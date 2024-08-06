@@ -1,0 +1,36 @@
+plugins {
+    id 'samba.java-application-conventions'
+}
+
+//apply from: "${rootDir}/gradle/versions.gradle"
+repositories {
+    mavenCentral()
+    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
+}
+
+
+
+dependencies {
+
+//    implementation 'org.bouncycastle:bcprov-jdk18on'
+
+//    implementation 'com.google.guava:guava'
+//    implementation 'io.projectreactor:reactor-core'
+//    implementation 'io.netty:netty-all'
+//    implementation 'org.apache.logging.log4j:log4j-api'
+//    implementation 'org.apache.logging.log4j:log4j-core'
+    implementation 'org.apache.tuweni:tuweni-bytes:2.3.1'
+    implementation 'org.apache.tuweni:tuweni-crypto:2.3.1'
+    implementation 'org.apache.tuweni:tuweni-rlp:2.3.1'
+    implementation 'org.apache.tuweni:tuweni-units:2.3.1'
+
+    implementation 'tech.pegasys.discovery:discovery:24.6.0'
+
+
+
+
+}
+
+application {
+    mainClass = 'samba.app.App'
+}
