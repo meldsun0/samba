@@ -2,6 +2,8 @@ package samba.domain.messages;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -11,7 +13,7 @@ public class Nodes {
 
     private final UInt64 enrSeq;
     private final Byte total = 1;
-
+    //
     private final Byte[][] enrs;
 
     public Nodes(UInt64 enrSeq, Byte[][] enrs) {
@@ -24,5 +26,12 @@ public class Nodes {
         * * */
         this.enrSeq = enrSeq;
         this.enrs = enrs;
+    }
+
+    public MessageType getMessageType() {
+        return MessageType.NODES;
+    }
+    public Optional<UInt64> getEnrSeq() {
+        return Optional.ofNullable(enrSeq);
     }
 }

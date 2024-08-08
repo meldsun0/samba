@@ -2,6 +2,8 @@ package samba.domain.messages;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
+import java.util.Optional;
+
 /**
  * Response message to Find Content (0x04).
  */
@@ -14,5 +16,9 @@ public class Content
         this.connectionId = connectionId;
         this.payload = payload;
         this.enrs = enrs;
+    }
+
+    public MessageType getMessageType() {
+        return MessageType.CONTENT;
     }
 }

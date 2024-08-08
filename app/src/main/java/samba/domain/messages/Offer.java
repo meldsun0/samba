@@ -10,4 +10,8 @@ public class Offer {
     public Offer(Byte[][] contentKeys) {
         content_keys = contentKeys;
     }
+
+    public MessageType getMessageType() {
+        return MessageType.OFFER;
+    }
 }

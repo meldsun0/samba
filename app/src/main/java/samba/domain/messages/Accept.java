@@ -8,12 +8,16 @@ import java.util.BitSet;
  * Response message to Offer (0x06).
  */
 public class Accept {
-
     private final UInt64 connectionId;
-    private final BitSet content_keys;
+    private final Byte[] content_keys;
 
-    public Accept(UInt64 connectionId, BitSet contentKeys) {
+    public Accept(UInt64 connectionId, Byte[] contentKeys) {
+        //content_keys limit 64
         this.connectionId = connectionId;
         content_keys = contentKeys;
+    }
+
+    public MessageType getMessageType() {
+        return MessageType.ACCEPT;
     }
 }

@@ -2,6 +2,9 @@ package samba.domain.messages;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+/***
+ * Unsupported messages SHOULD receive a TALKRESP message with an empty payload.
+ */
 public enum MessageType {
 
     PING(0x00),

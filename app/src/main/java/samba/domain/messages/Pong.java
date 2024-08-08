@@ -2,6 +2,8 @@ package samba.domain.messages;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -16,5 +18,13 @@ public class Pong {
 
         this.enrSeq = enrSeq;
         this.customPayload = customPayload;
+    }
+
+    public MessageType getMessageType() {
+        return MessageType.PONG;
+    }
+
+    public Optional<UInt64> getEnrSeq() {
+        return Optional.ofNullable(enrSeq);
     }
 }
