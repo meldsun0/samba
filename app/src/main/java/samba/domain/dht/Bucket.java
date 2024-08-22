@@ -1,10 +1,14 @@
 package samba.domain.dht;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 
 import static java.lang.System.arraycopy;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
 import org.apache.tuweni.bytes.Bytes;
 
 
@@ -37,10 +41,10 @@ public class Bucket {
 
     /**
      * Returns the bucketEntry with the provided ID if it exists in the bucket and
-     * it relocates it to the head of the bucketEntry[].
+     * relocates it to the head of the bucketEntry[].
      *
      * @param id The bucketEntry's ID.
-     * @return An option with the bucketEntry found or an empty optional if the buckeEntry was found
+     * @return An option with the bucketEntry found or an empty optional if the bucketEntry was not found
      */
     public synchronized Optional<BucketEntry> get(@NonNull final Bytes id) {
         for (int i = 0; i <= this.capacityIndex; i++) {
@@ -55,7 +59,7 @@ public class Bucket {
     }
 
     /**
-     * Removes the BucketEntry by moving bucketEntris to the left.
+     * Removes the BucketEntry by moving bucketEntries to the left.
      *
      * @param bucketEntry the element to be removed
      * @return <code>true</code>
@@ -72,6 +76,14 @@ public class Bucket {
         return false;
     }
 
+    /**
+     * Returns an unmodifiable list  of the bucketEntries[]
+     * @return An unmodifiable list
+     */
+    public synchronized List<BucketEntry> getAll() {
+        return unmodifiableList(asList(Arrays.copyOf(this.bucketEntries, capacityIndex + 1)));
+    }
+
     @Override
     public String toString() {
         return Arrays.toString(this.bucketEntries);
@@ -84,7 +96,7 @@ public class Bucket {
     }
 
     private synchronized void checkCapacityReached() {
-        if (capacityIndex >= bucketSize) {
+        if (capacityIndex >= bucketSize -1) {
             throw new IllegalArgumentException(String.format("Capacity reached on BucketEntry"));
         }
     }
