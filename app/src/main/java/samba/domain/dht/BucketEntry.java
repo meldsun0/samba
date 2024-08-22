@@ -28,6 +28,11 @@ public class BucketEntry implements Comparable<BucketEntry> {
     public Bytes getId(){
         return this.node.getId();
     }
+
+    public Node getNode(){
+        return this.node;
+    }
+
     @Override
     public int compareTo(BucketEntry bucketEntry) {
         return this.node.getId().compareTo(bucketEntry.getId());
