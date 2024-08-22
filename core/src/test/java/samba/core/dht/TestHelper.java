@@ -1,4 +1,4 @@
-package samba.app.dht;
+package samba.core.dht;
 
 import org.apache.tuweni.bytes.Bytes;
 import samba.domain.node.Node;
@@ -7,7 +7,6 @@ import samba.domain.dht.BucketEntry;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

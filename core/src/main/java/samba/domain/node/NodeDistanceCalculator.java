@@ -39,7 +39,6 @@ public class NodeDistanceCalculator {
         }
         return distance;
     }
-    }
 }
 
 

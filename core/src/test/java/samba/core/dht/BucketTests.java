@@ -1,4 +1,4 @@
-package samba.app.dht;
+package samba.core.dht;
 
 import org.junit.jupiter.api.Test;
 import samba.domain.dht.Bucket;

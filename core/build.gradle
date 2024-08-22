@@ -40,5 +40,5 @@ dependencies {
 }
 
 application {
-    mainClass = 'samba.app.App'
+    mainClass = 'samba.core.App'
 }

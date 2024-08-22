@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = 'samba'
-include('app', 'execution-state-network', 'execution-history-network')
+include('core', 'execution-state-network', 'execution-history-network')
