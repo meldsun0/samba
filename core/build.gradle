@@ -4,8 +4,18 @@ plugins {
 
 //apply from: "${rootDir}/gradle/versions.gradle"
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { url "https://artifacts.consensys.net/public/maven/maven/" }
+    maven {
+        url "https://artifacts.consensys.net/public/teku/maven/"
+
+    }
+
+    maven { url "https://mvnrepository.com" }
+    maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
+
+
 }
 
 
@@ -17,14 +27,30 @@ dependencies {
 //    implementation 'com.google.guava:guava'
 //    implementation 'io.projectreactor:reactor-core'
 //    implementation 'io.netty:netty-all'
-//    implementation 'org.apache.logging.log4j:log4j-api'
-//    implementation 'org.apache.logging.log4j:log4j-core'
+    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
     implementation 'org.apache.tuweni:tuweni-bytes:2.3.1'
     implementation 'org.apache.tuweni:tuweni-crypto:2.3.1'
     implementation 'org.apache.tuweni:tuweni-rlp:2.3.1'
     implementation 'org.apache.tuweni:tuweni-units:2.3.1'
-
+    implementation 'io.vertx:vertx-core:4.5.9'
+    implementation 'io.vertx:vertx-web:4.5.9'
+    implementation 'io.netty:netty-all:4.1.110.Final'
     implementation 'tech.pegasys.discovery:discovery:24.6.0'
+
+    implementation 'org.hyperledger.besu.internal:metrics-core:24.7.0'
+    implementation 'org.hyperledger.besu.internal:core:24.7.0'
+    implementation 'org.hyperledger.besu.internal:config:24.7.0'
+    implementation 'org.hyperledger.besu:plugin-api:24.7.0'
+
+
+    implementation 'tech.pegasys.teku.internal:infrastructure-events:24.8.0'
+    implementation 'tech.pegasys.teku.internal:async:24.8.0'
+    implementation 'tech.pegasys.teku.internal:serviceutils:24.8.0'
+//    implementation 'tech.pegasys.teku.internal:p2p:24.8.0'
+    implementation 'tech.pegasys.teku.internal:io:24.8.0'
+
+
 
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
@@ -36,6 +62,22 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.21.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
+//    dependencySet(group: 'org.hyperledger.besu.internal', version: '24.7.0') {
+//        entry('metrics-core')
+//        entry('core')
+//        entry('config')
+//    }
+//    dependencySet(group: 'org.hyperledger.besu', version: '24.7.0') {
+//        entry('besu-datatypes')
+//        entry('evm')
+//        entry('plugin-api')
+//    }
+//    dependencySet(group: 'io.vertx', version: '4.5.9') {
+//        entry 'vertx-codegen'
+//        entry 'vertx-core'
+//        entry 'vertx-unit'
+//        entry 'vertx-web'
+//    }
 
 }
 
