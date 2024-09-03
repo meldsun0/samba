@@ -26,7 +26,7 @@ public class SambaConfiguration {
 
         public SambaConfiguration build() {
 
-            return new SambaConfiguration(metricsConfigBuilder.build());
+            return new SambaConfiguration(metricsConfigBuilder.metricsEnabled(true).build());
         }
 
     }

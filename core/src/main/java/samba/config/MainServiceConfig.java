@@ -22,7 +22,7 @@ import tech.pegasys.teku.infrastructure.time.TimeProvider;
 
 import java.util.function.IntSupplier;
 
-public class ServiceConfig {
+public class MainServiceConfig {
 
   private final AsyncRunnerFactory asyncRunnerFactory;
   private final TimeProvider timeProvider;
@@ -33,7 +33,7 @@ public class ServiceConfig {
   private final IntSupplier rejectedExecutionsSupplier;
   private final int executorThreads = Math.max(5, Math.min(Runtime.getRuntime().availableProcessors(), 12));
 
-  public ServiceConfig(
+  public MainServiceConfig(
       final AsyncRunnerFactory asyncRunnerFactory,
       final TimeProvider timeProvider,
       final EventChannels eventChannels,

@@ -19,7 +19,6 @@ repositories {
 }
 
 
-
 dependencies {
 
 //    implementation 'org.bouncycastle:bcprov-jdk18on'
@@ -46,9 +45,14 @@ dependencies {
 
     implementation 'tech.pegasys.teku.internal:infrastructure-events:24.8.0'
     implementation 'tech.pegasys.teku.internal:async:24.8.0'
+    implementation 'tech.pegasys.teku.internal:infrastructure-restapi:24.8.0'
+
     implementation 'tech.pegasys.teku.internal:serviceutils:24.8.0'
 //    implementation 'tech.pegasys.teku.internal:p2p:24.8.0'
     implementation 'tech.pegasys.teku.internal:io:24.8.0'
+
+    implementation 'tech.pegasys.teku.internal:http:24.8.0'
+    implementation 'tech.pegasys.teku.internal:json:24.8.0'
 
 
 

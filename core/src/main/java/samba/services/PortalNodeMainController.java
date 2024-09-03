@@ -14,31 +14,29 @@
 package samba.services;
 
 
-import samba.config.SambaConfiguration;
-import samba.services.discovery.DiscV5Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import samba.config.MainServiceConfig;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.service.serviceutils.Service;
-import tech.pegasys.teku.service.serviceutils.ServiceConfig;
 import tech.pegasys.teku.service.serviceutils.ServiceFacade;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PortalNodeServiceController extends Service {
+public class PortalNodeMainController extends Service {
 
+    private static final Logger LOG = LogManager.getLogger();
     protected final List<Service> services = new ArrayList<>();
 
-
-    public PortalNodeServiceController(final SambaConfiguration sambaConfiguration, final ServiceConfig serviceConfig) {
-        services.add(new PortalNodeService(serviceConfig));
-
-
+    public PortalNodeMainController(final MainServiceConfig mainServiceConfig) {
+          services.add(new PortalNodeMainService(mainServiceConfig));
     }
-
 
     @Override
     protected SafeFuture<?> doStart() {
+        LOG.debug("Starting {}", this.getClass().getSimpleName());
         final Iterator<Service> iterator = services.iterator();
         SafeFuture<?> startupFuture = iterator.next().start();
         while (iterator.hasNext()) {
@@ -52,7 +50,6 @@ public class PortalNodeServiceController extends Service {
     protected SafeFuture<?> doStop() {
         return SafeFuture.allOf(services.stream().map(Service::stop).toArray(SafeFuture[]::new));
     }
-
 
     public List<? extends ServiceFacade> getServices() {
         return services;

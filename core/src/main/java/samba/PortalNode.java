@@ -21,11 +21,11 @@ import org.apache.logging.log4j.Logger;
 
 import samba.config.SambaConfiguration;
 
-import samba.config.ServiceConfig;
+import samba.config.MainServiceConfig;
 import samba.metrics.MetricsEndpoint;
 import samba.node.Node;
 
-import samba.services.PortalNodeServiceController;
+import samba.services.PortalNodeMainController;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.MetricTrackingExecutorFactory;
@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 
 
+import static samba.logging.StatusLogger.STATUS_LOG;
 import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TIME_PROVIDER;
 
 
@@ -49,25 +50,38 @@ public class PortalNode implements Node {
 
     private final Vertx vertx = Vertx.vertx();
     private final ExecutorService threadPool = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("events-%d").build());
+    private final EventChannels eventChannels;
+
+    //async actions
+    private final AsyncRunnerFactory asyncRunnerFactory;
+
+    private final MetricsEndpoint metricsEndpoint;
+
+
+
+    private final PortalNodeMainController portalNodeMainController;
+
+
 
     private final OccurrenceCounter rejectedExecutionCounter = new OccurrenceCounter(120);
     private Optional<Cancellable> counterMaintainer = Optional.empty();
 
-    private final EventChannels eventChannels;
 
-    private final MetricsEndpoint metricsEndpoint;
 
-    //async actions
-    private final AsyncRunnerFactory asyncRunnerFactory;
-    private final PortalNodeServiceController serviceController;
+   ;
+    //private final MetricsPublisherManager metricsPublisher;
+
+
+
 
     protected PortalNode(final SambaConfiguration sambaConfiguration) {
+        STATUS_LOG.onStartup("1.0");
         this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.metricsConfig(), vertx);
         this.eventChannels = new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
         asyncRunnerFactory = AsyncRunnerFactory.createDefault(new MetricTrackingExecutorFactory(metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
 
-        final ServiceConfig serviceConfig =
-                new ServiceConfig(
+        final MainServiceConfig mainServiceConfig =
+                new MainServiceConfig(
                         asyncRunnerFactory,
                         SYSTEM_TIME_PROVIDER,
                         eventChannels,
@@ -75,7 +89,7 @@ public class PortalNode implements Node {
                         rejectedExecutionCounter::getTotalCount);
 
 
-        this.serviceController = new PortalNodeServiceController(sambaConfiguration, serviceConfig);
+         this.portalNodeMainController = new PortalNodeMainController(mainServiceConfig);
 
 
         // final String network = tekuConfig.eth2NetworkConfiguration().getEth2Network().map(Eth2Network::configName).orElse("empty");
@@ -88,7 +102,8 @@ public class PortalNode implements Node {
 
     @Override
     public void start() {
-        this.serviceController.start().join();
+        metricsEndpoint.start().join();
+       this.portalNodeMainController.start().join();
 //      counterMaintainer =
 //              Optional.of(
 //                      serviceConfig
@@ -112,7 +127,7 @@ public class PortalNode implements Node {
         asyncRunnerFactory.shutdown();
 
         // Stop services.
-        this.serviceController
+        this.portalNodeMainController
                 .stop()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handleException(error -> LOG.error("Failed to stop services", error))

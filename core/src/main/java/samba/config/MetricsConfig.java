@@ -27,7 +27,7 @@ public class MetricsConfig {
     public static final ImmutableSet<MetricCategory> DEFAULT_METRICS_CATEGORIES = ImmutableSet.<MetricCategory>builder().addAll(EnumSet.allOf(StandardMetricCategory.class)).addAll(SambaMetricCategory.defaultCategories()).build();
     public static final int DEFAULT_METRICS_PORT = 8008;
     public static final String DEFAULT_METRICS_INTERFACE = "127.0.0.1";
-    public static final List<String> DEFAULT_METRICS_HOST_ALLOWLIST = Arrays.asList("127.0.0.1", "localhost");
+    public static final List<String> DEFAULT_METRICS_HOST_ALLOWLIST = Arrays.asList("127.0.0.1", "127.0 0.1:8008");
     public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 60;
     public static final int DEFAULT_METRICS_PUBLICATION_INTERVAL = 60;
 
