@@ -15,14 +15,14 @@ import tech.pegasys.teku.infrastructure.time.TimeProvider;
 
 import javax.naming.ServiceUnavailableException;
 
-public class TestAPI implements PortalRestAPI {
+public class PortalAPI implements PortalRestAPI {
 
     private final RestApi restApi;
 
-    public TestAPI(final PortalRestApiConfig config,
-                   final EventChannels eventChannels,
-                   final AsyncRunner asyncRunner,
-                   final TimeProvider timeProvider) {
+    public PortalAPI(final PortalRestApiConfig config,
+                     final EventChannels eventChannels,
+                     final AsyncRunner asyncRunner,
+                     final TimeProvider timeProvider) {
         restApi = create(config,eventChannels, asyncRunner, timeProvider);
     }
 

@@ -125,8 +125,6 @@ public class DiscV5Service extends Service implements DiscoveryService {
         bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QKSLYMpku9F0Ebk84zhIhwTkmn80UnYvE4Z4sOcLukASIcofrGdXVLAUPVHh8oPCfnEOZm1W1gcAxB9kV2FJywkCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJO2oc6Jc2VjcDI1NmsxoQLMSGVlxXL62N3sPtaV-n_TbZFCEM5AR7RDyIwOadbQK4N1ZHCCIyg"));
         bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QH4_H4cW--ejWDl_W7ngXw2m31MM2GT8_1ZgECnfWxMzZTiZKvHDgkmwUS_l2aqHHU54Q7hcFSPz6VGzkUjOqkcCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg"));
 
-        System.out.println("Discovery setup!");
-
         this.discoverySystem =
                 discoverySystemBuilder
                         .secretKey(localNodePrivateKey)
@@ -135,9 +133,8 @@ public class DiscV5Service extends Service implements DiscoveryService {
                         .localNodeRecordListener(this::localNodeRecordUpdated)
                         .build();
         this.kvStore = kvStore;
-        System.out.println(discoverySystem.getBucketStats().getTotalLiveNodeCount());
         NodeRecord myNode = discoverySystem.getLocalNodeRecord();
-        System.out.println(myNode);
+
 
         metricsSystem.createIntegerGauge(
                 SambaMetricCategory.DISCOVERY,
@@ -148,11 +145,11 @@ public class DiscV5Service extends Service implements DiscoveryService {
 
 
     private void localNodeRecordUpdated(final NodeRecord oldRecord, final NodeRecord newRecord) {
-        System.out.println(
-                                "New active node: "
-                                        + newRecord.getNodeId()
-                                        + " @ "
-                                        + newRecord.getUdpAddress().map(InetSocketAddress::toString).orElse("<unknown>"));
+//        System.out.println(
+//                                "New active node: "
+//                                        + newRecord.getNodeId()
+//                                        + " @ "
+//                                        + newRecord.getUdpAddress().map(InetSocketAddress::toString).orElse("<unknown>"));
         kvStore.put(SEQ_NO_STORE_KEY, newRecord.getSeq().toBytes());
     }
 
@@ -161,7 +158,6 @@ public class DiscV5Service extends Service implements DiscoveryService {
         return SafeFuture.of(discoverySystem.start())
                 .thenRun(
                         () ->{
-                                System.out.println("Starting");
                                 this.bootnodeRefreshTask =
                                         asyncRunner.runWithFixedDelay(
                                                 this::pingBootnodes,
@@ -175,7 +171,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
         System.out.println("pinging");
         bootnodes.forEach(
                 bootnode ->
-                        SafeFuture.of(discoverySystem.ping(bootnode).whenComplete((a,b) -> System.out.println(b)))
+                        SafeFuture.of(discoverySystem.ping(bootnode).whenComplete((a,b) -> System.out.println(a+ ""+ b)))
                                 .whenComplete((a,b) -> System.out.println(a))
                                 .finish(error -> LOG.info("Bootnode {} is unresponsive", bootnode)));
     }

@@ -68,7 +68,7 @@ public class PortalRestApiConfig {
     public static final class PortalRestApiConfigBuilder {
 
         private int restApiPort = DEFAULT_REST_API_PORT;
-        private boolean restApiDocsEnabled = false;
+        private boolean restApiDocsEnabled = true;
         private String restApiInterface = DEFAULT_REST_API_INTERFACE;
         private int maxUrlLength = DEFAULT_MAX_URL_LENGTH;
         private List<String> restApiCorsAllowedOrigins = DEFAULT_REST_API_CORS_ALLOWED_ORIGINS;

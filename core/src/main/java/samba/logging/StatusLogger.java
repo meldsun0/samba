@@ -13,17 +13,13 @@
 
 package samba.logging;
 
-
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
-
+import samba.config.StartupLogConfig;
 
 public class StatusLogger {
 
     public static final StatusLogger STATUS_LOG = new StatusLogger("samba-status-log");
-
 
     final Logger log;
 
@@ -32,7 +28,10 @@ public class StatusLogger {
     }
 
     public void onStartup(final String version) {
-        log.debug("Samba version: {}", version);
+        log.info("Samba version: {}", version);
     }
 
+    public void startupConfigurations(final StartupLogConfig config) {
+        config.getReport().forEach(log::info);
+    }
 }

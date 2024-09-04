@@ -19,13 +19,18 @@ import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import oshi.SystemInfo;
+import oshi.hardware.HardwareAbstractionLayer;
+import samba.config.PortalRestApiConfig;
 import samba.config.SambaConfiguration;
 
-import samba.config.MainServiceConfig;
+import samba.services.MainServiceConfig;
+import samba.config.StartupLogConfig;
 import samba.metrics.MetricsEndpoint;
 import samba.node.Node;
 
 import samba.services.PortalNodeMainController;
+import samba.util.PortalDefaultExceptionHandler;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.MetricTrackingExecutorFactory;
@@ -57,28 +62,29 @@ public class PortalNode implements Node {
 
     private final MetricsEndpoint metricsEndpoint;
 
-
-
     private final PortalNodeMainController portalNodeMainController;
-
-
 
     private final OccurrenceCounter rejectedExecutionCounter = new OccurrenceCounter(120);
     private Optional<Cancellable> counterMaintainer = Optional.empty();
 
-
-
-   ;
     //private final MetricsPublisherManager metricsPublisher;
 
-
-
-
     protected PortalNode(final SambaConfiguration sambaConfiguration) {
-        STATUS_LOG.onStartup("1.0");
         this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.metricsConfig(), vertx);
         this.eventChannels = new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
-        asyncRunnerFactory = AsyncRunnerFactory.createDefault(new MetricTrackingExecutorFactory(metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
+        this.asyncRunnerFactory = AsyncRunnerFactory.createDefault(new MetricTrackingExecutorFactory(metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
+
+        final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.portalRestApiConfig();
+        STATUS_LOG.onStartup("1.0");
+        STATUS_LOG.startupConfigurations(
+                StartupLogConfig.builder()
+                        .network("")
+                        .hardwareInfo(new SystemInfo().getHardware())
+                        .portalNodeRestApiEnabled(portalRestApiConfig.isRestApiDocsEnabled())
+                        .portalNodeRestApiInterface(portalRestApiConfig.getRestApiInterface())
+                        .portalNodeRestApiPort(portalRestApiConfig.getRestApiPort())
+                        .portalNodeRestApiAllowList(portalRestApiConfig.getRestApiHostAllowlist())
+                        .build());
 
         final MainServiceConfig mainServiceConfig =
                 new MainServiceConfig(
@@ -87,16 +93,9 @@ public class PortalNode implements Node {
                         eventChannels,
                         metricsEndpoint.getMetricsSystem(),
                         rejectedExecutionCounter::getTotalCount);
-
-
-         this.portalNodeMainController = new PortalNodeMainController(mainServiceConfig);
-
+        this.portalNodeMainController = new PortalNodeMainController(mainServiceConfig, sambaConfiguration);
 
         // final String network = tekuConfig.eth2NetworkConfiguration().getEth2Network().map(Eth2Network::configName).orElse("empty");
-        //final BeaconRestApiConfig beaconChainRestApiConfig = tekuConfig.beaconChain().beaconRestApiConfig();
-        //
-
-
     }
 
 

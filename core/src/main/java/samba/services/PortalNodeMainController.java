@@ -16,7 +16,7 @@ package samba.services;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import samba.config.MainServiceConfig;
+import samba.config.SambaConfiguration;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.service.serviceutils.Service;
 import tech.pegasys.teku.service.serviceutils.ServiceFacade;
@@ -30,8 +30,8 @@ public class PortalNodeMainController extends Service {
     private static final Logger LOG = LogManager.getLogger();
     protected final List<Service> services = new ArrayList<>();
 
-    public PortalNodeMainController(final MainServiceConfig mainServiceConfig) {
-          services.add(new PortalNodeMainService(mainServiceConfig));
+    public PortalNodeMainController(final MainServiceConfig mainServiceConfig, SambaConfiguration sambaConfiguration) {
+          services.add(new PortalNodeMainService(mainServiceConfig, sambaConfiguration));
     }
 
     @Override

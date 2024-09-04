@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package samba.config;
+package samba.services;
 
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;

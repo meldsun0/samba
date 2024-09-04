@@ -6,10 +6,9 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
-import samba.config.MainServiceConfig;
-import samba.config.PortalRestApiConfig;
+import samba.config.SambaConfiguration;
 import samba.services.api.PortalRestAPI;
-import samba.services.api.TestAPI;
+import samba.services.api.PortalAPI;
 import samba.services.discovery.DiscV5Service;
 import samba.services.discovery.DiscoveryService;
 import samba.store.KeyValueStore;
@@ -43,21 +42,22 @@ public class PortalNodeMainService extends Service {
     protected volatile AsyncRunner networkAsyncRunner;
     private final Bytes privKey;
 
-
+    protected volatile SambaConfiguration sambaConfiguration;
     private DiscoveryService discoveryService;
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
 
-    public PortalNodeMainService(final MainServiceConfig mainServiceConfig) {
+    public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration) {
         this.timeProvider = mainServiceConfig.getTimeProvider();
         this.eventChannels = mainServiceConfig.getEventChannels();
         this.metricsSystem = mainServiceConfig.getMetricsSystem();
         this.networkAsyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
+        this.sambaConfiguration = sambaConfiguration;
 
         keyValueStore = new MemKeyValueStore<>();
-        privKey = Functions.randomKeyPair(new Random(new Random().nextInt())).secretKey().bytes(); //:S
+        privKey =Bytes.fromHexString("0x008110c0cc11ec947b27f722e2394e0abe6d8596208888a3e50768296556bc7152"); // Functions.randomKeyPair(new Random(new Random().nextInt())).secretKey().bytes(); //:S
 
 
-        createDiscoveryService();
+        initDiscoveryService();
         initRestAPI();
 
     }
@@ -85,9 +85,8 @@ public class PortalNodeMainService extends Service {
 
     }
 
-    protected void createDiscoveryService() {
-        LOG.info("PortalNodeService.createDiscoveryService()");
-
+    protected void initDiscoveryService() {
+        LOG.info("PortalNodeService.initDiscoveryService()");
         this.discoveryService = new DiscV5Service(
                 metricsSystem,
                 networkAsyncRunner,
@@ -96,19 +95,16 @@ public class PortalNodeMainService extends Service {
                 privKey,
                 DiscV5Service.createDefaultDiscoverySystemBuilder(),
                 DiscV5Service.DEFAULT_NODE_RECORD_CONVERTER);
-
     }
-
 
     public void initRestAPI() {
         LOG.debug("PortalNodeMainService.initRestAPI()");
         portalRestAPI =
                 Optional.of(
-                        new TestAPI(
-                                PortalRestApiConfig.builder().build(),
+                        new PortalAPI(
+                                sambaConfiguration.portalRestApiConfig(),
                                 eventChannels,
                                 networkAsyncRunner,
                                 timeProvider));
     }
-
 }

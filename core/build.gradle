@@ -53,10 +53,12 @@ dependencies {
 
     implementation 'tech.pegasys.teku.internal:http:24.8.0'
     implementation 'tech.pegasys.teku.internal:json:24.8.0'
-
+    implementation 'com.github.oshi:oshi-core:6.6.2'
 
 
     compileOnly 'org.projectlombok:lombok:1.18.34'
+
+
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.34'
