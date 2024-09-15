@@ -1,6 +1,8 @@
 package samba.domain.messages;
 
-import java.util.Arrays;
+import java.util.List;
+
+import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -9,12 +11,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class Offer implements PortalWireMessage {
 
-    private static final int MAX_KEYS = 64;
-    private final Byte[][] content_keys;
+    private final List<Bytes> content_keys;
 
-    public Offer(Byte[][] contentKeys) {
-        checkArgument(contentKeys != null && contentKeys.length <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKeys cannot be null or exceed maximum payload size");
-        checkArgument(Arrays.stream(contentKeys).allMatch(key -> key.length <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more content keys exceed maximum payload size");
+    public Offer(List<Bytes> contentKeys) {
+        checkArgument(contentKeys != null && contentKeys.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKeys cannot be null or exceed maximum payload size");
+        checkArgument(contentKeys.stream().allMatch(key -> key.size() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more content keys exceed maximum payload size");
         this.content_keys = contentKeys;
     }
 
@@ -23,7 +24,7 @@ public class Offer implements PortalWireMessage {
         return MessageType.OFFER;
     }
 
-    public Byte[][] getContentKeys() {
+    public List<Bytes> getContentKeys() {
         return content_keys;
     }
 }

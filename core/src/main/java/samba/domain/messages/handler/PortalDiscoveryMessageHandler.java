@@ -27,7 +27,7 @@ public class PortalDiscoveryMessageHandler implements TalkHandler {
     public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
         PortalWireMessageDecoder decoder = new PortalWireMessageDecoder();
         // Decode Request
-        PortalWireMessage message = decoder.decode(request);
+        PortalWireMessage message = decoder.decode(srcNode, request);
         Optional<PortalWireMessage> handlerResponse = handler.handleMessage(message, srcNode);
         if (handlerResponse.isPresent()) {
             PortalWireMessage response = handlerResponse.get();

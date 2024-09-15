@@ -14,11 +14,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class Pong implements PortalWireMessage {
 
     private final UInt64 enrSeq;
-    private final Byte[] customPayload;
+    private final Bytes customPayload;
 
-    public Pong(UInt64 enrSeq, Byte[] customPayload) {
+    public Pong(UInt64 enrSeq, Bytes customPayload) {
         checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
-        checkArgument(customPayload.length <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
+        checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
 
         this.enrSeq = enrSeq;
         this.customPayload = customPayload;
@@ -29,7 +29,7 @@ public class Pong implements PortalWireMessage {
         return MessageType.PONG;
     }
 
-    public Byte[] getCustomPayload() {
+    public Bytes getCustomPayload() {
         return customPayload;
     }
 

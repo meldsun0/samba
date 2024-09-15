@@ -121,12 +121,13 @@ public class DiscV5Service extends Service implements DiscoveryService {
 
         //this.bootnodes = discoveryConfig.getBootnodes().stream().map(NodeRecordFactory.DEFAULT::fromEnr).toList();
         this.bootnodes = discoveryConfig.getBootnodes();
+        NodeRecord localNodeRecord = createNodeRecord(keyPair,"23.44.56.78",Integer.parseInt("9001"));
 
         this.discoverySystem =
                 discoverySystemBuilder
                         .secretKey(localNodePrivateKey)
                         .bootnodes(bootnodes)
-                        .localNodeRecord(createNodeRecord(keyPair,"23.44.56.78",Integer.parseInt("9001")))
+                        .localNodeRecord(localNodeRecord)
                         .localNodeRecordListener(this::localNodeRecordUpdated)
                         .build();
                         // .talkHandler(talkHandler)

@@ -31,6 +31,7 @@ dependencies {
     implementation 'org.apache.tuweni:tuweni-crypto:2.3.1'
     implementation 'org.apache.tuweni:tuweni-rlp:2.3.1'
     implementation 'org.apache.tuweni:tuweni-units:2.3.1'
+    implementation 'org.apache.tuweni:tuweni-ssz:2.3.1'
     implementation 'info.picocli:picocli:4.6.1'
     implementation 'io.vertx:vertx-core:4.5.9'
     implementation 'io.vertx:vertx-web:4.5.9'

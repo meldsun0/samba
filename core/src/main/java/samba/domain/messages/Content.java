@@ -1,10 +1,13 @@
 package samba.domain.messages;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
 import java.util.Optional;
+
+import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -13,18 +16,34 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class Content implements PortalWireMessage {
 
-    private final static int MAX_ENRS = 32;
     private final UInt64 connectionId;
-    private final Byte[] content;
-    private final Byte[][] enrs;
-    public Content(UInt64 connectionId, Byte[] content, Byte[][] enrs) {
-        checkArgument(connectionId != null && UInt64.ZERO.compareTo(connectionId) < 0, "connectionId cannot be null or negative");
-        checkArgument(content.length <= MAX_CUSTOM_PAYLOAD_SIZE, "Content size exceeds limit");
-        checkArgument(enrs.length <= MAX_ENRS, "Number of ENRs exceeds limit");
-        checkArgument(Arrays.stream(enrs).allMatch(enr -> enr.length <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+    private final Bytes content;
+    private final List<Bytes> enrs;
+    private final int payloadType;
+
+    public Content(UInt64 connectionId) {
+        this.payloadType = 0;
         this.connectionId = connectionId;
+        this.content = null;
+        this.enrs = null;
+
+    }
+
+    public Content(Bytes content) {
+        checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Content size exceeds limit");
+        this.payloadType = 1;
         this.content = content;
+        this.connectionId = null;
+        this.enrs = null;
+    }
+
+    public Content(List<Bytes> enrs) {
+        checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
+        checkArgument(enrs.stream().allMatch(enr -> enr.size() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+        this.payloadType = 2;
         this.enrs = enrs;
+        this.connectionId = null;
+        this.content = null;
     }
 
     @Override
@@ -36,11 +55,11 @@ public class Content implements PortalWireMessage {
         return connectionId;
     }
 
-    public Byte[] getContent() {
+    public Bytes getContent() {
         return content;
     }
 
-    public Byte[][] getEnrArray() {
+    public List<Bytes> getEnrList() {
         return enrs;
     }
 }

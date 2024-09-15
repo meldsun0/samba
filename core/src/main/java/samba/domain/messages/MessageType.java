@@ -26,6 +26,16 @@ public enum MessageType {
 
     }
 
+    public static MessageType fromInt(int value) {
+        value = value & BYTE_MASK;
+        for (MessageType messageType : MessageType.values()) {
+            if (messageType.value == value) {
+                return messageType;
+            }
+        }
+        throw new IllegalArgumentException("Unknown message type: " + value);
+    }
+
 
 }
 

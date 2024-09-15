@@ -2,22 +2,21 @@ package samba.domain.messages;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
-import java.util.BitSet;
+import org.apache.tuweni.bytes.Bytes;
 
 /***
  * Response message to Offer (0x06).
  */
 public class Accept implements PortalWireMessage {
 
-    private final int MAX_KEYS = 64;
     private final UInt64 connectionId;
-    private final Byte[] content_keys;
+    private final Bytes content_keys;
 
-    public Accept(UInt64 connectionId, Byte[] contentKeys) {
+    public Accept(UInt64 connectionId, Bytes contentKeys) {
 
         //content_keys limit 64
         this.connectionId = connectionId;
-        content_keys = contentKeys;
+        this.content_keys = contentKeys;
     }
 
     @Override
@@ -29,7 +28,7 @@ public class Accept implements PortalWireMessage {
         return connectionId;
     }
 
-    public Byte[] getContentKeys() {
+    public Bytes getContentKeys() {
         return content_keys;
     }
 }

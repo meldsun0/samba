@@ -1,9 +1,5 @@
 package samba.domain.messages;
 
-import org.apache.tuweni.units.bigints.UInt64;
-
-import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -15,10 +11,10 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class FindContent implements PortalWireMessage {
 
-    private final Byte[] contentKey;
+    private final Bytes contentKey;
 
-    public FindContent(Byte[] contentKey) {
-        checkArgument(contentKey != null && contentKey.length <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKey cannot be null or exceed maximum payload size");
+    public FindContent(Bytes contentKey) {
+        checkArgument(contentKey != null && contentKey.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKey cannot be null or exceed maximum payload size");
         
         this.contentKey = contentKey;
     }
@@ -28,7 +24,7 @@ public class FindContent implements PortalWireMessage {
         return MessageType.FIND_CONTENT;
     }
 
-    public Byte[] getContentKey() {
+    public Bytes getContentKey() {
         return contentKey;
     }
 
