@@ -141,6 +141,8 @@ public class DiscV5Service extends Service implements DiscoveryService {
                 "live_nodes_current",
                 "Current number of live nodes tracked by the discovery system",
                 () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
+
+
     }
 
 
@@ -171,6 +173,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
         System.out.println("pinging");
         bootnodes.forEach(
                 bootnode ->
+
                         SafeFuture.of(discoverySystem.ping(bootnode).whenComplete((a,b) -> System.out.println(a+ ""+ b)))
                                 .whenComplete((a,b) -> System.out.println(a))
                                 .finish(error -> LOG.info("Bootnode {} is unresponsive", bootnode)));
