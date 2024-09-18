@@ -1,7 +1,9 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt64;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.HistoryProtocolRequestMessage;
 
 import java.util.Optional;
 
@@ -11,7 +13,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * Request message to check if a node is reachable, communicate basic information about our node,
  * and request basic information about the recipient node.
  */
-public class Ping implements ProtocolMessage {
+public class Ping implements HistoryProtocolRequestMessage {
 
     private final UInt64 enrSeq;
     private final byte[] customPayload;

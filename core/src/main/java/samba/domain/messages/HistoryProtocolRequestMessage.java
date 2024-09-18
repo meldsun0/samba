@@ -3,7 +3,7 @@ package samba.domain.messages;
 import org.apache.tuweni.bytes.Bytes;
 
 
-public interface ProtocolMessage {
+public interface HistoryProtocolRequestMessage {
 
     Bytes getMessageInBytes();
 

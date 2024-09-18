@@ -32,6 +32,7 @@ import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.metrics.SambaMetricCategory;
+import samba.network.history.HistoryNetwork;
 import samba.schema.DefaultScheme;
 import samba.store.KeyValueStore;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
@@ -65,7 +66,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
     private final DiscoverySystem discoverySystem;
     private final KeyValueStore<String, Bytes> kvStore;
     private final boolean supportsIpv6;
-    private final List<NodeRecord> bootnodes;
+
     private volatile Cancellable bootnodeRefreshTask;
     public static final NodeRecordConverter DEFAULT_NODE_RECORD_CONVERTER = new NodeRecordConverter();
 
@@ -75,7 +76,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
 
 
     private final NodeRecordConverter nodeRecordConverter;
-
+    private final List<NodeRecord> bootnodes;
 
     public DiscV5Service(
             final MetricsSystem metricsSystem,
@@ -117,13 +118,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
         }
 
 
-
-        //this.bootnodes = discoveryConfig.getBootnodes().stream().map(NodeRecordFactory.DEFAULT::fromEnr).toList();
-        this.bootnodes = new ArrayList<>();
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Ku4QImhMc1z8yCiNJ1TyUxdcfNucje3BGwEHzodEZUan8PherEo4sF7pPHPSIB1NNuSg5fZy7qFsjmUKs2ea1Whi0EBh2F0dG5ldHOIAAAAAAAAAACEZXRoMpD1pf1CAAAAAP__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQOVphkDqal4QzPMksc5wnpuC3gvSC8AfbFOnZY_On34wIN1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QIs2pCyiKna9YWnAF0zgf7bT0GzlAGoF8MEKFJOExmtofBIqzm71zDvmzRiiLkxaEJcs_Amr7XIhLI74k1rtlXICY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhKEjVaWJc2VjcDI1NmsxoQLSC_nhF1iRwsCw0n3J4jRjqoaRxtKgsEe5a-Dz7y0JloN1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QKSLYMpku9F0Ebk84zhIhwTkmn80UnYvE4Z4sOcLukASIcofrGdXVLAUPVHh8oPCfnEOZm1W1gcAxB9kV2FJywkCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJO2oc6Jc2VjcDI1NmsxoQLMSGVlxXL62N3sPtaV-n_TbZFCEM5AR7RDyIwOadbQK4N1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QH4_H4cW--ejWDl_W7ngXw2m31MM2GT8_1ZgECnfWxMzZTiZKvHDgkmwUS_l2aqHHU54Q7hcFSPz6VGzkUjOqkcCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg"));
+       this.bootnodes = new ArrayList<>();
 
         this.discoverySystem =
                 discoverySystemBuilder
@@ -170,9 +165,8 @@ public class DiscV5Service extends Service implements DiscoveryService {
     }
 
     private void pingBootnodes() {
-        System.out.println("pinging");
         bootnodes.forEach(
-                bootnode ->
+                bootnode -> HistoryNe
 
                         SafeFuture.of(discoverySystem.ping(bootnode).whenComplete((a,b) -> System.out.println(a+ ""+ b)))
                                 .whenComplete((a,b) -> System.out.println(a))

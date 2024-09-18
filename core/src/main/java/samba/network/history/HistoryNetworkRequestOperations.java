@@ -1,18 +1,18 @@
 package samba.network.history;
 
-import org.ethereum.beacon.discovery.message.PingMessage;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.*;
-import samba.network.ProtocolRequest;
+import samba.domain.messages.requests.FindContent;
+import samba.domain.messages.requests.Offer;
+import samba.domain.messages.requests.Ping;
+import samba.domain.messages.response.Pong;
+import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public interface HistoryNetworkRequestOperations<T> {
+public interface HistoryNetworkRequestOperations {
 
-    CompletableFuture<T> ping(Ping ping);
+    SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
 
-    CompletableFuture<T> findNodes(Nodes message);
-
-    CompletableFuture<T> findContent(FindContent message);
-
-    CompletableFuture<T> offer(Offer offer);
 }
