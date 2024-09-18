@@ -3,14 +3,12 @@ package samba.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
 import samba.services.api.PortalRestAPI;
 import samba.services.api.PortalAPI;
 import samba.services.discovery.DiscV5Service;
-import samba.services.discovery.DiscoveryService;
 import samba.store.KeyValueStore;
 import samba.store.MemKeyValueStore;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
@@ -21,7 +19,6 @@ import tech.pegasys.teku.service.serviceutils.Service;
 
 
 import java.util.Optional;
-import java.util.Random;
 
 
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;

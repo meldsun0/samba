@@ -14,6 +14,7 @@ public class PortalNetworkService  extends Service {
 
     private static final Logger LOG = LogManager.getLogger();
 
+
     private HistoryNetwork historyNetwork;
     private final AsyncRunner asyncRunner;
 
