@@ -13,23 +13,32 @@
 
 package samba.services.discovery;
 
-import com.google.common.base.Preconditions;
+import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
+import static java.util.Collections.emptyList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Stream;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.crypto.SECP256K1.SecretKey;
-import org.apache.tuweni.units.bigints.UInt64;
-import org.ethereum.beacon.discovery.AddressAccessPolicy;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
+import org.ethereum.beacon.discovery.TalkHandler;
 import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
-import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
-import org.ethereum.beacon.discovery.storage.NewAddressHandler;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+
+import com.google.common.base.Preconditions;
+
 import samba.config.DiscoveryConfig;
 import samba.metrics.SambaMetricCategory;
 import samba.schema.DefaultScheme;
@@ -39,18 +48,7 @@ import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver.IPVersion;
-
-
 import tech.pegasys.teku.service.serviceutils.Service;
-
-
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
 
 
 public class DiscV5Service extends Service implements DiscoveryService {
@@ -66,6 +64,7 @@ public class DiscV5Service extends Service implements DiscoveryService {
     private final KeyValueStore<String, Bytes> kvStore;
     private final boolean supportsIpv6;
     private final List<NodeRecord> bootnodes;
+    private final TalkHandler talkHandler;
     private volatile Cancellable bootnodeRefreshTask;
     public static final NodeRecordConverter DEFAULT_NODE_RECORD_CONVERTER = new NodeRecordConverter();
 
@@ -84,10 +83,12 @@ public class DiscV5Service extends Service implements DiscoveryService {
             final KeyValueStore<String, Bytes> kvStore,
             final Bytes privateKey,
             final DiscoverySystemBuilder discoverySystemBuilder,
-            final NodeRecordConverter nodeRecordConverter) {
+            final NodeRecordConverter nodeRecordConverter,
+            final TalkHandler talkHandler) {
         this.asyncRunner = asyncRunner;
         this.localNodePrivateKey = SecretKeyParser.fromLibP2pPrivKey(privateKey);
         this.nodeRecordConverter = nodeRecordConverter;
+        this.talkHandler = talkHandler;
         final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
 
         final List<String> networkInterfaces = List.of("0.0.0.0");
@@ -119,19 +120,17 @@ public class DiscV5Service extends Service implements DiscoveryService {
 
 
         //this.bootnodes = discoveryConfig.getBootnodes().stream().map(NodeRecordFactory.DEFAULT::fromEnr).toList();
-        this.bootnodes = new ArrayList<>();
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Ku4QImhMc1z8yCiNJ1TyUxdcfNucje3BGwEHzodEZUan8PherEo4sF7pPHPSIB1NNuSg5fZy7qFsjmUKs2ea1Whi0EBh2F0dG5ldHOIAAAAAAAAAACEZXRoMpD1pf1CAAAAAP__________gmlkgnY0gmlwhBLf22SJc2VjcDI1NmsxoQOVphkDqal4QzPMksc5wnpuC3gvSC8AfbFOnZY_On34wIN1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QIs2pCyiKna9YWnAF0zgf7bT0GzlAGoF8MEKFJOExmtofBIqzm71zDvmzRiiLkxaEJcs_Amr7XIhLI74k1rtlXICY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhKEjVaWJc2VjcDI1NmsxoQLSC_nhF1iRwsCw0n3J4jRjqoaRxtKgsEe5a-Dz7y0JloN1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QKSLYMpku9F0Ebk84zhIhwTkmn80UnYvE4Z4sOcLukASIcofrGdXVLAUPVHh8oPCfnEOZm1W1gcAxB9kV2FJywkCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJO2oc6Jc2VjcDI1NmsxoQLMSGVlxXL62N3sPtaV-n_TbZFCEM5AR7RDyIwOadbQK4N1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QH4_H4cW--ejWDl_W7ngXw2m31MM2GT8_1ZgECnfWxMzZTiZKvHDgkmwUS_l2aqHHU54Q7hcFSPz6VGzkUjOqkcCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg"));
+        this.bootnodes = discoveryConfig.getBootnodes();
+        NodeRecord localNodeRecord = createNodeRecord(keyPair,"23.44.56.78",Integer.parseInt("9001"));
 
         this.discoverySystem =
                 discoverySystemBuilder
                         .secretKey(localNodePrivateKey)
                         .bootnodes(bootnodes)
-                        .localNodeRecord(createNodeRecord(keyPair,"23.44.56.78",Integer.parseInt("9001")))
+                        .localNodeRecord(localNodeRecord)
                         .localNodeRecordListener(this::localNodeRecordUpdated)
                         .build();
+                        // .talkHandler(talkHandler)
         this.kvStore = kvStore;
         NodeRecord myNode = discoverySystem.getLocalNodeRecord();
 

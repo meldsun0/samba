@@ -13,15 +13,17 @@
 
 package samba.config;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import tech.pegasys.teku.infrastructure.io.PortAvailability;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalInt;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 
 public class DiscoveryConfig {
@@ -29,11 +31,12 @@ public class DiscoveryConfig {
 
     public static final int DEFAULT_P2P_PORT = 9000;
     public static final int DEFAULT_P2P_PORT_IPV6 = 9090;
+    private static final String DEFAULT_NETWORK_NAME = "mainnet";
 
 
     private final int listenUdpPort;
     private final int listenUpdPortIpv6;
-    private final List<String> bootnodes;
+    private final List<NodeRecord> bootnodes;
     private final OptionalInt advertisedUdpPort;
     private final OptionalInt advertisedUdpPortIpv6;
     private final boolean siteLocalAddressesEnabled;
@@ -42,7 +45,7 @@ public class DiscoveryConfig {
     private DiscoveryConfig(
             final int listenUdpPort,
             final int listenUpdPortIpv6,
-            final List<String> bootnodes,
+            final List<NodeRecord> bootnodes,
             final OptionalInt advertisedUdpPort,
             final OptionalInt advertisedUdpPortIpv6,
             final boolean siteLocalAddressesEnabled) {
@@ -76,7 +79,7 @@ public class DiscoveryConfig {
         return advertisedUdpPortIpv6.orElse(listenUpdPortIpv6);
     }
 
-    public List<String> getBootnodes() {
+    public List<NodeRecord> getBootnodes() {
         return bootnodes;
     }
 
@@ -88,7 +91,7 @@ public class DiscoveryConfig {
 
         private OptionalInt listenUdpPort = OptionalInt.empty();
         private OptionalInt listenUdpPortIpv6 = OptionalInt.empty();
-        private List<String> bootnodes;
+        private List<NodeRecord> bootnodes;
         private OptionalInt advertisedUdpPort = OptionalInt.empty();
         private OptionalInt advertisedUdpPortIpv6 = OptionalInt.empty();
         private boolean siteLocalAddressesEnabled = false;
@@ -188,13 +191,13 @@ public class DiscoveryConfig {
         }
 
 
-        public Builder bootnodes(final List<String> bootnodes) {
+        public Builder bootnodes(final List<NodeRecord> bootnodes) {
             checkNotNull(bootnodes);
             this.bootnodes = bootnodes;
             return this;
         }
 
-        public Builder bootnodesDefault(final List<String> bootnodes) {
+        public Builder bootnodesDefault(final List<NodeRecord> bootnodes) {
             checkNotNull(bootnodes);
             if (this.bootnodes == null) {
                 this.bootnodes = bootnodes;

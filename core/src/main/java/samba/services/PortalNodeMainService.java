@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
 import samba.services.api.PortalRestAPI;
@@ -19,11 +20,14 @@ import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
 
-
 import java.util.Optional;
 import java.util.Random;
 
+import org.ethereum.beacon.discovery.TalkHandler;
 
+import samba.domain.messages.handler.PortalDiscoveryMessageHandler;
+import samba.domain.messages.processor.PortalWireMessageProcessor;
+import samba.services.discovery.Bootnodes;
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
 //Check DiscoveryNetwork
@@ -44,6 +48,8 @@ public class PortalNodeMainService extends Service {
 
     protected volatile SambaConfiguration sambaConfiguration;
     private DiscoveryService discoveryService;
+    private TalkHandler portalDiscoveryMessageHandler;
+    private PortalWireMessageProcessor portalWireMessageProcessor;
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
 
     public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration) {
@@ -87,14 +93,20 @@ public class PortalNodeMainService extends Service {
 
     protected void initDiscoveryService() {
         LOG.info("PortalNodeService.initDiscoveryService()");
+        this.portalWireMessageProcessor = new PortalWireMessageProcessor();
+        this.portalDiscoveryMessageHandler = new PortalDiscoveryMessageHandler(portalWireMessageProcessor);
+        DiscoveryConfig.Builder discoveryConfig = DiscoveryConfig.builder();
+        Bootnodes bootnodes = new Bootnodes(sambaConfiguration.getNetworkName());
+        discoveryConfig.bootnodes(bootnodes.getBootnodes());
         this.discoveryService = new DiscV5Service(
                 metricsSystem,
                 networkAsyncRunner,
-                DiscoveryConfig.builder().build(),
+                discoveryConfig.build(),
                 keyValueStore,
                 privKey,
                 DiscV5Service.createDefaultDiscoverySystemBuilder(),
-                DiscV5Service.DEFAULT_NODE_RECORD_CONVERTER);
+                DiscV5Service.DEFAULT_NODE_RECORD_CONVERTER,
+                portalDiscoveryMessageHandler);
     }
 
     public void initRestAPI() {
