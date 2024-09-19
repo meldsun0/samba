@@ -1,6 +1,7 @@
 package samba.domain.messages;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -28,4 +29,11 @@ public class FindContent implements PortalWireMessage {
         return contentKey;
     }
 
+    @Override
+    public Bytes serialize() {
+        Bytes contentKeySerialized = SSZ.encodeBytes(contentKey);
+        return Bytes.concatenate(
+                SSZ.encodeUInt8(getMessageType().ordinal()),
+                contentKeySerialized);
+    }
 }

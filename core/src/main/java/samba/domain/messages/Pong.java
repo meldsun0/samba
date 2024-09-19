@@ -1,10 +1,10 @@
 package samba.domain.messages;
 
-import org.apache.tuweni.units.bigints.UInt64;
-
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
+import org.apache.tuweni.units.bigints.UInt64;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -35,5 +35,15 @@ public class Pong implements PortalWireMessage {
 
     public Optional<UInt64> getEnrSeq() {
         return Optional.ofNullable(enrSeq);
+    }
+
+    @Override
+    public Bytes serialize() {
+        Bytes enrSeqSerialized = SSZ.encodeUInt64(enrSeq.toLong());
+        Bytes customPayloadSerialized = SSZ.encodeBytes(customPayload);
+        return Bytes.concatenate(
+                SSZ.encodeUInt8(getMessageType().ordinal()),
+                enrSeqSerialized,
+                customPayloadSerialized);
     }
 }

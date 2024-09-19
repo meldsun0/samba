@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -12,7 +13,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class Nodes implements PortalWireMessage {
 
-    private final byte total = 1;
+    private final Bytes total = Bytes.ofUnsignedInt(1);
     //
     private final List<Bytes> enrs;
 
@@ -35,5 +36,15 @@ public class Nodes implements PortalWireMessage {
 
     public List<Bytes> getEnrList() {
           return enrs;
+    }
+
+    @Override
+    public Bytes serialize() {
+        Bytes totalSerialized = SSZ.encodeUInt8(total.toInt());
+        Bytes enrsSerialized = SSZ.encodeBytesList(enrs);
+        return Bytes.concatenate(
+                SSZ.encodeUInt8(getMessageType().ordinal()),
+                totalSerialized,
+                enrsSerialized);
     }
 }

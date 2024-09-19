@@ -1,13 +1,11 @@
 package samba.domain.messages;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
-import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -61,5 +59,36 @@ public class Content implements PortalWireMessage {
 
     public List<Bytes> getEnrList() {
         return enrs;
+    }
+
+    @Override
+    public Bytes serialize() {
+        Bytes payloadTypeSerialized = SSZ.encodeInt8(payloadType);
+        switch(payloadType) {
+            case 0 -> {
+                Bytes connectionIdSerialized = SSZ.encodeUInt64(connectionId.toLong());
+                return Bytes.concatenate(
+                        SSZ.encodeUInt8(getMessageType().ordinal()),
+                        payloadTypeSerialized,
+                        connectionIdSerialized);
+            }
+            case 1 -> {
+                Bytes contentSerialized = SSZ.encodeBytes(content);
+                return Bytes.concatenate(
+                        SSZ.encodeUInt8(getMessageType().ordinal()),
+                        payloadTypeSerialized,
+                        contentSerialized);
+            }
+            case 2 -> {
+                Bytes enrsSerialized = SSZ.encodeBytesList(enrs);
+                return Bytes.concatenate(
+                        SSZ.encodeUInt8(getMessageType().ordinal()),
+                        payloadTypeSerialized,
+                        enrsSerialized);
+            }
+            default -> {
+                throw new IllegalArgumentException("CONTENT: Invalid payload type");
+            }
+        }
     }
 }

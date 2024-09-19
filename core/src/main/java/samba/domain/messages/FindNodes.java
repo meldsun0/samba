@@ -2,6 +2,9 @@ package samba.domain.messages;
 
 import java.util.List;
 
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -26,5 +29,14 @@ public class FindNodes implements PortalWireMessage {
 
     public List<Integer> getDistances() {
         return distances;
+    }
+
+    @Override
+    public Bytes serialize() {
+        Bytes distancesSerialized = SSZ.encodeIntList(Integer.SIZE, distances);
+        return Bytes.concatenate(
+                SSZ.encodeUInt8(getMessageType().ordinal()),
+                distancesSerialized);
+        
     }
 }

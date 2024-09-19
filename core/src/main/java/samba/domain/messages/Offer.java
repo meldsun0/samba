@@ -3,6 +3,7 @@ package samba.domain.messages;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,5 +27,13 @@ public class Offer implements PortalWireMessage {
 
     public List<Bytes> getContentKeys() {
         return content_keys;
+    }
+
+    @Override
+    public Bytes serialize() {
+        Bytes contentKeysSerialized = SSZ.encodeBytesList(content_keys);
+        return Bytes.concatenate(
+                SSZ.encodeUInt8(getMessageType().ordinal()),
+                contentKeysSerialized);
     }
 }

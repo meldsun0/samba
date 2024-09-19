@@ -1,5 +1,7 @@
 package samba.domain.messages;
 
+import org.apache.tuweni.bytes.Bytes;
+
 public interface PortalWireMessage {
     
     public final static int MAX_CUSTOM_PAYLOAD_SIZE = 2048;
@@ -8,4 +10,6 @@ public interface PortalWireMessage {
     public static final int MAX_KEYS = 64;
 
     MessageType getMessageType();
+
+    Bytes serialize();
 }
