@@ -10,10 +10,10 @@ import org.apache.tuweni.ssz.SSZ;
  */
 public class Accept implements PortalWireMessage {
 
-    private final UInt64 connectionId;
+    private final int connectionId;
     private final Bytes content_keys;
 
-    public Accept(UInt64 connectionId, Bytes contentKeys) {
+    public Accept(int connectionId, Bytes contentKeys) {
 
         //content_keys limit 64
         this.connectionId = connectionId;
@@ -25,7 +25,7 @@ public class Accept implements PortalWireMessage {
         return MessageType.ACCEPT;
     }
 
-    public UInt64 getConnectionId() {
+    public int getConnectionId() {
         return connectionId;
     }
 
@@ -35,7 +35,7 @@ public class Accept implements PortalWireMessage {
 
     @Override
     public Bytes serialize() {
-        Bytes connectionIdSerialized = SSZ.encodeUInt64(connectionId.toLong());
+        Bytes connectionIdSerialized = SSZ.encodeBytes(Bytes.ofUnsignedShort(connectionId));
         Bytes contentKeysSerialized = SSZ.encodeBytes(content_keys);
         return Bytes.concatenate(
                 SSZ.encodeUInt8(getMessageType().ordinal()),

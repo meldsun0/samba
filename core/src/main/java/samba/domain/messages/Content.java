@@ -14,12 +14,12 @@ import static com.google.common.base.Preconditions.checkArgument;
  */
 public class Content implements PortalWireMessage {
 
-    private final UInt64 connectionId;
+    private final int connectionId;
     private final Bytes content;
     private final List<Bytes> enrs;
     private final int payloadType;
 
-    public Content(UInt64 connectionId) {
+    public Content(int connectionId) {
         this.payloadType = 0;
         this.connectionId = connectionId;
         this.content = null;
@@ -31,7 +31,7 @@ public class Content implements PortalWireMessage {
         checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Content size exceeds limit");
         this.payloadType = 1;
         this.content = content;
-        this.connectionId = null;
+        this.connectionId = 0;
         this.enrs = null;
     }
 
@@ -40,7 +40,7 @@ public class Content implements PortalWireMessage {
         checkArgument(enrs.stream().allMatch(enr -> enr.size() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
         this.payloadType = 2;
         this.enrs = enrs;
-        this.connectionId = null;
+        this.connectionId = 0;
         this.content = null;
     }
 
@@ -49,7 +49,11 @@ public class Content implements PortalWireMessage {
         return MessageType.CONTENT;
     }
 
-    public UInt64 getConnectionId() {
+    public int getPayloadType() {
+        return payloadType;
+    }
+
+    public int getConnectionId() {
         return connectionId;
     }
 
@@ -66,7 +70,7 @@ public class Content implements PortalWireMessage {
         Bytes payloadTypeSerialized = SSZ.encodeInt8(payloadType);
         switch(payloadType) {
             case 0 -> {
-                Bytes connectionIdSerialized = SSZ.encodeUInt64(connectionId.toLong());
+                Bytes connectionIdSerialized = SSZ.encodeBytes(Bytes.ofUnsignedShort(connectionId));
                 return Bytes.concatenate(
                         SSZ.encodeUInt8(getMessageType().ordinal()),
                         payloadTypeSerialized,

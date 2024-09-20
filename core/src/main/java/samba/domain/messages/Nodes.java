@@ -34,6 +34,10 @@ public class Nodes implements PortalWireMessage {
         return MessageType.NODES;
     }
 
+    public Bytes getTotal() {
+        return total;
+    }
+
     public List<Bytes> getEnrList() {
           return enrs;
     }

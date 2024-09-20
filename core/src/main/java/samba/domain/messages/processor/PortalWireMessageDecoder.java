@@ -41,7 +41,7 @@ public class PortalWireMessageDecoder {
             }
             return parsedMessage;
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Unknown message type: " + packetType);
+            throw new IllegalArgumentException("Error parsing message: " + e.getMessage());
         } catch (Exception e) {
             throw new IllegalArgumentException("Error parsing message: " + e.getMessage());
         }
@@ -53,7 +53,11 @@ public class PortalWireMessageDecoder {
 
     private PortalWireMessage parsePing(Bytes request) {
         UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(request.slice(1, 9)));
-        Bytes customPayload = SSZ.decodeBytes(request.slice(9, request.size()));
+        Bytes customPayload = SSZ.decodeBytes(request.slice(9));
+        System.out.println("request size: " + request.size());
+        System.out.println("request: " + request);
+        System.out.println("sliced request: " + request.slice(9));
+        System.out.println("customPayload: " + customPayload);
         if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("PING: Custom payload size exceeds limit");
         }
@@ -62,7 +66,7 @@ public class PortalWireMessageDecoder {
 
     private PortalWireMessage parsePong(Bytes request) {
         UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(request.slice(1, 9)));
-        Bytes customPayload = SSZ.decodeBytes(request.slice(9, request.size()));
+        Bytes customPayload = SSZ.decodeBytes(request.slice(9));
         if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("PONG: Custom payload size exceeds limit");
         }
@@ -70,7 +74,7 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseFindNodes(Bytes request) {
-        List<Integer> distances = SSZ.decodeUInt16List(request.slice(1, request.size()));
+        List<Integer> distances = SSZ.decodeUInt16List(request.slice(1));
         Set<Integer> uniqueDistances = new HashSet<>(distances);
         distances.clear();
         distances.addAll(uniqueDistances);
@@ -88,7 +92,16 @@ public class PortalWireMessageDecoder {
 
     private PortalWireMessage parseNodes(Bytes request, NodeRecord srcNode) {
         int total = SSZ.decodeUInt8(request.slice(1, 2));
-        List<Bytes> enrs = SSZ.decodeBytesList(request.slice(2, request.size()));
+
+        System.out.println(request.slice(2));
+
+        System.out.println(request.slice(2));
+
+        System.out.println(request.slice(2));
+        List<Bytes> enrs = SSZ.decodeBytesList(request.slice(2));
+        System.out.println("ENRS: " + enrs);
+        System.out.println(request.slice(2));
+
         if (total > 1) {
             throw new IllegalArgumentException("NODES: Total number of Nodes messages must be 1");
         }
@@ -106,7 +119,7 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseFindContent(Bytes request) {
-        Bytes contentKey = SSZ.decodeBytes(request.slice(9, request.size()));
+        Bytes contentKey = SSZ.decodeBytes(request.slice(1, request.size()));
         if (contentKey.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("FINDCONTENT: Content key size exceeds limit");
         }
@@ -118,7 +131,7 @@ public class PortalWireMessageDecoder {
         switch (payloadType) {
             // uTP connection ID
             case 0 -> {
-                UInt64 connectionId = UInt64.valueOf(SSZ.decodeUInt64(request.slice(2, 4)));
+                int connectionId = SSZ.decodeBytes(request.slice(2, 4)).toInt();
                 return new Content(connectionId);
             }
             // Requested content
@@ -164,13 +177,11 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseAccept(Bytes request) {
-        UInt64 connectionId = UInt64.valueOf(SSZ.decodeUInt64(request.slice(1, 3)));
+        int connectionId = (request.slice(1, 3)).toInt();
         Bytes contentKeys = SSZ.decodeBytes(request.slice(3, request.size()));
         if (contentKeys.size() > PortalWireMessage.MAX_KEYS/8) {
             throw new IllegalArgumentException("ACCEPT: Number of content keys exceeds limit");
         }
         return new Accept(connectionId, contentKeys);
-        // Parse Bytes to obtain message
-        // Put message into apprpriate packet type and return packet
     }
 }
