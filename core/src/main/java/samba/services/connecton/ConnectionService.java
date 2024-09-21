@@ -27,7 +27,7 @@ public class ConnectionService extends Service {
     protected static final Duration DISCOVERY_INTERVAL = Duration.ofSeconds(30);
 
     private ConnectionPool connectionPool;
-    private final Discv5Client discv5PeerClient;
+    private final Discv5Client discv5Client;
     private final Network network;
 
     private final Counter attemptedConnectionCounter;
@@ -40,12 +40,12 @@ public class ConnectionService extends Service {
     public ConnectionService(
             final MetricsSystem metricsSystem,
             final AsyncRunner asyncRunner,
-            final Discv5Client discv5PeerClient,
+            final Discv5Client discv5Client,
             final Network network) {
 
         this.asyncRunner = asyncRunner;
         this.network = network;
-        this.discv5PeerClient = discv5PeerClient;
+        this.discv5Client = discv5Client;
 
         final LabelledMetric<Counter> connectionAttemptCounter = metricsSystem.createLabelledCounter(SambaMetricCategory.NETWORK, "peer_connection_attempt_count_total", "Total number of outbound connection attempts made", "status");
         attemptedConnectionCounter = connectionAttemptCounter.labels("attempted");
@@ -72,7 +72,7 @@ public class ConnectionService extends Service {
             return SafeFuture.COMPLETE;
         }
         LOG.info("Searching for active peers");
-        return discv5PeerClient.streamLiveNodes()
+        return discv5Client.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handle(
                         (peers, error) -> {
@@ -94,8 +94,9 @@ public class ConnectionService extends Service {
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
-                    LOG.trace("Successfully connected to node {}", nodeRecord.getNodeId());
+                    LOG.info("Successfully connected to node {}", nodeRecord.getNodeId());
                     successfulConnectionCounter.inc();
+
 //                    peer.subscribeDisconnect(
 //                            (reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },

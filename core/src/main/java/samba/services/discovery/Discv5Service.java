@@ -39,8 +39,8 @@ public class Discv5Service extends Service implements Discv5Client {
 
     private final DiscoverySystem discoverySystem;
     private final List<NodeRecord> bootnodes;
-    private final boolean supportsIpv6;
-    private final SECP256K1.SecretKey localNodePrivateKey;
+//    private final boolean supportsIpv6;
+//    private final SECP256K1.SecretKey localNodePrivateKey;
 
     private final AsyncRunner asyncRunner;
     private volatile Cancellable bootnodeRefreshTask;
@@ -53,8 +53,9 @@ public class Discv5Service extends Service implements Discv5Client {
         //add node Record converter.
         this.bootnodes = bootnodes;
         this.asyncRunner = asyncRunner;
-        this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
-        DiscoverySystemBuilder discoverySystemBuilder = new DiscoverySystemBuilder();
+      //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
+
+
 
         final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
 
@@ -62,35 +63,36 @@ public class Discv5Service extends Service implements Discv5Client {
         Preconditions.checkState(networkInterfaces.size() == 1 || networkInterfaces.size() == 2, "The configured network interfaces must be either 1 or 2");
 
 
-        if (networkInterfaces.size() == 1) {
-            final String listenAddress = networkInterfaces.get(0);
-            discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUdpPort());
-            this.supportsIpv6 = IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
-        } else {
-            // IPv4 and IPv6 (dual-stack)
-            final InetSocketAddress[] listenAddresses =
-                    networkInterfaces.stream()
-                            .map(
-                                    networkInterface -> {
-                                        final int listenUdpPort =
-                                                switch (IPVersionResolver.resolve(networkInterface)) {
-                                                    case IP_V4 -> discoveryConfig.getListenUdpPort();
-                                                    case IP_V6 -> discoveryConfig.getListenUpdPortIpv6();
-                                                };
-                                        return new InetSocketAddress(networkInterface, listenUdpPort);
-                                    })
-                            .toArray(InetSocketAddress[]::new);
-            discoverySystemBuilder.listen(listenAddresses);
-            this.supportsIpv6 = true;
-        }
+//        if (networkInterfaces.size() == 1) {
+//            final String listenAddress = networkInterfaces.get(0);
+//            discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUdpPort());
+//            this.supportsIpv6 = IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
+//        } else {
+//            // IPv4 and IPv6 (dual-stack)
+//            final InetSocketAddress[] listenAddresses =
+//                    networkInterfaces.stream()
+//                            .map(
+//                                    networkInterface -> {
+//                                        final int listenUdpPort =
+//                                                switch (IPVersionResolver.resolve(networkInterface)) {
+//                                                    case IP_V4 -> discoveryConfig.getListenUdpPort();
+//                                                    case IP_V6 -> discoveryConfig.getListenUpdPortIpv6();
+//                                                };
+//                                        return new InetSocketAddress(networkInterface, listenUdpPort);
+//                                    })
+//                            .toArray(InetSocketAddress[]::new);
+//            discoverySystemBuilder.listen(listenAddresses);
+//            this.supportsIpv6 = true;
+//        }
 
 
 
         this.discoverySystem =
-                discoverySystemBuilder
-                        .secretKey(localNodePrivateKey)
+                new DiscoverySystemBuilder()
+                        .listen("0.0.0.0", 9090)
+                        .secretKey(keyPair.secretKey())
                         .bootnodes(bootnodes)
-                        .localNodeRecord(createNodeRecord(keyPair, "181.28.127.143", Integer.parseInt("9001")))
+                        .localNodeRecord(createNodeRecord(keyPair,"0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
                         .talkHandler(new TalkHandler() {
                             @Override
@@ -100,8 +102,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
 
                             }
-                        })
-                        .build();
+                        }).build();
 
         NodeRecord myNode = discoverySystem.getLocalNodeRecord();
 
@@ -129,30 +130,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
     @Override
     public CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
-
-
-        try {
-            this.discoverySystem.talk(nodeRecord, protocol, request)
-                            .thenAccept(
-                                    respBytes -> {
-                                        LOG.debug("Application TalkHandler completed with error", err);
-                                    })
-                            .exceptionally(
-                                    err -> {
-                                        LOG.debug("Application TalkHandler completed with error", err);
-                                        return null;
-                                    }).get(50, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (TimeoutException e) {
-            throw new RuntimeException(e);
-        }
-
-
-
-        return this.discoverySystem.talk(nodeRecord, protocol, request);
+            return this.discoverySystem.talk(nodeRecord, protocol, request);
     }
 
     @Override

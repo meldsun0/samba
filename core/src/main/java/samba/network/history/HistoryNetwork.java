@@ -1,6 +1,7 @@
 package samba.network.history;
 
 
+import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import samba.domain.messages.requests.Ping;
@@ -22,8 +23,9 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
 
 
     public HistoryNetwork(Discv5Client client){
-        super(NetworkType.EXECUTION_HISTORY_NETWORK, client);
+        super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable());
         this.connectionPool = new ConnectionPool();
+
 
 
     }
@@ -38,15 +40,13 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message ) { //node should be changed.
-        LOG.info("Send Ping message to {}", nodeRecord);
         //avoid pinging ourself.
         //handle timeout
-
         return  sendMessage(nodeRecord, message)
                 .thenApply(Optional::get)
                 .thenCompose(
                        pongMessage -> {
-                              LOG.info("Pong message received from {}", message.getEnrSeq());
+                              LOG.trace("{} message received from {}", message.getType(), message.getEnrSeq().get());
                               Pong pong = pongMessage.getDeserilizedMessage();
                               connectionPool.updateLivenessNode(pong.getNodeId());
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
@@ -57,7 +57,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a Ping to {}",message.getEnrSeq());
+                            LOG.trace("Something when wrong when sending a {} to {}", message.getType() , message.getEnrSeq().get());
                             this.connectionPool.ignoreNode(message.getEnrSeq().get());
                             this.routingTable.evictNode(message.getEnrSeq().get());
                             return SafeFuture.completedFuture(Optional.empty());
@@ -67,8 +67,8 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
 
     @Override
     public SafeFuture<NodeRecord> connect(NodeRecord peer) {
-       return  this.ping(peer, null).thenApply(Optional::get).thenCompose(pong -> {
-              return SafeFuture.completedFuture(new NodeRecordBuilder().build());
+       return  this.ping(peer, new Ping(peer.getSeq(),  new byte[]{})).thenApply(Optional::get).thenCompose(pong -> {
+              return SafeFuture.completedFuture(pong.getNodeRecord());
        });
     }
 

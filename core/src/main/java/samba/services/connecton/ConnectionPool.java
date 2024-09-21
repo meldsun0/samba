@@ -25,6 +25,7 @@ public class ConnectionPool {
     }
 
     public int getNumberOfConnectedPeers() {
-        return 0;
+
+        return this.nodesPool.size();
     }
 }

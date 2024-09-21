@@ -38,7 +38,7 @@ public class PortalNodeMainService extends Service {
     protected volatile MetricsSystem metricsSystem;
     protected volatile TimeProvider timeProvider;
     protected volatile AsyncRunner asyncRunner;
-    private final Bytes privKey;
+    private final Bytes privKey = null;
 
     protected volatile SambaConfiguration sambaConfiguration;
 
@@ -56,19 +56,17 @@ public class PortalNodeMainService extends Service {
         this.asyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
         this.sambaConfiguration = sambaConfiguration;
 
-        privKey = Bytes.fromHexString("0x008110c0cc11ec947b27f722e2394e0abe6d8596208888a3e50768296556bc7152"); // Functions.randomKeyPair(new Random(new Random().nextInt())).secretKey().bytes(); //:S
-
 
 
         initDiscoveryService();
-        initHistoryNetwrok();
+        initHistoryNetwork();
         initConnectionService();
         initRestAPI();
 
     }
 
-    private void initHistoryNetwrok() {
-        LOG.info("PortalNodeMainService.initHistoryNetwrok()");
+    private void initHistoryNetwork() {
+        LOG.info("PortalNodeMainService.initHistoryNetwork()");
         this.historyNetwork = new HistoryNetwork(this.discoveryService);
     }
 

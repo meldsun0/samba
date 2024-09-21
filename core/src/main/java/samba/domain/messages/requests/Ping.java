@@ -41,6 +41,6 @@ public class Ping implements HistoryProtocolRequestMessage {
 
     @Override
     public Bytes getSSZMessageInBytes() {
-        return null;
+        return Bytes.EMPTY;
     }
 }

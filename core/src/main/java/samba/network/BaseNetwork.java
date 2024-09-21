@@ -28,9 +28,11 @@ public abstract class BaseNetwork implements Network {
     private Discv5Client client;
 
 
-    public BaseNetwork(NetworkType networkType, Discv5Client client) {
+    public BaseNetwork(NetworkType networkType, Discv5Client client, RoutingTable routingTable) {
         this.networkType = networkType;
         this.client = client;
+        this.networkType = networkType;
+        this.routingTable = routingTable;
 
     }
 
@@ -41,21 +43,20 @@ public abstract class BaseNetwork implements Network {
     // private final PeerManager peerManager;
 
     protected SafeFuture<Optional<HistoryProtocolReceiveMessage>> sendMessage(NodeRecord node, HistoryProtocolRequestMessage message) {
-        LOG.info("Send ping {}", node.asEnr());
-//       if (!isStoreAvailable()) {
+        LOG.trace("Send {} message to {}", message.getType(), node.getNodeId());
+//         if (!isStoreAvailable()) {
 //            return SafeFuture.failedFuture(new ChainDataUnavailableException());
 //        }
-        //SafeFuture.of(client.sendMessage(node, this.networkType.getValue(), message.getSSZMessageInBytes())
-        PingMessageSSZ a = new PingMessageSSZ(node.getSeq().toLong(), Bytes.of(1));
-        return SafeFuture.of(this.client.sendDisV5Message(node, Bytes.fromHexString("0x500B"), Bytes.fromHexString("0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
-                        .thenApply(this::parseResponse)
+      //  return SafeFuture.of(this.client.sendDisV5Message(node, Bytes.fromHexString("0x500B"),message.getSSZMessageInBytes())
+        return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), Bytes.fromHexString("0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+                        .thenApply((bytes)->parseResponse(bytes, node)) //Change
                         .thenApply(Optional::of))
                 .exceptionallyCompose(this::handleSendMessageError);
     }
 
 
     private SafeFuture<Optional<HistoryProtocolReceiveMessage>> handleSendMessageError(Throwable error) {
-        LOG.info("error");
+        LOG.info("Error when sending a discv5 message");
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));
@@ -63,12 +64,9 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private HistoryProtocolReceiveMessage parseResponse(Bytes response) {
-        LOG.info("PONG");
-        UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(response.slice(1, 9)));
-        Bytes customPayload = SSZ.decodeBytes(response.slice(9, response.size()));
-
-        return new Pong(enrSeq, customPayload);
+    private HistoryProtocolReceiveMessage parseResponse(Bytes response, NodeRecord node) {
+       //TODO- add message handler.
+        return new Pong(node);
     }
 
 }
