@@ -1,8 +1,7 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import org.apache.tuweni.units.bigints.UInt64;
-
-import java.util.BitSet;
+import samba.domain.messages.MessageType;
 
 /***
  * Response message to Offer (0x06).

@@ -1,4 +1,4 @@
-package samba.network;
+package samba.services.discovery;
 
 
 import org.apache.tuweni.bytes.Bytes;
@@ -6,21 +6,23 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
-
-public interface PeerClient {
+public interface Discv5Client {
 
 
-    public CompletableFuture<Bytes> sendMessage(NodeRecord nodeRecord, Bytes protocol, Bytes request);
-
-
+    public CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
 
 
     SafeFuture<Collection<NodeRecord>> streamLiveNodes();
+
+    public Optional<Bytes> getNodeId();
+
+
+    public Optional<String> getEnr();
+
+    public void updateCustomENRField(final String fieldName, final Bytes value);
 
 
 //

@@ -4,29 +4,31 @@ import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.DiscoverySystem;
+import org.apache.tuweni.ssz.SSZ;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.jetbrains.annotations.NotNull;
 import samba.db.PortalDB;
 import samba.domain.messages.HistoryProtocolReceiveMessage;
 import samba.domain.messages.HistoryProtocolRequestMessage;
+import samba.domain.messages.sszexample.PingMessageSSZ;
 import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
+import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 import java.util.Optional;
 
-public abstract class BaseNetwork {
+public abstract class BaseNetwork implements Network {
 
     protected static final Logger LOG = LogManager.getLogger();
 
     private NetworkType networkType;
     protected RoutingTable routingTable;
     private PortalDB db;
-    private PeerClient client;
+    private Discv5Client client;
 
 
-    public BaseNetwork(NetworkType networkType, PeerClient client) {
+    public BaseNetwork(NetworkType networkType, Discv5Client client) {
         this.networkType = networkType;
         this.client = client;
 
@@ -39,19 +41,21 @@ public abstract class BaseNetwork {
     // private final PeerManager peerManager;
 
     protected SafeFuture<Optional<HistoryProtocolReceiveMessage>> sendMessage(NodeRecord node, HistoryProtocolRequestMessage message) {
+        LOG.info("Send ping {}", node.asEnr());
 //       if (!isStoreAvailable()) {
 //            return SafeFuture.failedFuture(new ChainDataUnavailableException());
 //        }
-
-        return  SafeFuture.of(client.sendMessage(node, this.networkType.getValue(), message.getSSZMessageInBytes())
-                        .thenApply(this::parseInput)
+        //SafeFuture.of(client.sendMessage(node, this.networkType.getValue(), message.getSSZMessageInBytes())
+        PingMessageSSZ a = new PingMessageSSZ(node.getSeq().toLong(), Bytes.of(1));
+        return SafeFuture.of(this.client.sendDisV5Message(node, Bytes.fromHexString("0x500B"), Bytes.fromHexString("0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
+                        .thenApply(this::parseResponse)
                         .thenApply(Optional::of))
-                    .exceptionallyCompose(this::handleSendMessageError);
-
+                .exceptionallyCompose(this::handleSendMessageError);
     }
 
 
-    private  SafeFuture<Optional<HistoryProtocolReceiveMessage>> handleSendMessageError(Throwable error) {
+    private SafeFuture<Optional<HistoryProtocolReceiveMessage>> handleSendMessageError(Throwable error) {
+        LOG.info("error");
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));
@@ -59,11 +63,12 @@ public abstract class BaseNetwork {
         return SafeFuture.failedFuture(error);
     }
 
-    private HistoryProtocolReceiveMessage parseInput(Bytes input){
-        HistoryProtocolReceiveMessage a = new Pong();
-            return  a;
+    private HistoryProtocolReceiveMessage parseResponse(Bytes response) {
+        LOG.info("PONG");
+        UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(response.slice(1, 9)));
+        Bytes customPayload = SSZ.decodeBytes(response.slice(9, response.size()));
+
+        return new Pong(enrSeq, customPayload);
     }
-
-
 
 }

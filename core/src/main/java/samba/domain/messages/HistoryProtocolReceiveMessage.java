@@ -10,5 +10,8 @@ public interface HistoryProtocolReceiveMessage {
 
     public <T> T getDeserilizedMessage();
 
+    public MessageType getMessageType();
+
+    public Bytes serialize();
 
 }

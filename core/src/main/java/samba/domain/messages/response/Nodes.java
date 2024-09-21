@@ -1,6 +1,7 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import org.apache.tuweni.units.bigints.UInt64;
+import samba.domain.messages.MessageType;
 
 import java.util.Optional;
 

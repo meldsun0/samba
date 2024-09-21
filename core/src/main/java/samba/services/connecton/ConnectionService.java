@@ -7,8 +7,8 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.hyperledger.besu.plugin.services.metrics.Counter;
 import org.hyperledger.besu.plugin.services.metrics.LabelledMetric;
 import samba.metrics.SambaMetricCategory;
-import samba.network.PeerClient;
-import samba.services.connecton.needimpl.Network;
+import samba.services.discovery.Discv5Client;
+import samba.network.Network;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -20,14 +20,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
-public class ConnectionManager extends Service {
+public class ConnectionService extends Service {
 
     private static final Logger LOG = LogManager.getLogger();
     protected static final Duration WARMUP_DISCOVERY_INTERVAL = Duration.ofSeconds(1);
     protected static final Duration DISCOVERY_INTERVAL = Duration.ofSeconds(30);
 
     private ConnectionPool connectionPool;
-    private final PeerClient peerClient;
+    private final Discv5Client discv5PeerClient;
     private final Network network;
 
     private final Counter attemptedConnectionCounter;
@@ -37,15 +37,15 @@ public class ConnectionManager extends Service {
     private volatile Cancellable periodicPeerSearch;
 
 
-    public ConnectionManager(
+    public ConnectionService(
             final MetricsSystem metricsSystem,
-            final PeerClient peerClient,
             final AsyncRunner asyncRunner,
+            final Discv5Client discv5PeerClient,
             final Network network) {
 
         this.asyncRunner = asyncRunner;
         this.network = network;
-        this.peerClient = peerClient;
+        this.discv5PeerClient = discv5PeerClient;
 
         final LabelledMetric<Counter> connectionAttemptCounter = metricsSystem.createLabelledCounter(SambaMetricCategory.NETWORK, "peer_connection_attempt_count_total", "Total number of outbound connection attempts made", "status");
         attemptedConnectionCounter = connectionAttemptCounter.labels("attempted");
@@ -57,7 +57,7 @@ public class ConnectionManager extends Service {
 
     @Override
     protected SafeFuture<?> doStart() {
-        LOG.trace("Starting connection manager");
+        LOG.info("Starting ConnectionService");
         activeNodesSearchingTask();
         return SafeFuture.COMPLETE;
     }
@@ -68,11 +68,11 @@ public class ConnectionManager extends Service {
 
     private SafeFuture<Void> searchForActivePeers() {
         if (!isRunning()) {
-            LOG.trace("Not running so not searching for active peers");
+            LOG.info("Not running so not searching for active peers");
             return SafeFuture.COMPLETE;
         }
-        LOG.trace("Searching for active peers");
-        return peerClient.streamLiveNodes()
+        LOG.info("Searching for active peers");
+        return discv5PeerClient.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handle(
                         (peers, error) -> {
@@ -82,7 +82,7 @@ public class ConnectionManager extends Service {
                                         .collect(Collectors.toSet())
                                         .forEach(this::connectToPeers);
                             } else {
-                                LOG.debug("Discovery failed", error);
+                                LOG.info("Discovery failed", error);
                                 //TODO  What to do ?
                             }
                             return null;
@@ -90,7 +90,7 @@ public class ConnectionManager extends Service {
     }
 
     private void connectToPeers(final NodeRecord nodeRecord) {
-        LOG.trace("Attempting to connect to {}", nodeRecord.getNodeId());
+        LOG.info("Attempting to connect to {}", nodeRecord.getNodeId());
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
@@ -153,6 +153,8 @@ public class ConnectionManager extends Service {
 }
 
 /**
+ *
+ *                private volatile Cancellable bootnodeRefreshTask;
  *               .thenRun(
  *                         () ->{
  *                             this.bootnodeRefreshTask =
@@ -172,4 +174,11 @@ public class ConnectionManager extends Service {
  *                                 .whenComplete((a,b) -> System.out.println(a))
  *                                 .finish(error -> LOG.info("Bootnode {} is unresponsive", bootnode)));
  *     }
+ *
+ *
+ *     final Cancellable refreshTask = this.bootnodeRefreshTask;
+ *         this.bootnodeRefreshTask = null;
+ *         if (refreshTask != null) {
+ *             refreshTask.cancel();
+ *         }
  */

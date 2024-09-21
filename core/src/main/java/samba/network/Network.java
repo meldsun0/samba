@@ -1,11 +1,11 @@
-package samba.services.connecton.needimpl;
+package samba.network;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface Network {
 
-    SafeFuture<NodeRecord> connect(NodeRecord peer);
+    public SafeFuture<NodeRecord> connect(NodeRecord peer);
 
-    int getPeerCount();
+    public int getPeerCount();
 }

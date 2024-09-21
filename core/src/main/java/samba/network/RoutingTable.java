@@ -8,7 +8,7 @@ public interface RoutingTable {
 
     public void updateRoutingTable();
 
-    public void evitNode(UInt64 nodeId);
+    public void evictNode(UInt64 nodeId);
 
     void updateRadius(NodeId nodeId, int radius);
 }

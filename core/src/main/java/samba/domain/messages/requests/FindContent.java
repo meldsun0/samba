@@ -23,7 +23,7 @@ public class FindContent implements HistoryProtocolRequestMessage {
 
     @Override
     public Bytes getMessageInBytes() {
-        null;
+        return Bytes.of(1);
     }
 
     @Override

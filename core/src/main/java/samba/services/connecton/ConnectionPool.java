@@ -11,16 +11,20 @@ public class ConnectionPool {
     private final Map<NodeId, ConnectionState> nodesPool = new ConcurrentHashMap<>();
 
 
-    private void insertOrUpdate(NodeId nodeId, ConnectionState state){
+    private void insertOrUpdate(NodeId nodeId, ConnectionState state) {
         this.nodesPool.compute(nodeId, (key, value) -> state);
     }
 
 
-    public void updateLivenessNode(NodeId nodeId){
+    public void updateLivenessNode(NodeId nodeId) {
         this.insertOrUpdate(nodeId, ConnectionState.CONNECTED);
     }
 
     public void ignoreNode(UInt64 uInt64) {
 
+    }
+
+    public int getNumberOfConnectedPeers() {
+        return 0;
     }
 }
