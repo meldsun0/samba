@@ -8,4 +8,6 @@ public interface Network {
     public SafeFuture<NodeRecord> connect(NodeRecord peer);
 
     public int getPeerCount();
+
+    public boolean isPeerConnected(NodeRecord peer);
 }

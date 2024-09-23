@@ -80,26 +80,6 @@ public class PortalNodeMainService extends Service {
 
     }
 
-
-    @Override
-    protected SafeFuture<?> doStart() {
-        LOG.debug("Starting {}", this.getClass().getSimpleName());
-        return SafeFuture.allOfFailFast(discoveryService.start())
-                .thenCompose(__ -> connectionService.start())
-                .thenCompose((__) -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
-    }
-
-    @Override
-    protected SafeFuture<?> doStop() {
-        LOG.debug("Stopping {}", this.getClass().getSimpleName());
-        return SafeFuture.allOf(
-                discoveryService.stop(),
-                connectionService.stop(),
-                portalRestAPI.map(PortalRestAPI::stop).orElse(SafeFuture.completedFuture(null)));
-
-
-    }
-
     protected void initDiscoveryService() {
         LOG.info("PortalNodeMainService.initDiscoveryService()");
         List bootnodes = new ArrayList<>();
@@ -115,6 +95,25 @@ public class PortalNodeMainService extends Service {
                 DiscoveryConfig.builder().build(),
                 this.privKey,
                 bootnodes);
+
+    }
+
+    @Override
+    protected SafeFuture<?> doStart() {
+        LOG.debug("Starting {}", this.getClass().getSimpleName());
+        return SafeFuture.allOfFailFast(discoveryService.start())
+                .thenCompose(__-> connectionService.start())
+                .thenCompose((__) -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
+    }
+
+    @Override
+    protected SafeFuture<?> doStop() {
+        LOG.debug("Stopping {}", this.getClass().getSimpleName());
+        return SafeFuture.allOf(
+                discoveryService.stop(),
+                connectionService.stop(),
+                portalRestAPI.map(PortalRestAPI::stop).orElse(SafeFuture.completedFuture(null)));
+
 
     }
 

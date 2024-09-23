@@ -25,9 +25,6 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
     public HistoryNetwork(Discv5Client client){
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable());
         this.connectionPool = new ConnectionPool();
-
-
-
     }
 
 
@@ -47,7 +44,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                 .thenCompose(
                        pongMessage -> {
                               LOG.trace("{} message received from {}", message.getType(), message.getEnrSeq().get());
-                              Pong pong = pongMessage.getDeserilizedMessage();
+                              Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getNodeId());
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
                                  this.routingTable.updateRadius(pong.getNodeId(), 1);
@@ -57,7 +54,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.trace("Something when wrong when sending a {} to {}", message.getType() , message.getEnrSeq().get());
+                            LOG.info("Something when wrong when sending a {} to {}", message.getType() , message.getEnrSeq().get());
                             this.connectionPool.ignoreNode(message.getEnrSeq().get());
                             this.routingTable.evictNode(message.getEnrSeq().get());
                             return SafeFuture.completedFuture(Optional.empty());
@@ -77,8 +74,8 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
         return connectionPool.getNumberOfConnectedPeers();
     }
 
-    //livenesscheck
-
-
-
+    @Override
+    public boolean isPeerConnected(NodeRecord peer) {
+        return this.connectionPool.isPeerConnected(peer);
+    }
 }

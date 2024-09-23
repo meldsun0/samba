@@ -26,7 +26,6 @@ public class ConnectionService extends Service {
     protected static final Duration WARMUP_DISCOVERY_INTERVAL = Duration.ofSeconds(1);
     protected static final Duration DISCOVERY_INTERVAL = Duration.ofSeconds(30);
 
-    private ConnectionPool connectionPool;
     private final Discv5Client discv5Client;
     private final Network network;
 
@@ -35,6 +34,7 @@ public class ConnectionService extends Service {
     private final Counter failedConnectionCounter;
     private final AsyncRunner asyncRunner;
     private volatile Cancellable periodicPeerSearch;
+
 
 
     public ConnectionService(
@@ -68,10 +68,11 @@ public class ConnectionService extends Service {
 
     private SafeFuture<Void> searchForActivePeers() {
         if (!isRunning()) {
-            LOG.info("Not running so not searching for active peers");
+            LOG.debug("Not running so not searching for active peers");
             return SafeFuture.COMPLETE;
         }
-        LOG.info("Searching for active peers");
+        LOG.info("Searching for active peers every {} seconds", DISCOVERY_INTERVAL);
+        LOG.info("{} active peers",network.getPeerCount());
         return discv5Client.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handle(
@@ -90,22 +91,19 @@ public class ConnectionService extends Service {
     }
 
     private void connectToPeers(final NodeRecord nodeRecord) {
-        LOG.info("Attempting to connect to {}", nodeRecord.getNodeId());
+        LOG.debug("Attempting to connect to {}", nodeRecord.getNodeId());
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
-                    LOG.info("Successfully connected to node {}", nodeRecord.getNodeId());
+                    LOG.debug("Successfully connected to node {}", nodeRecord.getNodeId());
                     successfulConnectionCounter.inc();
-
-//                    peer.subscribeDisconnect(
-//                            (reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
+//                    peer.subscribeDisconnect((reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },
                 error -> {
-                    LOG.trace(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
+                    LOG.debug(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
                     failedConnectionCounter.inc();
 //                    peerPools.forgetPeer(peerAddress.getId());
                 });
-
     }
 
 
@@ -132,19 +130,13 @@ public class ConnectionService extends Service {
 
     private void createNextSearchPeerTask() {
         if (network.getPeerCount() == 0) {
-            // Retry fast until we have at least one connection with peers
             LOG.trace("Retrying peer search, no connected peers yet");
             cancelPeerSearchTask();
             this.periodicPeerSearch = asyncRunner.runCancellableAfterDelay(this::activeNodesSearchingTask, WARMUP_DISCOVERY_INTERVAL, this::logSearchError);
         } else {
-            // Long term task, run when we have peers connected
             LOG.trace("Establishing peer search task with long delay");
             cancelPeerSearchTask();
-            this.periodicPeerSearch =
-                    asyncRunner.runWithFixedDelay(
-                            () -> searchForActivePeers().finish(this::logSearchError),
-                            DISCOVERY_INTERVAL,
-                            this::logSearchError);
+            this.periodicPeerSearch = asyncRunner.runWithFixedDelay(() -> searchForActivePeers().finish(this::logSearchError), DISCOVERY_INTERVAL, this::logSearchError);
         }
     }
 
@@ -152,34 +144,3 @@ public class ConnectionService extends Service {
         LOG.error("Error while searching for peers", throwable);
     }
 }
-
-/**
- *
- *                private volatile Cancellable bootnodeRefreshTask;
- *               .thenRun(
- *                         () ->{
- *                             this.bootnodeRefreshTask =
- *                                     asyncRunner.runWithFixedDelay(
- *                                             this::pingBootnodes,
- *                                             BOOTNODE_REFRESH_DELAY,
- *                                             error -> LOG.error("Failed to contact discovery bootnodes", error));
- *                         }
- *                 );
- *     }
- *
- *     private void pingBootnodes() {
- *         bootnodes.forEach(
- *                 bootnode ->
- *
- *                         SafeFuture.of(discoverySystem.ping(bootnode).whenComplete((a,b) -> System.out.println(a+ ""+ b)))
- *                                 .whenComplete((a,b) -> System.out.println(a))
- *                                 .finish(error -> LOG.info("Bootnode {} is unresponsive", bootnode)));
- *     }
- *
- *
- *     final Cancellable refreshTask = this.bootnodeRefreshTask;
- *         this.bootnodeRefreshTask = null;
- *         if (refreshTask != null) {
- *             refreshTask.cancel();
- *         }
- */

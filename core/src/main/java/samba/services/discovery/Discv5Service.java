@@ -25,18 +25,13 @@ import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import static java.lang.System.err;
+
 
 public class Discv5Service extends Service implements Discv5Client {
 
     private static final Logger LOG = LogManager.getLogger();
-    private static final Duration BOOTNODE_REFRESH_DELAY = Duration.ofSeconds(4);
-
     private final DiscoverySystem discoverySystem;
     private final List<NodeRecord> bootnodes;
 //    private final boolean supportsIpv6;
@@ -53,8 +48,7 @@ public class Discv5Service extends Service implements Discv5Client {
         //add node Record converter.
         this.bootnodes = bootnodes;
         this.asyncRunner = asyncRunner;
-      //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
-
+        //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
 
 
         final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
@@ -86,18 +80,17 @@ public class Discv5Service extends Service implements Discv5Client {
 //        }
 
 
-
         this.discoverySystem =
                 new DiscoverySystemBuilder()
                         .listen("0.0.0.0", 9090)
                         .secretKey(keyPair.secretKey())
                         .bootnodes(bootnodes)
-                        .localNodeRecord(createNodeRecord(keyPair,"0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
+                        .localNodeRecord(createNodeRecord(keyPair, "0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
                         .talkHandler(new TalkHandler() {
                             @Override
                             public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
-                                LOG.info("Talk Hanlder hetr");
+                                LOG.info("Talk handler here");
                                 return null;
 
 
@@ -105,7 +98,6 @@ public class Discv5Service extends Service implements Discv5Client {
                         }).build();
 
         NodeRecord myNode = discoverySystem.getLocalNodeRecord();
-
 
 
         metricsSystem.createIntegerGauge(
@@ -130,19 +122,13 @@ public class Discv5Service extends Service implements Discv5Client {
 
     @Override
     public CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
-            return this.discoverySystem.talk(nodeRecord, protocol, request);
+        return this.discoverySystem.talk(nodeRecord, protocol, request);
     }
 
     @Override
     public SafeFuture<Collection<NodeRecord>> streamLiveNodes() {
         //TODO maybe searchForNewPeers?
-        return SafeFuture.of(
-                () -> {
-                    Stream<NodeRecord> nodes = discoverySystem.streamLiveNodes(); //   .thenApply(this::convertToDiscoveryPeers);
-                    return nodes.toList();
-
-                });
-
+        return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList()); //   .thenApply(this::converToPeer);
     }
 
     @Override
@@ -158,25 +144,7 @@ public class Discv5Service extends Service implements Discv5Client {
     protected SafeFuture<?> doStart() {
         LOG.info("Starting DiscV5 service");
         return SafeFuture.of(discoverySystem.start());
-//                .thenRun(
-//                        () ->
-//                                this.bootnodeRefreshTask =
-//                                        asyncRunner.runWithFixedDelay(
-//                                                this::pingBootnodes,
-//                                                BOOTNODE_REFRESH_DELAY,
-//                                                error -> LOG.info("Failed to contact discovery bootnodes", error)));
     }
-
-//    private void pingBootnodes() {
-//        bootnodes.forEach(
-//                bootnode ->
-//                        SafeFuture.of(discoverySystem.ping(bootnode))
-//                                .whenSuccess(() -> LOG.info("Bootnode {} is reponsive", bootnode))
-//                                .finish(error -> LOG.info("Bootnode {} is unresponsive", bootnode)));
-//    }
-
-
-
 
     @Override
     protected SafeFuture<?> doStop() {

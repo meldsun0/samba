@@ -4,13 +4,9 @@ import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
-import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.db.PortalDB;
-import samba.domain.messages.HistoryProtocolReceiveMessage;
-import samba.domain.messages.HistoryProtocolRequestMessage;
-import samba.domain.messages.sszexample.PingMessageSSZ;
+import samba.domain.messages.HistoryProtocolMessage;
 import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
 import samba.services.discovery.Discv5Client;
@@ -42,7 +38,7 @@ public abstract class BaseNetwork implements Network {
     //   private final Host host;
     // private final PeerManager peerManager;
 
-    protected SafeFuture<Optional<HistoryProtocolReceiveMessage>> sendMessage(NodeRecord node, HistoryProtocolRequestMessage message) {
+    protected SafeFuture<Optional<HistoryProtocolMessage>> sendMessage(NodeRecord node, HistoryProtocolMessage message) {
         LOG.trace("Send {} message to {}", message.getType(), node.getNodeId());
 //         if (!isStoreAvailable()) {
 //            return SafeFuture.failedFuture(new ChainDataUnavailableException());
@@ -55,7 +51,7 @@ public abstract class BaseNetwork implements Network {
     }
 
 
-    private SafeFuture<Optional<HistoryProtocolReceiveMessage>> handleSendMessageError(Throwable error) {
+    private SafeFuture<Optional<HistoryProtocolMessage>> handleSendMessageError(Throwable error) {
         LOG.info("Error when sending a discv5 message");
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
@@ -64,7 +60,7 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private HistoryProtocolReceiveMessage parseResponse(Bytes response, NodeRecord node) {
+    private HistoryProtocolMessage parseResponse(Bytes response, NodeRecord node) {
        //TODO- add message handler.
         return new Pong(node);
     }
