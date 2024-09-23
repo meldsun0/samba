@@ -33,7 +33,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      * Sends a Portal Network Wire PING message to a specified node
      * @param nodeRecord the nodeId of the peer to send a ping to
      * @param message PING message to be sent
-     * @returns the PING payload specified by the subnetwork or undefined
+     * @return the PONG message.
      */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message ) { //node should be changed.

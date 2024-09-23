@@ -47,6 +47,7 @@ public class ConnectionService extends Service {
         this.network = network;
         this.discv5Client = discv5Client;
 
+
         final LabelledMetric<Counter> connectionAttemptCounter = metricsSystem.createLabelledCounter(SambaMetricCategory.NETWORK, "peer_connection_attempt_count_total", "Total number of outbound connection attempts made", "status");
         attemptedConnectionCounter = connectionAttemptCounter.labels("attempted");
         successfulConnectionCounter = connectionAttemptCounter.labels("successful");
