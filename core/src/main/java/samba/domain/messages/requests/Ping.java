@@ -9,14 +9,15 @@ import org.apache.tuweni.units.bigints.UInt64;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * Response message to Ping(0x00)
+ * Request message to check if a node is reachable, communicate basic information about our node,
+ * and request basic information about the recipient node.
  */
-public class Pong implements PortalWireMessage {
+public class Ping implements PortalWireMessage {
 
     private final UInt64 enrSeq;
     private final Bytes customPayload;
 
-    public Pong(UInt64 enrSeq, Bytes customPayload) {
+    public Ping(UInt64 enrSeq, Bytes customPayload) {
         checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
         checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
 
@@ -26,7 +27,7 @@ public class Pong implements PortalWireMessage {
 
     @Override
     public MessageType getMessageType() {
-        return MessageType.PONG;
+        return MessageType.PING;
     }
 
     public Bytes getCustomPayload() {
