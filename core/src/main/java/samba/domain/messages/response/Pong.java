@@ -4,10 +4,10 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.messages.HistoryProtocolMessage;
+import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.MessageType;
 import samba.domain.node.NodeId;
-
+import samba.domain.messages.MessageType;
 
 import java.util.Optional;
 
@@ -17,10 +17,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Response message to Ping(0x00)
  */
-public class Pong implements HistoryProtocolMessage {
+public class Pong implements PortalWireMessage {
 
-//    private final UInt64 enrSeq;
-//    private final Bytes customPayload;
+    private  UInt64 enrSeq;
+    private  Bytes customPayload;
     private NodeRecord nodeRecord;
 
     public Pong(NodeRecord node) {
@@ -30,6 +30,13 @@ public class Pong implements HistoryProtocolMessage {
 //        this.enrSeq = enrSeq;
 //        this.customPayload = customPayload;
         this.nodeRecord = node;
+    }
+
+    public Pong(UInt64 enrSeq, Bytes customPayload) {
+        checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
+        checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
+        this.enrSeq = enrSeq;
+        this.customPayload = customPayload;
     }
 
     public Bytes getCustomPayload() {
@@ -45,22 +52,17 @@ public class Pong implements HistoryProtocolMessage {
     }
 
     @Override
-    public Bytes getMessageInBytes() {
+    public Bytes serialize() {
         Bytes enrSeqSerialized = SSZ.encodeUInt64(nodeRecord.getSeq().toLong());
         Bytes customPayloadSerialized = SSZ.encodeBytes(Bytes.EMPTY);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getType().ordinal()),
+                SSZ.encodeUInt8(getMessageType().ordinal()),
                 enrSeqSerialized,
                 customPayloadSerialized);
     }
 
     @Override
-    public Bytes getSSZMessageInBytes() {
-        return null;
-    }
-
-    @Override
-    public MessageType getType() {
+    public MessageType getMessageType() {
         return MessageType.PONG;
     }
 

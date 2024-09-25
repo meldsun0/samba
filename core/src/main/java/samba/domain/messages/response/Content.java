@@ -1,9 +1,10 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import java.util.List;
 
 import org.apache.tuweni.units.bigints.UInt64;
-
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
 
@@ -90,5 +91,10 @@ public class Content implements PortalWireMessage {
                 throw new IllegalArgumentException("CONTENT: Invalid payload type");
             }
         }
+    }
+
+    @Override
+    public Content getMessage() {
+        return this;
     }
 }

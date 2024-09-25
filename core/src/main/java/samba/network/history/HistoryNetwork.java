@@ -43,7 +43,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                 .thenApply(Optional::get)
                 .thenCompose(
                        pongMessage -> {
-                              LOG.trace("{} message received from {}", message.getType(), message.getEnrSeq().get());
+                              LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq().get());
                               Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getNodeId());
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
@@ -54,7 +54,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a {} to {}", message.getType() , message.getEnrSeq().get());
+                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType() , message.getEnrSeq().get());
                             this.connectionPool.ignoreNode(message.getEnrSeq().get());
                             this.routingTable.evictNode(message.getEnrSeq().get());
                             return SafeFuture.completedFuture(Optional.empty());
@@ -64,7 +64,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
 
     @Override
     public SafeFuture<NodeRecord> connect(NodeRecord peer) {
-       return  this.ping(peer, new Ping(peer.getSeq(),  new byte[]{})).thenApply(Optional::get).thenCompose(pong -> {
+       return  this.ping(peer, new Ping(peer.getSeq(),  Bytes.EMPTY)).thenApply(Optional::get).thenCompose(pong -> {
               return SafeFuture.completedFuture(pong.getNodeRecord());
        });
     }

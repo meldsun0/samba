@@ -1,9 +1,11 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import org.apache.tuweni.units.bigints.UInt64;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 
 /***
  * Response message to Offer (0x06).
@@ -41,5 +43,10 @@ public class Accept implements PortalWireMessage {
                 SSZ.encodeUInt8(getMessageType().ordinal()),
                 connectionIdSerialized,
                 contentKeysSerialized);
+    }
+
+    @Override
+    public Accept getMessage() {
+        return this;
     }
 }

@@ -14,5 +14,6 @@ import java.util.concurrent.CompletableFuture;
 public interface HistoryNetworkRequestOperations {
 
     SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
+    
 
 }

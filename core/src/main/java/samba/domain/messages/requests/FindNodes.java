@@ -1,12 +1,13 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
-
+import samba.domain.messages.MessageType;
 import static com.google.common.base.Preconditions.checkArgument;
-
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 /**
  * Request message to get ENR records from the recipient's routing table at
  * the given logarithmic distances. The distance of 0 indicates a request for the recipient's own ENR record.
@@ -38,5 +39,10 @@ public class FindNodes implements PortalWireMessage {
                 SSZ.encodeUInt8(getMessageType().ordinal()),
                 distancesSerialized);
         
+    }
+
+    @Override
+    public FindNodes getMessage() {
+        return this;
     }
 }

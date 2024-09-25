@@ -1,6 +1,7 @@
 package samba.domain.messages;
 
 import org.apache.tuweni.bytes.Bytes;
+import samba.domain.messages.MessageType;
 
 public interface PortalWireMessage {
     
@@ -12,4 +13,6 @@ public interface PortalWireMessage {
     MessageType getMessageType();
 
     Bytes serialize();
+
+    <T>  T getMessage();
 }

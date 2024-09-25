@@ -1,10 +1,11 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
-
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -35,5 +36,10 @@ public class Offer implements PortalWireMessage {
         return Bytes.concatenate(
                 SSZ.encodeUInt8(getMessageType().ordinal()),
                 contentKeysSerialized);
+    }
+
+    @Override
+    public Offer getMessage() {
+        return this;
     }
 }

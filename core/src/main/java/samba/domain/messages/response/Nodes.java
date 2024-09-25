@@ -1,11 +1,12 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
-
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
@@ -47,4 +48,11 @@ public class Nodes implements PortalWireMessage {
                 totalSerialized,
                 enrsSerialized);
     }
+
+    @Override
+    public Nodes getMessage() {
+        return this;
+    }
+
+
 }

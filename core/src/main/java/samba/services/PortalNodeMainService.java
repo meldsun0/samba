@@ -12,6 +12,7 @@ import samba.services.api.PortalRestAPI;
 import samba.services.api.PortalAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Discv5Service;
+import samba.domain.messages.processor.PortalWireMessageProcessor;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
@@ -41,8 +42,7 @@ public class PortalNodeMainService extends Service {
     private final Bytes privKey = null;
 
     protected volatile SambaConfiguration sambaConfiguration;
-    private DiscoveryService discoveryService;
-    private TalkHandler portalDiscoveryMessageHandler;
+    
     private PortalWireMessageProcessor portalWireMessageProcessor;
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
 

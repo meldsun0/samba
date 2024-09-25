@@ -1,10 +1,12 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
 import org.apache.tuweni.units.bigints.UInt64;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -46,5 +48,10 @@ public class Ping implements PortalWireMessage {
                 SSZ.encodeUInt8(getMessageType().ordinal()),
                 enrSeqSerialized,
                 customPayloadSerialized);
+    }
+
+    @Override
+    public Ping getMessage() {
+        return this;
     }
 }

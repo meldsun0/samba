@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.db.PortalDB;
-import samba.domain.messages.HistoryProtocolMessage;
+import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
 import samba.services.discovery.Discv5Client;
@@ -38,8 +38,8 @@ public abstract class BaseNetwork implements Network {
     //   private final Host host;
     // private final PeerManager peerManager;
 
-    protected SafeFuture<Optional<HistoryProtocolMessage>> sendMessage(NodeRecord node, HistoryProtocolMessage message) {
-        LOG.trace("Send {} message to {}", message.getType(), node.getNodeId());
+    protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord node, PortalWireMessage message) {
+        LOG.trace("Send {} message to {}", message.getMessageType(), node.getNodeId());
 //         if (!isStoreAvailable()) {
 //            return SafeFuture.failedFuture(new ChainDataUnavailableException());
 //        }
@@ -51,7 +51,7 @@ public abstract class BaseNetwork implements Network {
     }
 
 
-    private SafeFuture<Optional<HistoryProtocolMessage>> handleSendMessageError(Throwable error) {
+    private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(Throwable error) {
         LOG.info("Error when sending a discv5 message");
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
@@ -60,7 +60,7 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private HistoryProtocolMessage parseResponse(Bytes response, NodeRecord node) {
+    private PortalWireMessage parseResponse(Bytes response, NodeRecord node) {
        //TODO- add message handler.
         return new Pong(node);
     }
