@@ -26,6 +26,10 @@ public enum MessageType {
 
     }
 
+    public byte getByteValue() {
+        return value;
+    }
+
     public static MessageType fromInt(int value) {
         value = value & BYTE_MASK;
         for (MessageType messageType : MessageType.values()) {
@@ -35,8 +39,6 @@ public enum MessageType {
         }
         throw new IllegalArgumentException("Unknown message type from int: " + value);
     }
-
-
 }
 
 

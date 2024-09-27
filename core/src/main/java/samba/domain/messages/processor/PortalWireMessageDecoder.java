@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
-import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import samba.domain.messages.Accept;
@@ -19,12 +18,19 @@ import samba.domain.messages.Offer;
 import samba.domain.messages.Ping;
 import samba.domain.messages.Pong;
 import samba.domain.messages.PortalWireMessage;
+import samba.schema.ssz.containers.ContentContainer;
+import samba.schema.ssz.containers.FindContentContainer;
+import samba.schema.ssz.containers.FindNodesContainer;
+import samba.schema.ssz.containers.NodesContainer;
+import samba.schema.ssz.containers.PingContainer;
+import samba.schema.ssz.containers.PongContainer;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class PortalWireMessageDecoder {
 
     public PortalWireMessage decode(NodeRecord srcNode, Bytes request) {
         PortalWireMessage parsedMessage = null;
-        // Parse Bytes to obtain message type
+
         int packetType = SSZ.decodeInt8(request.slice(0, 1));
         try {
             MessageType messageType = MessageType.fromInt(packetType);
@@ -45,19 +51,14 @@ public class PortalWireMessageDecoder {
         } catch (Exception e) {
             throw new IllegalArgumentException("Error parsing message: " + e.getMessage());
         }
-
-        // Parse Bytes to obtain message
-        // Put message into apprpriate packet type and return packet
-        // Error if packet type is not recognized
     }
 
     private PortalWireMessage parsePing(Bytes request) {
-        UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(request.slice(1, 9)));
-        Bytes customPayload = SSZ.decodeBytes(request.slice(9));
-        System.out.println("request size: " + request.size());
-        System.out.println("request: " + request);
-        System.out.println("sliced request: " + request.slice(9));
-        System.out.println("customPayload: " + customPayload);
+        Bytes container = request.slice(1);
+        PingContainer pingContainer = PingContainer.decodePacket(container);
+        UInt64 enrSeq = pingContainer.getEnrSeq();
+        Bytes customPayload = pingContainer.getCustomPayload();
+
         if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("PING: Custom payload size exceeds limit");
         }
@@ -65,8 +66,11 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parsePong(Bytes request) {
-        UInt64 enrSeq = UInt64.valueOf(SSZ.decodeUInt64(request.slice(1, 9)));
-        Bytes customPayload = SSZ.decodeBytes(request.slice(9));
+        Bytes container = request.slice(1);
+        PongContainer pongContainer = PongContainer.decodePacket(container);
+        UInt64 enrSeq = pongContainer.getEnrSeq();
+        Bytes customPayload = pongContainer.getCustomPayload();
+
         if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("PONG: Custom payload size exceeds limit");
         }
@@ -74,10 +78,13 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseFindNodes(Bytes request) {
-        List<Integer> distances = SSZ.decodeUInt16List(request.slice(1));
+        Bytes container = request.slice(1);
+        FindNodesContainer findNodesContainer = FindNodesContainer.decodePacket(container);
+        List<Integer> distances = findNodesContainer.getDistances();
         Set<Integer> uniqueDistances = new HashSet<>(distances);
         distances.clear();
         distances.addAll(uniqueDistances);
+
         if (distances.size() > PortalWireMessage.MAX_DISTANCES) {
             throw new IllegalArgumentException("FINDNODES: Number of distances exceeds limit");
         } else {
@@ -91,16 +98,10 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseNodes(Bytes request, NodeRecord srcNode) {
-        int total = SSZ.decodeUInt8(request.slice(1, 2));
-
-        System.out.println(request.slice(2));
-
-        System.out.println(request.slice(2));
-
-        System.out.println(request.slice(2));
-        List<Bytes> enrs = SSZ.decodeBytesList(request.slice(2));
-        System.out.println("ENRS: " + enrs);
-        System.out.println(request.slice(2));
+        Bytes container = request.slice(1);
+        NodesContainer nodesContainer = NodesContainer.decodePacket(container);
+        int total = nodesContainer.getTotal();
+        List<String> enrs = nodesContainer.getEnrs();
 
         if (total > 1) {
             throw new IllegalArgumentException("NODES: Total number of Nodes messages must be 1");
@@ -108,18 +109,21 @@ public class PortalWireMessageDecoder {
         if (enrs.size() > PortalWireMessage.MAX_ENRS) {
             throw new IllegalArgumentException("NODES: Number of ENRs exceeds limit");
         }
-        for (Bytes enr : enrs) {
-            if (enr.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+        for (String enr : enrs) {
+            if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
                 throw new IllegalArgumentException("NODES: One or more ENRs exceed maximum payload size");
             }
         }
         // TODO: Remove requesting node (this node) from the list of ENRs
+        // TODO: It is invalid to return multiple ENR records for the same node_id
         return new Nodes(enrs);
-        // It is invalid to return multiple ENR records for the same node_id
     }
 
     private PortalWireMessage parseFindContent(Bytes request) {
-        Bytes contentKey = SSZ.decodeBytes(request.slice(1, request.size()));
+        Bytes container = request.slice(1);
+        FindContentContainer findContentContainer = FindContentContainer.decodePacket(container);
+        Bytes contentKey = findContentContainer.getContentKey();
+        
         if (contentKey.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
             throw new IllegalArgumentException("FINDCONTENT: Content key size exceeds limit");
         }
@@ -127,16 +131,22 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseContent(Bytes request, NodeRecord srcNode) {
-        int payloadType = SSZ.decodeInt8(request.slice(1, 2));
-        switch (payloadType) {
+        Bytes container = request.slice(1);
+        System.out.println("Test 0: " + container);
+        ContentContainer contentContainer = ContentContainer.decodePacket(container);
+        int contentType = contentContainer.getContentType();
+
+        switch (contentType) {
             // uTP connection ID
             case 0 -> {
-                int connectionId = SSZ.decodeBytes(request.slice(2, 4)).toInt();
+                System.out.println("Test 1");
+                int connectionId = contentContainer.getConnectionId();
+                System.out.println("Test 2");
                 return new Content(connectionId);
             }
             // Requested content
             case 1 -> {
-                Bytes content = SSZ.decodeBytes(request.slice(2, request.size()));
+                Bytes content = contentContainer.getContent();
                 if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
                     throw new IllegalArgumentException("CONTENT: Content size exceeds limit");
                 }
@@ -144,16 +154,16 @@ public class PortalWireMessageDecoder {
             }
             // ENRs
             case 2 -> {
-                List<Bytes> enrs = SSZ.decodeBytesList(request.slice(2, request.size()));
+                List<String> enrs = contentContainer.getEnrs();
                 if (enrs.size() > PortalWireMessage.MAX_ENRS) {
                     throw new IllegalArgumentException("CONTENT: Number of ENRs exceeds limit");
                 }
-                for (Bytes enr : enrs) {
-                    if (enr.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                for (String enr : enrs) {
+                    if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
                         throw new IllegalArgumentException("CONTENT: One or more ENRs exceed maximum payload size");
                     }
                 }
-                enrs.removeIf(enr -> enr.equals(srcNode.asRlp()));
+                // TODO: Remove requesting node (this node) from the list of ENRs
                 // TODO: Remove requesting node (this node) from the list of ENRs
                 return new Content(enrs);
             }

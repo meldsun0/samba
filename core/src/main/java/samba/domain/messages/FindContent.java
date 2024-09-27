@@ -1,9 +1,11 @@
 package samba.domain.messages;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.schema.ssz.containers.FindNodesContainer;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**
  * Request message to get the content with content_key.
@@ -31,9 +33,8 @@ public class FindContent implements PortalWireMessage {
 
     @Override
     public Bytes serialize() {
-        Bytes contentKeySerialized = SSZ.encodeBytes(contentKey);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                contentKeySerialized);
+            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
+            new FindNodesContainer(contentKey).sszSerialize());
     }
 }

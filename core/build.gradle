@@ -30,7 +30,6 @@ dependencies {
     implementation 'org.apache.tuweni:tuweni-bytes:2.3.1'
     implementation 'org.apache.tuweni:tuweni-crypto:2.3.1'
     implementation 'org.apache.tuweni:tuweni-rlp:2.3.1'
-    implementation 'org.apache.tuweni:tuweni-units:2.3.1'
     implementation 'org.apache.tuweni:tuweni-ssz:2.3.1'
     implementation 'info.picocli:picocli:4.6.1'
     implementation 'io.vertx:vertx-core:4.5.9'
@@ -51,6 +50,8 @@ dependencies {
     implementation 'tech.pegasys.teku.internal:serviceutils:24.8.0'
 //    implementation 'tech.pegasys.teku.internal:p2p:24.8.0'
     implementation 'tech.pegasys.teku.internal:io:24.8.0'
+    implementation 'tech.pegasys.teku.internal:ssz:24.8.0'
+    implementation 'tech.pegasys.teku.internal:unsigned:24.8.0'
 
     implementation 'tech.pegasys.teku.internal:http:24.8.0'
     implementation 'tech.pegasys.teku.internal:json:24.8.0'

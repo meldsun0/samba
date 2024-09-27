@@ -3,9 +3,9 @@ package samba.domain.messages.processor;
 import java.util.Base64;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
@@ -22,6 +22,7 @@ import samba.domain.messages.Nodes;
 import samba.domain.messages.Offer;
 import samba.domain.messages.Ping;
 import samba.domain.messages.Pong;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 
 
@@ -71,7 +72,7 @@ public class PortalWireMessageDecoderTests {
         Bytes nodesBytes = Bytes.fromHexString("0x030105000000");
         Nodes nodes = (Nodes) decoder.decode(srcNode, nodesBytes);
         assertEquals(MessageType.NODES, nodes.getMessageType());
-        assertEquals(1, nodes.getTotal().toInt());
+        assertEquals(1, nodes.getTotal());
         assertEquals(0, nodes.getEnrList().size());
 
 
@@ -82,11 +83,11 @@ public class PortalWireMessageDecoderTests {
         Bytes nodesBytes = Bytes
             .fromHexString("0x030105000000080000007f000000f875b8401ce2991c64993d7c84c29a00bdc871917551c7d330fca2dd0d69c706596dc655448f030b98a77d4001fd46ae0112ce26d613c5a6a02a81a6223cd0c4edaa53280182696482763489736563703235366b31a103ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138f875b840d7f1c39e376297f81d7297758c64cb37dcc5c3beea9f57f7ce9695d7d5a67553417d719539d6ae4b445946de4d99e680eb8063f29485b555d45b7df16a1850130182696482763489736563703235366b31a1030e2cb74241c0c4fc8e8166f1a79a05d5b0dd95813a74b094529f317d5c39d235");
         Nodes nodes = (Nodes) decoder.decode(srcNode, nodesBytes);
-        List<Bytes> enrList = List.of(Bytes.wrap(Base64.getUrlDecoder().decode("-HW4QBzimRxkmT18hMKaAL3IcZF1UcfTMPyi3Q1pxwZZbcZVRI8DC5infUAB_UauARLOJtYTxaagKoGmIjzQxO2qUygBgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg")),
-            Bytes.wrap(Base64.getUrlDecoder().decode("-HW4QNfxw543Ypf4HXKXdYxkyzfcxcO-6p9X986WldfVpnVTQX1xlTnWrktEWUbeTZnmgOuAY_KUhbVV1Ft98WoYUBMBgmlkgnY0iXNlY3AyNTZrMaEDDiy3QkHAxPyOgWbxp5oF1bDdlYE6dLCUUp8xfVw50jU")));
+        List<String> enrList = List.of("-HW4QBzimRxkmT18hMKaAL3IcZF1UcfTMPyi3Q1pxwZZbcZVRI8DC5infUAB_UauARLOJtYTxaagKoGmIjzQxO2qUygBgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg",
+            "-HW4QNfxw543Ypf4HXKXdYxkyzfcxcO-6p9X986WldfVpnVTQX1xlTnWrktEWUbeTZnmgOuAY_KUhbVV1Ft98WoYUBMBgmlkgnY0iXNlY3AyNTZrMaEDDiy3QkHAxPyOgWbxp5oF1bDdlYE6dLCUUp8xfVw50jU");
         assertEquals(MessageType.NODES, nodes.getMessageType());
-        assertEquals(1, nodes.getTotal().toInt());
-        assertEquals(enrList, nodes.getEnrList());
+        assertEquals(1, nodes.getTotal());
+        assertEquals(enrList, nodes.getEnrList().stream().map(enr -> enr.replace("=", "")).collect(Collectors.toList()));
 
     }
 
@@ -121,11 +122,11 @@ public class PortalWireMessageDecoderTests {
         Bytes contentBytes = Bytes
             .fromHexString("0x0502080000007f000000f875b8401ce2991c64993d7c84c29a00bdc871917551c7d330fca2dd0d69c706596dc655448f030b98a77d4001fd46ae0112ce26d613c5a6a02a81a6223cd0c4edaa53280182696482763489736563703235366b31a103ca634cae0d49acb401d8a4c6b6fe8c55b70d115bf400769cc1400f3258cd3138f875b840d7f1c39e376297f81d7297758c64cb37dcc5c3beea9f57f7ce9695d7d5a67553417d719539d6ae4b445946de4d99e680eb8063f29485b555d45b7df16a1850130182696482763489736563703235366b31a1030e2cb74241c0c4fc8e8166f1a79a05d5b0dd95813a74b094529f317d5c39d235");
         Content content = (Content) decoder.decode(srcNode, contentBytes);
-        List<Bytes> enrList = List.of(Bytes.wrap(Base64.getUrlDecoder().decode("-HW4QBzimRxkmT18hMKaAL3IcZF1UcfTMPyi3Q1pxwZZbcZVRI8DC5infUAB_UauARLOJtYTxaagKoGmIjzQxO2qUygBgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg")),
-            Bytes.wrap(Base64.getUrlDecoder().decode("-HW4QNfxw543Ypf4HXKXdYxkyzfcxcO-6p9X986WldfVpnVTQX1xlTnWrktEWUbeTZnmgOuAY_KUhbVV1Ft98WoYUBMBgmlkgnY0iXNlY3AyNTZrMaEDDiy3QkHAxPyOgWbxp5oF1bDdlYE6)dLCUUp8xfVw50jU")));
+        List<String> enrList = List.of("-HW4QBzimRxkmT18hMKaAL3IcZF1UcfTMPyi3Q1pxwZZbcZVRI8DC5infUAB_UauARLOJtYTxaagKoGmIjzQxO2qUygBgmlkgnY0iXNlY3AyNTZrMaEDymNMrg1JrLQB2KTGtv6MVbcNEVv0AHacwUAPMljNMTg",
+            "-HW4QNfxw543Ypf4HXKXdYxkyzfcxcO-6p9X986WldfVpnVTQX1xlTnWrktEWUbeTZnmgOuAY_KUhbVV1Ft98WoYUBMBgmlkgnY0iXNlY3AyNTZrMaEDDiy3QkHAxPyOgWbxp5oF1bDdlYE6)dLCUUp8xfVw50jU");
         assertEquals(MessageType.CONTENT, content.getMessageType());
         assertEquals(2, content.getPayloadType());
-        assertEquals(enrList, content.getEnrList());
+        assertEquals(enrList, content.getEnrList().stream().map(enr -> enr.replace("=", "")).collect(Collectors.toList()));
     }
 
     @Test

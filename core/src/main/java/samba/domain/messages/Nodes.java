@@ -1,25 +1,27 @@
 package samba.domain.messages;
 
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.schema.ssz.containers.NodesContainer;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**
  * Response message to FindNodes(0x02).
  */
 public class Nodes implements PortalWireMessage {
 
-    private final Bytes total = Bytes.ofUnsignedInt(1);
+    private final byte total = 1;
     //
-    private final List<Bytes> enrs;
+    private final List<String> enrs;
 
-    public Nodes(List<Bytes> enrs) {
+    public Nodes(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
-        checkArgument(enrs.stream().allMatch(enr -> enr.size() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
         /* *
         * Individual ENR records MUST correspond to one of the requested distances.
            It is invalid to return multiple ENR records for the same node_id.
@@ -34,21 +36,22 @@ public class Nodes implements PortalWireMessage {
         return MessageType.NODES;
     }
 
-    public Bytes getTotal() {
-        return total;
+    public int getTotal() {
+        return Bytes.of(total).toInt();
     }
 
-    public List<Bytes> getEnrList() {
+    public List<String> getEnrList() {
           return enrs;
+    }
+
+    private List<Bytes> getEnrsBytes() {
+        return enrs.stream().map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr))).toList();
     }
 
     @Override
     public Bytes serialize() {
-        Bytes totalSerialized = SSZ.encodeUInt8(total.toInt());
-        Bytes enrsSerialized = SSZ.encodeBytesList(enrs);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                totalSerialized,
-                enrsSerialized);
+            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
+            new NodesContainer(total, getEnrsBytes()).sszSerialize());
     }
 }

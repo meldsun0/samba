@@ -1,11 +1,15 @@
 package samba.domain.messages;
 
+import java.nio.ByteOrder;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import io.vertx.core.buffer.Buffer;
+import samba.schema.ssz.containers.FindNodesContainer;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**
  * Request message to get ENR records from the recipient's routing table at
@@ -31,12 +35,16 @@ public class FindNodes implements PortalWireMessage {
         return distances;
     }
 
+    private Bytes getDistancesBytes() {
+        Buffer distancesBytesBuffer = Buffer.buffer();
+        for (Integer distance : distances) Bytes.ofUnsignedShort(distance, ByteOrder.LITTLE_ENDIAN).appendTo(distancesBytesBuffer);
+        return Bytes.wrapBuffer(distancesBytesBuffer);
+    }
+
     @Override
     public Bytes serialize() {
-        Bytes distancesSerialized = SSZ.encodeIntList(Integer.SIZE, distances);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                distancesSerialized);
-        
-    }
+            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
+            new FindNodesContainer(getDistancesBytes()).sszSerialize());
+    };
 }
