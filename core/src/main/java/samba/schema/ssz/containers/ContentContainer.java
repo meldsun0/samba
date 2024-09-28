@@ -18,6 +18,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.SszListSchema;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszUnionSchema;
 import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema;
+import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteVectorSchema;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
 public class ContentContainer extends Container2<ContentContainer, SszByte, SszUnion> {
@@ -36,7 +37,8 @@ public class ContentContainer extends Container2<ContentContainer, SszByte, SszU
         switch (contentType) {
             case 0 -> {
                 System.out.println("ContentContainer.getUnionValue: contentType = 0");
-                return ContentSchema.INSTANCE.getUnionSchema().createFromValue(contentType, ContentSchema.createByteListSchema(CONTENT_KEY_BYTE_SIZE).fromBytes(content.slice(0, 2)));
+                //return ContentSchema.INSTANCE.getUnionSchema().createFromValue(contentType, ContentSchema.createByteVectorSchema(CONTENT_KEY_BYTE_SIZE).fromBytes(content.slice(0, 2)));
+                return ContentSchema.INSTANCE.getUnionSchema().createFromValue(contentType, SszByte.of(content.get(0)));
             }
             case 1 -> {
                 return ContentSchema.INSTANCE.getUnionSchema().createFromValue(contentType, ContentSchema.createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE).fromBytes(content));
@@ -96,7 +98,11 @@ public class ContentContainer extends Container2<ContentContainer, SszByte, SszU
 
         private ContentSchema() {
             super(SszPrimitiveSchemas.BYTE_SCHEMA, 
-            SszUnionSchema.create(createByteListSchema(CONTENT_KEY_BYTE_SIZE), createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE), createByteListListSchema()));
+            SszUnionSchema.create(SszPrimitiveSchemas.BYTE_SCHEMA, createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE), createByteListListSchema()));
+        }
+
+        private static SszByteVectorSchema createByteVectorSchema(int size) {
+            return SszByteVectorSchema.create(size);
         }
 
         private static SszByteListSchema createByteListSchema(int maxSize) {

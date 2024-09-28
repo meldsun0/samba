@@ -18,10 +18,12 @@ import samba.domain.messages.Offer;
 import samba.domain.messages.Ping;
 import samba.domain.messages.Pong;
 import samba.domain.messages.PortalWireMessage;
+import samba.schema.ssz.containers.AcceptContainer;
 import samba.schema.ssz.containers.ContentContainer;
 import samba.schema.ssz.containers.FindContentContainer;
 import samba.schema.ssz.containers.FindNodesContainer;
 import samba.schema.ssz.containers.NodesContainer;
+import samba.schema.ssz.containers.OfferContainer;
 import samba.schema.ssz.containers.PingContainer;
 import samba.schema.ssz.containers.PongContainer;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
@@ -174,7 +176,10 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseOffer(Bytes request) {
-        List<Bytes> contentKeys = SSZ.decodeBytesList(request.slice(1, request.size()));
+        Bytes container = request.slice(1);
+        OfferContainer offerContainer = OfferContainer.decodePacket(container);
+        List<Bytes> contentKeys = offerContainer.getContentKeys();
+
         if (contentKeys.size() > PortalWireMessage.MAX_KEYS) {
             throw new IllegalArgumentException("OFFER: Number of content keys exceeds limit");
         }
@@ -187,8 +192,11 @@ public class PortalWireMessageDecoder {
     }
 
     private PortalWireMessage parseAccept(Bytes request) {
-        int connectionId = (request.slice(1, 3)).toInt();
-        Bytes contentKeys = SSZ.decodeBytes(request.slice(3, request.size()));
+        Bytes container = request.slice(1);
+        AcceptContainer acceptContainer = AcceptContainer.decodePacket(container);
+        int connectionId = acceptContainer.getConnectionId();
+        Bytes contentKeys = acceptContainer.getContentKeysBitList();
+        
         if (contentKeys.size() > PortalWireMessage.MAX_KEYS/8) {
             throw new IllegalArgumentException("ACCEPT: Number of content keys exceeds limit");
         }
