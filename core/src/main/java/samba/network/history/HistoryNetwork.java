@@ -2,6 +2,7 @@ package samba.network.history;
 
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import samba.domain.messages.requests.Ping;
@@ -47,7 +48,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                               Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getNodeId());
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
-                                 this.routingTable.updateRadius(pong.getNodeId(), 1);
+                                 this.routingTable.updateRadius(pong.getNodeId(), null); //getRadius
                                  //should we need to notify someone ?
                               }
                             return SafeFuture.completedFuture(Optional.of(pong));

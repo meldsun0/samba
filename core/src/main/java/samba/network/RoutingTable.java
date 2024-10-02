@@ -5,10 +5,9 @@ import samba.domain.node.NodeId;
 
 public interface RoutingTable {
 
-
-    public void updateRoutingTable();
-
     public void evictNode(UInt64 nodeId);
 
-    void updateRadius(NodeId nodeId, int radius);
+    public void updateRadius(NodeId nodeId, UInt64 radius);
+
+    public UInt64 getRadius(NodeId nodeId);
 }
