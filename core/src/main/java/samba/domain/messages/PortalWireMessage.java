@@ -10,9 +10,9 @@ public interface PortalWireMessage {
     public static final int MAX_ENRS = 32;
     public static final int MAX_KEYS = 64;
 
-    MessageType getMessageType();
+    public MessageType getMessageType();
 
-    Bytes serialize();
+    public Bytes serialize();
 
-    <T>  T getMessage();
+    public <T>  T getMessage();
 }

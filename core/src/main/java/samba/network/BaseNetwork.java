@@ -47,7 +47,12 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), Bytes.fromHexString("0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"))
                         .thenApply((bytes)->parseResponse(bytes, node)) //Change
                         .thenApply(Optional::of))
-                .exceptionallyCompose(this::handleSendMessageError);
+                        .thenPeek(this::logResponse)
+                        .exceptionallyCompose(this::handleSendMessageError);
+    }
+
+    private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
+        portalWireMessage.ifPresent((message)->LOG.info("{} message received", message.getMessageType()));
     }
 
 
@@ -61,7 +66,7 @@ public abstract class BaseNetwork implements Network {
     }
 
     private PortalWireMessage parseResponse(Bytes response, NodeRecord node) {
-       //TODO- add message handler.
+       //TODO- add message handler and validate that each response is from the corresponding request
         return new Pong(node);
     }
 
