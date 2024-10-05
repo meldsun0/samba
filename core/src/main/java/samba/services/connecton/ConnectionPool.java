@@ -32,4 +32,9 @@ public class ConnectionPool {
     public boolean isPeerConnected(NodeRecord peer) {
         return this.nodesPool.get(peer.getNodeId())!=null  && this.nodesPool.get(peer.getNodeId()).equals(ConnectionState.CONNECTED);
     }
+
+
+    public boolean isIgnored(NodeRecord nodeRecord) {
+        return this.nodesPool.get(nodeRecord.getNodeId())!=null  && this.nodesPool.get(nodeRecord.getNodeId()).equals(ConnectionState.IGNORED);
+    }
 }

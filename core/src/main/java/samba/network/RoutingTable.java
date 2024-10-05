@@ -15,7 +15,5 @@ public interface RoutingTable {
 
     public UInt64 getRadius(NodeId nodeId);
 
-    boolean isIgnored(NodeRecord nodeRecord);
-
     boolean isKnown(NodeRecord nodeRecord);
 }

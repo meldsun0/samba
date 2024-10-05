@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 //distance -> [nodes]
 public class HistoryRoutingTable implements RoutingTable {
 
-    //should we have an ignored list ? 
-
    private final Map<NodeId, UInt64>  radiusMap;
    private KBuckets dht;
 
@@ -47,14 +45,9 @@ public class HistoryRoutingTable implements RoutingTable {
     }
 
     @Override
-    public boolean isIgnored(NodeRecord nodeRecord) {
-        //TODO
-        return false;
-    }
-
-    @Override
     public boolean isKnown(NodeRecord nodeRecord) {
         //TODO
         return false;
     }
+
 }

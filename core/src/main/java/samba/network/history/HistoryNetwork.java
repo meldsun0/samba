@@ -42,9 +42,12 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
      */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
-        //avoid pinging ourself.
-        //handle timeout
+        if(nodeRecord.equals(this.nodeRecord)){
+            LOG.info("Can not ping ourself");
+            return SafeFuture.completedFuture(Optional.empty());
+        }
         return sendMessage(nodeRecord, message)
+                .orTimeout(2, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
                         pongMessage -> {
@@ -79,7 +82,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         //Each distance in the list MUST be unique.
         //  It is invalid to return multiple ENR records for the same node_id.
         return sendMessage(nodeRecord, message)
-                .orTimeout(10, TimeUnit.SECONDS)
+                .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
                         nodesMessage -> {
@@ -87,7 +90,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             if (!nodes.isNodeListEmpty()) {
                                 SafeFuture.runAsync(() -> {
                                     nodes.getNodes().stream()
-                                            .filter(n -> nodeRecord.equals(n)) //The ENR record of the requesting node SHOULD be filtered out of the list.
+                                            .filter(n -> !nodeRecord.equals(n)) //The ENR record of the requesting node SHOULD be filtered out of the list.
                                             .filter(this::isNotIgnored)
                                             .filter(this::isNotKnown)
                                             .forEach(this::pingUnknownNode);
@@ -103,7 +106,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
     private void pingUnknownNode(NodeRecord nodeRecord) {
-        this.ping(nodeRecord, new Ping(nodeRecord.getSeq(), Bytes.EMPTY));
+        this.ping(nodeRecord, new Ping(nodeRecord.getSeq(), Bytes.EMPTY));  //TODO Payload should be empty?
     }
 
     private boolean isNotKnown(NodeRecord nodeRecord) {
@@ -111,7 +114,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
     private boolean isNotIgnored(NodeRecord nodeRecord) {
-        return !this.routingTable.isIgnored(nodeRecord);
+        return !this.connectionPool.isIgnored(nodeRecord);
     }
 
     @Override
