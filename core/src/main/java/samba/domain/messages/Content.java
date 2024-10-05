@@ -66,11 +66,15 @@ public class Content implements PortalWireMessage {
         return enrs;
     }
 
-    private Bytes getContentBytes() {
+    private List<Bytes> getEnrsBytes() {
+        return enrs.stream().map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr))).toList();
+    }
+
+    private ContentContainer getContentContainer() {
         return switch (contentType) {
-            case 0 -> Bytes.ofUnsignedShort(connectionId);
-            case 1 -> content;
-            case 2 -> Bytes.concatenate(enrs.stream().map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr))).toArray(Bytes[]::new));
+            case 0 -> new ContentContainer((byte) contentType, Bytes.ofUnsignedShort(connectionId));
+            case 1 -> new ContentContainer((byte) contentType, content);
+            case 2 -> new ContentContainer((byte) contentType, getEnrsBytes());
             default -> throw new AssertionError();
         };
     }
@@ -79,6 +83,6 @@ public class Content implements PortalWireMessage {
     public Bytes serialize() {
         return Bytes.concatenate(
             SszByte.of(getMessageType().getByteValue()).sszSerialize(),
-            new ContentContainer((byte) contentType, getContentBytes()).sszSerialize());
+            getContentContainer().sszSerialize());
     }
 }

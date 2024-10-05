@@ -134,16 +134,13 @@ public class PortalWireMessageDecoder {
 
     private PortalWireMessage parseContent(Bytes request, NodeRecord srcNode) {
         Bytes container = request.slice(1);
-        System.out.println("Test 0: " + container);
         ContentContainer contentContainer = ContentContainer.decodePacket(container);
         int contentType = contentContainer.getContentType();
 
         switch (contentType) {
             // uTP connection ID
             case 0 -> {
-                System.out.println("Test 1");
                 int connectionId = contentContainer.getConnectionId();
-                System.out.println("Test 2");
                 return new Content(connectionId);
             }
             // Requested content

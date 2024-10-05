@@ -1,6 +1,5 @@
 package samba.domain.messages;
 
-import java.util.Base64;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
