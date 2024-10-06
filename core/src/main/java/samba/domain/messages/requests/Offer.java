@@ -1,4 +1,4 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import samba.domain.messages.*;
 import samba.schema.ssz.containers.OfferContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 

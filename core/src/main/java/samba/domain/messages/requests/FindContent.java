@@ -1,9 +1,10 @@
-package samba.domain.messages;
+package samba.domain.messages.requests;
 
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import samba.domain.messages.*;
 import samba.schema.ssz.containers.FindNodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 

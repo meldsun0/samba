@@ -12,15 +12,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import samba.domain.messages.Accept;
-import samba.domain.messages.Content;
-import samba.domain.messages.FindContent;
-import samba.domain.messages.FindNodes;
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
 import samba.domain.messages.MessageType;
-import samba.domain.messages.Nodes;
-import samba.domain.messages.Offer;
-import samba.domain.messages.Ping;
-import samba.domain.messages.Pong;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 

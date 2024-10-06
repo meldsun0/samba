@@ -1,7 +1,8 @@
-package samba.domain.messages;
+package samba.domain.messages.response;
 
 import org.apache.tuweni.bytes.Bytes;
 
+import samba.domain.messages.*;
 import samba.schema.ssz.containers.AcceptContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 

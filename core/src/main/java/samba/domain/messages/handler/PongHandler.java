@@ -2,7 +2,7 @@ package samba.domain.messages.handler;
 
 import java.util.Optional;
 
-import samba.domain.messages.Pong;
+import samba.domain.messages.response.Pong;
 import samba.domain.messages.PortalWireMessage;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;

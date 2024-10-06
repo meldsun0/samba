@@ -2,6 +2,8 @@ package samba.domain.messages;
 
 import java.util.List;
 
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
 import org.apache.tuweni.bytes.Bytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
