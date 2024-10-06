@@ -7,28 +7,28 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import samba.domain.messages.*;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import samba.schema.ssz.containers.NodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
-/**
+/*
  * Response message to FindNodes(0x02).
  */
 public class Nodes implements PortalWireMessage {
 
     private final byte total = 1;
-    //
     private final List<String> enrs;
 
     public Nodes(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
         checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
-        /* *
+
+        /*
         * Individual ENR records MUST correspond to one of the requested distances.
-           It is invalid to return multiple ENR records for the same node_id.
-            The ENR record of the requesting node SHOULD be filtered out of the list.
-        *
-        * * */
+        * It is invalid to return multiple ENR records for the same node_id.
+        * The ENR record of the requesting node SHOULD be filtered out of the list.
+        */
         this.enrs = enrs;
     }
 
@@ -54,5 +54,10 @@ public class Nodes implements PortalWireMessage {
         return Bytes.concatenate(
             SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
             new NodesContainer(total, getEnrsBytes()).sszSerialize());
+    }
+
+    @Override
+    public Nodes getMessage() {
+        return this;
     }
 }

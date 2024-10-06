@@ -8,7 +8,8 @@ import org.apache.tuweni.bytes.Bytes;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import io.vertx.core.buffer.Buffer;
-import samba.domain.messages.*;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import samba.schema.ssz.containers.FindNodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -48,4 +49,10 @@ public class FindNodes implements PortalWireMessage {
             SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
             new FindNodesContainer(getDistancesBytes()).sszSerialize());
     };
+
+    @Override
+    public FindNodes getMessage() {
+        return this;
+    }
+
 }

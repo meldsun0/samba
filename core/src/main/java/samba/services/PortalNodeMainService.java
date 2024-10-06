@@ -3,82 +3,109 @@ package samba.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.util.Functions;
+import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
+import samba.network.history.HistoryNetwork;
 import samba.services.api.PortalRestAPI;
 import samba.services.api.PortalAPI;
-import samba.services.discovery.DiscV5Service;
-import samba.services.discovery.DiscoveryService;
-import samba.store.KeyValueStore;
-import samba.store.MemKeyValueStore;
+import samba.services.connecton.ConnectionService;
+import samba.services.discovery.Discv5Service;
+import samba.domain.messages.processor.PortalWireMessageProcessor;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
 
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
-import org.ethereum.beacon.discovery.TalkHandler;
 
-import samba.domain.messages.handler.PortalDiscoveryMessageHandler;
-import samba.domain.messages.processor.PortalWireMessageProcessor;
-import samba.services.discovery.Bootnodes;
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
 //Check DiscoveryNetwork
 public class PortalNodeMainService extends Service {
 
     private static final Logger LOG = LogManager.getLogger();
-    protected static final String KEY_VALUE_STORE_SUBDIRECTORY = "kvstore";
     private static final int DEFAULT_ASYNC_P2P_MAX_THREADS = 10;
     public static final int DEFAULT_ASYNC_P2P_MAX_QUEUE = DEFAULT_MAX_QUEUE_SIZE;
 
 
-    protected volatile KeyValueStore<String, Bytes> keyValueStore;
     protected volatile EventChannels eventChannels;
     protected volatile MetricsSystem metricsSystem;
     protected volatile TimeProvider timeProvider;
-    protected volatile AsyncRunner networkAsyncRunner;
-    private final Bytes privKey;
+    protected volatile AsyncRunner asyncRunner;
+    private final Bytes privKey = null;
 
     protected volatile SambaConfiguration sambaConfiguration;
-    private DiscoveryService discoveryService;
-    private TalkHandler portalDiscoveryMessageHandler;
+    
     private PortalWireMessageProcessor portalWireMessageProcessor;
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
+
+    private Discv5Service discoveryService;
+    private ConnectionService connectionService;
+    private HistoryNetwork historyNetwork;
+
 
     public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration) {
         this.timeProvider = mainServiceConfig.getTimeProvider();
         this.eventChannels = mainServiceConfig.getEventChannels();
         this.metricsSystem = mainServiceConfig.getMetricsSystem();
-        this.networkAsyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
+        this.asyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
         this.sambaConfiguration = sambaConfiguration;
 
-        keyValueStore = new MemKeyValueStore<>();
-        privKey =Bytes.fromHexString("0x008110c0cc11ec947b27f722e2394e0abe6d8596208888a3e50768296556bc7152"); // Functions.randomKeyPair(new Random(new Random().nextInt())).secretKey().bytes(); //:S
 
 
         initDiscoveryService();
+        initHistoryNetwork();
+        initConnectionService();
         initRestAPI();
 
     }
 
+    private void initHistoryNetwork() {
+        LOG.info("PortalNodeMainService.initHistoryNetwork()");
+        this.historyNetwork = new HistoryNetwork(this.discoveryService);
+    }
+
+    private void initConnectionService() {
+        LOG.info("PortalNodeMainService.initConnectionService()");
+        this.connectionService = new ConnectionService(
+                this.metricsSystem,
+                this.asyncRunner,
+                this.discoveryService,
+                this.historyNetwork);
+
+    }
+
+    protected void initDiscoveryService() {
+        LOG.info("PortalNodeMainService.initDiscoveryService()");
+        List bootnodes = new ArrayList<>();
+
+        //# Trin bootstrap nodes
+        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QIs2pCyiKna9YWnAF0zgf7bT0GzlAGoF8MEKFJOExmtofBIqzm71zDvmzRiiLkxaEJcs_Amr7XIhLI74k1rtlXICY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhKEjVaWJc2VjcDI1NmsxoQLSC_nhF1iRwsCw0n3J4jRjqoaRxtKgsEe5a-Dz7y0JloN1ZHCCIyg"));
+        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QH4_H4cW--ejWDl_W7ngXw2m31MM2GT8_1ZgECnfWxMzZTiZKvHDgkmwUS_l2aqHHU54Q7hcFSPz6VGzkUjOqkcCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg"));
+
+
+        this.discoveryService = new Discv5Service(
+                this.metricsSystem,
+                this.asyncRunner,
+                DiscoveryConfig.builder().build(),
+                this.privKey,
+                bootnodes);
+
+    }
 
     @Override
     protected SafeFuture<?> doStart() {
         LOG.debug("Starting {}", this.getClass().getSimpleName());
-
-
-        //   .thenCompose(__ -> connectionManager.start())
-        //     .thenRun(() -> getEnr().ifPresent(StatusLogger.STATUS_LOG::listeningForDiscv5));
-
-     return SafeFuture.allOfFailFast(discoveryService.start())
-              .thenCompose((__) -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
+        return SafeFuture.allOfFailFast(discoveryService.start())
+                .thenCompose(__-> connectionService.start())
+                .thenCompose((__) -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
     }
 
     @Override
@@ -86,27 +113,10 @@ public class PortalNodeMainService extends Service {
         LOG.debug("Stopping {}", this.getClass().getSimpleName());
         return SafeFuture.allOf(
                 discoveryService.stop(),
+                connectionService.stop(),
                 portalRestAPI.map(PortalRestAPI::stop).orElse(SafeFuture.completedFuture(null)));
 
 
-    }
-
-    protected void initDiscoveryService() {
-        LOG.info("PortalNodeService.initDiscoveryService()");
-        this.portalWireMessageProcessor = new PortalWireMessageProcessor();
-        this.portalDiscoveryMessageHandler = new PortalDiscoveryMessageHandler(portalWireMessageProcessor);
-        DiscoveryConfig.Builder discoveryConfig = DiscoveryConfig.builder();
-        Bootnodes bootnodes = new Bootnodes(sambaConfiguration.getNetworkName());
-        discoveryConfig.bootnodes(bootnodes.getBootnodes());
-        this.discoveryService = new DiscV5Service(
-                metricsSystem,
-                networkAsyncRunner,
-                discoveryConfig.build(),
-                keyValueStore,
-                privKey,
-                DiscV5Service.createDefaultDiscoverySystemBuilder(),
-                DiscV5Service.DEFAULT_NODE_RECORD_CONVERTER,
-                portalDiscoveryMessageHandler);
     }
 
     public void initRestAPI() {
@@ -116,7 +126,7 @@ public class PortalNodeMainService extends Service {
                         new PortalAPI(
                                 sambaConfiguration.portalRestApiConfig(),
                                 eventChannels,
-                                networkAsyncRunner,
+                                asyncRunner,
                                 timeProvider));
     }
 }

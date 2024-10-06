@@ -41,4 +41,9 @@ public class Accept implements PortalWireMessage {
             new AcceptContainer(Bytes.ofUnsignedShort(connectionId), contentKeys).sszSerialize()
         );
     }
+
+    @Override
+    public Accept getMessage() {
+        return this;
+    }
 }
