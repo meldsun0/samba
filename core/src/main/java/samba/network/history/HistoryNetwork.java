@@ -2,7 +2,7 @@ package samba.network.history;
 
 
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.units.bigints.UInt64;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import samba.domain.messages.requests.Ping;
@@ -37,14 +37,14 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      * @return the PONG message.
      */
     @Override
-    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message ) { //node should be changed.
+    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
         //avoid pinging ourself.
         //handle timeout
         return  sendMessage(nodeRecord, message)
                 .thenApply(Optional::get)
                 .thenCompose(
                        pongMessage -> {
-                              LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq().get());
+                              LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq());
                               Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getNodeId());
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
@@ -55,9 +55,9 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType() , message.getEnrSeq().get());
-                            this.connectionPool.ignoreNode(message.getEnrSeq().get());
-                            this.routingTable.evictNode(message.getEnrSeq().get());
+                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType(), message.getEnrSeq());
+                            this.connectionPool.ignoreNode(message.getEnrSeq());
+                            this.routingTable.evictNode(message.getEnrSeq());
                             return SafeFuture.completedFuture(Optional.empty());
                         });
 
@@ -65,7 +65,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
 
     @Override
     public SafeFuture<NodeRecord> connect(NodeRecord peer) {
-       return  this.ping(peer, new Ping(peer.getSeq(),  Bytes.EMPTY)).thenApply(Optional::get).thenCompose(pong -> {
+       return  this.ping(peer, new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), Bytes.EMPTY)).thenApply(Optional::get).thenCompose(pong -> {
               return SafeFuture.completedFuture(pong.getNodeRecord());
        });
     }

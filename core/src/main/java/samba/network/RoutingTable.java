@@ -1,6 +1,6 @@
 package samba.network;
 
-import org.apache.tuweni.units.bigints.UInt64;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import samba.domain.node.NodeId;
 
 public interface RoutingTable {
