@@ -1,6 +1,6 @@
 package samba.network.history;
 
-import org.apache.tuweni.units.bigints.UInt64;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import samba.domain.node.NodeId;
 import samba.network.RoutingTable;
 

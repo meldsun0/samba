@@ -1,6 +1,6 @@
 package samba.services.connecton;
 
-import org.apache.tuweni.units.bigints.UInt64;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.node.NodeId;
 
