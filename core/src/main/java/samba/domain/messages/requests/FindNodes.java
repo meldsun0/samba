@@ -22,9 +22,10 @@ public class FindNodes implements PortalWireMessage {
     private final List<Integer> distances;
 
     public FindNodes(List<Integer> distances) {
+        //TODO heck each distance MUST unique
+        checkArgument(!distances.isEmpty(), "Distances can not be 0");
         checkArgument(distances.size() <= MAX_DISTANCES, "Number of distances exceeds limit");
-        //check each distance MUST be within the inclusive range [0,256]
-        //check each distance MUST unique
+        checkEachDistance(distances);
         this.distances = distances;
     }
 
@@ -53,6 +54,10 @@ public class FindNodes implements PortalWireMessage {
     @Override
     public FindNodes getMessage() {
         return this;
+    }
+
+    private void checkEachDistance(List<Integer> distances) {
+        distances.forEach(distance -> checkArgument(distances.size() <= 256, "Distances greater than 256 are not allowed"));
     }
 
 }

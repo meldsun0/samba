@@ -7,6 +7,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.schema.ssz.containers.NodesContainer;
@@ -25,10 +26,10 @@ public class Nodes implements PortalWireMessage {
         checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
 
         /*
-        * Individual ENR records MUST correspond to one of the requested distances.
-        * It is invalid to return multiple ENR records for the same node_id.
-        * The ENR record of the requesting node SHOULD be filtered out of the list.
-        */
+         * Individual ENR records MUST correspond to one of the requested distances.
+         * It is invalid to return multiple ENR records for the same node_id.
+         * The ENR record of the requesting node SHOULD be filtered out of the list.
+         */
         this.enrs = enrs;
     }
 
@@ -42,7 +43,7 @@ public class Nodes implements PortalWireMessage {
     }
 
     public List<String> getEnrList() {
-          return enrs;
+        return enrs;
     }
 
     private List<Bytes> getEnrsBytes() {
@@ -52,12 +53,18 @@ public class Nodes implements PortalWireMessage {
     @Override
     public Bytes serialize() {
         return Bytes.concatenate(
-            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
-            new NodesContainer(total, getEnrsBytes()).sszSerialize());
+                SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+                new NodesContainer(total, getEnrsBytes()).sszSerialize());
     }
 
     @Override
     public Nodes getMessage() {
         return this;
     }
+
+    public boolean isNodeListEmpty(){
+        return this.enrs.isEmpty();
+    }
 }
+
+
