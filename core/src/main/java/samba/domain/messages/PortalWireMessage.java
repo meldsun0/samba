@@ -15,4 +15,5 @@ public interface PortalWireMessage {
     public Bytes serialize();
 
     public <T>  T getMessage();
+
 }

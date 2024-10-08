@@ -3,6 +3,7 @@ package samba.domain.messages.processor;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
@@ -78,7 +79,7 @@ public class PortalWireMessageDecoder {
                 }
             }
         }
-        return new FindNodes(distances);
+        return new FindNodes(distances.stream().collect(Collectors.toSet()));
     }
 
     private PortalWireMessage parseNodes(Bytes request, NodeRecord srcNode) {

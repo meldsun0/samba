@@ -47,8 +47,8 @@ public class Pong implements PortalWireMessage {
         return this.nodeRecord;
     }
 
-    public Optional<UInt64> getEnrSeq() {
-        return Optional.ofNullable(nodeRecord.getSeq());
+    public UInt64 getEnrSeq() {
+        return nodeRecord.getSeq();
     }
 
     @Override

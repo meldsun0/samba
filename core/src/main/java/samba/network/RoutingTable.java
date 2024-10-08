@@ -1,19 +1,17 @@
 package samba.network;
 
-import org.apache.tuweni.units.bigints.UInt64;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.node.Node;
-import samba.domain.node.NodeId;
 
-import java.util.List;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.apache.tuweni.units.bigints.UInt64;
+
 
 public interface RoutingTable {
 
     public void evictNode(UInt64 nodeId);
 
-    public void updateRadius(NodeId nodeId, UInt64 radius);
+    public void updateRadius(UInt64 nodeId, UInt64 radius);
 
-    public UInt64 getRadius(NodeId nodeId);
+    public UInt64 getRadius(UInt64 nodeId);
 
     boolean isKnown(NodeRecord nodeRecord);
 }

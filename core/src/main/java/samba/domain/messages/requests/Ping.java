@@ -36,8 +36,8 @@ public class Ping implements PortalWireMessage {
         return customPayload;
     }
 
-    public Optional<UInt64> getEnrSeq() {
-        return Optional.ofNullable(enrSeq);
+    public UInt64 getEnrSeq() {
+        return this.enrSeq;
     }
 
     @Override

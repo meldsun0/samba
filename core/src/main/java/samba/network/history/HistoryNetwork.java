@@ -13,22 +13,23 @@ import samba.services.discovery.Discv5Client;
 import samba.services.connecton.ConnectionPool;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+
 
 
 public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequestOperations {
 
 
-    private NodeRecord nodeRecord;
+
     private ConnectionPool connectionPool;
 
 
     public HistoryNetwork(Discv5Client client) {
         //TODO
-        super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(null, null, null));
+        super(NetworkType.EXECUTION_HISTORY_NETWORK, client,
+                new HistoryRoutingTable(), null);
         this.connectionPool = new ConnectionPool();
     }
 
@@ -38,32 +39,28 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
      *
      * @param nodeRecord the nodeId of the peer to send a ping to
      * @param message    PING message to be sent
-     * @return a PONG message.
+     * @return optional with  PONG message or empty if error.
      */
     @Override
-    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
-        if(nodeRecord.equals(this.nodeRecord)){
-            LOG.info("Can not ping ourself");
-            return SafeFuture.completedFuture(Optional.empty());
-        }
+    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) {
+        //TODO validate before sending request
         return sendMessage(nodeRecord, message)
                 .orTimeout(2, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
                         pongMessage -> {
                             Pong pong = pongMessage.getMessage();
-                            connectionPool.updateLivenessNode(pong.getNodeId());
+                            connectionPool.updateLivenessNode(pong.getEnrSeq());
                             if (pong.getCustomPayload() != null) { //TO-DO decide what to validate.
-                                this.routingTable.updateRadius(pong.getNodeId(), null); //getRadius
+                                this.routingTable.updateRadius(pong.getEnrSeq(), null); //get Radius
                                 //should we need to notify someone ?
                             }
                             return SafeFuture.completedFuture(Optional.of(pong));
                         })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType(), message.getEnrSeq().get());
-                            this.connectionPool.ignoreNode(message.getEnrSeq().get());
-                            this.routingTable.evictNode(message.getEnrSeq().get());
+                            this.connectionPool.ignoreNode(message.getEnrSeq());
+                            this.routingTable.evictNode(message.getEnrSeq());
                             return SafeFuture.completedFuture(Optional.empty());
                         });
 
@@ -78,10 +75,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
      */
     @Override
     public SafeFuture<Optional<NodesV2>> findNodes(NodeRecord nodeRecord, FindNodes message) {
-        //Each distance MUST be within the inclusive range [0, 256]
-        //Each distance in the list MUST be unique.
-        //  It is invalid to return multiple ENR records for the same node_id.
-        return sendMessage(nodeRecord, message)
+         return sendMessage(nodeRecord, message)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
@@ -89,11 +83,11 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             NodesV2 nodes = nodesMessage.getMessage();
                             if (!nodes.isNodeListEmpty()) {
                                 SafeFuture.runAsync(() -> {
-                                    nodes.getNodes().stream()
-                                            .filter(n -> !nodeRecord.equals(n)) //The ENR record of the requesting node SHOULD be filtered out of the list.
-                                            .filter(this::isNotIgnored)
-                                            .filter(this::isNotKnown)
-                                            .forEach(this::pingUnknownNode);
+                                    List<NodeRecord> nodesList = nodes.getNodes();
+                                    nodesList.removeIf(nodeRecord::equals); //The ENR record of the requesting node SHOULD be filtered out of the list.
+                                    nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
+                                    nodesList.removeIf(routingTable::isKnown);
+                                    nodesList.forEach(this::pingUnknownNode);
                                 });
                             }
                             return SafeFuture.completedFuture(Optional.of(nodes));
@@ -106,16 +100,9 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
     private void pingUnknownNode(NodeRecord nodeRecord) {
-        this.ping(nodeRecord, new Ping(nodeRecord.getSeq(), Bytes.EMPTY));  //TODO Payload should be empty?
+        this.ping(nodeRecord, new Ping(nodeRecord.getSeq(), Bytes.EMPTY));  //TODO it should be this.nodeRadius
     }
 
-    private boolean isNotKnown(NodeRecord nodeRecord) {
-        return !this.routingTable.isKnown(nodeRecord);
-    }
-
-    private boolean isNotIgnored(NodeRecord nodeRecord) {
-        return !this.connectionPool.isIgnored(nodeRecord);
-    }
 
     @Override
     public SafeFuture<NodeRecord> connect(NodeRecord peer) {
@@ -131,6 +118,6 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     @Override
     public boolean isPeerConnected(NodeRecord peer) {
-        return this.connectionPool.isPeerConnected(peer);
+        return this.connectionPool.isPeerConnected(peer.getSeq());
     }
 }

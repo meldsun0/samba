@@ -1,6 +1,7 @@
 package samba.domain.messages.requests;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
@@ -14,12 +15,12 @@ import samba.domain.messages.PortalWireMessage;
  */
 public class FindNodes implements PortalWireMessage {
 
-    private final List<Integer> distances;
+    private final Set<Integer> distances;  //check each distance MUST unique
 
-    public FindNodes(List<Integer> distances) {
+    public FindNodes(Set<Integer> distances) {
+        checkArgument(!distances.isEmpty(), "Distances can not be 0");
         checkArgument(distances.size() <= MAX_DISTANCES, "Number of distances exceeds limit");
-        //check each distance MUST be within the inclusive range [0,256]
-        //check each distance MUST unique
+        checkEachDistance(distances);
         this.distances = distances;
     }
 
@@ -28,21 +29,24 @@ public class FindNodes implements PortalWireMessage {
         return MessageType.FIND_NODES;
     }
 
-    public List<Integer> getDistances() {
+    public Set<Integer> getDistances() {
         return distances;
     }
 
+
     @Override
     public Bytes serialize() {
-        Bytes distancesSerialized = SSZ.encodeIntList(Integer.SIZE, distances);
-        return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                distancesSerialized);
-        
+        //TODO FIX.
+        return Bytes.EMPTY;
     }
 
     @Override
     public FindNodes getMessage() {
         return this;
+    }
+
+    private void checkEachDistance(Set<Integer> distances) {
+        distances.forEach(distance -> checkArgument(distances.size() <= 256, "Distances greater than 256 are not allowed")
+                );
     }
 }
