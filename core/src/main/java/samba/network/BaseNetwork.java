@@ -8,6 +8,7 @@ import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.db.PortalDB;
 import samba.domain.messages.PortalWireMessage;
+import samba.domain.messages.PortalWireMessageDecoder;
 import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
 import samba.network.exception.MessageToOurselfException;
@@ -52,7 +53,7 @@ public abstract class BaseNetwork implements Network {
 //        }
         //TODO FIX chain order
         return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), messageRequest.getSszBytes())
-                        .thenApply((bytes)->parseResponse(bytes, node, messageRequest)) //Change
+                        .thenApply((sszbytes)->parseResponse(sszbytes, node, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)
                         .exceptionallyCompose(error->handleSendMessageError(messageRequest, error));
@@ -76,9 +77,9 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private PortalWireMessage parseResponse(Bytes response, NodeRecord node, PortalWireMessage requestMessage) {
-       //TODO- add message handler and validate that each response is from the corresponding request
-        return new Pong(node);
+    private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord node, PortalWireMessage requestMessage) {
+        //TODO validate appropriate response. If I send a Ping I must get a PONG
+        return PortalWireMessageDecoder.decode(node, sszbytes);
     }
 
 }

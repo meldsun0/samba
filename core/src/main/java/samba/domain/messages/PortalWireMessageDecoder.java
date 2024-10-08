@@ -11,7 +11,7 @@ import samba.domain.messages.response.Pong;
 
 public class PortalWireMessageDecoder {
 
-    public PortalWireMessage decode(NodeRecord sourceNode, Bytes sszbytes) {
+    public static PortalWireMessage decode(NodeRecord sourceNode, Bytes sszbytes) { //TODO change NodeRecord
         int packetType = SSZ.decodeInt8(sszbytes.slice(0, 1));
         MessageType messageType = MessageType.fromInt(packetType);
         if (messageType == null) {
