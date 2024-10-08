@@ -1,14 +1,13 @@
 package samba.domain.messages.requests;
 
-import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
-import org.apache.tuweni.units.bigints.UInt64;
-import samba.domain.messages.MessageType;
-import samba.domain.messages.PortalWireMessage;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.domain.messages.*;
+import samba.schema.ssz.containers.PingContainer;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 /**
  * Request message to check if a node is reachable, communicate basic information about our node,
@@ -37,17 +36,14 @@ public class Ping implements PortalWireMessage {
     }
 
     public UInt64 getEnrSeq() {
-        return this.enrSeq;
+        return enrSeq;
     }
 
     @Override
     public Bytes serialize() {
-        Bytes enrSeqSerialized = SSZ.encodeUInt64(enrSeq.toLong());
-        Bytes customPayloadSerialized = SSZ.encodeBytes(customPayload);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                enrSeqSerialized,
-                customPayloadSerialized);
+            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
+            new PingContainer(enrSeq, customPayload).sszSerialize());
     }
 
     @Override

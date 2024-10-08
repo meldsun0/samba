@@ -1,19 +1,8 @@
 package samba.network.history;
 
-import org.apache.tuweni.units.bigints.UInt64;
-import org.ethereum.beacon.discovery.liveness.LivenessChecker;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.ethereum.beacon.discovery.storage.KBuckets;
-import org.ethereum.beacon.discovery.storage.LocalNodeRecordStore;
-import org.ethereum.beacon.discovery.storage.NewAddressHandler;
-import org.ethereum.beacon.discovery.storage.NodeRecordListener;
-import org.ethereum.beacon.discovery.util.Functions;
-import samba.domain.node.NodeId;
 import samba.network.RoutingTable;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

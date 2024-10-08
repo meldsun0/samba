@@ -1,25 +1,24 @@
 package samba.domain.messages.response;
 
-import org.apache.tuweni.units.bigints.UInt64;
-
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.ssz.SSZ;
-import samba.domain.messages.MessageType;
-import samba.domain.messages.PortalWireMessage;
+
+import samba.domain.messages.*;
+import samba.schema.ssz.containers.AcceptContainer;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /***
  * Response message to Offer (0x06).
  */
 public class Accept implements PortalWireMessage {
 
-    private final UInt64 connectionId;
-    private final Bytes content_keys;
+    private final int connectionId;
+    private final Bytes contentKeys;
 
-    public Accept(UInt64 connectionId, Bytes contentKeys) {
+    public Accept(int connectionId, Bytes contentKeys) {
 
         //content_keys limit 64
         this.connectionId = connectionId;
-        this.content_keys = contentKeys;
+        this.contentKeys = contentKeys;
     }
 
     @Override
@@ -27,22 +26,20 @@ public class Accept implements PortalWireMessage {
         return MessageType.ACCEPT;
     }
 
-    public UInt64 getConnectionId() {
+    public int getConnectionId() {
         return connectionId;
     }
 
     public Bytes getContentKeys() {
-        return content_keys;
+        return contentKeys;
     }
 
     @Override
     public Bytes serialize() {
-        Bytes connectionIdSerialized = SSZ.encodeUInt64(connectionId.toLong());
-        Bytes contentKeysSerialized = SSZ.encodeBytes(content_keys);
         return Bytes.concatenate(
-                SSZ.encodeUInt8(getMessageType().ordinal()),
-                connectionIdSerialized,
-                contentKeysSerialized);
+            SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+            new AcceptContainer(Bytes.ofUnsignedShort(connectionId), contentKeys).sszSerialize()
+        );
     }
 
     @Override

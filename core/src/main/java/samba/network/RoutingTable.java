@@ -2,8 +2,7 @@ package samba.network;
 
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.apache.tuweni.units.bigints.UInt64;
-
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public interface RoutingTable {
 

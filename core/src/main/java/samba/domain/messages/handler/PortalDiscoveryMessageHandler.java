@@ -17,6 +17,7 @@ import samba.domain.messages.processor.PortalWireMessageProcessor;
 
 public class PortalDiscoveryMessageHandler implements TalkHandler {
     private static final Logger LOG = LoggerFactory.getLogger(PortalDiscoveryMessageHandler.class);
+
     private final PortalWireMessageProcessor handler;
 
     public PortalDiscoveryMessageHandler(final PortalWireMessageProcessor handler) {
