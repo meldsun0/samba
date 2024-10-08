@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import samba.domain.messages.PortalWireMessage;
-import samba.domain.messages.processor.PortalWireMessageDecoder;
+import samba.domain.messages.PortalWireMessageDecoder;
 import samba.domain.messages.processor.PortalWireMessageProcessor;
 
 

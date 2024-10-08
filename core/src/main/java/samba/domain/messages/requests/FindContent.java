@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
+import samba.schema.ssz.containers.FindContentContainer;
 import samba.schema.ssz.containers.FindNodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -24,6 +25,17 @@ public class FindContent implements PortalWireMessage {
         this.contentKey = contentKey;
     }
 
+    public static FindContent fromSSZBytes(Bytes sszbytes){
+        Bytes container = sszbytes.slice(1);
+        FindContentContainer findContentContainer = FindContentContainer.decodePacket(container);
+        Bytes contentKey = findContentContainer.getContentKey();
+
+        if (contentKey.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+            throw new IllegalArgumentException("FINDCONTENT: Content key size exceeds limit");
+        }
+        return new FindContent(contentKey);
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.FIND_CONTENT;
@@ -34,7 +46,7 @@ public class FindContent implements PortalWireMessage {
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
             SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
             new FindNodesContainer(contentKey).sszSerialize());

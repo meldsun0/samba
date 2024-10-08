@@ -26,6 +26,18 @@ public class Ping implements PortalWireMessage {
         this.customPayload = customPayload;
     }
 
+    public static Ping fromSSZBytes(Bytes sszbytes){
+            Bytes container = sszbytes.slice(1);
+            PingContainer pingContainer = PingContainer.decodePacket(container);
+            UInt64 enrSeq = pingContainer.getEnrSeq();
+            Bytes customPayload = pingContainer.getCustomPayload();
+
+            if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                throw new IllegalArgumentException("PING: Custom payload size exceeds limit"); //TODO change exception
+            }
+            return new Ping(enrSeq, customPayload);
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.PING;
@@ -40,7 +52,7 @@ public class Ping implements PortalWireMessage {
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
             SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
             new PingContainer(enrSeq, customPayload).sszSerialize());

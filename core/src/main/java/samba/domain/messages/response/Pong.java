@@ -3,6 +3,8 @@ package samba.domain.messages.response;
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.domain.messages.requests.Ping;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 import samba.domain.messages.*;
@@ -32,6 +34,18 @@ public class Pong implements PortalWireMessage {
         this.customPayload = customPayload;
     }
 
+    public static Pong fromSSZBytes(Bytes sszbytes){
+        Bytes container = sszbytes.slice(1);
+        PongContainer pongContainer = PongContainer.decodePacket(container);
+        UInt64 enrSeq = pongContainer.getEnrSeq();
+        Bytes customPayload = pongContainer.getCustomPayload();
+
+        if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+            throw new IllegalArgumentException("PONG: Custom payload size exceeds limit");
+        }
+        return new Pong(enrSeq, customPayload);
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.PONG;
@@ -50,7 +64,7 @@ public class Pong implements PortalWireMessage {
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
             SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
             new PongContainer(enrSeq, customPayload).sszSerialize());

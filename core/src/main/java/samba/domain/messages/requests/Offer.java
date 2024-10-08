@@ -24,6 +24,22 @@ public class Offer implements PortalWireMessage {
         this.contentKeys = contentKeys;
     }
 
+    public static Offer fromSSZBytes(Bytes sszbytes) {
+        Bytes container = sszbytes.slice(1);
+        OfferContainer offerContainer = OfferContainer.decodePacket(container);
+        List<Bytes> contentKeys = offerContainer.getContentKeys();
+
+        if (contentKeys.size() > PortalWireMessage.MAX_KEYS) {
+            throw new IllegalArgumentException("OFFER: Number of content keys exceeds limit");
+        }
+        for (Bytes key : contentKeys) {
+            if (key.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                throw new IllegalArgumentException("OFFER: One or more content keys exceed maximum payload size");
+            }
+        }
+        return new Offer(contentKeys);
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.OFFER;
@@ -34,7 +50,7 @@ public class Offer implements PortalWireMessage {
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
                 SszByte.of(getMessageType().getByteValue()).sszSerialize(),
                 new OfferContainer(contentKeys).sszSerialize());

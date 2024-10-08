@@ -51,7 +51,7 @@ public abstract class BaseNetwork implements Network {
 //            return SafeFuture.failedFuture(new MessageToOurselfException());
 //        }
         //TODO FIX chain order
-        return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), messageRequest.serialize())
+        return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), messageRequest.getSszBytes())
                         .thenApply((bytes)->parseResponse(bytes, node, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)

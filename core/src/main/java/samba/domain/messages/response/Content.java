@@ -7,8 +7,10 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
+import samba.domain.messages.requests.Ping;
 import samba.schema.ssz.containers.ContentContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -47,6 +49,47 @@ public class Content implements PortalWireMessage {
         this.content = null;
     }
 
+    public static Content fromSSZBytes(Bytes sszbytes, NodeRecord srcNode) {
+        Bytes container = sszbytes.slice(1);
+        ContentContainer contentContainer = ContentContainer.decodePacket(container);
+        int contentType = contentContainer.getContentType();
+
+        switch (contentType) {
+            // uTP connection ID
+            case 0 -> {
+                int connectionId = contentContainer.getConnectionId();
+                return new Content(connectionId);
+            }
+            // Requested content
+            case 1 -> {
+                Bytes content = contentContainer.getContent();
+                if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                    throw new IllegalArgumentException("CONTENT: Content size exceeds limit");
+                }
+                return new Content(content);
+            }
+            // ENRs
+            case 2 -> {
+                List<String> enrs = contentContainer.getEnrs();
+                if (enrs.size() > PortalWireMessage.MAX_ENRS) {
+                    throw new IllegalArgumentException("CONTENT: Number of ENRs exceeds limit");
+                }
+                for (String enr : enrs) {
+                    if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                        throw new IllegalArgumentException("CONTENT: One or more ENRs exceed maximum payload size");
+                    }
+                }
+                // TODO: Remove requesting node (this node) from the list of ENRs
+                // TODO: Remove requesting node (this node) from the list of ENRs
+                return new Content(enrs);
+            }
+            default -> {
+                throw new IllegalArgumentException("CONTENT: Invalid payload type");
+            }
+        }
+    }
+
+
     @Override
     public MessageType getMessageType() {
         return MessageType.CONTENT;
@@ -82,10 +125,10 @@ public class Content implements PortalWireMessage {
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
-            SszByte.of(getMessageType().getByteValue()).sszSerialize(),
-            getContentContainer().sszSerialize());
+                SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+                getContentContainer().sszSerialize());
     }
 
     @Override

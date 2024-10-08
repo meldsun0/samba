@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import samba.domain.messages.requests.*;
 import samba.domain.messages.response.*;
 import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessageDecoder;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 

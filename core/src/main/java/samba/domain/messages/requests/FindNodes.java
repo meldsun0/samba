@@ -1,7 +1,9 @@
 package samba.domain.messages.requests;
 
 import java.nio.ByteOrder;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -29,6 +31,26 @@ public class FindNodes implements PortalWireMessage {
         this.distances = distances;
     }
 
+    public static FindNodes fromSSZBytes(Bytes sszbytes) {
+        Bytes container = sszbytes.slice(1);
+        FindNodesContainer findNodesContainer = FindNodesContainer.decodePacket(container);
+        List<Integer> distances = findNodesContainer.getDistances();
+        Set<Integer> uniqueDistances = new HashSet<>(distances);
+        distances.clear();
+        distances.addAll(uniqueDistances);
+
+        if (distances.size() > PortalWireMessage.MAX_DISTANCES) {
+            throw new IllegalArgumentException("FINDNODES: Number of distances exceeds limit");
+        } else {
+            for (Integer distance : distances) {
+                if (distance < 0 || distance > 256) {
+                    throw new IllegalArgumentException("FINDNODES: Distance must be within the inclusive range [0,256]");
+                }
+            }
+        }
+        return new FindNodes(distances);
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.FIND_NODES;
@@ -40,16 +62,19 @@ public class FindNodes implements PortalWireMessage {
 
     private Bytes getDistancesBytes() {
         Buffer distancesBytesBuffer = Buffer.buffer();
-        for (Integer distance : distances) Bytes.ofUnsignedShort(distance, ByteOrder.LITTLE_ENDIAN).appendTo(distancesBytesBuffer);
+        for (Integer distance : distances)
+            Bytes.ofUnsignedShort(distance, ByteOrder.LITTLE_ENDIAN).appendTo(distancesBytesBuffer);
         return Bytes.wrapBuffer(distancesBytesBuffer);
     }
 
     @Override
-    public Bytes serialize() {
+    public Bytes getSszBytes() {
         return Bytes.concatenate(
-            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
-            new FindNodesContainer(getDistancesBytes()).sszSerialize());
-    };
+                SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+                new FindNodesContainer(getDistancesBytes()).sszSerialize());
+    }
+
+    ;
 
     @Override
     public FindNodes getMessage() {

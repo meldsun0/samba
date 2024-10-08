@@ -12,7 +12,7 @@ public interface PortalWireMessage {
 
     public MessageType getMessageType();
 
-    public Bytes serialize();
+    public Bytes getSszBytes();
 
     public <T>  T getMessage();
 
