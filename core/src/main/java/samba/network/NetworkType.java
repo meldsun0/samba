@@ -12,15 +12,23 @@ public enum NetworkType {
     ANGELFOOD_HISTORY_NETWORK(0x504B, "Angelfood-History-Network"),
     ANGELFOOOD_BECACON_CHAIN_NETWORK(0x504C, "Angelfood-State-Network");
 
-    private final byte value;
-    private String name;
+    private final int value;
+    private final String name;
 
     NetworkType(int value, String name) {
-        this.value = (byte) (value);
+        this.value = value;
         this.name = name;
     }
 
     public Bytes getValue() {
-        return Bytes.wrap(new byte[]{value});
+        return Bytes.of((byte) (value >>> 8), (byte) value);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getIntValue() {
+        return value;
     }
 }
