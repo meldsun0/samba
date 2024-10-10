@@ -5,6 +5,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.response.Nodes;
+import samba.schema.ssz.containers.HistoryCustomPayloadContainer;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.requests.Ping;
@@ -15,6 +16,7 @@ import samba.services.discovery.Discv5Client;
 import samba.services.connecton.ConnectionPool;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -22,14 +24,14 @@ import java.util.concurrent.TimeUnit;
 public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkRequestOperations {
 
 
-    private NodeRecord nodeRecord;
     private ConnectionPool connectionPool;
-
+    private BigInteger nodeRadius;
 
 
     public HistoryNetwork(Discv5Client client){
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(), null);
         this.connectionPool = new ConnectionPool();
+        this.nodeRadius = BigInteger.TWO.pow(256).subtract(BigInteger.ONE); //TODO must come from argument
     }
 
 
@@ -42,17 +44,18 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
-        //avoid pinging ourself.
-        //handle timeout
         return  sendMessage(nodeRecord, message)
+                .orTimeout(30, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
                        pongMessage -> {
                               LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq());
                               Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getEnrSeq());
+
                               if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
-                                 this.routingTable.updateRadius(pong.getEnrSeq(), pong.getRadius());
+                                  LOG.info(HistoryCustomPayloadContainer.decodePacket(pong.getCustomPayload()).getDataRadius());
+                                  //this.routingTable.updateRadius(pong.getEnrSeq(), pong.getRadius());
                                  //should we need to notify someone ?
                               }
                             return SafeFuture.completedFuture(Optional.of(pong));
@@ -107,10 +110,13 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
 
     @Override
     public SafeFuture<String> connect(NodeRecord peer) {
-       return  this.ping(peer, new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), Bytes.EMPTY)).thenApply(Optional::get).thenCompose(pong -> {
+        Ping ping = new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), Bytes.fromHexString(this.nodeRadius.toString(16)));
+       return  this.ping(peer, ping)
+               .thenApply(Optional::get).thenCompose(pong -> {
               return SafeFuture.completedFuture(pong.getEnrSeq().toString());
        });
     }
+
 
     @Override
     public int getPeerCount() {

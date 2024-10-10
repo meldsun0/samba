@@ -104,8 +104,8 @@ public class PortalNodeMainService extends Service {
     protected SafeFuture<?> doStart() {
         LOG.debug("Starting {}", this.getClass().getSimpleName());
         return SafeFuture.allOfFailFast(discoveryService.start())
-                .thenCompose(__-> connectionService.start())
-                .thenCompose((__) -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
+                .thenCompose( __ -> connectionService.start())
+                .thenCompose( __ -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
     }
 
     @Override

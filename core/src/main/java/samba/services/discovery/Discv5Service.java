@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
 import org.ethereum.beacon.discovery.TalkHandler;
@@ -34,6 +35,7 @@ public class Discv5Service extends Service implements Discv5Client {
     private static final Logger LOG = LogManager.getLogger();
     private final DiscoverySystem discoverySystem;
     private final List<NodeRecord> bootnodes;
+    private final NodeRecord localNodeRecord;
 //    private final boolean supportsIpv6;
 //    private final SECP256K1.SecretKey localNodePrivateKey;
 
@@ -97,7 +99,7 @@ public class Discv5Service extends Service implements Discv5Client {
                             }
                         }).build();
 
-        NodeRecord myNode = discoverySystem.getLocalNodeRecord();
+        this.localNodeRecord = discoverySystem.getLocalNodeRecord();
 
 
         metricsSystem.createIntegerGauge(
@@ -137,6 +139,7 @@ public class Discv5Service extends Service implements Discv5Client {
     }
 
     private Stream<NodeRecord> converToPeer(NodeRecord nodeRecord) {
+        //TODO convert to our on definiton of Node
         return null;
     }
 

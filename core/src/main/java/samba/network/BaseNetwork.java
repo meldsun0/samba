@@ -27,7 +27,6 @@ public abstract class BaseNetwork implements Network {
     protected RoutingTable routingTable;
     private Discv5Client client;
 
-    private NodeRecord nodeRecord;
     protected UInt64 nodeRadius;
     private PortalDB db;
     // private final PrivKey privKey;
@@ -43,20 +42,24 @@ public abstract class BaseNetwork implements Network {
     }
 
 
-    protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord node, PortalWireMessage messageRequest) {
-        LOG.trace("Send {} message to {}", messageRequest.getMessageType(), node.getNodeId());
+    protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord destinationNode, PortalWireMessage messageRequest) {
+        LOG.trace("Send {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
          if (!isStoreAvailable()) {
             return SafeFuture.failedFuture(new StoreNotAvailableException());
         }
-//        if(nodeRecord.equals(node)){
-//            return SafeFuture.failedFuture(new MessageToOurselfException());
-//        }
+        if(isOurself(destinationNode)){
+            return SafeFuture.failedFuture(new MessageToOurselfException());
+        }
         //TODO FIX chain order
-        return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), messageRequest.getSszBytes())
-                        .thenApply((sszbytes)->parseResponse(sszbytes, node, messageRequest)) //Change
+        return SafeFuture.of(client.sendDisV5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
+                        .thenApply((sszbytes)->parseResponse(sszbytes, destinationNode, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)
                         .exceptionallyCompose(error->handleSendMessageError(messageRequest, error));
+    }
+
+    private boolean isOurself(NodeRecord node) {
+      return this.client.getNodeId().isPresent() && this.client.getNodeId().get().equals(node.getNodeId());
     }
 
     private boolean isStoreAvailable() {
@@ -77,9 +80,12 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord node, PortalWireMessage requestMessage) {
+    private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord destinationNode, PortalWireMessage requestMessage) {
+        System.out.println(sszbytes.toHexString());
+
         //TODO validate appropriate response. If I send a Ping I must get a PONG
-        return PortalWireMessageDecoder.decode(node, sszbytes);
+       return PortalWireMessageDecoder.decode(destinationNode, sszbytes);
+
     }
 
 }
