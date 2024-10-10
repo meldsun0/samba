@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 import io.vertx.core.buffer.Buffer;
+import org.ethereum.beacon.discovery.message.FindNodeMessage;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.schema.ssz.containers.FindNodesContainer;
@@ -83,6 +85,29 @@ public class FindNodes implements PortalWireMessage {
 
     private void checkEachDistance(List<Integer> distances) {
         distances.forEach(distance -> checkArgument(distances.size() <= 256, "Distances greater than 256 are not allowed"));
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        FindNodes that = (FindNodes) o;
+        return Objects.equal(getDistances(), that.getDistances());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getDistances());
+    }
+
+    @Override
+    public String toString() {
+        return "FindNodes{ distances=" + getDistances() + '}';
     }
 
 }

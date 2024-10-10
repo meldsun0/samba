@@ -1,5 +1,6 @@
 package samba.domain.messages.response;
 
+import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -11,7 +12,6 @@ import samba.domain.messages.*;
 import samba.schema.ssz.containers.PongContainer;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.node.NodeId;
 
 
 /**
@@ -21,11 +21,6 @@ public class Pong implements PortalWireMessage {
 
     private UInt64 enrSeq;
     private Bytes customPayload;
-    private NodeRecord nodeRecord;
-
-    public Pong(NodeRecord node) {
-        this.nodeRecord = node;
-    }
 
     public Pong(UInt64 enrSeq, Bytes customPayload) {
         checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
@@ -34,7 +29,7 @@ public class Pong implements PortalWireMessage {
         this.customPayload = customPayload;
     }
 
-    public static Pong fromSSZBytes(Bytes sszbytes){
+    public static Pong fromSSZBytes(Bytes sszbytes) {
         Bytes container = sszbytes.slice(1);
         PongContainer pongContainer = PongContainer.decodePacket(container);
         UInt64 enrSeq = pongContainer.getEnrSeq();
@@ -59,15 +54,11 @@ public class Pong implements PortalWireMessage {
         return enrSeq;
     }
 
-    public NodeRecord getNodeRecord() {
-        return this.nodeRecord;
-    }
-
     @Override
     public Bytes getSszBytes() {
         return Bytes.concatenate(
-            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
-            new PongContainer(enrSeq, customPayload).sszSerialize());
+                SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+                new PongContainer(enrSeq, customPayload).sszSerialize());
     }
 
     @Override
@@ -75,13 +66,30 @@ public class Pong implements PortalWireMessage {
         return this;
     }
 
-    public NodeId getNodeId() {
-        return new NodeId() {
-            @Override
-            public Bytes toBytes() {
-                return  nodeRecord.getNodeId();
-            }
-        };
+    public UInt64 getRadius() {
+        return UInt64.valueOf(this.customPayload.toLong());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Pong that = (Pong) o;
+        return Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(enrSeq, customPayload);
+    }
+
+    @Override
+    public String toString() {
+        return "Pong{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
     }
 }
 

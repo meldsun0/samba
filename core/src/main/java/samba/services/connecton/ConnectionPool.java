@@ -1,8 +1,6 @@
 package samba.services.connecton;
 
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.node.NodeId;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,9 +1,12 @@
 package samba.domain.messages.requests;
 
+import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.ethereum.beacon.discovery.message.MessageCode;
+import org.ethereum.beacon.discovery.message.PingMessage;
 import samba.domain.messages.*;
 import samba.schema.ssz.containers.PingContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
@@ -61,5 +64,28 @@ public class Ping implements PortalWireMessage {
     @Override
     public Ping getMessage() {
         return this;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Ping that = (Ping) o;
+        return  Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(enrSeq, customPayload);
+    }
+
+    @Override
+    public String toString() {
+        return "Ping{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
     }
 }

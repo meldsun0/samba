@@ -5,7 +5,7 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface Network {
 
-    public SafeFuture<NodeRecord> connect(NodeRecord peer);
+    public SafeFuture<String> connect(NodeRecord peer);
 
     public int getPeerCount();
 
