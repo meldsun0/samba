@@ -92,11 +92,11 @@ public class ConnectionService extends Service {
     }
 
     private void connectToPeers(final NodeRecord nodeRecord) {
-        LOG.debug("Attempting to connect to {}", nodeRecord.getNodeId());
+        LOG.trace("Attempting to connect to {}", nodeRecord.getNodeId());
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
-                    LOG.debug("Successfully connected to node {}", nodeRecord.getNodeId());
+                    LOG.info("Successfully connected to node {}", nodeRecord.getNodeId());
                     successfulConnectionCounter.inc();
 //                    peer.subscribeDisconnect((reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },

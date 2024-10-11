@@ -8,10 +8,18 @@ import samba.domain.messages.response.Accept;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class PortalWireMessageDecoder {
 
     public static PortalWireMessage decode(NodeRecord sourceNode, Bytes sszbytes) { //TODO change NodeRecord
+        checkNotNull(sourceNode,"SourceNode could not be null when decoding a Portal Wire Message");
+        checkNotNull(sszbytes,"SSZBytes could not be null when decoding a Portal Wire Message");
+        checkArgument(sszbytes.size()>=2, "SSZBytes should have more than 2 bytes when decoding a Portal Message");
+
         int packetType = SSZ.decodeInt8(sszbytes.slice(0, 1));
         MessageType messageType = MessageType.fromInt(packetType);
         if (messageType == null) {

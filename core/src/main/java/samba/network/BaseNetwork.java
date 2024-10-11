@@ -43,7 +43,7 @@ public abstract class BaseNetwork implements Network {
 
 
     protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord destinationNode, PortalWireMessage messageRequest) {
-        LOG.trace("Send {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
+        LOG.trace("Send Discv5 {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
          if (!isStoreAvailable()) {
             return SafeFuture.failedFuture(new StoreNotAvailableException());
         }
@@ -67,12 +67,12 @@ public abstract class BaseNetwork implements Network {
     }
 
     private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
-        portalWireMessage.ifPresent((message)->LOG.info("{} message received", message.getMessageType()));
+        portalWireMessage.ifPresent((message)->LOG.trace("Discv5 {} message received", message.getMessageType()));
     }
 
 
     private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(PortalWireMessage message, Throwable error) {
-        LOG.info("Something when wrong when sending a {} message", message.getMessageType());
+        LOG.info("Something when wrong when sending a Discv5 {} message", message.getMessageType());
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));
@@ -81,8 +81,6 @@ public abstract class BaseNetwork implements Network {
     }
 
     private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord destinationNode, PortalWireMessage requestMessage) {
-        System.out.println(sszbytes.toHexString());
-
         //TODO validate appropriate response. If I send a Ping I must get a PONG
        return PortalWireMessageDecoder.decode(destinationNode, sszbytes);
 

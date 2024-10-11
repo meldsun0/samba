@@ -45,16 +45,20 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
         return  sendMessage(nodeRecord, message)
-                .orTimeout(30, TimeUnit.SECONDS)
+                .orTimeout(300, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
                        pongMessage -> {
-                              LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq());
+                              LOG.trace("{} message being processed from {}", message.getMessageType(), message.getEnrSeq());
                               Pong pong = pongMessage.getMessage();
                               connectionPool.updateLivenessNode(pong.getEnrSeq());
+                                 if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
+//                                     try{
+//                                       //  LOG.info(HistoryCustomPayloadContainer.decodePacket(pong.getCustomPayload()).getDataRadius());
+//                                     }catch (Exception a){
+//                                         LOG.info("error with payload");
+//                                     }
 
-                              if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
-                                  LOG.info(HistoryCustomPayloadContainer.decodePacket(pong.getCustomPayload()).getDataRadius());
                                   //this.routingTable.updateRadius(pong.getEnrSeq(), pong.getRadius());
                                  //should we need to notify someone ?
                               }
@@ -62,7 +66,8 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType(), message.getEnrSeq());
+                            LOG.info("Something when wrong when processing message {} to {}", message.getMessageType(), message.getEnrSeq());
+                            LOG.info(error);
                             this.connectionPool.ignoreNode(message.getEnrSeq());
                             this.routingTable.evictNode(message.getEnrSeq());
                             return SafeFuture.completedFuture(Optional.empty());
