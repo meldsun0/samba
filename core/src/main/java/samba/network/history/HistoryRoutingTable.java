@@ -1,5 +1,6 @@
 package samba.network.history;
 
+import org.apache.tuweni.units.bigints.UInt256;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.network.RoutingTable;
@@ -8,12 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HistoryRoutingTable implements RoutingTable {
 
-   private final Map<UInt64, UInt64> radiusMap;
+   private final Map<UInt64, UInt256> radiusMap;
  //  private KBuckets dht; //distance -> [nodes]
    //gossip ?
 
     public HistoryRoutingTable(){
-        this.radiusMap = new ConcurrentHashMap<UInt64, UInt64> ();
+        this.radiusMap = new ConcurrentHashMap<UInt64, UInt256> ();
     }
 
     @Override
@@ -28,12 +29,12 @@ public class HistoryRoutingTable implements RoutingTable {
      * @param radius This value is a 256 bit integer and represents the data that a node is "interested" in.
      */
     @Override
-    public void updateRadius(UInt64 nodeId, UInt64 radius) {
+    public void updateRadius(UInt64 nodeId, UInt256 radius) {
         this.radiusMap.put(nodeId, radius);
     }
     
     @Override
-    public UInt64 getRadius(UInt64 nodeId){
+    public UInt256 getRadius(UInt64 nodeId){
         return this.radiusMap.get(nodeId);
     }
 

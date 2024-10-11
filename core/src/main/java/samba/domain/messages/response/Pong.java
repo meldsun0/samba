@@ -66,9 +66,6 @@ public class Pong implements PortalWireMessage {
         return this;
     }
 
-    public UInt64 getRadius() {
-        return UInt64.valueOf(this.customPayload.toLong());
-    }
 
     @Override
     public boolean equals(Object o) {
