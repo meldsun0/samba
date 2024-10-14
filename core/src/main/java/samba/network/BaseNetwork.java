@@ -1,23 +1,22 @@
 package samba.network;
 
-import com.google.common.base.Throwables;
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+
+import com.google.common.base.Throwables;
+
 import samba.db.PortalDB;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
-import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
-import samba.network.exception.MessageToOurselfException;
 import samba.network.exception.StoreNotAvailableException;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
-
-import java.math.BigInteger;
-import java.util.Optional;
 
 public abstract class BaseNetwork implements Network {
 
@@ -41,7 +40,6 @@ public abstract class BaseNetwork implements Network {
         this.nodeRadius = nodeRadius;
 
     }
-
 
     protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord node, PortalWireMessage messageRequest) {
         LOG.trace("Send {} message to {}", messageRequest.getMessageType(), node.getNodeId());
