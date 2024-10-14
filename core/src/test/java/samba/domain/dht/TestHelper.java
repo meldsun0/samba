@@ -1,8 +1,7 @@
-package samba.core.dht;
+package samba.domain.dht;
 
 import org.apache.tuweni.bytes.Bytes;
 import samba.domain.node.Node;
-import samba.domain.dht.BucketEntry;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

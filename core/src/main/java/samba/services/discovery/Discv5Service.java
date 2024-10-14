@@ -139,7 +139,7 @@ public class Discv5Service extends Service implements Discv5Client {
     }
 
     private Stream<NodeRecord> converToPeer(NodeRecord nodeRecord) {
-        //TODO convert to our on definiton of Node
+        //TODO convert to our on definition of Node
         return null;
     }
 

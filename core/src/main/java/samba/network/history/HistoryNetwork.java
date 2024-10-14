@@ -40,7 +40,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      * @return the PONG message.
      */
     @Override
-    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //TODO replace NodeRecord. 
+    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //TODO replace NodeRecord.
         return  sendMessage(nodeRecord, message)
                 .orTimeout(300, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
