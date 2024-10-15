@@ -10,9 +10,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 public class OfferHandler implements PortalWireMessageHandler<Offer> {
     
     @Override
-    public Optional<PortalWireMessage> handle(Offer message, NodeRecord srcNode) {
-        
+    public Optional<PortalWireMessage> handle(NodeRecord srcNode, Offer offer) {
         return Optional.empty();
     }
-    
 }

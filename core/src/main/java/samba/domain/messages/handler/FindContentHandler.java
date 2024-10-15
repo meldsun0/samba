@@ -8,11 +8,9 @@ import samba.domain.messages.PortalWireMessage;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 public class FindContentHandler implements PortalWireMessageHandler<FindContent> {
-    
+
     @Override
-    public Optional<PortalWireMessage> handle(FindContent message, NodeRecord srcNode) {
-        
+    public Optional<PortalWireMessage> handle(NodeRecord srcNode, FindContent findContent) {
         return Optional.empty();
     }
-    
 }

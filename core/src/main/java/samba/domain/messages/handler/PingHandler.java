@@ -8,11 +8,10 @@ import samba.domain.messages.requests.Ping;
 import samba.domain.messages.PortalWireMessage;
 
 public class PingHandler implements PortalWireMessageHandler<Ping> {
-    
+
+
     @Override
-    public Optional<PortalWireMessage> handle(Ping message, NodeRecord srcNode) {
-        
+    public Optional<PortalWireMessage> handle(NodeRecord srcNode, Ping ping) {
         return Optional.empty();
     }
-    
 }

@@ -5,25 +5,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
-import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
-import org.ethereum.beacon.discovery.TalkHandler;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
+import samba.domain.messages.handler.IncomingRequestHandler;
 import samba.metrics.SambaMetricCategory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
-import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.service.serviceutils.Service;
 
-import java.math.BigInteger;
-import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -34,7 +29,6 @@ public class Discv5Service extends Service implements Discv5Client {
 
     private static final Logger LOG = LogManager.getLogger();
     private final DiscoverySystem discoverySystem;
-    private final List<NodeRecord> bootnodes;
     private final NodeRecord localNodeRecord;
 //    private final boolean supportsIpv6;
 //    private final SECP256K1.SecretKey localNodePrivateKey;
@@ -46,9 +40,8 @@ public class Discv5Service extends Service implements Discv5Client {
                          final AsyncRunner asyncRunner,
                          final DiscoveryConfig discoveryConfig,
                          final Bytes privateKey,
-                         final List bootnodes) {
+                         final IncomingRequestHandler incomingRequestProcessor) {
         //add node Record converter.
-        this.bootnodes = bootnodes;
         this.asyncRunner = asyncRunner;
         //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
 
@@ -86,18 +79,10 @@ public class Discv5Service extends Service implements Discv5Client {
                 new DiscoverySystemBuilder()
                         .listen("0.0.0.0", 9090)
                         .secretKey(keyPair.secretKey())
-                        .bootnodes(bootnodes)
+                        .bootnodes(discoveryConfig.getBootnodes())
                         .localNodeRecord(createNodeRecord(keyPair, "0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
-                        .talkHandler(new TalkHandler() {
-                            @Override
-                            public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
-                                LOG.info("Talk handler here");
-                                return null;
-
-
-                            }
-                        }).build();
+                        .talkHandler(incomingRequestProcessor).build();
 
         this.localNodeRecord = discoverySystem.getLocalNodeRecord();
 

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkRequestOperations {
+public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkRequests {
 
 
     private ConnectionPool connectionPool;

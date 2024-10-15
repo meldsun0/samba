@@ -7,12 +7,16 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.handler.*;
+import samba.network.NetworkType;
 import samba.network.history.HistoryNetwork;
 import samba.services.api.PortalRestAPI;
 import samba.services.api.PortalAPI;
 import samba.services.connecton.ConnectionService;
+import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
-import samba.domain.messages.processor.PortalWireMessageProcessor;
+import samba.domain.messages.handler.IncomingRequestHandler;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
@@ -42,13 +46,14 @@ public class PortalNodeMainService extends Service {
     private final Bytes privKey = null;
 
     protected volatile SambaConfiguration sambaConfiguration;
-    
-    private PortalWireMessageProcessor portalWireMessageProcessor;
+
+
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
 
     private Discv5Service discoveryService;
     private ConnectionService connectionService;
     private HistoryNetwork historyNetwork;
+    private final IncomingRequestHandler incomingRequestProcessor = new IncomingRequestHandler();
 
 
     public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration) {
@@ -57,8 +62,6 @@ public class PortalNodeMainService extends Service {
         this.metricsSystem = mainServiceConfig.getMetricsSystem();
         this.asyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
         this.sambaConfiguration = sambaConfiguration;
-
-
 
         initDiscoveryService();
         initHistoryNetwork();
@@ -70,6 +73,11 @@ public class PortalNodeMainService extends Service {
     private void initHistoryNetwork() {
         LOG.info("PortalNodeMainService.initHistoryNetwork()");
         this.historyNetwork = new HistoryNetwork(this.discoveryService);
+        incomingRequestProcessor
+                .addHandler(MessageType.PING, new PingHandler())
+                .addHandler(MessageType.FIND_NODES, new FindNodesHandler())
+                .addHandler(MessageType.FIND_CONTENT, new FindContentHandler())
+                .addHandler(MessageType.OFFER, new OfferHandler());
     }
 
     private void initConnectionService() {
@@ -84,28 +92,22 @@ public class PortalNodeMainService extends Service {
 
     protected void initDiscoveryService() {
         LOG.info("PortalNodeMainService.initDiscoveryService()");
-        List bootnodes = new ArrayList<>();
-
-        //# Trin bootstrap nodes
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QIs2pCyiKna9YWnAF0zgf7bT0GzlAGoF8MEKFJOExmtofBIqzm71zDvmzRiiLkxaEJcs_Amr7XIhLI74k1rtlXICY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhKEjVaWJc2VjcDI1NmsxoQLSC_nhF1iRwsCw0n3J4jRjqoaRxtKgsEe5a-Dz7y0JloN1ZHCCIyg"));
-        bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64("-Jy4QH4_H4cW--ejWDl_W7ngXw2m31MM2GT8_1ZgECnfWxMzZTiZKvHDgkmwUS_l2aqHHU54Q7hcFSPz6VGzkUjOqkcCY5Z0IDAuMS4xLWFscGhhLjEtMTEwZjUwgmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg"));
-
-
         this.discoveryService = new Discv5Service(
                 this.metricsSystem,
                 this.asyncRunner,
-                DiscoveryConfig.builder().build(),
+                DiscoveryConfig.builder().bootnodes(Bootnodes.loadBootnodes(NetworkType.EXECUTION_HISTORY_NETWORK)).build(),
                 this.privKey,
-                bootnodes);
+                incomingRequestProcessor);
 
     }
 
     @Override
     protected SafeFuture<?> doStart() {
         LOG.debug("Starting {}", this.getClass().getSimpleName());
+        this.incomingRequestProcessor.build();
         return SafeFuture.allOfFailFast(discoveryService.start())
-                .thenCompose( __ -> connectionService.start())
-                .thenCompose( __ -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
+                .thenCompose(__ -> connectionService.start())
+                .thenCompose(__ -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
     }
 
     @Override

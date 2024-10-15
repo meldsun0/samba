@@ -1,4 +1,4 @@
-package samba.domain.messages.processor;
+package samba.domain.messages;
 
 import java.util.List;
 import java.util.Random;
@@ -9,13 +9,15 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import samba.domain.messages.requests.*;
-import samba.domain.messages.response.*;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessageDecoder;
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 
@@ -38,7 +40,7 @@ public class PortalWireMessageDecoderTests {
     public void testParsePing() {
         Bytes pingBytes = Bytes.fromHexString("0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         Ping ping = (Ping) decoder.decode(srcNode, pingBytes);
-        assertEquals(MessageType.PING, ping.getMessageType());
+        Assertions.assertEquals(MessageType.PING, ping.getMessageType());
         assertEquals(UInt64.valueOf(1), ping.getEnrSeq());
         assertEquals(Bytes.fromHexString("0xfeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"), ping.getCustomPayload());
     }

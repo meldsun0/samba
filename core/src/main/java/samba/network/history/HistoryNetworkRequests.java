@@ -10,7 +10,7 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import java.util.Optional;
 
 
-public interface HistoryNetworkRequestOperations {
+public interface HistoryNetworkRequests {
 
     SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
 
