@@ -72,8 +72,7 @@ public abstract class BaseNetwork implements Network {
 
 
     private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(PortalWireMessage message, Throwable error) {
-        LOG.info("Something when wrong when sending a Discv5 {} message", message.getMessageType());
-        LOG.info(error);
+        LOG.trace("Something when wrong when sending a Discv5 {} message", message.getMessageType());
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));

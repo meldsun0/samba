@@ -69,11 +69,11 @@ public class ConnectionService extends Service {
 
     private SafeFuture<Void> searchForActivePeers() {
         if (!isRunning()) {
-            LOG.debug("Not running so not searching for active peers");
+            LOG.trace("Not running so not searching for active peers");
             return SafeFuture.COMPLETE;
         }
-        LOG.info("Searching for active peers every {} seconds", DISCOVERY_INTERVAL);
-        LOG.info("{} active peers",network.getPeerCount());
+        LOG.info("{} active peers. Checking again in {} seconds",network.getPeerCount(), DISCOVERY_INTERVAL.getSeconds());
+
         return discv5Client.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handle(
@@ -101,7 +101,7 @@ public class ConnectionService extends Service {
 //                    peer.subscribeDisconnect((reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },
                 error -> {
-                    LOG.debug(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
+                    LOG.trace(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
                     failedConnectionCounter.inc();
 //                    peerPools.forgetPeer(peerAddress.getId());
                 });

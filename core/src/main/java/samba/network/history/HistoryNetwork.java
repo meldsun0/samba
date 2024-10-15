@@ -58,7 +58,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when processing message {} to {}", message.getMessageType(), message.getEnrSeq());
+                            LOG.trace("Something when wrong when processing message {} to {}", message.getMessageType(), message.getEnrSeq());
                             this.connectionPool.ignoreNode(message.getEnrSeq());
                             this.routingTable.evictNode(message.getEnrSeq());
                             return SafeFuture.completedFuture(Optional.empty());
@@ -75,6 +75,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
      */
     @Override
     public SafeFuture<Optional<Nodes>> findNodes(NodeRecord nodeRecord, FindNodes message) {
+
         return sendMessage(nodeRecord, message)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
@@ -103,7 +104,6 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         this.ping(nodeRecord, new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius.toBytes()));
     }
 
-
     @Override
     public SafeFuture<String> connect(NodeRecord peer) {
         Ping ping = new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), this.nodeRadius.toBytes());
@@ -111,7 +111,6 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                     return SafeFuture.completedFuture(pong.getEnrSeq().toString());
                 });
     }
-
 
     @Override
     public int getPeerCount() {
