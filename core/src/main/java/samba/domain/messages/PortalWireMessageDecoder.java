@@ -18,7 +18,8 @@ public class PortalWireMessageDecoder {
     public static PortalWireMessage decode(NodeRecord sourceNode, Bytes sszbytes) { //TODO change NodeRecord
         checkNotNull(sourceNode,"SourceNode could not be null when decoding a Portal Wire Message");
         checkNotNull(sszbytes,"SSZBytes could not be null when decoding a Portal Wire Message");
-        checkArgument(sszbytes.size()>=2, "SSZBytes should have more than 2 bytes when decoding a Portal Message");
+        checkArgument(sszbytes.size()>=1, "SSZBytes: {}  {}: should have more than 1 bytes when decoding a Portal Message"
+                , sszbytes.size(), sourceNode.getNodeId().toHexString());
 
         int packetType = SSZ.decodeInt8(sszbytes.slice(0, 1));
         MessageType messageType = MessageType.fromInt(packetType);

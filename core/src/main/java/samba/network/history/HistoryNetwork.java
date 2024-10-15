@@ -18,48 +18,47 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkRequests {
+public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
 
 
     private ConnectionPool connectionPool;
     private UInt256 nodeRadius;
 
 
-    public HistoryNetwork(Discv5Client client){
+    public HistoryNetwork(Discv5Client client) {
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(), null);
         this.connectionPool = new ConnectionPool();
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
     }
 
 
-
     /**
      * Sends a Portal Network Wire PING message to a specified node
+     *
      * @param nodeRecord the nodeId of the peer to send a ping to
-     * @param message PING message to be sent
+     * @param message    PING message to be sent
      * @return the PONG message.
      */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //TODO replace NodeRecord.
-        return  sendMessage(nodeRecord, message)
+        return sendMessage(nodeRecord, message)
                 .orTimeout(300, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
-                       pongMessage -> {
-                              LOG.trace("{} message being processed from {}", message.getMessageType(), message.getEnrSeq());
-                              Pong pong = pongMessage.getMessage();
-                              connectionPool.updateLivenessNode(pong.getEnrSeq());
-                                 if(pong.getCustomPayload() != null){
-                                     //TODO decide what to validate.
-                                     this.routingTable.updateRadius(pong.getEnrSeq(), UInt256.fromBytes(pong.getCustomPayload()));
-                                     //TODO should we need to notify someone ?
-                              }
+                        pongMessage -> {
+                            LOG.trace("{} message being processed from {}", message.getMessageType(), message.getEnrSeq());
+                            Pong pong = pongMessage.getMessage();
+                            connectionPool.updateLivenessNode(pong.getEnrSeq());
+                            if (pong.getCustomPayload() != null) {
+                                //TODO decide what to validate.
+                                this.routingTable.updateRadius(pong.getEnrSeq(), UInt256.fromBytes(pong.getCustomPayload()));
+                                //TODO should we need to notify someone ?
+                            }
                             return SafeFuture.completedFuture(Optional.of(pong));
-                       })
+                        })
                 .exceptionallyCompose(
                         error -> {
                             LOG.info("Something when wrong when processing message {} to {}", message.getMessageType(), message.getEnrSeq());
-                            LOG.info(error);
                             this.connectionPool.ignoreNode(message.getEnrSeq());
                             this.routingTable.evictNode(message.getEnrSeq());
                             return SafeFuture.completedFuture(Optional.empty());
@@ -76,7 +75,7 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
      */
     @Override
     public SafeFuture<Optional<Nodes>> findNodes(NodeRecord nodeRecord, FindNodes message) {
-         return sendMessage(nodeRecord, message)
+        return sendMessage(nodeRecord, message)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
@@ -108,10 +107,9 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
     @Override
     public SafeFuture<String> connect(NodeRecord peer) {
         Ping ping = new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), this.nodeRadius.toBytes());
-       return  this.ping(peer, ping)
-               .thenApply(Optional::get).thenCompose(pong -> {
-              return SafeFuture.completedFuture(pong.getEnrSeq().toString());
-       });
+        return this.ping(peer, ping).thenApply(Optional::get).thenCompose(pong -> {
+                    return SafeFuture.completedFuture(pong.getEnrSeq().toString());
+                });
     }
 
 
@@ -123,5 +121,20 @@ public class HistoryNetwork extends BaseNetwork  implements HistoryNetworkReques
     @Override
     public boolean isPeerConnected(NodeRecord peer) {
         return this.connectionPool.isPeerConnected(UInt64.valueOf(peer.getSeq().toBytes().toLong()));
+    }
+
+    @Override
+    public void handlePing(NodeRecord srcNode, Ping ping) {
+
+        connectionPool.updateLivenessNode(ping.getEnrSeq());
+        routingTable.updateRadius(ping.getEnrSeq(), UInt256.fromBytes(ping.getCustomPayload()));
+
+        Pong pong = new Pong(UInt64.valueOf(srcNode.getSeq().toBytes().toLong()), this.nodeRadius.toBytes());
+        sendMessage(srcNode, pong);
+    }
+
+    @Override
+    public NetworkType getNetworkType() {
+        return networkType;
     }
 }

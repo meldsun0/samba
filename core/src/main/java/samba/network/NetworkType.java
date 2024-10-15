@@ -27,4 +27,8 @@ public enum NetworkType {
     public String getName() {
         return this.name;
     }
+
+    public boolean isEquals(Bytes bytes){
+        return getValue().equals(bytes);
+    }
 }

@@ -12,7 +12,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
-import samba.domain.messages.handler.IncomingRequestHandler;
+import samba.domain.messages.IncomingRequestHandler;
 import samba.metrics.SambaMetricCategory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
@@ -151,5 +151,6 @@ public class Discv5Service extends Service implements Discv5Client {
 
     public void updateCustomENRField(final String fieldName, final Bytes value) {
         discoverySystem.updateCustomFieldValue(fieldName, value);
+
     }
 }

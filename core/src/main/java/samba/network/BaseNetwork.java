@@ -23,7 +23,7 @@ public abstract class BaseNetwork implements Network {
 
     protected static final Logger LOG = LogManager.getLogger();
 
-    private NetworkType networkType;
+    protected NetworkType networkType;
     protected RoutingTable routingTable;
     private Discv5Client client;
 
@@ -73,6 +73,7 @@ public abstract class BaseNetwork implements Network {
 
     private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(PortalWireMessage message, Throwable error) {
         LOG.info("Something when wrong when sending a Discv5 {} message", message.getMessageType());
+        LOG.info(error);
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));

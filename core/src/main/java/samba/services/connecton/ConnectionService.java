@@ -96,7 +96,7 @@ public class ConnectionService extends Service {
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
-                    LOG.info("Successfully connected to node {}", nodeRecord.getNodeId());
+                    LOG.trace("Successfully connected to node {}", nodeRecord.getNodeId());
                     successfulConnectionCounter.inc();
 //                    peer.subscribeDisconnect((reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },

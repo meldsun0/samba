@@ -3,7 +3,6 @@ package samba.services;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
@@ -16,7 +15,7 @@ import samba.services.api.PortalAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
-import samba.domain.messages.handler.IncomingRequestHandler;
+import samba.domain.messages.IncomingRequestHandler;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
@@ -24,8 +23,6 @@ import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
 
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 
@@ -104,7 +101,7 @@ public class PortalNodeMainService extends Service {
     @Override
     protected SafeFuture<?> doStart() {
         LOG.debug("Starting {}", this.getClass().getSimpleName());
-        this.incomingRequestProcessor.build();
+        this.incomingRequestProcessor.build(this.historyNetwork);
         return SafeFuture.allOfFailFast(discoveryService.start())
                 .thenCompose(__ -> connectionService.start())
                 .thenCompose(__ -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));

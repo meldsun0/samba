@@ -1,16 +1,15 @@
 package samba.domain.messages.handler;
 
-import java.util.Optional;
-
 import samba.domain.messages.requests.Offer;
-import samba.domain.messages.PortalWireMessage;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import samba.network.Network;
+import samba.network.history.HistoryNetworkIncomingRequests;
 
 public class OfferHandler implements PortalWireMessageHandler<Offer> {
     
     @Override
-    public Optional<PortalWireMessage> handle(NodeRecord srcNode, Offer offer) {
-        return Optional.empty();
+    public void handle(HistoryNetworkIncomingRequests network, NodeRecord srcNode, Offer offer) {
+        //TODO implement OfferHandler
     }
 }

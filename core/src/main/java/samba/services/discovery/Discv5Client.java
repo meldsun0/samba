@@ -7,6 +7,7 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,7 +15,6 @@ public interface Discv5Client {
 
 
     CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
-
 
     SafeFuture<Collection<NodeRecord>> streamLiveNodes();
 

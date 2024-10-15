@@ -7,11 +7,14 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public interface RoutingTable {
 
-    public void evictNode(UInt64 nodeId);
+    void evictNode(UInt64 nodeId);
 
-    public void updateRadius(UInt64 nodeId, UInt256 radius);
+    void updateRadius(UInt64 nodeId, UInt256 radius);
 
-    public UInt256 getRadius(UInt64 nodeId);
+    UInt256 getRadius(UInt64 nodeId);
 
-    boolean isKnown(NodeRecord nodeRecord);
+    boolean isKnown(UInt64 nodeId);
+
+
+
 }

@@ -39,7 +39,7 @@ public class HistoryRoutingTable implements RoutingTable {
     }
 
     @Override
-    public boolean isKnown(NodeRecord nodeRecord) {
+    public boolean isKnown(UInt64 nodeId) {
         return false;
         //TODO  use a DHT
        // return this.dht.containsNode(nodeRecord.getNodeId());
