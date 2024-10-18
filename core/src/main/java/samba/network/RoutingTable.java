@@ -1,20 +1,25 @@
 package samba.network;
 
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+
+import java.util.Optional;
 
 public interface RoutingTable {
 
-    void evictNode(UInt64 nodeId);
+    void removeRadius(Bytes nodeId);
 
-    void updateRadius(UInt64 nodeId, UInt256 radius);
+    void updateRadius(Bytes nodeId, UInt256 radius);
 
-    UInt256 getRadius(UInt64 nodeId);
+    UInt256 getRadius(Bytes nodeId);
 
-    boolean isKnown(UInt64 nodeId);
+    boolean isKnown(Bytes nodeId);
 
 
+    Optional<NodeRecord> findNode(Bytes nodeId);
 
+
+    Object updateNode(NodeRecord nodeRecord);
 }

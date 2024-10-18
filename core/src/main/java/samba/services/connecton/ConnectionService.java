@@ -72,7 +72,7 @@ public class ConnectionService extends Service {
             LOG.trace("Not running so not searching for active peers");
             return SafeFuture.COMPLETE;
         }
-        LOG.info("{} active peers. Checking again in {} seconds",network.getPeerCount(), DISCOVERY_INTERVAL.getSeconds());
+        LOG.info("{} active peers. Checking again in {} seconds",network.getNumberOfConnectedPeers(), DISCOVERY_INTERVAL.getSeconds());
 
         return discv5Client.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
@@ -130,7 +130,7 @@ public class ConnectionService extends Service {
 
 
     private void createNextSearchPeerTask() {
-        if (network.getPeerCount() == 0) {
+        if (network.getNumberOfConnectedPeers() == 0) {
             LOG.trace("Retrying peer search, no connected peers yet");
             cancelPeerSearchTask();
             this.periodicPeerSearch = asyncRunner.runCancellableAfterDelay(this::activeNodesSearchingTask, WARMUP_DISCOVERY_INTERVAL, this::logSearchError);

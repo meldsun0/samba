@@ -5,13 +5,11 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import samba.domain.messages.requests.Ping;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 import samba.domain.messages.*;
 import samba.schema.ssz.containers.PongContainer;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 
 /**
@@ -27,6 +25,10 @@ public class Pong implements PortalWireMessage {
         checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
         this.enrSeq = enrSeq;
         this.customPayload = customPayload;
+    }
+
+    public Pong(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
+        this(UInt64.valueOf(enrSeq.toBytes().toLong()),customPayload);
     }
 
     public static Pong fromSSZBytes(Bytes sszbytes) {
@@ -52,6 +54,10 @@ public class Pong implements PortalWireMessage {
 
     public UInt64 getEnrSeq() {
         return enrSeq;
+    }
+
+    public boolean containsPayload(){
+        return !this.customPayload.isZero();
     }
 
     @Override

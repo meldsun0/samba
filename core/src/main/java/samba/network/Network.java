@@ -1,13 +1,16 @@
 package samba.network;
 
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface Network {
 
-    public SafeFuture<String> connect(NodeRecord peer);
+    SafeFuture<String> connect(NodeRecord node);
 
-    public int getPeerCount();
+    int getNumberOfConnectedPeers();
 
-    public boolean isPeerConnected(NodeRecord peer);
+    boolean isPeerConnected(NodeRecord node);
+
+    UInt256 getRadiusFromNode(NodeRecord node);
 }

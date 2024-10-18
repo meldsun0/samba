@@ -2,6 +2,7 @@ package samba.services.discovery;
 
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
@@ -14,14 +15,17 @@ import java.util.concurrent.CompletableFuture;
 public interface Discv5Client {
 
 
-    CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
+    CompletableFuture<Bytes> sendDisv5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
 
     SafeFuture<Collection<NodeRecord>> streamLiveNodes();
 
     Optional<Bytes> getNodeId();
 
-
     Optional<String> getEnr();
+
+    UInt64 getEnrSeq();
+
+    CompletableFuture<Collection<NodeRecord>> sendDiscv5FindNodes(NodeRecord nodeRecord, List<Integer> distances);
 
     void updateCustomENRField(final String fieldName, final Bytes value);
 

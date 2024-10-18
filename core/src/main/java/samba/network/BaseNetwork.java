@@ -25,7 +25,7 @@ public abstract class BaseNetwork implements Network {
 
     protected NetworkType networkType;
     protected RoutingTable routingTable;
-    private Discv5Client client;
+    protected Discv5Client client;
 
     protected UInt64 nodeRadius;
     private PortalDB db;
@@ -43,7 +43,7 @@ public abstract class BaseNetwork implements Network {
 
 
     protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord destinationNode, PortalWireMessage messageRequest) {
-        LOG.trace("Send Discv5 {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
+        LOG.trace("Send Portal {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
          if (!isStoreAvailable()) {
             return SafeFuture.failedFuture(new StoreNotAvailableException());
         }
@@ -51,7 +51,7 @@ public abstract class BaseNetwork implements Network {
             return SafeFuture.failedFuture(new MessageToOurselfException());
         }
         //TODO FIX chain order
-        return SafeFuture.of(client.sendDisV5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
+        return SafeFuture.of(client.sendDisv5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
                         .thenApply((sszbytes)->parseResponse(sszbytes, destinationNode, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)
@@ -67,12 +67,12 @@ public abstract class BaseNetwork implements Network {
     }
 
     private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
-        portalWireMessage.ifPresent((message)->LOG.trace("Discv5 {} message received", message.getMessageType()));
+        portalWireMessage.ifPresent((message)->LOG.trace("Portal {} message received", message.getMessageType()));
     }
 
 
     private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(PortalWireMessage message, Throwable error) {
-        LOG.trace("Something when wrong when sending a Discv5 {} message", message.getMessageType());
+        LOG.trace("Something when wrong when sending a Portal {} message", message.getMessageType());
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));
@@ -85,5 +85,6 @@ public abstract class BaseNetwork implements Network {
        return PortalWireMessageDecoder.decode(destinationNode, sszbytes);
 
     }
+
 
 }
