@@ -102,10 +102,6 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         });
     }
 
-    private void pingUnknownNode(NodeRecord nodeRecord) {
-        this.ping(nodeRecord, new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius.toBytes()));
-    }
-
     @Override
     public SafeFuture<String> connect(NodeRecord peer) {
         Ping ping = new Ping(peer.getSeq(), this.nodeRadius.toBytes());
@@ -131,18 +127,22 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     @Override
     public void handlePing(NodeRecord srcNode, Ping ping) {
-        Bytes nodeId = srcNode.getNodeId();
-        connectionPool.updateLivenessNode(nodeId); //TODO  should not be state updated if nodeId is not present ?
-        routingTable.updateRadius(nodeId, UInt256.fromBytes(ping.getCustomPayload())); //TODO we can avoid this if radius is not different.
+        Bytes srcNodeId = srcNode.getNodeId();
+        connectionPool.updateLivenessNode(srcNodeId); //TODO  should not be state updated if nodeId is not present ?
+        routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload())); //TODO we can avoid this if radius is not different.
         Optional<NodeRecord> node = routingTable.findNode(srcNode.getNodeId());
-        if(node.isPresent() &&  UInt64.valueOf(node.get().getSeq().toBytes().toLong()).compareTo(ping.getEnrSeq()) < 0){
+        if(node.isPresent() &&  UInt64.valueOf(node.get().getSeq().toBytes().toLong()).compareTo(ping.getEnrSeq()) < 0){ //TODO validate enrSeq
 //            client.sendDiscv5FindNodes(srcNode, List.of(0))
 //                    .thenApply(Collection::stream)
 //                    .thenApply(Stream::findFirst)
 //
         }
-        Pong pong = new Pong(client.getEnrSeq(), this.nodeRadius.toBytes());
+        Pong pong = new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
         sendMessage(srcNode, pong);
+    }
+
+    private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {
+        return discv5Client.getEnrSeq();
     }
 
     @Override

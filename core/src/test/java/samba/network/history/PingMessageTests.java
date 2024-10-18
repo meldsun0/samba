@@ -3,8 +3,6 @@ package samba.network.history;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
-import org.ethereum.beacon.discovery.util.Functions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import samba.domain.messages.requests.Ping;
@@ -14,14 +12,14 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static samba.network.history.TestHelper.createNodeRecord;
 
-public class PingRequestTests {
+public class PingMessageTests {
 
     private static final Bytes pongCustomPayload = Bytes.fromHexString("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f");
     private static final Bytes pingCustomPayload = Bytes.fromHexString("0xfeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -74,7 +72,23 @@ public class PingRequestTests {
     }
 
 
+    @Test
+    public void handleASuccessfulPingIncomingRequestTest() throws ExecutionException, InterruptedException {
+        Discv5Client discv5Client = mock(Discv5Client.class);
+        when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
+        when(discv5Client.getEnrSeq()).thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        NodeRecord nodeRecord = TestHelper.createNodeRecord();
+        Ping pingMessage = createPingMessage();
+
+        historyNetwork.handlePing(nodeRecord, createPingMessage() );
+
+
+        assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
+        assertTrue(historyNetwork.isPeerConnected(nodeRecord));
+        assertEquals(pingMessage.getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
+    }
 
     @NotNull
     private static CompletableFuture<Bytes> createPongBytesResponse(Bytes pongCustomPayload ) {
@@ -86,10 +100,4 @@ public class PingRequestTests {
         return new Ping(UInt64.valueOf(1), pingCustomPayload);
     }
 
-    private static NodeRecord createNodeRecord(){
-        return  new NodeRecordBuilder()
-                .secretKey(Functions.randomKeyPair(new Random(new Random().nextInt())).secretKey())
-                .address("12.34.45.67", Integer.parseInt("9001"))
-                .build();
-    }
 }

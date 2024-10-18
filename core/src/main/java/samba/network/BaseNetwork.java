@@ -9,14 +9,12 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.db.PortalDB;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
-import samba.domain.messages.response.Pong;
 import samba.network.exception.BadRequestException;
 import samba.network.exception.MessageToOurselfException;
 import samba.network.exception.StoreNotAvailableException;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
-import java.math.BigInteger;
 import java.util.Optional;
 
 public abstract class BaseNetwork implements Network {
@@ -25,16 +23,16 @@ public abstract class BaseNetwork implements Network {
 
     protected NetworkType networkType;
     protected RoutingTable routingTable;
-    protected Discv5Client client;
+    protected Discv5Client discv5Client;
 
     protected UInt64 nodeRadius;
     private PortalDB db;
     // private final PrivKey privKey;
     // private final Host host;
 
-    public BaseNetwork(NetworkType networkType, Discv5Client client, RoutingTable routingTable, UInt64 nodeRadius) {
+    public BaseNetwork(NetworkType networkType, Discv5Client discv5Client, RoutingTable routingTable, UInt64 nodeRadius) {
         this.networkType = networkType;
-        this.client = client;
+        this.discv5Client = discv5Client;
         this.networkType = networkType;
         this.routingTable = routingTable;
         this.nodeRadius = nodeRadius;
@@ -51,7 +49,7 @@ public abstract class BaseNetwork implements Network {
             return SafeFuture.failedFuture(new MessageToOurselfException());
         }
         //TODO FIX chain order
-        return SafeFuture.of(client.sendDisv5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
+        return SafeFuture.of(discv5Client.sendDisv5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
                         .thenApply((sszbytes)->parseResponse(sszbytes, destinationNode, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)
@@ -59,7 +57,7 @@ public abstract class BaseNetwork implements Network {
     }
 
     private boolean isOurself(NodeRecord node) {
-      return this.client.getNodeId().isPresent() && this.client.getNodeId().get().equals(node.getNodeId());
+      return this.discv5Client.getNodeId().isPresent() && this.discv5Client.getNodeId().get().equals(node.getNodeId());
     }
 
     private boolean isStoreAvailable() {
