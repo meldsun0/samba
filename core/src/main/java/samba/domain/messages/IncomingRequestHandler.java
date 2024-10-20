@@ -8,13 +8,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.TalkHandler;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.domain.messages.handler.PortalWireMessageHandler;
-import samba.network.history.HistoryNetworkIncomingRequests;
 
 import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.domain.messages.handler.PortalWireMessageHandler;
+import samba.network.history.HistoryNetworkIncomingRequests;
 
 public class IncomingRequestHandler implements TalkHandler {
 
@@ -46,11 +46,13 @@ public class IncomingRequestHandler implements TalkHandler {
 
         PortalWireMessage message = PortalWireMessageDecoder.decode(srcNode, request);
         PortalWireMessageHandler handler = messageHandlers.get(message.getMessageType());
+        Bytes response = Bytes.EMPTY;
         if (handler != null) {
-            handler.handle(this.network, srcNode, message);
-        }else{
+            PortalWireMessage responsePacket = handler.handle(this.network, srcNode, message);
+            response = responsePacket.getSszBytes();
+        } else {
             LOG.info("{} message not expected in TALKREQ", message.getMessageType()); //NODES, CONTENT, ACCEPT, PONG
         }
-        return CompletableFuture.completedFuture(Bytes.EMPTY);
+        return CompletableFuture.completedFuture(response);
     }
 }
