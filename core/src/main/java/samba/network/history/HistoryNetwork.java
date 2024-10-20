@@ -5,20 +5,24 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-import samba.domain.messages.requests.*;
-import samba.domain.messages.response.*;
+import samba.domain.messages.PortalWireMessage;
+import samba.domain.messages.requests.FindContent;
+import samba.domain.messages.requests.FindNodes;
+import samba.domain.messages.requests.Offer;
+import samba.domain.messages.requests.Ping;
+import samba.domain.messages.response.Accept;
+import samba.domain.messages.response.Content;
+import samba.domain.messages.response.Nodes;
+import samba.domain.messages.response.Pong;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.services.connecton.ConnectionPool;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-
-import org.apache.tuweni.units.bigints.UInt256;
-
-import samba.domain.messages.PortalWireMessage;
 
 public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
 
@@ -187,7 +191,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 //
         }
         Pong pong = new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
-        sendMessage(srcNode, pong);
+        return pong; 
     }
 
     private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {

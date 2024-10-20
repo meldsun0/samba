@@ -1,7 +1,6 @@
 package samba.domain.messages.handler;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,7 @@ public class PingHandler implements PortalWireMessageHandler<Ping> {
     @Override
     public PortalWireMessage handle(HistoryNetworkIncomingRequests network, NodeRecord srcNode, Ping ping) {
         LOG.info("{} message received", ping.getMessageType());
-        network.handlePing(srcNode,ping);
+        PortalWireMessage pong = network.handlePing(srcNode,ping);
+        return pong;
     }
 }
