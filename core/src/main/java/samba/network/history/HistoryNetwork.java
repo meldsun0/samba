@@ -15,7 +15,10 @@ import samba.services.connecton.ConnectionPool;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+
 import org.apache.tuweni.units.bigints.UInt256;
+
+import samba.domain.messages.PortalWireMessage;
 
 public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
 
@@ -172,7 +175,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
     @Override
-    public void handlePing(NodeRecord srcNode, Ping ping) {
+    public PortalWireMessage handlePing(NodeRecord srcNode, Ping ping) {
         Bytes srcNodeId = srcNode.getNodeId();
         connectionPool.updateLivenessNode(srcNodeId); //TODO  should not be state updated if nodeId is not present ?
         routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload())); //TODO we can avoid this if radius is not different.
