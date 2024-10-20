@@ -9,4 +9,6 @@ public interface PortalDB {
     public Bytes get(Bytes key);
 
     public void delete(Bytes key);
+
+    public boolean contains(Bytes key);
 }

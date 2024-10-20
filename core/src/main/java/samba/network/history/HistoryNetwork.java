@@ -112,12 +112,16 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         contentMessage -> {
                             Content content = contentMessage.getMessage();
                             //Parse for three subtypes and then opperate accordingly
-                            if (content.getContentType() == 2) {
-                                    List<String> nodesList = content.getEnrList();
-                                    //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
-                                    //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
-                                    //nodesList.removeIf(routingTable::isKnown);
-                                    //nodesList.forEach(this::pingUnknownNode);
+                            if (content.getContentType() == 0) {
+                                //uTP connection
+                            } else if (content.getContentType() == 1) {
+                                //Recieve content
+                            } else if (content.getContentType() == 2) {
+                                List<String> nodesList = content.getEnrList();
+                                //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
+                                //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
+                                //nodesList.removeIf(routingTable::isKnown);
+                                //nodesList.forEach(this::pingUnknownNode);
                             }
                             return SafeFuture.completedFuture(Optional.of(content));
                         })
