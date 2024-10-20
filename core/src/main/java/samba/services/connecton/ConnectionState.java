@@ -3,6 +3,6 @@ package samba.services.connecton;
 public enum ConnectionState {
     CONNECTED,
     IGNORED,
-    CLOSED;
+    CLOSED; //TODO when is closed?
 
 }

@@ -1,46 +1,48 @@
 package samba.services.connecton;
 
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.node.NodeId;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectionPool {
 
-    private final Map<UInt64, ConnectionState> nodesPool = new ConcurrentHashMap<>();
+    //Node-ID
+    private final Map<Bytes, ConnectionState> nodesPool = new ConcurrentHashMap<>(); //TODO Define size
 
 
-    public void updateLivenessNode(UInt64 nodeId) {
+    public void updateLivenessNode(Bytes nodeId) {
         this.insertOrUpdate(nodeId, ConnectionState.CONNECTED);
     }
 
-    private void insertOrUpdate(UInt64 nodeId, ConnectionState state) {
+    private void insertOrUpdate(Bytes nodeId, ConnectionState state) {
         this.nodesPool.compute(nodeId, (key, value) -> state);
     }
 
-    public void ignoreNode(UInt64 nodeId) {
+    public void ignoreNode(Bytes nodeId) {
        //TODO what if, if it is not present ?
-        this.nodesPool.computeIfPresent(
-               nodeId, (key, currentValue )-> ConnectionState.IGNORED);
+        this.insertOrUpdate(nodeId, ConnectionState.IGNORED);
     }
 
-    public int getNumberOfConnectedPeers() {
-
-        return this.nodesPool.size();
+    public int getNumberOfConnectedPeers() { //TODO use an atomic integer
+        return Collections.frequency(new ArrayList<ConnectionState>(this.nodesPool.values()), ConnectionState.CONNECTED);
     }
 
-    public boolean isPeerConnected(UInt64 nodeId) {
+    public boolean isPeerConnected(Bytes nodeId) {
         return checkStatus(nodeId, ConnectionState.CONNECTED);
     }
 
-
-    public boolean isIgnored(UInt64 nodeId) {
+    public boolean isIgnored(Bytes nodeId) {
         return checkStatus(nodeId, ConnectionState.IGNORED);
     }
 
-    private boolean checkStatus(UInt64 nodeId, ConnectionState state){
+    private boolean checkStatus(Bytes nodeId, ConnectionState state){
         return this.nodesPool.containsKey(nodeId) && this.nodesPool.get(nodeId).equals(state);
     }
 }
+

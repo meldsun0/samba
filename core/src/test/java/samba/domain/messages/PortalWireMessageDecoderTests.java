@@ -1,4 +1,4 @@
-package samba.domain.messages.processor;
+package samba.domain.messages;
 
 import java.util.List;
 import java.util.Random;
@@ -9,19 +9,15 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessageDecoder;
-import samba.domain.messages.requests.FindContent;
-import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.requests.Offer;
-import samba.domain.messages.requests.Ping;
-import samba.domain.messages.response.Accept;
-import samba.domain.messages.response.Content;
-import samba.domain.messages.response.Nodes;
-import samba.domain.messages.response.Pong;
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 

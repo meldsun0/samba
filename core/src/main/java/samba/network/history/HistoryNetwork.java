@@ -1,6 +1,5 @@
 package samba.network.history;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -8,64 +7,59 @@ import java.util.concurrent.TimeUnit;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-import samba.domain.messages.requests.Offer;
-import samba.domain.messages.requests.FindContent;
-import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.requests.Ping;
-import samba.domain.messages.response.Accept;
-import samba.domain.messages.response.Content;
-import samba.domain.messages.response.Nodes;
-import samba.domain.messages.response.Pong;
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.services.connecton.ConnectionPool;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+import org.apache.tuweni.units.bigints.UInt256;
 
-public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequestOperations {
+public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
 
-
-    private NodeRecord nodeRecord;
     private ConnectionPool connectionPool;
+    private UInt256 nodeRadius;
 
 
-
-    public HistoryNetwork(Discv5Client client){
+    public HistoryNetwork(Discv5Client client) {
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(), null);
         this.connectionPool = new ConnectionPool();
+        this.nodeRadius = UInt256.ONE; //TODO must come from argument
     }
-
 
 
     /**
      * Sends a Portal Network Wire PING message to a specified node
+     *
      * @param nodeRecord the nodeId of the peer to send a ping to
-     * @param message PING message to be sent
+     * @param message    PING message to be sent
      * @return the PONG message.
      */
     @Override
-    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //node should be changed.
-        //avoid pinging ourself.
-        //handle timeout
-        return  sendMessage(nodeRecord, message)
+    public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) { //TODO replace NodeRecord.
+        return sendMessage(nodeRecord, message)
+                .orTimeout(30, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
-                       pongMessage -> {
-                              LOG.trace("{} message received from {}", message.getMessageType(), message.getEnrSeq());
-                              Pong pong = pongMessage.getMessage();
-                              connectionPool.updateLivenessNode(pong.getEnrSeq());
-                              if(pong.getCustomPayload() != null){ //TO-DO decide what to validate.
-                                 this.routingTable.updateRadius(pong.getEnrSeq(), null); // TODO getRadius
-                                 //should we need to notify someone ?
-                              }
+                        pongMessage -> {
+                            LOG.trace("{} message being processed from {}", message.getMessageType(), nodeRecord.asEnr());
+                            Pong pong = pongMessage.getMessage();
+                            if (pong.containsPayload()) { //TODO anything else to validate?
+                                this.connectionPool.updateLivenessNode(nodeRecord.getNodeId());
+                                this.routingTable.updateRadius(nodeRecord.getNodeId(), UInt256.fromBytes(pong.getCustomPayload()));
+                                //TODO should we need to notify someone ?
+                            }else{
+                                LOG.trace("{} message without payload", message.getMessageType());
+                            }
                             return SafeFuture.completedFuture(Optional.of(pong));
-                       })
+                        })
                 .exceptionallyCompose(
                         error -> {
-                            LOG.info("Something when wrong when sending a {} to {}", message.getMessageType(), message.getEnrSeq());
-                            this.connectionPool.ignoreNode(message.getEnrSeq());
-                            this.routingTable.evictNode(message.getEnrSeq());
+                            LOG.trace("Something when wrong when processing message {} to {}", message.getMessageType(), nodeRecord.asEnr());
+                            this.connectionPool.ignoreNode(nodeRecord.getNodeId());
+                            this.routingTable.removeRadius(nodeRecord.getNodeId());
                             return SafeFuture.completedFuture(Optional.empty());
                         });
 
@@ -80,7 +74,8 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
      */
     @Override
     public SafeFuture<Optional<Nodes>> findNodes(NodeRecord nodeRecord, FindNodes message) {
-         return sendMessage(nodeRecord, message)
+
+        return sendMessage(nodeRecord, message)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
                 .thenCompose(
@@ -153,21 +148,51 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         this.ping(nodeRecord, new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), Bytes.EMPTY));  //TODO it should be this.nodeRadius
     }
 
-
     @Override
-    public SafeFuture<NodeRecord> connect(NodeRecord peer) {
-       return  this.ping(peer, new Ping(UInt64.valueOf(peer.getSeq().toBytes().toLong()), Bytes.EMPTY)).thenApply(Optional::get).thenCompose(pong -> {
-              return SafeFuture.completedFuture(pong.getNodeRecord());
-       });
+    public SafeFuture<String> connect(NodeRecord peer) {
+        Ping ping = new Ping(peer.getSeq(), this.nodeRadius.toBytes());
+        return this.ping(peer, ping).thenApply(Optional::get).thenCompose(pong -> {
+                    return SafeFuture.completedFuture(pong.getEnrSeq().toString());
+                });
     }
 
     @Override
-    public int getPeerCount() {
+    public int getNumberOfConnectedPeers() {
         return connectionPool.getNumberOfConnectedPeers();
     }
 
     @Override
     public boolean isPeerConnected(NodeRecord peer) {
-        return this.connectionPool.isPeerConnected(UInt64.valueOf(peer.getSeq().toBytes().toLong()));
+        return this.connectionPool.isPeerConnected(peer.getNodeId());
+    }
+
+    @Override
+    public UInt256 getRadiusFromNode(NodeRecord node) {
+        return this.routingTable.getRadius(node.getNodeId());
+    }
+
+    @Override
+    public void handlePing(NodeRecord srcNode, Ping ping) {
+        Bytes srcNodeId = srcNode.getNodeId();
+        connectionPool.updateLivenessNode(srcNodeId); //TODO  should not be state updated if nodeId is not present ?
+        routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload())); //TODO we can avoid this if radius is not different.
+        Optional<NodeRecord> node = routingTable.findNode(srcNode.getNodeId());
+        if(node.isPresent() &&  UInt64.valueOf(node.get().getSeq().toBytes().toLong()).compareTo(ping.getEnrSeq()) < 0){ //TODO validate enrSeq
+//            client.sendDiscv5FindNodes(srcNode, List.of(0))
+//                    .thenApply(Collection::stream)
+//                    .thenApply(Stream::findFirst)
+//
+        }
+        Pong pong = new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
+        sendMessage(srcNode, pong);
+    }
+
+    private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {
+        return discv5Client.getEnrSeq();
+    }
+
+    @Override
+    public NetworkType getNetworkType() {
+        return networkType;
     }
 }

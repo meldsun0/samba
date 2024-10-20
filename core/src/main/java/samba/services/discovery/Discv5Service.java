@@ -1,30 +1,31 @@
 package samba.services.discovery;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
-import org.ethereum.beacon.discovery.TalkHandler;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
+import samba.domain.messages.IncomingRequestHandler;
+import samba.domain.messages.PortalWireMessage;
 import samba.metrics.SambaMetricCategory;
+import samba.network.exception.BadRequestException;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
-import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.service.serviceutils.Service;
 
-import java.math.BigInteger;
-import java.net.InetSocketAddress;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
 
@@ -33,7 +34,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
     private static final Logger LOG = LogManager.getLogger();
     private final DiscoverySystem discoverySystem;
-    private final List<NodeRecord> bootnodes;
+    private final NodeRecord localNodeRecord;
 //    private final boolean supportsIpv6;
 //    private final SECP256K1.SecretKey localNodePrivateKey;
 
@@ -44,9 +45,8 @@ public class Discv5Service extends Service implements Discv5Client {
                          final AsyncRunner asyncRunner,
                          final DiscoveryConfig discoveryConfig,
                          final Bytes privateKey,
-                         final List bootnodes) {
+                         final IncomingRequestHandler incomingRequestProcessor) {
         //add node Record converter.
-        this.bootnodes = bootnodes;
         this.asyncRunner = asyncRunner;
         //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
 
@@ -84,20 +84,12 @@ public class Discv5Service extends Service implements Discv5Client {
                 new DiscoverySystemBuilder()
                         .listen("0.0.0.0", 9090)
                         .secretKey(keyPair.secretKey())
-                        .bootnodes(bootnodes)
+                        .bootnodes(discoveryConfig.getBootnodes())
                         .localNodeRecord(createNodeRecord(keyPair, "0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
-                        .talkHandler(new TalkHandler() {
-                            @Override
-                            public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
-                                LOG.info("Talk handler here");
-                                return null;
+                        .talkHandler(incomingRequestProcessor).build();
 
-
-                            }
-                        }).build();
-
-        NodeRecord myNode = discoverySystem.getLocalNodeRecord();
+        this.localNodeRecord = discoverySystem.getLocalNodeRecord();
 
 
         metricsSystem.createIntegerGauge(
@@ -121,8 +113,13 @@ public class Discv5Service extends Service implements Discv5Client {
 
 
     @Override
-    public CompletableFuture<Bytes> sendDisV5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
-        return this.discoverySystem.talk(nodeRecord, protocol, request);
+    public CompletableFuture<Bytes> sendDisv5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
+        return this.discoverySystem.talk(nodeRecord, protocol, request).exceptionallyCompose(this::handleError);
+    }
+
+    private CompletionStage<Bytes> handleError(Throwable error) {
+        LOG.trace("Something when wrong when sending a Discv5 message");
+        return SafeFuture.failedFuture(error);
     }
 
     @Override
@@ -131,14 +128,34 @@ public class Discv5Service extends Service implements Discv5Client {
         return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList()); //   .thenApply(this::converToPeer);
     }
 
+
     @Override
     public Optional<Bytes> getNodeId() {
         return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
     }
 
+
+    @Override
+    public Optional<String> getEnr() {
+        return Optional.of(discoverySystem.getLocalNodeRecord().asEnr());
+    }
+
+    @Override
+    public UInt64 getEnrSeq() {
+        return discoverySystem.getLocalNodeRecord().getSeq();
+    }
+
+    @Override
+    public CompletableFuture<Collection<NodeRecord>> sendDiscv5FindNodes(NodeRecord nodeRecord, List<Integer> distances) {
+        return discoverySystem.findNodes(nodeRecord, distances);
+    }
+
     private Stream<NodeRecord> converToPeer(NodeRecord nodeRecord) {
+        //TODO convert to our on definition of Node
         return null;
     }
+
+
 
     @Override
     protected SafeFuture<?> doStart() {
@@ -157,11 +174,8 @@ public class Discv5Service extends Service implements Discv5Client {
         return SafeFuture.completedFuture(null);
     }
 
-    public Optional<String> getEnr() {
-        return Optional.of(discoverySystem.getLocalNodeRecord().asEnr());
-    }
-
     public void updateCustomENRField(final String fieldName, final Bytes value) {
         discoverySystem.updateCustomFieldValue(fieldName, value);
+
     }
 }

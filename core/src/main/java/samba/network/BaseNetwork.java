@@ -14,6 +14,7 @@ import samba.db.PortalDB;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
 import samba.network.exception.BadRequestException;
+import samba.network.exception.MessageToOurselfException;
 import samba.network.exception.StoreNotAvailableException;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -22,39 +23,42 @@ public abstract class BaseNetwork implements Network {
 
     protected static final Logger LOG = LogManager.getLogger();
 
-    private NetworkType networkType;
+    protected NetworkType networkType;
     protected RoutingTable routingTable;
-    private Discv5Client client;
+    protected Discv5Client discv5Client;
 
-    private NodeRecord nodeRecord;
     protected UInt64 nodeRadius;
     private PortalDB db;
     // private final PrivKey privKey;
     // private final Host host;
 
-    public BaseNetwork(NetworkType networkType, Discv5Client client, RoutingTable routingTable, UInt64 nodeRadius) {
+    public BaseNetwork(NetworkType networkType, Discv5Client discv5Client, RoutingTable routingTable, UInt64 nodeRadius) {
         this.networkType = networkType;
-        this.client = client;
+        this.discv5Client = discv5Client;
         this.networkType = networkType;
         this.routingTable = routingTable;
         this.nodeRadius = nodeRadius;
 
     }
 
-    protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord node, PortalWireMessage messageRequest) {
-        LOG.trace("Send {} message to {}", messageRequest.getMessageType(), node.getNodeId());
-         if (!isStoreAvailable()) {
+    protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord destinationNode, PortalWireMessage messageRequest) {
+        LOG.trace("Send Portal {} message to {}", messageRequest.getMessageType(), destinationNode.getNodeId());
+        if (!isStoreAvailable()) {
             return SafeFuture.failedFuture(new StoreNotAvailableException());
         }
-//        if(nodeRecord.equals(node)){
-//            return SafeFuture.failedFuture(new MessageToOurselfException());
-//        }
+        if(isOurself(destinationNode)){
+            return SafeFuture.failedFuture(new MessageToOurselfException());
+        }
         //TODO FIX chain order
-        return SafeFuture.of(client.sendDisV5Message(node, this.networkType.getValue(), messageRequest.getSszBytes())
-                        .thenApply((sszbytes)->parseResponse(sszbytes, node, messageRequest)) //Change
+        return SafeFuture.of(discv5Client.sendDisv5Message(destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
+                        .thenApply((sszbytes)->parseResponse(sszbytes, destinationNode, messageRequest)) //Change
                         .thenApply(Optional::of))
                         .thenPeek(this::logResponse)
                         .exceptionallyCompose(error->handleSendMessageError(messageRequest, error));
+    }
+
+    private boolean isOurself(NodeRecord node) {
+      return this.discv5Client.getNodeId().isPresent() && this.discv5Client.getNodeId().get().equals(node.getNodeId());
     }
 
     private boolean isStoreAvailable() {
@@ -62,12 +66,12 @@ public abstract class BaseNetwork implements Network {
     }
 
     private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
-        portalWireMessage.ifPresent((message)->LOG.info("{} message received", message.getMessageType()));
+        portalWireMessage.ifPresent((message)->LOG.trace("Portal {} message received", message.getMessageType()));
     }
 
 
     private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(PortalWireMessage message, Throwable error) {
-        LOG.info("Something when wrong when sending a {} message", message.getMessageType());
+        LOG.trace("Something when wrong when sending a Portal {} message", message.getMessageType());
         final Throwable rootCause = Throwables.getRootCause(error);
         if (rootCause instanceof IllegalArgumentException) {
             return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));
@@ -75,9 +79,9 @@ public abstract class BaseNetwork implements Network {
         return SafeFuture.failedFuture(error);
     }
 
-    private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord node, PortalWireMessage requestMessage) {
+    private PortalWireMessage parseResponse(Bytes sszbytes, NodeRecord destinationNode, PortalWireMessage requestMessage) {
         //TODO validate appropriate response. If I send a Ping I must get a PONG
-        return PortalWireMessageDecoder.decode(node, sszbytes);
-    }
+       return PortalWireMessageDecoder.decode(destinationNode, sszbytes);
 
+    }
 }

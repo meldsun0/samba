@@ -37,6 +37,8 @@ public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteL
         return decodedPacket;
     }
 
+
+
     public static class PingSchema extends ContainerSchema2<PingContainer, SszUInt64, SszByteList> {
 
         public static final PingSchema INSTANCE = new PingSchema();
@@ -51,3 +53,5 @@ public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteL
         }
     }
 }
+
+

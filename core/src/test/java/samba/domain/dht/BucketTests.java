@@ -1,8 +1,6 @@
-package samba.core.dht;
+package samba.domain.dht;
 
 import org.junit.jupiter.api.Test;
-import samba.domain.dht.Bucket;
-import samba.domain.dht.BucketEntry;
 
 import java.util.List;
 

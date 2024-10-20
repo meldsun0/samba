@@ -1,4 +1,4 @@
-package samba.core.dht;
+package samba.domain.dht;
 
 public class NodeTableTests {
 }

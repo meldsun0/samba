@@ -1,18 +1,15 @@
 package samba.domain.messages.handler;
 
-import java.util.Optional;
-
 import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.PortalWireMessage;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import samba.network.Network;
+import samba.network.history.HistoryNetworkIncomingRequests;
 
 public class FindNodesHandler implements PortalWireMessageHandler<FindNodes> {
-    
+
     @Override
-    public Optional<PortalWireMessage> handle(FindNodes message, NodeRecord srcNode) {
-        
-        return Optional.empty();
+    public void handle(HistoryNetworkIncomingRequests network, NodeRecord srcNode, FindNodes findNodes) {
+        //TODO implement FindNodeHandler
     }
-    
 }

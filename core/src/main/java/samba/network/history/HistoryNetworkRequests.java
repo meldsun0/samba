@@ -14,7 +14,7 @@ import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
-public interface HistoryNetworkRequestOperations {
+public interface HistoryNetworkRequests {
 
     SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
 

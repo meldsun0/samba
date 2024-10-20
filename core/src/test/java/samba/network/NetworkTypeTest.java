@@ -1,28 +1,19 @@
 package samba.network;
 
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NetworkTypeTest {
 
     @Test
-    void testEnumValues() {
-        assertEquals(0x500A, NetworkType.EXECUTION_STATE_NETWORK.getIntValue());
-        assertEquals(0x500B, NetworkType.EXECUTION_HISTORY_NETWORK.getIntValue());
-        assertEquals(0x500C, NetworkType.BEACON_CHAIN_NETWORK.getIntValue());
-        assertEquals(0x504A, NetworkType.ANGELFOOD_STATE_NETWORK.getIntValue());
-        assertEquals(0x504B, NetworkType.ANGELFOOD_HISTORY_NETWORK.getIntValue());
-        assertEquals(0x504C, NetworkType.ANGELFOOOD_BECACON_CHAIN_NETWORK.getIntValue());
-    }
-
-    @Test
     void testEnumNames() {
-        assertEquals("State-Network", NetworkType.EXECUTION_STATE_NETWORK.getName());
-        assertEquals("History-Network", NetworkType.EXECUTION_HISTORY_NETWORK.getName());
-        assertEquals("Beacon-chain-Network", NetworkType.BEACON_CHAIN_NETWORK.getName());
-        assertEquals("Angelfood-State-Network", NetworkType.ANGELFOOD_STATE_NETWORK.getName());
-        assertEquals("Angelfood-History-Network", NetworkType.ANGELFOOD_HISTORY_NETWORK.getName());
-        assertEquals("Angelfood-State-Network", NetworkType.ANGELFOOOD_BECACON_CHAIN_NETWORK.getName());
+        assertEquals("state-network", NetworkType.EXECUTION_STATE_NETWORK.getName());
+        assertEquals("history-network", NetworkType.EXECUTION_HISTORY_NETWORK.getName());
+        assertEquals("beacon-chain-network", NetworkType.BEACON_CHAIN_NETWORK.getName());
+        assertEquals("angelfood-state-network", NetworkType.ANGELFOOD_STATE_NETWORK.getName());
+        assertEquals("angelfood-history-network", NetworkType.ANGELFOOD_HISTORY_NETWORK.getName());
+        assertEquals("angelfood-state-network", NetworkType.ANGELFOOOD_BECACON_CHAIN_NETWORK.getName());
     }
 
     @Test

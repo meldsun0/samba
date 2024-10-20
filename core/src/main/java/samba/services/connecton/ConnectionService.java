@@ -69,11 +69,11 @@ public class ConnectionService extends Service {
 
     private SafeFuture<Void> searchForActivePeers() {
         if (!isRunning()) {
-            LOG.debug("Not running so not searching for active peers");
+            LOG.trace("Not running so not searching for active peers");
             return SafeFuture.COMPLETE;
         }
-        LOG.info("Searching for active peers every {} seconds", DISCOVERY_INTERVAL);
-        LOG.info("{} active peers",network.getPeerCount());
+        LOG.info("{} active peers. Checking again in {} seconds",network.getNumberOfConnectedPeers(), DISCOVERY_INTERVAL.getSeconds());
+
         return discv5Client.streamLiveNodes()
                 .orTimeout(30, TimeUnit.SECONDS)
                 .handle(
@@ -92,16 +92,16 @@ public class ConnectionService extends Service {
     }
 
     private void connectToPeers(final NodeRecord nodeRecord) {
-        LOG.debug("Attempting to connect to {}", nodeRecord.getNodeId());
+        LOG.trace("Attempting to connect to {}", nodeRecord.getNodeId());
         attemptedConnectionCounter.inc();
         network.connect(nodeRecord).finish(
                 peer -> {
-                    LOG.debug("Successfully connected to node {}", nodeRecord.getNodeId());
+                    LOG.trace("Successfully connected to node {}", nodeRecord.getNodeId());
                     successfulConnectionCounter.inc();
 //                    peer.subscribeDisconnect((reason, locallyInitiated) -> peerPools.forgetPeer(peer.getId()));
                 },
                 error -> {
-                    LOG.debug(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
+                    LOG.trace(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
                     failedConnectionCounter.inc();
 //                    peerPools.forgetPeer(peerAddress.getId());
                 });
@@ -130,7 +130,7 @@ public class ConnectionService extends Service {
 
 
     private void createNextSearchPeerTask() {
-        if (network.getPeerCount() == 0) {
+        if (network.getNumberOfConnectedPeers() == 0) {
             LOG.trace("Retrying peer search, no connected peers yet");
             cancelPeerSearchTask();
             this.periodicPeerSearch = asyncRunner.runCancellableAfterDelay(this::activeNodesSearchingTask, WARMUP_DISCOVERY_INTERVAL, this::logSearchError);

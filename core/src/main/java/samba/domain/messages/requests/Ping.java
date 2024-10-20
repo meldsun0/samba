@@ -1,5 +1,6 @@
 package samba.domain.messages.requests;
 
+import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -18,12 +19,17 @@ public class Ping implements PortalWireMessage {
     private final UInt64 enrSeq;
     private final Bytes customPayload;
 
-    public Ping(UInt64 enrSeq, Bytes customPayload) {
+
+      public Ping(UInt64 enrSeq, Bytes customPayload) {
         checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
         checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
 
         this.enrSeq = enrSeq;
         this.customPayload = customPayload;
+    }
+
+    public Ping(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
+          this(UInt64.valueOf(enrSeq.toBytes().toLong()),customPayload);
     }
 
     public static Ping fromSSZBytes(Bytes sszbytes){
@@ -61,5 +67,28 @@ public class Ping implements PortalWireMessage {
     @Override
     public Ping getMessage() {
         return this;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Ping that = (Ping) o;
+        return  Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(enrSeq, customPayload);
+    }
+
+    @Override
+    public String toString() {
+        return "Ping{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
     }
 }
