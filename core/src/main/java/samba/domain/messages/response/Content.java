@@ -4,13 +4,12 @@ import java.util.Base64;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.domain.messages.requests.Ping;
 import samba.schema.ssz.containers.ContentContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -80,7 +79,6 @@ public class Content implements PortalWireMessage {
                     }
                 }
                 // TODO: Remove requesting node (this node) from the list of ENRs
-                // TODO: Remove requesting node (this node) from the list of ENRs
                 return new Content(enrs);
             }
             default -> {
@@ -95,7 +93,7 @@ public class Content implements PortalWireMessage {
         return MessageType.CONTENT;
     }
 
-    public int getPayloadType() {
+    public int getContentType() {
         return contentType;
     }
 

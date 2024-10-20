@@ -1,26 +1,23 @@
 package samba.network.history;
 
-
-import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.units.bigints.UInt256;
-import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.response.Nodes;
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.domain.messages.requests.Ping;
-import samba.domain.messages.response.Pong;
-import samba.network.BaseNetwork;
-import samba.network.NetworkType;
-import samba.services.discovery.Discv5Client;
-import samba.services.connecton.ConnectionPool;
-import tech.pegasys.teku.infrastructure.async.SafeFuture;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
+import org.apache.tuweni.bytes.Bytes;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 
+import samba.domain.messages.requests.*;
+import samba.domain.messages.response.*;
+import samba.network.BaseNetwork;
+import samba.network.NetworkType;
+import samba.services.connecton.ConnectionPool;
+import samba.services.discovery.Discv5Client;
+import tech.pegasys.teku.infrastructure.async.SafeFuture;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
+import org.apache.tuweni.units.bigints.UInt256;
+
+public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests {
 
     private ConnectionPool connectionPool;
     private UInt256 nodeRadius;
@@ -100,6 +97,55 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             LOG.info("Something when wrong when sending a {}", message.getMessageType());
                             return SafeFuture.completedFuture(Optional.empty());
                         });
+    }
+
+    @Override
+    public SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent message) {
+        return sendMessage(nodeRecord, message)
+                .thenApply(Optional::get)
+                .thenCompose(
+                        contentMessage -> {
+                            Content content = contentMessage.getMessage();
+                            //Parse for three subtypes and then opperate accordingly
+                            if (content.getContentType() == 0) {
+                                //uTP connection
+                            } else if (content.getContentType() == 1) {
+                                //Recieve content
+                            } else if (content.getContentType() == 2) {
+                                List<String> nodesList = content.getEnrList();
+                                //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
+                                //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
+                                //nodesList.removeIf(routingTable::isKnown);
+                                //nodesList.forEach(this::pingUnknownNode);
+                            }
+                            return SafeFuture.completedFuture(Optional.of(content));
+                        })
+                .exceptionallyCompose(
+                        error -> {
+                            LOG.info("Something when wrong when sending a {}", message.getMessageType());
+                            return SafeFuture.completedFuture(Optional.empty());
+                        });
+    }
+
+    @Override
+    public SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer message) {
+        return sendMessage(nodeRecord, message)
+                .thenApply(Optional::get)
+                .thenCompose(
+                        acceptMessage -> {
+                            Accept accept = acceptMessage.getMessage();
+                            //TODO
+                            return SafeFuture.completedFuture(Optional.of(accept));
+                        })
+                .exceptionallyCompose(
+                        error -> {
+                            LOG.info("Something when wrong when sending a {}", message.getMessageType());
+                            return SafeFuture.completedFuture(Optional.empty());
+                        });
+    }
+
+    private void pingUnknownNode(NodeRecord nodeRecord) {
+        this.ping(nodeRecord, new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), Bytes.EMPTY));  //TODO it should be this.nodeRadius
     }
 
     @Override
