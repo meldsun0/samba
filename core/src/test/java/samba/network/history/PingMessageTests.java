@@ -1,23 +1,28 @@
 package samba.network.history;
 
 
-import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
-import samba.domain.messages.requests.Ping;
-import samba.domain.messages.response.Pong;
-import samba.services.discovery.Discv5Client;
-import tech.pegasys.teku.infrastructure.async.SafeFuture;
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.apache.tuweni.bytes.Bytes;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.jetbrains.annotations.NotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import samba.domain.messages.requests.Ping;
+import samba.domain.messages.response.Pong;
 import static samba.network.history.TestHelper.createNodeRecord;
+import samba.services.discovery.Discv5Client;
+import tech.pegasys.teku.infrastructure.async.SafeFuture;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class PingMessageTests {
 
@@ -92,7 +97,7 @@ public class PingMessageTests {
 
     @NotNull
     private static CompletableFuture<Bytes> createPongBytesResponse(Bytes pongCustomPayload ) {
-        return CompletableFuture.completedFuture(Bytes.concatenate(Bytes.fromHexString("0x0101000000000000000c000000"),pongCustomPayload));
+        return CompletableFuture.completedFuture(Bytes.concatenate(Bytes.fromHexString("0x0101000000000000000c000000"), pongCustomPayload));
     }
 
     @NotNull

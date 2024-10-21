@@ -16,7 +16,7 @@ public class PingHandler implements PortalWireMessageHandler<Ping> {
     @Override
     public PortalWireMessage handle(HistoryNetworkIncomingRequests network, NodeRecord srcNode, Ping ping) {
         LOG.info("{} message received", ping.getMessageType());
-        PortalWireMessage pong = network.handlePing(srcNode,ping);
+        PortalWireMessage pong = network.handlePing(srcNode, ping);
         return pong;
     }
 }
