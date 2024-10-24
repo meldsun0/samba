@@ -2,13 +2,12 @@ package samba.network.history;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
-import samba.domain.routingtable.LivenessChecker;
-import samba.domain.routingtable.NodeTable;
+import samba.domain.dht.LivenessChecker;
+import samba.domain.dht.NodeTable;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.network.RoutingTable;
 
 
-import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,33 +16,25 @@ import java.util.concurrent.ConcurrentHashMap;
  * The binary tree exactly match the number of bits (256) in the key-space. (We have spot for any given distinction).
  * The greater the distance the greater the space, so each bucket has limit to prevent exponential growth -> each bucket contains less information about the space it needs to occupy.
  * You know more of the know you are close to.
+ *
+ * Radius: represents the data that a homeNode is "interested" in.
 */
 public class HistoryRoutingTable implements RoutingTable {
 
    private final Map<Bytes, UInt256> radiusMap;
    private final NodeTable nodeTable;
-    //gossip ?
-
+   //gossip ?
 
     public HistoryRoutingTable(final NodeRecord homeNode, final LivenessChecker livenessChecker) {
         this.radiusMap = new ConcurrentHashMap<Bytes, UInt256> ();
         this.nodeTable = new NodeTable(homeNode, livenessChecker);
     }
 
-
-
     @Override
     public void removeRadius(Bytes nodeId) {
         this.radiusMap.remove(nodeId);
+     }
 
-    }
-
-    /**
-     *
-     * @param nodeId
-     * @param radius This value is a 256 bit integer and represents the data that a node is "interested" in.
-     */
-    @Override
     public void updateRadius(Bytes nodeId, UInt256 radius) {
         this.radiusMap.put(nodeId, radius);
     }
@@ -54,20 +45,27 @@ public class HistoryRoutingTable implements RoutingTable {
     }
 
     @Override
-    public boolean isKnown(Bytes nodeId) {
-        return false;
-        //TODO  use a DHT
-       // return this.dht.containsNode(nodeRecord.getNodeId());
-    }
-
-    @Override
     public Optional<NodeRecord> findNode(Bytes nodeId) {
-        return Optional.empty();
+        return this.nodeTable.getNode(nodeId);
     }
 
     @Override
-    public void addNode(NodeRecord nodeRecord) {
+    public void addOrUpdateNode(NodeRecord nodeRecord) {
          this.nodeTable.addNode(nodeRecord);
     }
 
+    @Override
+    public void removeNode(NodeRecord nodeRecord) {
+        this.nodeTable.removeNode(nodeRecord);
+    }
+
+    @Override
+    public int getActiveNodes() {
+        return this.nodeTable.getStats().getTotalLiveNodeCount();
+    }
+
+    @Override
+    public boolean isNodeConnected(Bytes nodeId) {
+        return this.nodeTable.getNode(nodeId).isPresent();
+    }
 }

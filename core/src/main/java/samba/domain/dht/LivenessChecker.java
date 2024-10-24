@@ -1,4 +1,4 @@
-package samba.domain.routingtable;
+package samba.domain.dht;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import java.util.concurrent.CompletableFuture;

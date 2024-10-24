@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.domain.routingtable;
+package samba.domain.dht;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
@@ -16,21 +16,14 @@ import java.util.stream.Stream;
 
 class KBucket {
 
-    static final int K = 16;
+    private static final int K = 16;
+    private long lastMaintenanceTime = 0;
 
     private final LivenessManager livenessManager;
     private final Clock clock;
 
-    /**
-     * The nodes actually in the bucket, ordered by time they were last confirmed as live.
-     *
-     * <p>Thus the live nodes are at the start of the bucket with not yet confirmed nodes at the end,
-     * and the last node in the list is the node least recently confirmed as live that should be the
-     * next to check.
-     */
     private final List<BucketEntry> nodes = new ArrayList<>();
     private Optional<BucketEntry> pendingNode = Optional.empty();
-    private long lastMaintenanceTime = 0;
 
     public KBucket(final LivenessManager livenessManager, final Clock clock) {
         this.livenessManager = livenessManager;
@@ -57,34 +50,8 @@ class KBucket {
         return pendingNode.map(BucketEntry::getNode);
     }
 
-    //actualuliza el node existente o agrega uno nuevo en caso de q haya lugar y no sea un ignorado.
-    public void offer(final NodeRecord node) {
-        performMaintenance();
-        getEntry(node)
-                .ifPresentOrElse(
-                    existing -> updateExistingRecord(existing, node), () -> offerNewNode(node));
-    }
-
-
-
-    private void offerNewNode(final NodeRecord node) {
-        if (livenessManager.isABadPeer(node)) {
-            return;
-        }
-        if (isFull()) {
-            getLastNode().checkLiveness(clock.millis());
-            if (pendingNode.isEmpty()) {
-                livenessManager.checkLiveness(node);
-            }
-        } else {
-            final BucketEntry newEntry = new BucketEntry(livenessManager, node);
-            nodes.add(newEntry);
-            newEntry.checkLiveness(clock.millis());
-        }
-    }
-
-
-    public void add(final NodeRecord node) {
+    //TODO validate when trigger  newNode.checkLiveness(currentTime);
+    public void addOrUpdate(final NodeRecord node) {
         getEntry(node)
                 .ifPresentOrElse(
                         existingEntry -> {
@@ -92,43 +59,23 @@ class KBucket {
                             performMaintenance();
                         },
                         () -> {
-
-
-
+                            if (livenessManager.isABadPeer(node)) return;
                             if (isPendingNode(node)) updatePendingNodeTime();
                             performMaintenance();
                             addNewNode(node);
-
-
                         });
     }
 
-
-    private boolean isPendingNode(NodeRecord node) {
-        return pendingNode.isPresent() && pendingNode.get().getNodeId().equals(node.getNodeId());
-    }
-
-
-    private void addNewNode(NodeRecord node) {
-        if (isFull()) {
-            if (pendingNode.isEmpty()) {
-                pendingNode = Optional.of(new BucketEntry(livenessManager, node, clock.millis()));
-            }
-        } else {
-            nodes.addFirst(new BucketEntry(livenessManager, node, clock.millis()));
-        }
-    }
-
-    private void updateExistingEntry(BucketEntry existingEntry, final NodeRecord newRecord ) {
-       // if (existingEntry.getNode().getSeq().compareTo(newRecord.getSeq()) >= 0) return;
-        nodes.remove(existingEntry);
-        nodes.addFirst(new BucketEntry(livenessManager, newRecord, clock.millis()));
-        // newEntry.checkLiveness(clock.millis());
-    }
-
-
-    private void updatePendingNodeTime() {
-        pendingNode = Optional.of(pendingNode.get().withLastConfirmedTime(clock.millis()));
+    //TODO validate if it should be removed from the liveness checker.
+    public void remove(final NodeRecord node){
+        getEntry(node).ifPresent( existingEntry -> {
+                          if (isPendingNode(node)){
+                              pendingNode = Optional.empty();
+                          }else{
+                              nodes.remove(existingEntry);
+                          }
+                });
+        performMaintenance();
     }
 
     /**
@@ -153,15 +100,14 @@ class KBucket {
         lastMaintenanceTime = currentTime;
         performPendingNodeMaintenance();
 
-        if (nodes.isEmpty()) {
-            return;
-        }
+        if (nodes.isEmpty()) return;
+
         final BucketEntry lastNode = getLastNode();
         if (lastNode.hasFailedLivenessCheck(currentTime)) {
             nodes.remove(lastNode);
             pendingNode.ifPresent(
                     pendingEntry -> {
-                        nodes.add(0, pendingEntry);
+                        nodes.addFirst(pendingEntry);
                         pendingNode = Optional.empty();
                     });
         } else {
@@ -171,6 +117,37 @@ class KBucket {
 
     public long getLastMaintenanceTime() {
         return lastMaintenanceTime;
+    }
+
+    public Optional<NodeRecord> getNode(final Bytes targetNodeId) {
+        return getEntry(targetNodeId).map(BucketEntry::getNode);
+    }
+
+    public boolean isEmpty() {
+        return nodes.isEmpty();
+    }
+
+    private boolean isPendingNode(NodeRecord node) {
+        return pendingNode.isPresent() && pendingNode.get().getNodeId().equals(node.getNodeId());
+    }
+
+    private void addNewNode(NodeRecord node) {
+        if (isFull()) {
+            if (pendingNode.isEmpty()) {
+                pendingNode = Optional.of(new BucketEntry(livenessManager, node, clock.millis()));
+            }
+        } else {
+            nodes.addFirst(new BucketEntry(livenessManager, node, clock.millis()));
+        }
+    }
+
+    private void updateExistingEntry(BucketEntry existingEntry, final NodeRecord newRecord) {
+        nodes.remove(existingEntry);
+        nodes.addFirst(new BucketEntry(livenessManager, newRecord, clock.millis()));
+    }
+
+    private void updatePendingNodeTime() {
+        pendingNode = Optional.of(pendingNode.get().withLastConfirmedTime(clock.millis()));
     }
 
     private void performPendingNodeMaintenance() {
@@ -199,13 +176,5 @@ class KBucket {
 
     private Optional<BucketEntry> getEntry(final Bytes nodeId) {
         return nodes.stream().filter(node -> node.getNodeId().equals(nodeId)).findAny();
-    }
-
-    public Optional<NodeRecord> getNode(final Bytes targetNodeId) {
-        return getEntry(targetNodeId).map(BucketEntry::getNode);
-    }
-
-    public boolean isEmpty() {
-        return nodes.isEmpty();
     }
 }

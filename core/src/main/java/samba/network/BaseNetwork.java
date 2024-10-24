@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
@@ -22,23 +23,16 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 public abstract class BaseNetwork implements Network {
 
     protected static final Logger LOG = LogManager.getLogger();
-
     protected NetworkType networkType;
-    protected RoutingTable routingTable;
     protected Discv5Client discv5Client;
-
-    protected UInt64 nodeRadius;
+    protected UInt256 nodeRadius;
     private PortalDB db;
-    // private final PrivKey privKey;
-    // private final Host host;
 
-    public BaseNetwork(NetworkType networkType, Discv5Client discv5Client, RoutingTable routingTable, UInt64 nodeRadius) {
+
+    public BaseNetwork(NetworkType networkType, Discv5Client discv5Client, UInt256 nodeRadius) {
         this.networkType = networkType;
         this.discv5Client = discv5Client;
-        this.networkType = networkType;
-        this.routingTable = routingTable;
         this.nodeRadius = nodeRadius;
-
     }
 
     protected SafeFuture<Optional<PortalWireMessage>> sendMessage(NodeRecord destinationNode, PortalWireMessage messageRequest) {

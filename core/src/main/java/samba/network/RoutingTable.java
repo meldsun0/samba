@@ -15,11 +15,13 @@ public interface RoutingTable {
 
     UInt256 getRadius(Bytes nodeId);
 
-    boolean isKnown(Bytes nodeId);
-
-
     Optional<NodeRecord> findNode(Bytes nodeId);
 
+    void addOrUpdateNode(NodeRecord nodeRecord);
 
-    void addNode(NodeRecord nodeRecord);
+    void removeNode(NodeRecord nodeRecord);
+
+    int getActiveNodes();
+
+    boolean isNodeConnected(Bytes nodeId);
 }

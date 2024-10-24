@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.domain.routingtable;
+package samba.domain.dht;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,9 +32,6 @@ public class LivenessManager {
     this.ignoredNodes = new ExpirationSet<>(IGNORE_DURATION, clock, MAX_IGNORE_SET_SIZE);
     this.livenessChecker = livenessChecker;
   }
-
-
-
 
   /**
    * Adds the specified node to the queue of nodes to perform a liveness check on.

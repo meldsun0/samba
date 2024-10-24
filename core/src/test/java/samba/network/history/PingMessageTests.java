@@ -27,15 +27,18 @@ public class PingMessageTests {
     @Test
     public void sendOkPingMessageAndReceiveOkPongTest() throws ExecutionException, InterruptedException {
         Discv5Client discv5Client = mock(Discv5Client.class);
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
+        when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
+
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
         assertEquals(UInt64.valueOf(1), pong.get().getEnrSeq());
         assertEquals(pongCustomPayload, pong.get().getCustomPayload());
         assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
-        assertTrue(historyNetwork.isPeerConnected(nodeRecord));
+        assertTrue(historyNetwork.isNodeConnected(nodeRecord));
         assertEquals( pong.get().getCustomPayload(),historyNetwork.getRadiusFromNode(nodeRecord));
     }
 
@@ -43,29 +46,33 @@ public class PingMessageTests {
     @Test
     public void sendOkPingMessageAndReceiveOkEmptyCustomPayloadPongTest() throws ExecutionException, InterruptedException {
         Discv5Client discv5Client = mock(Discv5Client.class);
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(Bytes.EMPTY));
+        when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
+
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
         assertEquals(UInt64.valueOf(1), pong.get().getEnrSeq());
         assertEquals(Bytes.EMPTY, pong.get().getCustomPayload());
         assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
-        assertFalse(historyNetwork.isPeerConnected(nodeRecord));
+        assertFalse(historyNetwork.isNodeConnected(nodeRecord));
         assertNull(historyNetwork.getRadiusFromNode(nodeRecord));
     }
 
     @Test
     public void handleErrorWhenSendingaPingTest() throws ExecutionException, InterruptedException {
         Discv5Client discv5Client = mock(Discv5Client.class);
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
+
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
         NodeRecord nodeRecord = createNodeRecord();
 
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
         assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
-        assertFalse(historyNetwork.isPeerConnected(nodeRecord));
+        assertFalse(historyNetwork.isNodeConnected(nodeRecord));
         assertNull(historyNetwork.getRadiusFromNode(nodeRecord));
         assertFalse(pong.isPresent());
 
@@ -75,6 +82,7 @@ public class PingMessageTests {
     @Test
     public void handleASuccessfulPingIncomingRequestTest() throws ExecutionException, InterruptedException {
         Discv5Client discv5Client = mock(Discv5Client.class);
+        when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
         when(discv5Client.getEnrSeq()).thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
@@ -86,7 +94,7 @@ public class PingMessageTests {
 
 
         assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
-        assertTrue(historyNetwork.isPeerConnected(nodeRecord));
+        assertTrue(historyNetwork.isNodeConnected(nodeRecord));
         assertEquals(pingMessage.getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
     }
 

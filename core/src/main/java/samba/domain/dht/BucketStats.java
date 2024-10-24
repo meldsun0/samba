@@ -2,7 +2,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package samba.domain.routingtable;
+package samba.domain.dht;
 
 import org.ethereum.beacon.discovery.storage.KBuckets;
 
@@ -17,14 +17,6 @@ public class BucketStats {
         allNodeCounts[distance] = allNodeCount;
     }
 
-    public int[] getLiveNodeCounts() {
-        return liveNodeCounts;
-    }
-
-    public int[] getAllNodeCounts() {
-        return allNodeCounts;
-    }
-
     public int getTotalLiveNodeCount() {
         return IntStream.of(liveNodeCounts).sum();
     }
@@ -33,7 +25,8 @@ public class BucketStats {
         return IntStream.of(allNodeCounts).sum();
     }
 
-    public String format() {
+    @Override
+    public String toString() {
         final StringBuilder str = new StringBuilder("Node counts by distance:\n");
         for (int distance = 0; distance <= KBuckets.MAXIMUM_BUCKET; distance++) {
             final int liveCount = liveNodeCounts[distance];
@@ -53,10 +46,5 @@ public class BucketStats {
                 .append(" Total: ")
                 .append(getTotalNodeCount());
         return str.toString();
-    }
-
-    @Override
-    public String toString() {
-        return format();
     }
 }

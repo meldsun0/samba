@@ -1,7 +1,6 @@
 package samba.services.discovery;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -11,14 +10,11 @@ import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
-import org.ethereum.beacon.discovery.storage.NodeRecordListener;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.domain.messages.IncomingRequestHandler;
-import samba.domain.messages.PortalWireMessage;
 import samba.metrics.SambaMetricCategory;
-import samba.network.exception.BadRequestException;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -35,7 +31,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
     private static final Logger LOG = LogManager.getLogger();
     private final DiscoverySystem discoverySystem;
-    private final NodeRecord localNodeRecord;
+
 //    private final boolean supportsIpv6;
 //    private final SECP256K1.SecretKey localNodePrivateKey;
 
@@ -50,7 +46,6 @@ public class Discv5Service extends Service implements Discv5Client {
         //add node Record converter.
         this.asyncRunner = asyncRunner;
         //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
-
 
         final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
 
@@ -90,9 +85,6 @@ public class Discv5Service extends Service implements Discv5Client {
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
                         .talkHandler(incomingRequestProcessor).build();
 
-        this.localNodeRecord = discoverySystem.getLocalNodeRecord();
-
-
         metricsSystem.createIntegerGauge(
                 SambaMetricCategory.DISCOVERY,
                 "live_nodes_current",
@@ -100,10 +92,9 @@ public class Discv5Service extends Service implements Discv5Client {
                 () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
     }
 
-    private NodeRecordListener createLocalNodeRecordListener(NodeRecord nodeRecord, NodeRecord nodeRecorde) {
+    private void createLocalNodeRecordListener(NodeRecord nodeRecord, NodeRecord nodeRecord1) {
         LOG.info("Implement createLocalNodeRecordListener");
     }
-
 
     private NodeRecord createNodeRecord(final SECP256K1.KeyPair keyPair, final String ip, final int port) {
         return new NodeRecordBuilder()
@@ -133,6 +124,11 @@ public class Discv5Service extends Service implements Discv5Client {
     @Override
     public Optional<Bytes> getNodeId() {
         return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
+    }
+
+    @Override
+    public NodeRecord getHomeNodeRecord() {
+        return this.discoverySystem.getLocalNodeRecord();
     }
 
 

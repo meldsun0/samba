@@ -21,6 +21,8 @@ public interface Discv5Client {
 
     Optional<Bytes> getNodeId();
 
+    NodeRecord getHomeNodeRecord();
+
     Optional<String> getEnr();
 
     UInt64 getEnrSeq();
