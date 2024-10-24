@@ -31,7 +31,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
 
     public HistoryNetwork(Discv5Client client) {
-        super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(), null);
+        super(NetworkType.EXECUTION_HISTORY_NETWORK, client, new HistoryRoutingTable(null, null, null), null);
         this.connectionPool = new ConnectionPool();
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
     }
@@ -54,7 +54,8 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             LOG.trace("{} message being processed from {}", message.getMessageType(), nodeRecord.asEnr());
                             Pong pong = pongMessage.getMessage();
                             if (pong.containsPayload()) { //TODO anything else to validate?
-                                this.connectionPool.updateLivenessNode(nodeRecord.getNodeId());
+                                this.routingTable.addNode(nodeRecord);
+                                this.connectionPool.updateLivenessNode(nodeRecord.getNodeId()); //liveliens sconfirm
                                 this.routingTable.updateRadius(nodeRecord.getNodeId(), UInt256.fromBytes(pong.getCustomPayload()));
                                 //TODO should we need to notify someone ?
                             }else{
@@ -65,7 +66,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                 .exceptionallyCompose(
                         error -> {
                             LOG.trace("Something when wrong when processing message {} to {}", message.getMessageType(), nodeRecord.asEnr());
-                            this.connectionPool.ignoreNode(nodeRecord.getNodeId());
+                            this.connectionPool.ignoreNode(nodeRecord.getNodeId()); // y sacarlo del bucket.
                             this.routingTable.removeRadius(nodeRecord.getNodeId());
                             return SafeFuture.completedFuture(Optional.empty());
                         });

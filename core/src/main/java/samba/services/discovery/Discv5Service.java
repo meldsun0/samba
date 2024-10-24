@@ -11,6 +11,7 @@ import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
+import org.ethereum.beacon.discovery.storage.NodeRecordListener;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
@@ -99,8 +100,8 @@ public class Discv5Service extends Service implements Discv5Client {
                 () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
     }
 
-    private void createLocalNodeRecordListener(NodeRecord nodeRecord, NodeRecord nodeRecord1) {
-        LOG.trace("Implement createLocalNodeRecordListener");
+    private NodeRecordListener createLocalNodeRecordListener(NodeRecord nodeRecord, NodeRecord nodeRecorde) {
+        LOG.info("Implement createLocalNodeRecordListener");
     }
 
 

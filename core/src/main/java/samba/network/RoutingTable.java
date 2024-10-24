@@ -21,5 +21,5 @@ public interface RoutingTable {
     Optional<NodeRecord> findNode(Bytes nodeId);
 
 
-    Object updateNode(NodeRecord nodeRecord);
+    void addNode(NodeRecord nodeRecord);
 }

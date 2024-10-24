@@ -6,9 +6,7 @@ import samba.domain.node.Node;
 
 import java.util.function.Supplier;
 
-/**
- *
- */
+
 public class BucketEntry implements Comparable<BucketEntry> {
 
     private Node node;
