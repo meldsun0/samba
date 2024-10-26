@@ -182,9 +182,6 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         Bytes srcNodeId = srcNode.getNodeId();
         routingTable.addOrUpdateNode(srcNode);
         routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload()));
-        LOG.info("handle Ping");
-        //Optional<NodeRecord> node = routingTable.findNode(srcNode.getNodeId());
-
         return new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
     }
 
