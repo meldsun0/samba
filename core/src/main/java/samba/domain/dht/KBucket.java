@@ -52,31 +52,30 @@ class KBucket {
 
     //TODO validate when trigger  newNode.checkLiveness(currentTime);
     public void addOrUpdate(final NodeRecord node) {
+        performMaintenance();
         getEntry(node)
                 .ifPresentOrElse(
                         existingEntry -> {
                             updateExistingEntry(existingEntry, node);
-                            performMaintenance();
                         },
                         () -> {
                             if (livenessManager.isABadPeer(node)) return;
-                            if (isPendingNode(node)) updatePendingNodeTime();
-                            performMaintenance();
                             addNewNode(node);
                         });
     }
 
     //TODO validate if it should be removed from the liveness checker.
-    public void remove(final NodeRecord node){
-        getEntry(node).ifPresent( existingEntry -> {
-                          if (isPendingNode(node)){
-                              pendingNode = Optional.empty();
-                          }else{
-                              nodes.remove(existingEntry);
-                          }
-                });
-        performMaintenance();
+    public void remove(final NodeRecord node) {
+        getEntry(node).ifPresentOrElse(existingEntry -> {
+            nodes.remove(existingEntry);
+            this.promotePendingNode();
+        }, () -> {
+            if (isPendingNode(node)) {
+                pendingNode = Optional.empty();
+            }
+        });
     }
+
 
     /**
      * Performs any pending maintenance on the bucket.
@@ -105,14 +104,18 @@ class KBucket {
         final BucketEntry lastNode = getLastNode();
         if (lastNode.hasFailedLivenessCheck(currentTime)) {
             nodes.remove(lastNode);
-            pendingNode.ifPresent(
-                    pendingEntry -> {
-                        nodes.addFirst(pendingEntry);
-                        pendingNode = Optional.empty();
-                    });
+            this.promotePendingNode();
         } else {
             lastNode.checkLiveness(currentTime);
         }
+    }
+
+    private void promotePendingNode() {
+        pendingNode.ifPresent(
+                pendingEntry -> {
+                    nodes.addFirst(pendingEntry);
+                    pendingNode = Optional.empty();
+                });
     }
 
     public long getLastMaintenanceTime() {
@@ -131,20 +134,34 @@ class KBucket {
         return pendingNode.isPresent() && pendingNode.get().getNodeId().equals(node.getNodeId());
     }
 
-    private void addNewNode(NodeRecord node) {
+    private void addNewNode(NodeRecord newNode) {
+        long currentTime = clock.millis();
         if (isFull()) {
             if (pendingNode.isEmpty()) {
-                pendingNode = Optional.of(new BucketEntry(livenessManager, node, clock.millis()));
+                pendingNode = Optional.of(new BucketEntry(livenessManager, newNode, currentTime));
+            } else {
+                if (isPendingNode(newNode)) {
+                    pendingNode = Optional.of(new BucketEntry(livenessManager, newNode, currentTime));
+                }
             }
         } else {
-            nodes.addFirst(new BucketEntry(livenessManager, node, clock.millis()));
+            nodes.addFirst(new BucketEntry(livenessManager, newNode, currentTime));
         }
     }
 
     private void updateExistingEntry(BucketEntry existingEntry, final NodeRecord newRecord) {
         nodes.remove(existingEntry);
-        nodes.addFirst(new BucketEntry(livenessManager, newRecord, clock.millis()));
+        if (itsNewEntry(existingEntry, newRecord)) {
+            nodes.addFirst(new BucketEntry(livenessManager, newRecord, clock.millis()));
+        }else{
+            nodes.addFirst(new BucketEntry(livenessManager, existingEntry.getNode(), clock.millis()));
+        }
     }
+
+    private static boolean itsNewEntry(BucketEntry existingEntry, NodeRecord newRecord) {
+        return !(existingEntry.getNode().getSeq().compareTo(newRecord.getSeq()) >= 0);
+    }
+
 
     private void updatePendingNodeTime() {
         pendingNode = Optional.of(pendingNode.get().withLastConfirmedTime(clock.millis()));

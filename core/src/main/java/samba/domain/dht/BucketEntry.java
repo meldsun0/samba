@@ -16,7 +16,7 @@ public class BucketEntry {
     static final long MIN_MILLIS_BETWEEN_PINGS = TimeUnit.SECONDS.toMillis(30);
     static final long PING_TIMEOUT_MILLIS = 500;
 
-    private static final int NEVER = -1;
+    static final int NEVER = -1;
     private long lastPingTime = NEVER;
     private final long lastLivenessConfirmationTime;
 
@@ -38,7 +38,8 @@ public class BucketEntry {
     }
 
     public void checkLiveness(final long currentTime) {
-        if (currentTime - lastPingTime >= MIN_MILLIS_BETWEEN_PINGS  && currentTime - lastLivenessConfirmationTime >= MIN_MILLIS_BETWEEN_PINGS) {
+        if (currentTime - lastPingTime >= MIN_MILLIS_BETWEEN_PINGS //enough time has passed since the last "ping" to this node
+                && currentTime - lastLivenessConfirmationTime >= MIN_MILLIS_BETWEEN_PINGS) { //enough time has passed since the last confirmation of liveness.
             livenessManager.checkLiveness(node);
             lastPingTime = currentTime;
         }

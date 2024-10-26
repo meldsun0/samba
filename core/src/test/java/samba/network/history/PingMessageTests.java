@@ -5,6 +5,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import samba.TestHelper;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static samba.network.history.TestHelper.createNodeRecord;
+import static samba.TestHelper.createNodeRecord;
 
 public class PingMessageTests {
 
