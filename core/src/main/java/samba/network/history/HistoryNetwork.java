@@ -1,5 +1,6 @@
 package samba.network.history;
 
+import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -9,6 +10,8 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
+import samba.db.PortalDB;
+import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.requests.FindNodes;
@@ -18,7 +21,6 @@ import samba.domain.messages.response.Accept;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
-import samba.domain.dht.LivenessChecker;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.network.RoutingTable;
@@ -31,6 +33,8 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
 
     private UInt256 nodeRadius;
+    private PortalDB historyDB;
+
     protected RoutingTable routingTable;
 
     public HistoryNetwork(Discv5Client client) {
@@ -116,16 +120,19 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         contentMessage -> {
                             Content content = contentMessage.getMessage();
                             //Parse for three subtypes and then opperate accordingly
-                            if (content.getContentType() == 0) {
-                                //uTP connection
-                            } else if (content.getContentType() == 1) {
-                                //Recieve content
-                            } else if (content.getContentType() == 2) {
-                                List<String> nodesList = content.getEnrList();
-                                //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
-                                //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
-                                //nodesList.removeIf(routingTable::isKnown);
-                                //nodesList.forEach(this::pingUnknownNode);
+                            switch (content.getContentType()) {
+                                case 0:
+                                    SafeFuture.runAsync(() -> {
+                                        //TODO async UTP opperation
+                                    });
+                                case 1:
+                                    historyDB.put(message.getContentKey(), content.getContent());
+                                case 2:
+                                    List<String> nodesList = content.getEnrList();
+                                    //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
+                                    //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
+                                    //nodesList.removeIf(routingTable::isKnown);
+                                    //nodesList.forEach(this::pingUnknownNode);
                             }
                             return SafeFuture.completedFuture(Optional.of(content));
                         })
@@ -143,7 +150,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                 .thenCompose(
                         acceptMessage -> {
                             Accept accept = acceptMessage.getMessage();
-                            //TODO
+                            //TODO create UTP stream using connectionId
                             return SafeFuture.completedFuture(Optional.of(accept));
                         })
                 .exceptionallyCompose(
@@ -183,6 +190,45 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         routingTable.addOrUpdateNode(srcNode);
         routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload()));
         return new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
+    }
+
+    @Override
+    public PortalWireMessage handleFindNodes(NodeRecord srcNode, FindNodes findNodes) {
+        return null;
+    }
+
+    @Override
+    public PortalWireMessage handleFindContent(NodeRecord srcNode, FindContent findContent) {
+        if (historyDB.contains(findContent.getContentKey())) {
+            Bytes content = historyDB.get(findContent.getContentKey());
+            if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                //TODO initiate UTP connection
+                //int connectionId = UTP.generateConnectionId();
+                //UTP async listen on connectionId
+                return new Content(0);
+            } else {
+                return new Content(content);
+            }
+        } else {
+            //TODO return list of ENRs that we know of that are closest to the requested content
+            return new Content(List.of());
+        }
+    }
+
+    @Override
+    public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
+        BitSet missingContent = new BitSet(offer.getContentKeys().size());
+        for (int i = 0; i < offer.getContentKeys().size(); i++) {
+            if (!historyDB.contains(offer.getContentKeys().get(i))) {
+                missingContent.set(i);
+            }
+        }
+
+        int sliceLength = (offer.getContentKeys().size() + 7) / 8;
+        Bytes contentKeysBitList = Bytes.wrap(missingContent.toByteArray()).slice(sliceLength);
+        //int connectionId = UTP.generateConnectionId();
+        Accept accept = new Accept(0, contentKeysBitList);
+        return accept;
     }
 
     private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {

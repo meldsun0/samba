@@ -1,32 +1,33 @@
 package samba.services;
 
+import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
+import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
-import samba.domain.messages.handler.*;
+import samba.domain.messages.handler.FindContentHandler;
+import samba.domain.messages.handler.FindNodesHandler;
+import samba.domain.messages.handler.OfferHandler;
+import samba.domain.messages.handler.PingHandler;
 import samba.network.NetworkType;
 import samba.network.history.HistoryNetwork;
-import samba.services.api.PortalRestAPI;
 import samba.services.api.PortalAPI;
+import samba.services.api.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
-import samba.domain.messages.IncomingRequestHandler;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
+import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
-
-
-import java.util.Optional;
-
-
-import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
 //Check DiscoveryNetwork
 public class PortalNodeMainService extends Service {
