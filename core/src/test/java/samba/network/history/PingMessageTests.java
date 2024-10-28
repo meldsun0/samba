@@ -1,7 +1,5 @@
 package samba.network.history;
 
-import samba.TestHelper;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -18,12 +16,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.TestHelper;
+import static samba.TestHelper.createNodeRecord;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-import static samba.TestHelper.createNodeRecord;
 
 public class PingMessageTests {
 
@@ -45,7 +44,7 @@ public class PingMessageTests {
         assertEquals(pongCustomPayload, pong.get().getCustomPayload());
         assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
         assertTrue(historyNetwork.isNodeConnected(nodeRecord));
-        assertEquals( pong.get().getCustomPayload(),historyNetwork.getRadiusFromNode(nodeRecord));
+        assertEquals(pong.get().getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
     }
 
 

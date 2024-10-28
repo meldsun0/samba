@@ -121,18 +121,19 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             Content content = contentMessage.getMessage();
                             //Parse for three subtypes and then opperate accordingly
                             switch (content.getContentType()) {
-                                case 0:
+                                case 0 -> {/*
                                     SafeFuture.runAsync(() -> {
-                                        //TODO async UTP opperation
-                                    });
-                                case 1:
-                                    historyDB.put(message.getContentKey(), content.getContent());
-                                case 2:
+                                    //TODO async UTP opperation
+                                    });*/}
+                                case 1 -> historyDB.put(message.getContentKey(), content.getContent());
+                                case 2 -> {
                                     List<String> nodesList = content.getEnrList();
                                     //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
                                     //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
                                     //nodesList.removeIf(routingTable::isKnown);
                                     //nodesList.forEach(this::pingUnknownNode);
+                                    }
+                                default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
                             }
                             return SafeFuture.completedFuture(Optional.of(content));
                         })
