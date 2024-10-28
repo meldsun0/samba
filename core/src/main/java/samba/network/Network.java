@@ -10,7 +10,7 @@ public interface Network {
 
     int getNumberOfConnectedPeers();
 
-    boolean isPeerConnected(NodeRecord node);
+    boolean isNodeConnected(NodeRecord node);
 
     UInt256 getRadiusFromNode(NodeRecord node);
 }
