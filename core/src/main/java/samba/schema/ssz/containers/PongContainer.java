@@ -42,7 +42,7 @@ public class PongContainer extends Container2<PongContainer, SszUInt64, SszByteL
         public static final PongSchema INSTANCE = new PongSchema();
 
         private PongSchema() {
-            super(SszPrimitiveSchemas.UINT64_SCHEMA, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE));
+            super(SszPrimitiveSchemas.UINT64_SCHEMA, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES));
         }
 
         @Override

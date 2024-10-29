@@ -29,4 +29,5 @@ public interface RoutingTable {
     boolean isNodeConnected(Bytes nodeId);
 
     boolean isNodeIgnored(NodeRecord nodeRecord);
+
 }

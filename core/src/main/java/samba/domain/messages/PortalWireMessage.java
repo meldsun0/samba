@@ -1,19 +1,18 @@
 package samba.domain.messages;
 
 import org.apache.tuweni.bytes.Bytes;
-import samba.domain.messages.MessageType;
 
 public interface PortalWireMessage {
-    
-    public final static int MAX_CUSTOM_PAYLOAD_SIZE = 2048;
-    public final static int MAX_DISTANCES = 256;
-    public static final int MAX_ENRS = 32;
-    public static final int MAX_KEYS = 64;
 
-    public MessageType getMessageType();
+    int MAX_CUSTOM_PAYLOAD_BYTES = 2048;
+    int MAX_DISTANCES = 256;
+    int MAX_ENRS = 32;
+    int MAX_KEYS = 64;
 
-    public Bytes getSszBytes();
+    MessageType getMessageType();
 
-    public <T>  T getMessage();
+    Bytes getSszBytes();
+
+    <T> T getMessage();
 
 }

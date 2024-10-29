@@ -20,7 +20,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteVectorSche
 public class ContentContainer {
 
     private static final int CONTENT_KEY_BYTE_SIZE = 2;
-    private static SszUnionSchema schema = SszUnionSchema.create(createByteVectorSchema(CONTENT_KEY_BYTE_SIZE), createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE), createByteListListSchema());
+    private static SszUnionSchema schema = SszUnionSchema.create(createByteVectorSchema(CONTENT_KEY_BYTE_SIZE), createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES), createByteListListSchema());
     private final SszUnion union;
 
     public ContentContainer(Byte contentType, Bytes content) {
@@ -41,7 +41,7 @@ public class ContentContainer {
                 return schema.createFromValue(contentType, createByteVectorSchema(CONTENT_KEY_BYTE_SIZE).fromBytes(content.slice(0, 2)));
             }
             case 1 -> {
-                return schema.createFromValue(contentType, createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE).fromBytes(content));
+                return schema.createFromValue(contentType, createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES).fromBytes(content));
             }
             default -> throw new AssertionError();
         }
@@ -56,12 +56,12 @@ public class ContentContainer {
     }
 
     private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
-        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE);  
+        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
         return SszListSchema.create(byteListSchema, PortalWireMessage.MAX_ENRS);
     }
 
     private static SszList<SszByteList> createSszBytesList(List<Bytes> enrs) {
-        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE);
+        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
         List<SszByteList> sszByteLists = enrs.stream()
             .map(byteListSchema::fromBytes)
             .collect(Collectors.toList());

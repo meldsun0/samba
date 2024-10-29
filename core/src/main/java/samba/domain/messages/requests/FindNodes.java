@@ -28,25 +28,15 @@ public class FindNodes implements PortalWireMessage {
     public FindNodes(Set<Integer> distances) {
         checkArgument(!distances.isEmpty(), "Distances can not be 0");
         checkArgument(distances.size() <= MAX_DISTANCES, "Number of distances exceeds limit");
-        checkEachDistance(distances);
+        checkArgument(distances.stream().allMatch(distance -> distance >= 0 && distance <= 256), "One or more ENRs exceed maximum payload size");
+
         this.distances = distances;
     }
 
     public static FindNodes fromSSZBytes(Bytes sszbytes) {
         Bytes container = sszbytes.slice(1);
         FindNodesContainer findNodesContainer = FindNodesContainer.decodePacket(container);
-        Set<Integer> distances = findNodesContainer.getDistances();
-        Set<Integer> uniqueDistances = new HashSet<>(distances);
-        distances.clear();
-        distances.addAll(uniqueDistances);
-
-        if (distances.size() > PortalWireMessage.MAX_DISTANCES) {
-            throw new IllegalArgumentException("FINDNODES: Number of distances exceeds limit");
-        } else {
-            checkEachDistance(distances);
-
-        }
-        return new FindNodes(distances);
+        return new FindNodes(new HashSet<>(findNodesContainer.getDistances()));
     }
 
     @Override
@@ -73,14 +63,9 @@ public class FindNodes implements PortalWireMessage {
     }
 
 
-
     @Override
     public FindNodes getMessage() {
         return this;
-    }
-
-    private static void checkEachDistance(Set<Integer> distances) {
-        distances.forEach(distance -> checkArgument(distance >= 0 || distance <= 256, "FINDNODES: Distance must be within the inclusive range [0,256]"));
     }
 
 

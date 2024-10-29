@@ -41,8 +41,7 @@ public class IncomingRequestHandler implements TalkHandler {
 
     @Override
     public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
-        checkArgument(this.network.getNetworkType().isEquals(protocol),
-                "TALKKREQ message is not from the {}", this.network.getNetworkType().getName());
+        checkArgument(this.network.getNetworkType().isEquals(protocol), "TALKKREQ message is not from the {}", this.network.getNetworkType().getName());
 
         PortalWireMessage message = PortalWireMessageDecoder.decode(srcNode, request);
         PortalWireMessageHandler handler = messageHandlers.get(message.getMessageType());

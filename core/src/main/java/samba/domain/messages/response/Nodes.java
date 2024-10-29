@@ -11,8 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.requests.Ping;
 import samba.schema.ssz.containers.NodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -26,7 +24,7 @@ public class Nodes implements PortalWireMessage {
 
     public Nodes(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
-        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES), "One or more ENRs exceed maximum payload size");
 
         /*
          * Individual ENR records MUST correspond to one of the requested distances.
@@ -49,7 +47,7 @@ public class Nodes implements PortalWireMessage {
             throw new IllegalArgumentException("NODES: Number of ENRs exceeds limit");
         }
         for (String enr : enrs) {
-            if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+            if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                 throw new IllegalArgumentException("NODES: One or more ENRs exceed maximum payload size");
             }
         }

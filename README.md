@@ -36,3 +36,9 @@ TODO
 Recommended:
 
 TO-DO
+
+
+### Useful links:
+* [Playground](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/portal-network-specs/assembled-spec/jsonrpc/openrpc.json)
+* https://eips.ethereum.org/EIPS/eip-7639
+* https://eips.ethereum.org/EIPS/eip-4444

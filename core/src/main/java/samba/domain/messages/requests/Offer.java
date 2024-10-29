@@ -19,8 +19,8 @@ public class Offer implements PortalWireMessage {
     private final List<Bytes> contentKeys;
 
     public Offer(List<Bytes> contentKeys) {
-        checkArgument(contentKeys != null && contentKeys.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKeys cannot be null or exceed maximum payload size");
-        checkArgument(contentKeys.stream().allMatch(key -> key.size() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more content keys exceed maximum payload size");
+        checkArgument(contentKeys != null && contentKeys.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "contentKeys cannot be null or exceed maximum payload size");
+        checkArgument(contentKeys.stream().allMatch(key -> key.size() <= MAX_CUSTOM_PAYLOAD_BYTES), "One or more content keys exceed maximum payload size");
         this.contentKeys = contentKeys;
     }
 
@@ -33,7 +33,7 @@ public class Offer implements PortalWireMessage {
             throw new IllegalArgumentException("OFFER: Number of content keys exceeds limit");
         }
         for (Bytes key : contentKeys) {
-            if (key.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+            if (key.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                 throw new IllegalArgumentException("OFFER: One or more content keys exceed maximum payload size");
             }
         }

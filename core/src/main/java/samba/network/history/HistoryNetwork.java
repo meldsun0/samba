@@ -9,7 +9,6 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import samba.db.PortalDB;
 import samba.domain.dht.LivenessChecker;
@@ -42,6 +41,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
+        LOG.info("Home Record :"+ client.getHomeNodeRecord().asEnr());
         this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
     }
 
@@ -86,8 +86,9 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                                 SafeFuture.runAsync(() -> {
                                     nodes.getEnrList().stream()
                                             .map(nodeRecordFactory::fromEnr)
-                                            .filter(node -> !(this.discv5Client.getHomeNodeRecord().equals(node) || this.routingTable.isNodeIgnored(node)))
-                                            .forEach(nr -> this.ping(nr, new Ping(nr.getSeq(), this.nodeRadius.toBytes())));
+                                            .filter(this::isNotHomeNode)
+                                            .filter(this::isPossibleNodeCandidate)
+                                            .forEach(node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
                                 });
                             }
                             return SafeFuture.completedFuture(Optional.of(nodes));
@@ -98,6 +99,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             return SafeFuture.completedFuture(Optional.empty());
                         });
     }
+
 
     @Override
     public SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent message) {
@@ -182,26 +184,27 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     @Override
     public PortalWireMessage handleFindNodes(NodeRecord srcNode, FindNodes findNodes) {
         List<String> nodesPayload = new ArrayList<>();
-        if (!findNodes.getDistances().isEmpty()) {
-            findNodes.getDistances().stream().forEach(distance -> {
+        findNodes.getDistances().forEach(distance -> {
                 if (distance == 0) {
                     nodesPayload.add(this.getHomeNodeAsEnr());
                 } else {
-                    //TODO Check max bytes to be sent and decide what to do.
+                    //TODO Check max bytes to be sent and decide what to do if not the initialization of Nodes will fail.
                     this.routingTable.getNodes(distance)
                             .filter(node -> !srcNode.asEnr().equals(node.asEnr()))
                             .forEach(node -> nodesPayload.add(node.asEnr()));
                 }
             });
-        }
-        return new Nodes(nodesPayload);
+
+        Nodes nodes = new Nodes(nodesPayload);
+        LOG.info(nodes);
+        return nodes;
     }
 
     @Override
     public PortalWireMessage handleFindContent(NodeRecord srcNode, FindContent findContent) {
         if (historyDB.contains(findContent.getContentKey())) {
             Bytes content = historyDB.get(findContent.getContentKey());
-            if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+            if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                 //TODO initiate UTP connection
                 //int connectionId = UTP.generateConnectionId();
                 //UTP async listen on connectionId
@@ -250,4 +253,13 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     private String getHomeNodeAsEnr() {
         return this.discv5Client.getHomeNodeRecord().asEnr();
     }
+
+    private boolean isPossibleNodeCandidate(NodeRecord node) {
+        return !this.routingTable.isNodeConnected(node.getNodeId()) ||  !this.routingTable.isNodeIgnored(node);
+    }
+
+    private boolean isNotHomeNode(NodeRecord node) {
+        return !(this.discv5Client.getHomeNodeRecord().equals(node));
+    }
+
 }

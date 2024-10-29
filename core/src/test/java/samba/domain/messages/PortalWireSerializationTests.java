@@ -31,7 +31,7 @@ public class PortalWireSerializationTests {
     public void testFindNodeSerialization() {
         FindNodes findNodes =  new FindNodes(Set.of(256, 255));
         Bytes serialized = findNodes.getSszBytes();
-        assertEquals(Bytes.fromHexString("0x02040000000001ff00"), serialized);
+        assertEquals(Bytes.fromHexString("0x0204000000ff000001"), serialized);
     }
 
     @Test

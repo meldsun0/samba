@@ -20,7 +20,7 @@ public class FindContent implements PortalWireMessage {
     private final Bytes contentKey;
 
     public FindContent(Bytes contentKey) {
-        checkArgument(contentKey != null && contentKey.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "contentKey cannot be null or exceed maximum payload size");
+        checkArgument(contentKey != null && contentKey.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "contentKey cannot be null or exceed maximum payload size");
         
         this.contentKey = contentKey;
     }
@@ -30,7 +30,7 @@ public class FindContent implements PortalWireMessage {
         FindContentContainer findContentContainer = FindContentContainer.decodePacket(container);
         Bytes contentKey = findContentContainer.getContentKey();
 
-        if (contentKey.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+        if (contentKey.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
             throw new IllegalArgumentException("FINDCONTENT: Content key size exceeds limit");
         }
         return new FindContent(contentKey);
