@@ -29,7 +29,7 @@ public class Ping implements PortalWireMessage {
     }
 
     public Ping(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
-          this(UInt64.valueOf(enrSeq.toBytes().toLong()),customPayload);
+          this(UInt64.valueOf(enrSeq.toBytes().toLong()), customPayload);
     }
 
     public static Ping fromSSZBytes(Bytes sszbytes){

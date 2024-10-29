@@ -11,6 +11,7 @@ import samba.network.RoutingTable;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /** KBuckets: Represent distances from the local node perspective. It's a "binary tree whose leaves are k-buckets. The distance from myself is 0.
  * The binary tree exactly match the number of bits (256) in the key-space. (We have spot for any given distinction).
@@ -50,6 +51,11 @@ public class HistoryRoutingTable implements RoutingTable {
     }
 
     @Override
+    public Stream<NodeRecord> getNodes(int distance) {
+        return this.nodeTable.getLiveNodeRecords(distance);
+    }
+
+    @Override
     public void addOrUpdateNode(NodeRecord nodeRecord) {
          this.nodeTable.addNode(nodeRecord);
     }
@@ -67,5 +73,10 @@ public class HistoryRoutingTable implements RoutingTable {
     @Override
     public boolean isNodeConnected(Bytes nodeId) {
         return this.nodeTable.getNode(nodeId).isPresent();
+    }
+
+    @Override
+    public boolean isNodeIgnored(NodeRecord nodeRecord) {
+        return this.nodeTable.isNodeIgnored(nodeRecord);
     }
 }

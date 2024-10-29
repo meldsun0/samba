@@ -1,15 +1,16 @@
 package samba.network.history;
 
-import java.util.BitSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
+import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
+import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
+import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import samba.db.PortalDB;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
@@ -34,23 +35,17 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     private UInt256 nodeRadius;
     private PortalDB historyDB;
-
+    final NodeRecordFactory nodeRecordFactory;
     protected RoutingTable routingTable;
 
     public HistoryNetwork(Discv5Client client) {
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
+        this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
     }
 
 
-    /**
-     * Sends a Portal Network Wire PING message to a specified node
-     *
-     * @param nodeRecord the nodeId of the peer to send a ping to
-     * @param message    PING message to be sent
-     * @return the PONG message.
-     */
     @Override
     public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) {
         return sendMessage(nodeRecord, message)
@@ -78,16 +73,9 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     }
 
-    /**
-     * Sends a Portal Network Wire FINDNODES message request to a peer requesting other node ENRs
-     *
-     * @param nodeRecord the nodeId of the peer to send the findnodes message
-     * @param message    FINDNODES message to be sent
-     * @return a FINDNODES message.
-     */
+
     @Override
     public SafeFuture<Optional<Nodes>> findNodes(NodeRecord nodeRecord, FindNodes message) {
-
         return sendMessage(nodeRecord, message)
                 .orTimeout(3, TimeUnit.SECONDS)
                 .thenApply(Optional::get)
@@ -96,11 +84,10 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             Nodes nodes = nodesMessage.getMessage();
                             if (!nodes.isNodeListEmpty()) {
                                 SafeFuture.runAsync(() -> {
-                                    List<String> nodesList = nodes.getEnrList();
-//                                    nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
-//                                    nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
-//                                    nodesList.removeIf(routingTable::isKnown);
-//                                    nodesList.forEach(this::pingUnknownNode);
+                                    nodes.getEnrList().stream()
+                                            .map(nodeRecordFactory::fromEnr)
+                                            .filter(node -> !(this.discv5Client.getHomeNodeRecord().equals(node) || this.routingTable.isNodeIgnored(node)))
+                                            .forEach(nr -> this.ping(nr, new Ping(nr.getSeq(), this.nodeRadius.toBytes())));
                                 });
                             }
                             return SafeFuture.completedFuture(Optional.of(nodes));
@@ -194,7 +181,20 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     @Override
     public PortalWireMessage handleFindNodes(NodeRecord srcNode, FindNodes findNodes) {
-        return null;
+        List<String> nodesPayload = new ArrayList<>();
+        if (!findNodes.getDistances().isEmpty()) {
+            findNodes.getDistances().stream().forEach(distance -> {
+                if (distance == 0) {
+                    nodesPayload.add(this.getHomeNodeAsEnr());
+                } else {
+                    //TODO Check max bytes to be sent and decide what to do.
+                    this.routingTable.getNodes(distance)
+                            .filter(node -> !srcNode.asEnr().equals(node.asEnr()))
+                            .forEach(node -> nodesPayload.add(node.asEnr()));
+                }
+            });
+        }
+        return new Nodes(nodesPayload);
     }
 
     @Override
@@ -245,5 +245,9 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         LOG.info("checkLiveness");
         Ping pingMessage = new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius);
         return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage)).thenCompose((__) -> new CompletableFuture<>());
+    }
+
+    private String getHomeNodeAsEnr() {
+        return this.discv5Client.getHomeNodeRecord().asEnr();
     }
 }

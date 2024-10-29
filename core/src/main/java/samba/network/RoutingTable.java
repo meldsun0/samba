@@ -6,6 +6,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface RoutingTable {
 
@@ -17,6 +18,8 @@ public interface RoutingTable {
 
     Optional<NodeRecord> findNode(Bytes nodeId);
 
+    Stream<NodeRecord> getNodes(final int distance);
+
     void addOrUpdateNode(NodeRecord nodeRecord);
 
     void removeNode(NodeRecord nodeRecord);
@@ -24,4 +27,6 @@ public interface RoutingTable {
     int getActiveNodes();
 
     boolean isNodeConnected(Bytes nodeId);
+
+    boolean isNodeIgnored(NodeRecord nodeRecord);
 }
