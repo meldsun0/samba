@@ -28,7 +28,6 @@ import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
-//TODO replace NodeRecord.
 public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests, LivenessChecker {
 
 
@@ -41,7 +40,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
-        LOG.info("Home Record :"+ client.getHomeNodeRecord().asEnr());
+        LOG.info("Home Record :" + client.getHomeNodeRecord().asEnr());
         this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
     }
 
@@ -82,15 +81,14 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                 .thenCompose(
                         nodesMessage -> {
                             Nodes nodes = nodesMessage.getMessage();
-                            if (!nodes.isNodeListEmpty()) {
-                                SafeFuture.runAsync(() -> {
-                                    nodes.getEnrList().stream()
-                                            .map(nodeRecordFactory::fromEnr)
-                                            .filter(this::isNotHomeNode)
-                                            .filter(this::isPossibleNodeCandidate)
-                                            .forEach(node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
-                                });
-                            }
+                            //SafeFuture.runAsync(() -> {
+                                nodes.getEnrList().stream()
+                                        .map(nodeRecordFactory::fromEnr)
+                                        .filter(this::isNotHomeNode)
+                                        .filter(node -> !node.asEnr().equals(nodeRecord.asEnr()))
+                                        .filter(this::isPossibleNodeCandidate)
+                                        .forEach(node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
+                         //   });
                             return SafeFuture.completedFuture(Optional.of(nodes));
                         })
                 .exceptionallyCompose(
@@ -185,15 +183,15 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     public PortalWireMessage handleFindNodes(NodeRecord srcNode, FindNodes findNodes) {
         List<String> nodesPayload = new ArrayList<>();
         findNodes.getDistances().forEach(distance -> {
-                if (distance == 0) {
-                    nodesPayload.add(this.getHomeNodeAsEnr());
-                } else {
-                    //TODO Check max bytes to be sent and decide what to do if not the initialization of Nodes will fail.
-                    this.routingTable.getNodes(distance)
-                            .filter(node -> !srcNode.asEnr().equals(node.asEnr()))
-                            .forEach(node -> nodesPayload.add(node.asEnr()));
-                }
-            });
+            if (distance == 0) {
+                nodesPayload.add(this.getHomeNodeAsEnr());
+            } else {
+                //TODO Check max bytes to be sent and decide what to do if not the initialization of Nodes will fail.
+                this.routingTable.getNodes(distance)
+                        .filter(node -> !srcNode.asEnr().equals(node.asEnr()))
+                        .forEach(node -> nodesPayload.add(node.asEnr()));
+            }
+        });
 
         Nodes nodes = new Nodes(nodesPayload);
         LOG.info(nodes);
@@ -255,7 +253,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
     private boolean isPossibleNodeCandidate(NodeRecord node) {
-        return !this.routingTable.isNodeConnected(node.getNodeId()) ||  !this.routingTable.isNodeIgnored(node);
+        return !this.routingTable.isNodeConnected(node.getNodeId()) || !this.routingTable.isNodeIgnored(node);
     }
 
     private boolean isNotHomeNode(NodeRecord node) {

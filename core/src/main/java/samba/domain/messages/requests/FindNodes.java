@@ -29,7 +29,6 @@ public class FindNodes implements PortalWireMessage {
         checkArgument(!distances.isEmpty(), "Distances can not be 0");
         checkArgument(distances.size() <= MAX_DISTANCES, "Number of distances exceeds limit");
         checkArgument(distances.stream().allMatch(distance -> distance >= 0 && distance <= 256), "One or more ENRs exceed maximum payload size");
-
         this.distances = distances;
     }
 
