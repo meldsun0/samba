@@ -40,8 +40,8 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
-        LOG.info("Home Record :" + client.getHomeNodeRecord().asEnr());
         this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
+        LOG.info("Home Record :" + client.getHomeNodeRecord().asEnr());
     }
 
 
@@ -192,10 +192,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         .forEach(node -> nodesPayload.add(node.asEnr()));
             }
         });
-
-        Nodes nodes = new Nodes(nodesPayload);
-        LOG.info(nodes);
-        return nodes;
+        return new Nodes(nodesPayload);
     }
 
     @Override

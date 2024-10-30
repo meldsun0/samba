@@ -3,13 +3,16 @@ package samba.network.history;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import samba.TestHelper;
 import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
+import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
@@ -65,6 +68,61 @@ public class FindNodeMessageTests {
         verify(discv5Client, times(1)).sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
 
     }
+
+
+    @Test
+    public void findNodes_receivesNodesWithHomeNodeAndRequestingNodeSoNoPingsShouldBeTriggered() throws ExecutionException, InterruptedException {
+        NodeRecord homeNodeRecord = createNodeRecord();
+        NodeRecord requestingNodeRecord = createNodeRecord();
+
+        Discv5Client discv5Client = mockDiscv5Client(homeNodeRecord, List.of(homeNodeRecord.asBase64(), requestingNodeRecord.asBase64()));
+
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        Nodes nodes = historyNetwork.findNodes(requestingNodeRecord, new FindNodes(Set.of(256, 255))).get().get();
+
+        assertEquals(1, nodes.getTotal());
+        assertEquals(homeNodeRecord.asBase64(), nodes.getEnrList().getFirst().replace("=", ""));
+        assertEquals(requestingNodeRecord.asBase64(), nodes.getEnrList().getLast().replace("=", ""));
+
+        assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
+        verify(discv5Client, times(1)).sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+
+    }
+
+
+    @Test
+    public void findNodes_receivesNodesWithHomeNodeAndRequestingNodeButWithANewOneSoAPingsShouldBeTriggered() throws ExecutionException, InterruptedException {
+        NodeRecord homeNodeRecord = createNodeRecord();
+        NodeRecord newHomeRecord = createNodeRecord();
+
+        Discv5Client discv5Client = mockDiscv5Client(homeNodeRecord, List.of(homeNodeRecord.asBase64(), newHomeRecord.asBase64()));
+
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        Nodes nodes = historyNetwork.findNodes(createNodeRecord(), new FindNodes(Set.of(256, 255))).get().get();
+
+        assertEquals(1, nodes.getTotal());
+        assertEquals(homeNodeRecord.asBase64(), nodes.getEnrList().getFirst().replace("=", ""));
+        assertEquals(newHomeRecord.asBase64(), nodes.getEnrList().getLast().replace("=", ""));
+
+        assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
+        verify(discv5Client, times(2)).sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+
+    }
+
+    @Test
+    public void handle_find_nodes_receivesDistanceZero() {
+        NodeRecord homeNodeRecord = createNodeRecord();
+        Discv5Client discv5Client = mockDiscv5Client(homeNodeRecord, List.of());
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+
+        PortalWireMessage portalWireMessage = historyNetwork.handleFindNodes(createNodeRecord(), new FindNodes(Set.of(0)));
+
+
+        assertEquals(MessageType.NODES, portalWireMessage.getMessageType());
+        assertEquals(homeNodeRecord.asEnr(), ((Nodes)portalWireMessage.getMessage()).getEnrList().getFirst());
+    }
+
+    
 
     @NotNull
     private static Discv5Client mockDiscv5Client(NodeRecord homeNodeRecord, List<String> enrs) {
