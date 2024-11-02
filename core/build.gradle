@@ -2,89 +2,46 @@ plugins {
     id 'samba.java-common-conventions'
 }
 
-
 dependencies {
-
-//    implementation 'org.bouncycastle:bcprov-jdk18on'
-
-//    implementation 'com.google.guava:guava:33.3.0-jre'
-//    implementation 'io.projectreactor:reactor-core'
-//    implementation 'io.netty:netty-all'
-    implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
-
+    implementation libs.log4j.api
+    implementation libs.log4j.core
     implementation libs.tuweni.bytes
     implementation libs.tuweni.crypto
     implementation libs.tuweni.rlp
     implementation libs.tuweni.ssz
+    implementation libs.vertx.core
+    implementation libs.vertx.web
 
+    implementation libs.besu.internal.metrics.core
+    implementation libs.besu.internal.core
+    implementation libs.besu.internal.config
+    implementation libs.besu.internal.plugin.api
 
+    implementation libs.teku.internal.async
+    implementation libs.teku.internal.infrastructure.events
+    implementation libs.teku.internal.infrastructure.restapi
+    implementation libs.teku.internal.serviceutils
+    implementation libs.teku.internal.io
+    implementation libs.teku.internal.ssz
+    implementation libs.teku.internal.unsigned
+    implementation libs.teku.internal.http
+    implementation libs.teku.internal.json
 
-    implementation 'info.picocli:picocli:4.6.1'
-    implementation 'io.vertx:vertx-core:4.5.9'
-    implementation 'io.vertx:vertx-web:4.5.9'
-    implementation 'io.netty:netty-all:4.1.110.Final'
-    implementation 'tech.pegasys.discovery:discovery:24.6.0'
+    implementation libs.picocli
+    implementation libs.netty.all
+    implementation libs.discovery
+    implementation libs.oshi.core
+    implementation libs.assertj.core
+    implementation libs.mockito.core
 
-    implementation 'org.hyperledger.besu.internal:metrics-core:24.7.0'
-    implementation 'org.hyperledger.besu.internal:core:24.7.0'
-    implementation 'org.hyperledger.besu.internal:config:24.7.0'
-    implementation 'org.hyperledger.besu:plugin-api:24.7.0'
-
-
-    implementation 'tech.pegasys.teku.internal:infrastructure-events:24.8.0'
-    implementation 'tech.pegasys.teku.internal:async:24.8.0'
-    implementation 'tech.pegasys.teku.internal:infrastructure-restapi:24.8.0'
-
-    implementation 'tech.pegasys.teku.internal:serviceutils:24.8.0'
-//    implementation 'tech.pegasys.teku.internal:p2p:24.8.0'
-    implementation 'tech.pegasys.teku.internal:io:24.8.0'
-    implementation 'tech.pegasys.teku.internal:ssz:24.8.0'
-    implementation 'tech.pegasys.teku.internal:unsigned:24.8.0'
-
-    implementation 'tech.pegasys.teku.internal:http:24.8.0'
-    implementation 'tech.pegasys.teku.internal:json:24.8.0'
-    implementation 'com.github.oshi:oshi-core:6.6.2'
-
-    implementation 'tech.pegasys.teku.internal:ssz:develop'
-    implementation 'tech.pegasys.teku.internal:unsigned:develop'
-
-
-    implementation 'org.assertj:assertj-core:3.26.0'
-    implementation 'org.mockito:mockito-core:5.12.0'
-
-
-    compileOnly 'org.projectlombok:lombok:1.18.34'
-
-
-    annotationProcessor 'org.projectlombok:lombok:1.18.34'
-
-    testCompileOnly 'org.projectlombok:lombok:1.18.34'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testImplementation 'org.assertj:assertj-core:3.21.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-
-//    dependencySet(group: 'org.hyperledger.besu.internal', version: '24.7.0') {
-//        entry('metrics-core')
-//        entry('core')
-//        entry('config')
-//    }
-//    dependencySet(group: 'org.hyperledger.besu', version: '24.7.0') {
-//        entry('besu-datatypes')
-//        entry('evm')
-//        entry('plugin-api')
-//    }
-//    dependencySet(group: 'io.vertx', version: '4.5.9') {
-//        entry 'vertx-codegen'
-//        entry 'vertx-core'
-//        entry 'vertx-unit'
-//        entry 'vertx-web'
-//    }
-
+    compileOnly libs.projectlombok
+    annotationProcessor libs.projectlombok
+    testCompileOnly libs.projectlombok
+    testAnnotationProcessor libs.projectlombok
+    testImplementation libs.junit.jupiter.api
+    testImplementation libs.assertj.core
+    testRuntimeOnly libs.junit.jupiter.engine
 }
-
 application {
     mainClass = 'samba.Samba'
 }
