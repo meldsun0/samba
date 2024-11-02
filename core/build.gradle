@@ -1,21 +1,5 @@
 plugins {
-    id 'samba.java-application-conventions'
-}
-
-//apply from: "${rootDir}/gradle/versions.gradle"
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
-    maven {
-        url "https://artifacts.consensys.net/public/teku/maven/"
-
-    }
-
-    maven { url "https://mvnrepository.com" }
-    maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
-
-
+    id 'samba.java-common-conventions'
 }
 
 
@@ -28,10 +12,14 @@ dependencies {
 //    implementation 'io.netty:netty-all'
     implementation 'org.apache.logging.log4j:log4j-api:2.23.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
-    implementation 'org.apache.tuweni:tuweni-bytes:2.3.1'
-    implementation 'org.apache.tuweni:tuweni-crypto:2.3.1'
-    implementation 'org.apache.tuweni:tuweni-rlp:2.3.1'
-    implementation 'org.apache.tuweni:tuweni-ssz:2.3.1'
+
+    implementation libs.tuweni.bytes
+    implementation libs.tuweni.crypto
+    implementation libs.tuweni.rlp
+    implementation libs.tuweni.ssz
+
+
+
     implementation 'info.picocli:picocli:4.6.1'
     implementation 'io.vertx:vertx-core:4.5.9'
     implementation 'io.vertx:vertx-web:4.5.9'
