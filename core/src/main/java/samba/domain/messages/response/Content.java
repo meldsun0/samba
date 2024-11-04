@@ -57,6 +57,11 @@ public class Content implements PortalWireMessage {
             // uTP connection ID
             case 0 -> {
                 int connectionId = contentContainer.getConnectionId();
+                if (connectionId < 0) {
+                    throw new IllegalArgumentException("CONTENT: Connection ID must be non-negative");
+                } else if (connectionId > 65535) { // 2^16 - 1
+                    throw new IllegalArgumentException("CONTENT: Connection ID exceeds maximum value");
+                }
                 return new Content(connectionId);
             }
             // Requested content

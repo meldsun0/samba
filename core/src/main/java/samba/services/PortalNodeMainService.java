@@ -9,6 +9,7 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
+import samba.db.history.HistoryDBImpl;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.handler.FindContentHandler;
@@ -70,7 +71,8 @@ public class PortalNodeMainService extends Service {
 
     private void initHistoryNetwork() {
         LOG.info("PortalNodeMainService.initHistoryNetwork()");
-        this.historyNetwork = new HistoryNetwork(this.discoveryService);
+        //Get and initialize HistoryDB object from persistent storage
+        this.historyNetwork = new HistoryNetwork(this.discoveryService, new HistoryDBImpl());
         incomingRequestProcessor
                 .addHandler(MessageType.PING, new PingHandler())
                 .addHandler(MessageType.FIND_NODES, new FindNodesHandler())

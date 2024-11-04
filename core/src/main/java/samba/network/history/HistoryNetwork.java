@@ -11,6 +11,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import samba.db.PortalDB;
+import samba.db.history.HistoryDB;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
@@ -37,10 +38,11 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     protected RoutingTable routingTable;
 
-    public HistoryNetwork(Discv5Client client) {
+    public HistoryNetwork(Discv5Client client, HistoryDB historyDB) {
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
+        this.historyDB = historyDB;
     }
 
 
