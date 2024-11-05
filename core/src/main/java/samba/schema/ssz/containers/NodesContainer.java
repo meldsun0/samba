@@ -28,7 +28,7 @@ public class NodesContainer extends Container2<NodesContainer, SszByte, SszList<
     }
 
     private static SszList<SszByteList> createSszBytesList(List<Bytes> enrs) {
-        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE);
+        SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
         List<SszByteList> sszByteLists = enrs.stream()
             .map(byteListSchema::fromBytes)
             .collect(Collectors.toList());
@@ -60,7 +60,7 @@ public class NodesContainer extends Container2<NodesContainer, SszByte, SszList<
         }
 
         private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
-            SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE);  
+            SszByteListSchema byteListSchema = SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
             return SszListSchema.create(byteListSchema, PortalWireMessage.MAX_ENRS);
         }
 

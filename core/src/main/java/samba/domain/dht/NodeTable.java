@@ -51,6 +51,7 @@ public class NodeTable {
          getBucket(distance).ifPresent(bucket -> bucket.remove(nodeRecord));
     }
 
+
     public synchronized void performMaintenanceOnOldestBucket() {
         buckets.values().stream()
                 .filter(bucket -> !bucket.isEmpty())
@@ -81,5 +82,9 @@ public class NodeTable {
 
     private Optional<KBucket> getBucket(final int distance) {
         return Optional.ofNullable(buckets.get(distance));
+    }
+
+    public boolean isNodeIgnored(NodeRecord nodeRecord) {
+        return this.livenessManager.isABadPeer(nodeRecord);
     }
 }

@@ -32,7 +32,7 @@ public class Content implements PortalWireMessage {
     }
 
     public Content(Bytes content) {
-        checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Content size exceeds limit");
+        checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Content size exceeds limit");
         this.contentType = 1;
         this.content = content;
         this.connectionId = 0;
@@ -41,7 +41,7 @@ public class Content implements PortalWireMessage {
 
     public Content(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
-        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES), "One or more ENRs exceed maximum payload size");
         this.contentType = 2;
         this.enrs = enrs;
         this.connectionId = 0;
@@ -67,7 +67,7 @@ public class Content implements PortalWireMessage {
             // Requested content
             case 1 -> {
                 Bytes content = contentContainer.getContent();
-                if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                     throw new IllegalArgumentException("CONTENT: Content size exceeds limit");
                 }
                 return new Content(content);
@@ -79,7 +79,7 @@ public class Content implements PortalWireMessage {
                     throw new IllegalArgumentException("CONTENT: Number of ENRs exceeds limit");
                 }
                 for (String enr : enrs) {
-                    if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+                    if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                         throw new IllegalArgumentException("CONTENT: One or more ENRs exceed maximum payload size");
                     }
                 }

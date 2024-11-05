@@ -12,7 +12,7 @@ import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 public class FindContentContainer extends Container1<FindContentContainer, SszByteList> {
 
     public FindContentContainer(Bytes contentKey) {
-        super(FindContentSchema.INSTANCE, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE).fromBytes(contentKey));
+        super(FindContentSchema.INSTANCE, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES).fromBytes(contentKey));
     }
 
     public FindContentContainer(TreeNode backingNode) {
@@ -34,7 +34,7 @@ public class FindContentContainer extends Container1<FindContentContainer, SszBy
         public static final FindContentSchema INSTANCE = new FindContentSchema();
 
         private FindContentSchema() {
-            super(SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE));
+            super(SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES));
         }
 
         @Override

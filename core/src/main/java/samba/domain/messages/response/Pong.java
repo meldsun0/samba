@@ -22,7 +22,7 @@ public class Pong implements PortalWireMessage {
 
     public Pong(UInt64 enrSeq, Bytes customPayload) {
         checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
-        checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_SIZE, "Custom payload size exceeds limit");
+        checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Custom payload size exceeds limit");
         this.enrSeq = enrSeq;
         this.customPayload = customPayload;
     }
@@ -37,7 +37,7 @@ public class Pong implements PortalWireMessage {
         UInt64 enrSeq = pongContainer.getEnrSeq();
         Bytes customPayload = pongContainer.getCustomPayload();
 
-        if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
+        if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
             throw new IllegalArgumentException("PONG: Custom payload size exceeds limit");
         }
         return new Pong(enrSeq, customPayload);

@@ -11,8 +11,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.domain.messages.requests.FindNodes;
-import samba.domain.messages.requests.Ping;
 import samba.schema.ssz.containers.NodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
@@ -26,36 +24,23 @@ public class Nodes implements PortalWireMessage {
 
     public Nodes(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
-        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_SIZE), "One or more ENRs exceed maximum payload size");
+        checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES), "One or more ENRs exceed maximum payload size");
+        checkArgument(enrs.stream().mapToInt(enr -> enr.getBytes().length).sum() <= MAX_CUSTOM_PAYLOAD_BYTES, " Maximum payload size exceeded");
 
-        /*
+
+        /* TODO Validate all these:
          * Individual ENR records MUST correspond to one of the requested distances.
          * It is invalid to return multiple ENR records for the same node_id.
-         * The ENR record of the requesting node SHOULD be filtered out of the list.
          */
         this.enrs = enrs;
     }
 
-    public static Nodes fromSSZBytes(Bytes sszbytes, NodeRecord srcNode) {
+    public static Nodes fromSSZBytes(Bytes sszbytes) {
         Bytes container = sszbytes.slice(1);
         NodesContainer nodesContainer = NodesContainer.decodePacket(container);
         int total = nodesContainer.getTotal();
-        List<String> enrs = nodesContainer.getEnrs();
-
-        if (total > 1) {
-            throw new IllegalArgumentException("NODES: Total number of Nodes messages must be 1");
-        }
-        if (enrs.size() > PortalWireMessage.MAX_ENRS) {
-            throw new IllegalArgumentException("NODES: Number of ENRs exceeds limit");
-        }
-        for (String enr : enrs) {
-            if (enr.length() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE) {
-                throw new IllegalArgumentException("NODES: One or more ENRs exceed maximum payload size");
-            }
-        }
-        // TODO: Remove requesting node (this node) from the list of ENRs
-        // TODO: It is invalid to return multiple ENR records for the same node_id
-        return new Nodes(enrs);
+        if (total > 1) throw new IllegalArgumentException("NODES: Total number of Nodes messages must be 1");
+        return new Nodes(nodesContainer.getEnrs());
     }
 
     @Override

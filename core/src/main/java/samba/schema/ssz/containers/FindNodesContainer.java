@@ -2,7 +2,9 @@ package samba.schema.ssz.containers;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -24,12 +26,12 @@ public class FindNodesContainer extends Container1<FindNodesContainer, SszByteLi
     }
 
     // Distances in inclusive range [0, 256]
-    public List<Integer> getDistances() {
+    public Set<Integer> getDistances() {
         Bytes distancesBytes = getField0().getBytes();
         if (distancesBytes.size() % 2 != 0) {
             throw new IllegalArgumentException("Invalid distance bytes length");
         }
-        List<Integer> distances = new ArrayList<>();
+        Set<Integer> distances = new HashSet<>();
         for (int i = 0; i < distancesBytes.size(); i += 2) {
             distances.add(Bytes.wrap(distancesBytes.slice(i, 2).toArray(ByteOrder.LITTLE_ENDIAN)).toInt());
         }

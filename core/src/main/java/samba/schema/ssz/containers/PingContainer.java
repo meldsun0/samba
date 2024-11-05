@@ -16,7 +16,7 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteList> {
     
     public PingContainer(UInt64 enrSeq, Bytes customPayload) {
-        super(PingSchema.INSTANCE, SszUInt64.of(enrSeq), SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE).fromBytes(customPayload));
+        super(PingSchema.INSTANCE, SszUInt64.of(enrSeq), SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES).fromBytes(customPayload));
     }
 
     public PingContainer(TreeNode backingNode) {
@@ -44,7 +44,7 @@ public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteL
         public static final PingSchema INSTANCE = new PingSchema();
 
         private PingSchema() {
-            super(SszPrimitiveSchemas.UINT64_SCHEMA, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_SIZE));
+            super(SszPrimitiveSchemas.UINT64_SCHEMA, SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES));
         }
 
         @Override

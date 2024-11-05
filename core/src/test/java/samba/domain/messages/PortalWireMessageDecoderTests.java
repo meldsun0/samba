@@ -2,6 +2,7 @@ package samba.domain.messages;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -56,7 +57,7 @@ public class PortalWireMessageDecoderTests {
     public void testParseFindNode() {
         Bytes findNodesBytes = Bytes.fromHexString("0x02040000000001ff00");
         FindNodes findNodes = (FindNodes) PortalWireMessageDecoder.decode(srcNode, findNodesBytes);  
-        List<Integer> distances = List.of(256, 255);
+        Set<Integer> distances = Set.of(256, 255);
         assertEquals(MessageType.FIND_NODES, findNodes.getMessageType());
         assertEquals(distances, findNodes.getDistances());
     }

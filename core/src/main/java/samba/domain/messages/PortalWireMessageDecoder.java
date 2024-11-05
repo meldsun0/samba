@@ -22,14 +22,14 @@ public class PortalWireMessageDecoder {
 
         int packetType = SSZ.decodeInt8(sszbytes.slice(0, 1));
         MessageType messageType = MessageType.fromInt(packetType);
-        if (messageType == null) {
-            throw new IllegalArgumentException("Invalid message type from int: " + packetType); //TODO build own runtime exception.
-        }
+
+        checkNotNull(messageType,"Invalid message type from int: " + packetType);
+
         return switch (messageType) {
             case PING -> Ping.fromSSZBytes(sszbytes);
             case PONG -> Pong.fromSSZBytes(sszbytes);
             case FIND_NODES -> FindNodes.fromSSZBytes(sszbytes);
-            case NODES -> Nodes.fromSSZBytes(sszbytes, sourceNode);
+            case NODES -> Nodes.fromSSZBytes(sszbytes);
             case FIND_CONTENT -> FindContent.fromSSZBytes(sszbytes);
             case CONTENT -> Content.fromSSZBytes(sszbytes, sourceNode);
             case OFFER -> Offer.fromSSZBytes(sszbytes);

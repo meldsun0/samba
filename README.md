@@ -7,6 +7,10 @@ The name is inspired by the shortened name of of rescue dog named Sambayon that 
 
 > **Note:** Samba is still **under heavy development** and is not yet ready for production use.
 
+## High level node architecture diagram
+
+![Node architecture](docs/node-architecture.png "Node Architecture")
+
 ## Building the source
 
 TODO
@@ -36,3 +40,9 @@ TODO
 Recommended:
 
 TO-DO
+
+
+### Useful links:
+* [Playground](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/portal-network-specs/assembled-spec/jsonrpc/openrpc.json)
+* https://eips.ethereum.org/EIPS/eip-7639
+* https://eips.ethereum.org/EIPS/eip-4444
