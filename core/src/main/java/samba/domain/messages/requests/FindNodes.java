@@ -2,16 +2,14 @@ package samba.domain.messages.requests;
 
 import java.nio.ByteOrder;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Objects;
 import org.apache.tuweni.bytes.Bytes;
 
+import com.google.common.base.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import io.vertx.core.buffer.Buffer;
-import org.ethereum.beacon.discovery.message.FindNodeMessage;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.schema.ssz.containers.FindNodesContainer;

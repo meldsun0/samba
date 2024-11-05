@@ -69,6 +69,8 @@ public class Content implements PortalWireMessage {
                 Bytes content = contentContainer.getContent();
                 if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                     throw new IllegalArgumentException("CONTENT: Content size exceeds limit");
+                } else if (content.size() == 0) {
+                    throw new IllegalArgumentException("CONTENT: Content must not be empty");
                 }
                 return new Content(content);
             }

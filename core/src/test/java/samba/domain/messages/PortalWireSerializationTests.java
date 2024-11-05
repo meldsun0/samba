@@ -3,12 +3,19 @@ package samba.domain.messages;
 import java.util.List;
 import java.util.Set;
 
-import samba.domain.messages.requests.*;
-import samba.domain.messages.response.*;
 import org.apache.tuweni.bytes.Bytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
+import samba.domain.messages.requests.FindContent;
+import samba.domain.messages.requests.FindNodes;
+import samba.domain.messages.requests.Offer;
+import samba.domain.messages.requests.Ping;
+import samba.domain.messages.response.Accept;
+import samba.domain.messages.response.Content;
+import samba.domain.messages.response.Nodes;
+import samba.domain.messages.response.Pong;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class PortalWireSerializationTests {
@@ -31,7 +38,7 @@ public class PortalWireSerializationTests {
     public void testFindNodeSerialization() {
         FindNodes findNodes =  new FindNodes(Set.of(256, 255));
         Bytes serialized = findNodes.getSszBytes();
-        assertEquals(Bytes.fromHexString("0x0204000000ff000001"), serialized);
+        assertTrue(Bytes.fromHexString("0x02040000000001ff00").equals(serialized) || Bytes.fromHexString("0x0204000000ff000001").equals(serialized)); // Order of distances is not guaranteed
     }
 
     @Test
