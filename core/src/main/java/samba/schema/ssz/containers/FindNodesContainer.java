@@ -1,9 +1,7 @@
 package samba.schema.ssz.containers;
 
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;

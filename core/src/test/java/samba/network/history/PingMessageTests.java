@@ -1,7 +1,5 @@
 package samba.network.history;
 
-import samba.TestHelper;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -18,12 +16,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.TestHelper;
+import static samba.TestHelper.createNodeRecord;
+import samba.db.history.HistoryDBImpl;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
-import static samba.TestHelper.createNodeRecord;
 
 public class PingMessageTests {
 
@@ -36,7 +36,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
 
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -45,7 +45,7 @@ public class PingMessageTests {
         assertEquals(pongCustomPayload, pong.get().getCustomPayload());
         assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
         assertTrue(historyNetwork.isNodeConnected(nodeRecord));
-        assertEquals( pong.get().getCustomPayload(),historyNetwork.getRadiusFromNode(nodeRecord));
+        assertEquals(pong.get().getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
     }
 
 
@@ -55,7 +55,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(Bytes.EMPTY));
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
@@ -72,7 +72,7 @@ public class PingMessageTests {
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
         NodeRecord nodeRecord = createNodeRecord();
 
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -92,7 +92,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
         when(discv5Client.getEnrSeq()).thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client);
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
         NodeRecord nodeRecord = TestHelper.createNodeRecord();
         Ping pingMessage = createPingMessage();
 

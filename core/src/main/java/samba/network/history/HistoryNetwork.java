@@ -1,6 +1,9 @@
 package samba.network.history;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -8,9 +11,9 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
-import samba.db.PortalDB;
+
+import samba.db.history.HistoryDB;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
@@ -32,14 +35,15 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
 
     private UInt256 nodeRadius;
-    private PortalDB historyDB;
+    private HistoryDB historyDB;
     final NodeRecordFactory nodeRecordFactory;
     protected RoutingTable routingTable;
 
-    public HistoryNetwork(Discv5Client client) {
+    public HistoryNetwork(Discv5Client client, HistoryDB historyDB) {
         super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
         this.nodeRadius = UInt256.ONE; //TODO must come from argument
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
+        this.historyDB = historyDB;
         this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
         LOG.info("Home Record :" + client.getHomeNodeRecord().asEnr());
     }
@@ -108,18 +112,19 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             Content content = contentMessage.getMessage();
                             //Parse for three subtypes and then opperate accordingly
                             switch (content.getContentType()) {
-                                case 0:
+                                case 0 -> {/*
                                     SafeFuture.runAsync(() -> {
-                                        //TODO async UTP opperation
-                                    });
-                                case 1:
-                                    historyDB.put(message.getContentKey(), content.getContent());
-                                case 2:
+                                    //TODO async UTP opperation
+                                    });*/}
+                                case 1 -> historyDB.put(message.getContentKey(), content.getContent());
+                                case 2 -> {
                                     List<String> nodesList = content.getEnrList();
                                     //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
                                     //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
                                     //nodesList.removeIf(routingTable::isKnown);
                                     //nodesList.forEach(this::pingUnknownNode);
+                                    }
+                                default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
                             }
                             return SafeFuture.completedFuture(Optional.of(content));
                         })
