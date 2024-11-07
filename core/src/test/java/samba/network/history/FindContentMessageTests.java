@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static samba.TestHelper.createNodeRecord;
-import samba.db.history.HistoryDB;
+import samba.services.storage.HistoryDB;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.response.Content;

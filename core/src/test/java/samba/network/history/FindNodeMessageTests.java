@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static samba.TestHelper.createNodeRecord;
-import samba.db.history.HistoryDBImpl;
+import samba.services.storage.HistoryDBImpl;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindNodes;

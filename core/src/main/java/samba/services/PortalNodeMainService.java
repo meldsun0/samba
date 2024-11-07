@@ -9,7 +9,7 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
-import samba.db.history.HistoryDBImpl;
+import samba.services.storage.HistoryDBImpl;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.handler.FindContentHandler;

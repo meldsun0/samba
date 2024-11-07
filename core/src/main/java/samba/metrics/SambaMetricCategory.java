@@ -6,7 +6,13 @@ import java.util.Optional;
 import java.util.Set;
 
 public enum SambaMetricCategory implements MetricCategory {
-    DISCOVERY("discovery"), EVENTBUS("eventbus"), EXECUTOR("executor"), LIBP2P("libp2p"), NETWORK("network");
+    DISCOVERY("discovery"),
+    EVENTBUS("eventbus"),
+    EXECUTOR("executor"),
+    LIBP2P("libp2p"),
+    NETWORK("network"),
+    STORAGE("storage");
+
 
     private final String name;
 

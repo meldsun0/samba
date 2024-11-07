@@ -1,4 +1,4 @@
-package samba.db;
+package samba.services.storage;
 
 import org.apache.tuweni.bytes.Bytes;
 

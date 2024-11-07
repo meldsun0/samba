@@ -33,6 +33,8 @@ dependencies {
     implementation libs.oshi.core
     implementation libs.assertj.core
     implementation libs.mockito.core
+    implementation libs.rocksdbjni
+    implementation libs.prometheus.simpleclient
 
     compileOnly libs.projectlombok
     annotationProcessor libs.projectlombok
