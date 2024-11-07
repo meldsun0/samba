@@ -1,4 +1,4 @@
-package samba.schema.ssz.containers;
+package samba.schema.messages.ssz.containers;
 
 import java.util.List;
 import java.util.stream.Collectors;

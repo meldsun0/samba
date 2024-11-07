@@ -8,10 +8,9 @@ import org.apache.tuweni.bytes.Bytes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.schema.ssz.containers.NodesContainer;
+import samba.schema.messages.ssz.containers.NodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /*

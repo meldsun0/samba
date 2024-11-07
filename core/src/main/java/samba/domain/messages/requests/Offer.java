@@ -8,7 +8,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.schema.ssz.containers.OfferContainer;
+import samba.schema.messages.ssz.containers.OfferContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**

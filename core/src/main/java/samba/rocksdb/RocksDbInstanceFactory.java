@@ -24,6 +24,7 @@ import samba.config.InvalidConfigurationException;
 import samba.rocksdb.exceptions.DatabaseStorageException;
 import samba.rocksdb.keyvalue.KvStoreAccessor;
 import samba.rocksdb.keyvalue.KvStoreConfiguration;
+import samba.schema.content.Schema;
 
 
 import java.util.*;
@@ -51,6 +52,7 @@ public class RocksDbInstanceFactory {
             }
         }
     }
+
 
     public static KvStoreAccessor create(
             final MetricsSystem metricsSystem,

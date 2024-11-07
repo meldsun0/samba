@@ -11,19 +11,22 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package samba.rocksdb;
+package samba.schema.content;
 
 import org.apache.tuweni.bytes.Bytes;
+import samba.rocksdb.KvStoreColumn;
+import samba.rocksdb.KvStoreVariable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 public interface Schema {
-  Bytes DEFAULT_COLUMN_ID = Bytes.wrap("default".getBytes(StandardCharsets.UTF_8));
 
-  Collection<KvStoreColumn<?, ?>> getAllColumns();
+    Bytes DEFAULT_COLUMN_ID = Bytes.wrap("default".getBytes(StandardCharsets.UTF_8));
 
-  Collection<KvStoreVariable<?>> getAllVariables();
+    Collection<KvStoreColumn<?, ?>> getAllColumns();
 
-  Collection<Bytes> getDeletedColumnIds();
+    Collection<KvStoreVariable<?>> getAllVariables();
+
+    Collection<Bytes> getDeletedColumnIds();
 }

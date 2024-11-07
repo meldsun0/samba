@@ -6,8 +6,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
-import samba.schema.ssz.containers.FindContentContainer;
-import samba.schema.ssz.containers.FindNodesContainer;
+import samba.schema.messages.ssz.containers.FindContentContainer;
+import samba.schema.messages.ssz.containers.FindNodesContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**

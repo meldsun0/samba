@@ -154,6 +154,10 @@ public class KvStoreConfiguration {
         return optimizeForSmallDb;
     }
 
+    public static KvStoreConfiguration v6SingleDefaults() {
+        return new KvStoreConfiguration();
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)

@@ -1,4 +1,4 @@
-package samba.schema.ssz.containers;
+package samba.schema.messages.ssz.containers;
 
 import java.nio.ByteOrder;
 import java.util.HashSet;

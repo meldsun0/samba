@@ -6,7 +6,7 @@ import org.apache.tuweni.bytes.Bytes;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.*;
-import samba.schema.ssz.containers.PingContainer;
+import samba.schema.messages.ssz.containers.PingContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 

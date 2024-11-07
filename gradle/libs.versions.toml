@@ -14,6 +14,7 @@ lombok = "1.18.34"
 jupiter = "5.8.1"
 rocksdbjni = "8.3.2"
 prometheus = "0.16.0"
+jackson = "2.17.2"
 
 [libraries]
 tuweni-bytes = { module = "org.apache.tuweni:tuweni-bytes", version.ref = "tuweni"}
@@ -54,7 +55,6 @@ projectlombok= { module = "org.projectlombok:lombok", version.ref = "lombok"}
 junit-jupiter-api= { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter"}
 junit-jupiter-engine= { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "jupiter"}
 
-rocksdbjni= { module = "org.rocksdb:rocksdbjni", version.ref = "rocksdbjni"}
+rocksdbjni = { module = "org.rocksdb:rocksdbjni", version.ref = "rocksdbjni"}
 prometheus-simpleclient= { module = "io.prometheus:simpleclient", version.ref = "prometheus"}
-
-
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson"}

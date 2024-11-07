@@ -3,8 +3,7 @@ package samba.domain.messages.response;
 import org.apache.tuweni.bytes.Bytes;
 
 import samba.domain.messages.*;
-import samba.domain.messages.requests.Ping;
-import samba.schema.ssz.containers.AcceptContainer;
+import samba.schema.messages.ssz.containers.AcceptContainer;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /***
