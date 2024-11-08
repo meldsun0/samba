@@ -1,4 +1,4 @@
-package samba.rocksdb2.me.ready.kv;
+package samba.rocksdb;
 
 import java.nio.charset.StandardCharsets;
 

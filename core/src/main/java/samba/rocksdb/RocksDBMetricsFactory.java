@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb2;
+package samba.rocksdb;
 
 import org.hyperledger.besu.metrics.BesuMetricCategory;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
@@ -79,7 +79,7 @@ public class RocksDBMetricsFactory {
                 "read_latency_seconds",
                 "Latency for read from RocksDB.",
                 "database")
-            .labels(rocksDbConfiguration.getLabel());
+            .labels(rocksDbConfiguration.label());
     final OperationTimer removeLatency =
         metricsSystem
             .createLabelledTimer(
@@ -87,7 +87,7 @@ public class RocksDBMetricsFactory {
                 "remove_latency_seconds",
                 "Latency of remove requests from RocksDB.",
                 "database")
-            .labels(rocksDbConfiguration.getLabel());
+            .labels(rocksDbConfiguration.label());
     final OperationTimer writeLatency =
         metricsSystem
             .createLabelledTimer(
@@ -95,7 +95,7 @@ public class RocksDBMetricsFactory {
                 "write_latency_seconds",
                 "Latency for write to RocksDB.",
                 "database")
-            .labels(rocksDbConfiguration.getLabel());
+            .labels(rocksDbConfiguration.label());
     final OperationTimer commitLatency =
         metricsSystem
             .createLabelledTimer(
@@ -103,7 +103,7 @@ public class RocksDBMetricsFactory {
                 "commit_latency_seconds",
                 "Latency for commits to RocksDB.",
                 "database")
-            .labels(rocksDbConfiguration.getLabel());
+            .labels(rocksDbConfiguration.label());
 
     if (metricsSystem instanceof PrometheusMetricsSystem) {
       RocksDBStats.registerRocksDBMetrics(
@@ -143,7 +143,7 @@ public class RocksDBMetricsFactory {
                 "rollback_count",
                 "Number of RocksDB transactions rolled back.",
                 "database")
-            .labels(rocksDbConfiguration.getLabel());
+            .labels(rocksDbConfiguration.label());
 
     return new RocksDBMetrics(
         readLatency, removeLatency, writeLatency, commitLatency, rollbackCount);

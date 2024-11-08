@@ -1,5 +1,5 @@
 /*
- * Copyright Consensys Software Inc., 2022
+ * Copyright ConsenSys AG.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -9,23 +9,19 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
  */
+package samba.rocksdb;
 
-package samba.rocksdb.serialization;
-
-import samba.rocksdb.keyvalue.KvStoreSerializer;
-
-public class VoidSerializer implements KvStoreSerializer<Void> {
-
-  private static final byte[] VOID_VALUE = new byte[0];
-
-  @Override
-  public Void deserialize(final byte[] data) {
-    return null;
-  }
-
-  @Override
-  public byte[] serialize(final Void value) {
-    return VOID_VALUE;
+/** The Invalid configuration exception. */
+public class InvalidConfigurationException extends IllegalArgumentException {
+  /**
+   * Instantiates a new Invalid configuration exception.
+   *
+   * @param message the message
+   */
+  public InvalidConfigurationException(final String message) {
+    super(message);
   }
 }

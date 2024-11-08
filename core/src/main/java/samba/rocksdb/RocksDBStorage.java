@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb2.me.ready.kv;
+package samba.rocksdb;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
@@ -26,7 +26,6 @@ import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
 import org.rocksdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.rocksdb2.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -34,7 +33,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-//RocksDBColumnKeyValueStorage
 public abstract class RocksDBStorage implements KeyValueStorage {
 
     private static final Logger LOG = LoggerFactory.getLogger(RocksDBStorage.class);
@@ -78,10 +76,12 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     protected TransactionDBOptions rocksDBTxOptions;
     protected final Statistics stats = new Statistics();
     protected RocksDBMetrics metrics;
-    protected Map<Segment, RocksDbSegmentIdentifier> columnHandlesBySegmentIdentifier;
+    protected Map<Segment, RocksDBSegmentIdentifier> columnHandlesBySegmentIdentifier;
     protected List<ColumnFamilyDescriptor> columnDescriptors;
     protected List<ColumnFamilyHandle> columnHandles;
     protected List<Segment> trimmedSegments;
+
+    private final TransactionDB db;
 
 
     public RocksDBStorage(
@@ -98,7 +98,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
 
         try {
             trimmedSegments = new ArrayList<>(defaultSegments);
-            final List<byte[]> existingColumnFamilies = RocksDB.listColumnFamilies(new Options(), configuration.getDatabaseDir().toString());
+            final List<byte[]> existingColumnFamilies = RocksDB.listColumnFamilies(new Options(), configuration.databaseDir().toString());
             // Only ignore if not existed currently
             ignorableSegments.stream()
                     .filter(
@@ -112,9 +112,28 @@ public abstract class RocksDBStorage implements KeyValueStorage {
 
             rocksDBTxOptions = new TransactionDBOptions();
             columnHandles = new ArrayList<>(columnDescriptors.size());
+
+            db = TransactionDB.open(rocksDBOptions, rocksDBTxOptions, configuration.databaseDir().toString(), columnDescriptors, columnHandles);
+            initMetrics();
+            initColumnHandles();
+
         } catch (RocksDBException e) {
             throw parseRocksDBException(e, defaultSegments, ignorableSegments);
         }
+
+    }
+
+    @Override
+    public KeyValueStorageTransaction startTransaction() throws StorageException {
+        throwIfClosed();
+        final WriteOptions writeOptions = new WriteOptions();
+        writeOptions.setIgnoreMissingColumnFamilies(true);
+        return new RocksDBTransaction(this::safeColumnHandle, db.beginTransaction(writeOptions), writeOptions, metrics, this.closed::get);
+    }
+
+
+    RocksDB getDB() {
+        return db;
     }
 
     /**
@@ -161,7 +180,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
                 new LRUCache(
                         config.isHighSpec() && segment.isEligibleToHighSpecFlag()
                                 ? ROCKSDB_BLOCKCACHE_SIZE_WHEN_USING_HIGH_SPEC_OPT
-                                : config.getCacheCapacity());
+                                : config.cacheCapacity());
         return new BlockBasedTableConfig()
                 .setFormatVersion(ROCKSDB_FORMAT_VERSION)
                 .setBlockCache(cache)
@@ -181,12 +200,12 @@ public abstract class RocksDBStorage implements KeyValueStorage {
         rocksDBOptions = new DBOptions();
         rocksDBOptions
                 .setCreateIfMissing(true)
-                .setMaxOpenFiles(configuration.getMaxOpenFiles())
+                .setMaxOpenFiles(configuration.maxOpenFiles())
                 .setStatistics(stats)
                 .setCreateMissingColumnFamilies(true)
                 .setLogFileTimeToRoll(TIME_TO_ROLL_LOG_FILE_IN_SECONDS)
                 .setKeepLogFileNum(NUMBER_OF_LOG_FILES_TO_KEEP_ON_DISK)
-                .setEnv(Env.getDefault().setBackgroundThreads(configuration.getBackgroundThreadCount()))
+                .setEnv(Env.getDefault().setBackgroundThreads(configuration.backgroundThreadCount()))
                 .setMaxTotalWalSize(WAL_MAX_TOTAL_SIZE_AFTER_WHICH_A_FLUSH_IS_TRIGGERED)
                 .setRecycleLogFileNum(WAL_MAX_TOTAL_SIZE_AFTER_WHICH_A_FLUSH_IS_TRIGGERED / EXPECTED_WAL_FILE_SIZE_TO_KEEP_AROUND);
     }
@@ -264,7 +283,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
                                                                             new RuntimeException(
                                                                                     "Column handle not found for segment "
                                                                                             + segment.getName()));
-                                            return new RocksDbSegmentIdentifier(getDB(), columnHandle);
+                                            return new RocksDBSegmentIdentifier(getDB(), columnHandle);
                                         }));
     }
 
@@ -275,7 +294,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
      * @return column handle
      */
     protected ColumnFamilyHandle safeColumnHandle(final Segment segment) {
-        RocksDbSegmentIdentifier safeRef = columnHandlesBySegmentIdentifier.get(segment);
+        RocksDBSegmentIdentifier safeRef = columnHandlesBySegmentIdentifier.get(segment);
         if (safeRef == null) {
             throw new RuntimeException("Column handle not found for segment " + segment.getName());
         }
@@ -285,7 +304,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     @Override
     public Optional<byte[]> get(final Segment segment, final byte[] key) throws StorageException {
         throwIfClosed();
-        try (final OperationTimer.TimingContext ignored = metrics.getReadLatency().startTimer()) {
+        try (final OperationTimer.TimingContext ignored = metrics.readLatency().startTimer()) {
             return Optional.ofNullable(getDB().get(safeColumnHandle(segment), readOptions, key));
         } catch (final RocksDBException e) {
             throw new StorageException(e);
@@ -297,7 +316,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     public Stream<Pair<byte[], byte[]>> stream(final Segment segment) {
         final RocksIterator rocksIterator = getDB().newIterator(safeColumnHandle(segment));
         rocksIterator.seekToFirst();
-        return RocksDbIterator.create(rocksIterator).toStream();
+        return RocksDBIterator.create(rocksIterator).toStream();
     }
 
 
@@ -305,7 +324,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     public Stream<byte[]> streamKeys(final Segment segment) {
         final RocksIterator rocksIterator = getDB().newIterator(safeColumnHandle(segment));
         rocksIterator.seekToFirst();
-        return RocksDbIterator.create(rocksIterator).toStreamKeys();
+        return RocksDBIterator.create(rocksIterator).toStreamKeys();
     }
 
     @Override
@@ -326,7 +345,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     @Override
     public void clear(final Segment segment) {
         Optional.ofNullable(columnHandlesBySegmentIdentifier.get(segment))
-                .ifPresent(RocksDbSegmentIdentifier::reset);
+                .ifPresent(RocksDBSegmentIdentifier::reset);
     }
 
     @Override
@@ -336,7 +355,7 @@ public abstract class RocksDBStorage implements KeyValueStorage {
             rocksDBOptions.close();
             tryDeleteOptions.close();
             columnHandlesBySegmentIdentifier.values().stream()
-                    .map(RocksDbSegmentIdentifier::get)
+                    .map(RocksDBSegmentIdentifier::get)
                     .forEach(ColumnFamilyHandle::close);
             getDB().close();
         }
@@ -353,8 +372,6 @@ public abstract class RocksDBStorage implements KeyValueStorage {
             throw new IllegalStateException("Storage has been closed");
         }
     }
-
-    abstract RocksDB getDB();
 
     record SegmentRecord(String name, byte[] id) {
         public String forDisplay() {

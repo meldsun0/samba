@@ -10,7 +10,6 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import com.google.common.base.Throwables;
 
-import samba.services.storage.PortalDB;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
 import samba.network.exception.BadRequestException;
@@ -25,7 +24,6 @@ public abstract class BaseNetwork implements Network {
     protected NetworkType networkType;
     protected Discv5Client discv5Client;
     protected UInt256 nodeRadius;
-    private PortalDB db;
 
 
     public BaseNetwork(NetworkType networkType, Discv5Client discv5Client, UInt256 nodeRadius) {

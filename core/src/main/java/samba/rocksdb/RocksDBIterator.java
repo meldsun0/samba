@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb2;
+package samba.rocksdb;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.rocksdb.RocksDBException;
@@ -31,13 +31,13 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Preconditions.checkState;
 
 /** The Rocks db iterator. */
-public class RocksDbIterator implements Iterator<Pair<byte[], byte[]>>, AutoCloseable {
-  private static final Logger LOG = LoggerFactory.getLogger(RocksDbIterator.class);
+public class RocksDBIterator implements Iterator<Pair<byte[], byte[]>>, AutoCloseable {
+  private static final Logger LOG = LoggerFactory.getLogger(RocksDBIterator.class);
 
   private final RocksIterator rocksIterator;
   private final AtomicBoolean closed = new AtomicBoolean(false);
 
-  private RocksDbIterator(final RocksIterator rocksIterator) {
+  private RocksDBIterator(final RocksIterator rocksIterator) {
     this.rocksIterator = rocksIterator;
   }
 
@@ -47,8 +47,8 @@ public class RocksDbIterator implements Iterator<Pair<byte[], byte[]>>, AutoClos
    * @param rocksIterator the rocks iterator
    * @return the rocks db iterator
    */
-  public static RocksDbIterator create(final RocksIterator rocksIterator) {
-    return new RocksDbIterator(rocksIterator);
+  public static RocksDBIterator create(final RocksIterator rocksIterator) {
+    return new RocksDBIterator(rocksIterator);
   }
 
   @Override
@@ -129,12 +129,12 @@ public class RocksDbIterator implements Iterator<Pair<byte[], byte[]>>, AutoClos
             new Iterator<>() {
               @Override
               public boolean hasNext() {
-                return RocksDbIterator.this.hasNext();
+                return RocksDBIterator.this.hasNext();
               }
 
               @Override
               public byte[] next() {
-                return RocksDbIterator.this.nextKey();
+                return RocksDBIterator.this.nextKey();
               }
             },
             Spliterator.IMMUTABLE

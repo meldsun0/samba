@@ -18,7 +18,9 @@ import static org.mockito.Mockito.when;
 
 import samba.TestHelper;
 import static samba.TestHelper.createNodeRecord;
-import samba.services.storage.HistoryDBImpl;
+
+import samba.services.storage.HistoryDB;
+import samba.services.storage.HistoryRocksDB;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;
@@ -36,7 +38,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
 
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -55,7 +57,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(Bytes.EMPTY));
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
         NodeRecord nodeRecord = createNodeRecord();
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
@@ -72,7 +74,7 @@ public class PingMessageTests {
         when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
         NodeRecord nodeRecord = createNodeRecord();
 
         Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -92,7 +94,7 @@ public class PingMessageTests {
         when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class))).thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
         when(discv5Client.getEnrSeq()).thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
-        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, new HistoryDBImpl());
+        HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
         NodeRecord nodeRecord = TestHelper.createNodeRecord();
         Ping pingMessage = createPingMessage();
 

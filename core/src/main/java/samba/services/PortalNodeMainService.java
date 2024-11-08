@@ -9,7 +9,7 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
-import samba.services.storage.HistoryDBImpl;
+import samba.services.storage.HistoryRocksDB;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.handler.FindContentHandler;
@@ -23,6 +23,7 @@ import samba.services.api.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
+import samba.services.storage.StorageService;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -52,6 +53,7 @@ public class PortalNodeMainService extends Service {
     private Discv5Service discoveryService;
     private ConnectionService connectionService;
     private HistoryNetwork historyNetwork;
+    private StorageService storageService;
     private final IncomingRequestHandler incomingRequestProcessor = new IncomingRequestHandler();
 
 
@@ -63,6 +65,7 @@ public class PortalNodeMainService extends Service {
         this.sambaConfiguration = sambaConfiguration;
 
         initDiscoveryService();
+        initStorageService();
         initHistoryNetwork();
         initConnectionService();
         initRestAPI();
@@ -72,7 +75,7 @@ public class PortalNodeMainService extends Service {
     private void initHistoryNetwork() {
         LOG.info("PortalNodeMainService.initHistoryNetwork()");
         //Get and initialize HistoryDB object from persistent storage
-        this.historyNetwork = new HistoryNetwork(this.discoveryService, new HistoryDBImpl());
+        this.historyNetwork = new HistoryNetwork(this.discoveryService, this.storageService.getDatabase());
         incomingRequestProcessor
                 .addHandler(MessageType.PING, new PingHandler())
                 .addHandler(MessageType.FIND_NODES, new FindNodesHandler())
@@ -98,6 +101,12 @@ public class PortalNodeMainService extends Service {
                 DiscoveryConfig.builder().bootnodes(Bootnodes.loadBootnodes(NetworkType.EXECUTION_HISTORY_NETWORK)).build(),
                 this.privKey,
                 incomingRequestProcessor);
+
+    }
+
+    protected void initStorageService() {
+        LOG.info("PortalNodeMainService.initStorageService()");
+        this.storageService = new StorageService(this.metricsSystem, this.asyncRunner, null);
 
     }
 

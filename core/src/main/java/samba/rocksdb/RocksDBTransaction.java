@@ -1,4 +1,4 @@
-package samba.rocksdb2.me.ready.kv;
+package samba.rocksdb;
 
 
 import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
@@ -9,7 +9,6 @@ import org.rocksdb.Transaction;
 import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.rocksdb2.RocksDBMetrics;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -54,7 +53,7 @@ public class RocksDBTransaction implements KeyValueStorageTransaction {
         checkState(active, "Cannot invoke put() on a completed transaction.");
         checkState(!isClosed.get(), "Cannot invoke put() on a closed storage.");
 
-        try (final OperationTimer.TimingContext ignored = metrics.getWriteLatency().startTimer()) {
+        try (final OperationTimer.TimingContext ignored = metrics.writeLatency().startTimer()) {
             innerTx.put(columnFamilyMapper.apply(segmentId), key, value);
         } catch (final RocksDBException e) {
             if (e.getMessage().contains(NO_SPACE_LEFT_ON_DEVICE)) {
@@ -70,7 +69,7 @@ public class RocksDBTransaction implements KeyValueStorageTransaction {
         checkState(active, "Cannot invoke remove() on a completed transaction.");
         checkState(!isClosed.get(), "Cannot invoke remove() on a closed storage.");
 
-        try (final OperationTimer.TimingContext ignored = metrics.getRemoveLatency().startTimer()) {
+        try (final OperationTimer.TimingContext ignored = metrics.removeLatency().startTimer()) {
             innerTx.delete(columnFamilyMapper.apply(segmentId), key);
         } catch (final RocksDBException e) {
             if (e.getMessage().contains(NO_SPACE_LEFT_ON_DEVICE)) {
@@ -86,7 +85,7 @@ public class RocksDBTransaction implements KeyValueStorageTransaction {
         checkState(active, "Cannot commit a completed transaction.");
         checkState(!isClosed.get(), "Cannot invoke commit() on a closed storage.");
         active = false;
-        try (final OperationTimer.TimingContext ignored = metrics.getCommitLatency().startTimer()) {
+        try (final OperationTimer.TimingContext ignored = metrics.commitLatency().startTimer()) {
             innerTx.commit();
         } catch (final RocksDBException e) {
             if (e.getMessage().contains(NO_SPACE_LEFT_ON_DEVICE)) {
@@ -106,7 +105,7 @@ public class RocksDBTransaction implements KeyValueStorageTransaction {
         active = false;
         try {
             innerTx.rollback();
-            metrics.getRollbackCount().inc();
+            metrics.rollbackCount().inc();
         } catch (final RocksDBException e) {
             if (e.getMessage().contains(NO_SPACE_LEFT_ON_DEVICE)) {
                 logger.error(e.getMessage());
