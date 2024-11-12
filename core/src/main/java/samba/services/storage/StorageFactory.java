@@ -30,10 +30,10 @@ public class StorageFactory {
     }
 
     public HistoryRocksDB create() throws IOException {
-        LOG.info("Beacon data directory set to: {}", dataDirectory.getAbsolutePath());
+        LOG.info("History data directory set to: {}", dataDirectory.getAbsolutePath());
         validateDataPaths();
         createDirectories();
-        //TODO do we need versions
+        //TODO do we need versions, and a metadata file ?
         return new HistoryRocksDB(this.dataDirectory.toPath(), this.metricsSystem, RocksDBMetricsFactory.PUBLIC_ROCKS_DB_METRICS);
 
     }

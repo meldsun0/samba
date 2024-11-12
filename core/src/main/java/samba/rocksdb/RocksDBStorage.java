@@ -30,8 +30,11 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toUnmodifiableSet;
 
 public abstract class RocksDBStorage implements KeyValueStorage {
 
@@ -81,8 +84,6 @@ public abstract class RocksDBStorage implements KeyValueStorage {
     protected List<ColumnFamilyHandle> columnHandles;
     protected List<Segment> trimmedSegments;
 
-    private final TransactionDB db;
-
 
     public RocksDBStorage(
             final RocksDBConfiguration configuration,
@@ -113,28 +114,14 @@ public abstract class RocksDBStorage implements KeyValueStorage {
             rocksDBTxOptions = new TransactionDBOptions();
             columnHandles = new ArrayList<>(columnDescriptors.size());
 
-            db = TransactionDB.open(rocksDBOptions, rocksDBTxOptions, configuration.databaseDir().toString(), columnDescriptors, columnHandles);
-            initMetrics();
-            initColumnHandles();
-
         } catch (RocksDBException e) {
             throw parseRocksDBException(e, defaultSegments, ignorableSegments);
         }
 
     }
 
-    @Override
-    public KeyValueStorageTransaction startTransaction() throws StorageException {
-        throwIfClosed();
-        final WriteOptions writeOptions = new WriteOptions();
-        writeOptions.setIgnoreMissingColumnFamilies(true);
-        return new RocksDBTransaction(this::safeColumnHandle, db.beginTransaction(writeOptions), writeOptions, metrics, this.closed::get);
-    }
 
-
-    RocksDB getDB() {
-        return db;
-    }
+   abstract  RocksDB getDB();
 
     /**
      * Create a Column Family Descriptor for a given segment It defines basically the different
@@ -377,5 +364,14 @@ public abstract class RocksDBStorage implements KeyValueStorage {
         public String forDisplay() {
             return String.format("'%s'(%s)", name, Bytes.of(id).toHexString());
         }
+    }
+
+    @Override
+    public Set<byte[]> getAllKeysThat(
+            final Segment segment, final Predicate<byte[]> returnCondition) {
+        return stream(segment)
+                .filter(pair -> returnCondition.test(pair.getKey()))
+                .map(Pair::getKey)
+                .collect(toUnmodifiableSet());
     }
 }

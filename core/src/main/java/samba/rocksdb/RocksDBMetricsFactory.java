@@ -72,7 +72,7 @@ public class RocksDBMetricsFactory {
       final RocksDBConfiguration rocksDbConfiguration,
       final RocksDB db,
       final Statistics stats) {
-    final OperationTimer readLatency =
+      final OperationTimer readLatency =
         metricsSystem
             .createLabelledTimer(
                 rocksDbMetricCategory,

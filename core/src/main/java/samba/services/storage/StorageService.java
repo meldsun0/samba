@@ -34,7 +34,7 @@ public class StorageService extends Service {
         return SafeFuture.fromRunnable(
                         () -> {
                             StorageFactory storageFactory = new StorageFactory(this.metricsSystem,  Paths.get(""));
-                            database= storageFactory.create();
+                            database = storageFactory.create();
                         });
     }
 

@@ -13,11 +13,13 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.*;
 
-public class HistoryRocksDB extends RocksDBStorage implements HistoryDB {
+public class HistoryRocksDB  implements HistoryDB {
 
+
+    private RocksDBInstance rocksDBInstance;
 
     public HistoryRocksDB(Path path, MetricsSystem metricsSystem, RocksDBMetricsFactory rocksDBMetricsFactory) throws StorageException {
-        super(RocksDBConfiguration.createDefault(path),
+        this.rocksDBInstance = new RocksDBInstance(RocksDBConfiguration.createDefault(path),
                 Arrays.asList(KeyValueSegment.values()),
                 List.of(),
                 metricsSystem,
@@ -69,6 +71,10 @@ public class HistoryRocksDB extends RocksDBStorage implements HistoryDB {
 
     private void saveBlockBody(Bytes blockHash, Bytes content) {
         checkArgument(!content.isEmpty(), "Content should have more than 1 byte when persisting BlockBody");
-        this.startTransaction().put(KeyValueSegment.BLOCK_BODY, blockHash.toArray(), content.toArray());
+        this.rocksDBInstance.startTransaction().put(KeyValueSegment.BLOCK_BODY, blockHash.toArray(), content.toArray());
+    }
+
+    public void close() {
+        this.rocksDBInstance.close();
     }
 }

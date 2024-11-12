@@ -1,9 +1,13 @@
 package samba.rocksdb;
 
 import org.apache.commons.lang3.tuple.Pair;
+
+
 import java.io.Closeable;
 import java.util.Optional;
 
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 //SegmentdKeyValueStorage and KeyValueStorage
@@ -27,4 +31,5 @@ public interface KeyValueStorage extends Closeable {
 
   boolean isClosed();
 
+  Set<byte[]> getAllKeysThat(Segment segment, Predicate<byte[]> returnCondition);
 }
