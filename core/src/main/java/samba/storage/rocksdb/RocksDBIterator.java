@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.rocksdb.RocksDBException;

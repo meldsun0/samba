@@ -18,13 +18,17 @@ import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
  */
 public class Content implements PortalWireMessage {
 
+    public static final int UTP_CONNECTION_ID = 0;
+    public static final int CONTENT_TYPE = 1;
+    public static final int ENRS = 2;
+
     private final int connectionId;
     private final Bytes content;
     private final List<String> enrs;
     private final int contentType;
 
     public Content(int connectionId) {
-        this.contentType = 0;
+        this.contentType = UTP_CONNECTION_ID;
         this.connectionId = connectionId;
         this.content = null;
         this.enrs = null;
@@ -33,7 +37,7 @@ public class Content implements PortalWireMessage {
 
     public Content(Bytes content) {
         checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Content size exceeds limit");
-        this.contentType = 1;
+        this.contentType = CONTENT_TYPE;
         this.content = content;
         this.connectionId = 0;
         this.enrs = null;
@@ -42,7 +46,7 @@ public class Content implements PortalWireMessage {
     public Content(List<String> enrs) {
         checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
         checkArgument(enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES), "One or more ENRs exceed maximum payload size");
-        this.contentType = 2;
+        this.contentType = ENRS;
         this.enrs = enrs;
         this.connectionId = 0;
         this.content = null;
@@ -54,8 +58,7 @@ public class Content implements PortalWireMessage {
         int contentType = contentContainer.getContentType();
 
         switch (contentType) {
-            // uTP connection ID
-            case 0 -> {
+            case UTP_CONNECTION_ID -> {
                 int connectionId = contentContainer.getConnectionId();
                 if (connectionId < 0) {
                     throw new IllegalArgumentException("CONTENT: Connection ID must be non-negative");
@@ -64,8 +67,7 @@ public class Content implements PortalWireMessage {
                 }
                 return new Content(connectionId);
             }
-            // Requested content
-            case 1 -> {
+            case CONTENT_TYPE -> {
                 Bytes content = contentContainer.getContent();
                 if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
                     throw new IllegalArgumentException("CONTENT: Content size exceeds limit");
@@ -74,8 +76,7 @@ public class Content implements PortalWireMessage {
                 }
                 return new Content(content);
             }
-            // ENRs
-            case 2 -> {
+            case ENRS -> {
                 List<String> enrs = contentContainer.getEnrs();
                 if (enrs.size() > PortalWireMessage.MAX_ENRS) {
                     throw new IllegalArgumentException("CONTENT: Number of ENRs exceeds limit");
@@ -122,9 +123,9 @@ public class Content implements PortalWireMessage {
 
     private ContentContainer getContentContainer() {
         return switch (contentType) {
-            case 0 -> new ContentContainer((byte) contentType, Bytes.ofUnsignedShort(connectionId));
-            case 1 -> new ContentContainer((byte) contentType, content);
-            case 2 -> new ContentContainer((byte) contentType, getEnrsBytes());
+            case UTP_CONNECTION_ID -> new ContentContainer((byte) contentType, Bytes.ofUnsignedShort(connectionId));
+            case CONTENT_TYPE -> new ContentContainer((byte) contentType, content);
+            case ENRS -> new ContentContainer((byte) contentType, getEnrsBytes());
             default -> throw new AssertionError();
         };
     }

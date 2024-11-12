@@ -1,12 +1,11 @@
-package samba.services.storage;
+package samba.storage;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.ssz.SSZ;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.domain.content.ContentType;
-import samba.rocksdb.*;
+import samba.storage.rocksdb.*;
 
-import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.List;
 import static com.google.common.base.Preconditions.*;
 
 public class HistoryRocksDB  implements HistoryDB {
-
 
     private RocksDBInstance rocksDBInstance;
 
@@ -26,17 +24,16 @@ public class HistoryRocksDB  implements HistoryDB {
                 rocksDBMetricsFactory);
     }
 
-    public void put(Bytes contentKey, Bytes value) {
-        Bytes wireType = contentKey.slice(0, 1);
-        ContentType contentType = ContentType.fromInt(wireType.toInt());
-        checkNotNull(contentType, "Invalid content type from byte: " + wireType);
-
+    public void saveContent(Bytes contentKey, Bytes value) {
+        Bytes selector = contentKey.slice(0, 1);
+        ContentType contentType = ContentType.fromInt(selector.toInt());
+        checkNotNull(contentType, "Invalid content type from byte: " + selector);
         switch (contentType) {
             case ContentType.BLOCK_HEADER -> {
-                //validate header
+                //   validateHeader
+                //               save
             }
             case ContentType.BLOCK_BODY -> {
-                //TODO check size
                 Bytes blockHash = SSZ.decodeBytes(contentKey.slice(1, contentKey.size()));
                 saveBlockBody(blockHash, value);
             }
@@ -71,7 +68,9 @@ public class HistoryRocksDB  implements HistoryDB {
 
     private void saveBlockBody(Bytes blockHash, Bytes content) {
         checkArgument(!content.isEmpty(), "Content should have more than 1 byte when persisting BlockBody");
-        this.rocksDBInstance.startTransaction().put(KeyValueSegment.BLOCK_BODY, blockHash.toArray(), content.toArray());
+        KeyValueStorageTransaction tx = rocksDBInstance.startTransaction();
+        tx.put(KeyValueSegment.BLOCK_BODY, blockHash.toArray(), content.toArray());
+        tx.commit();
     }
 
     public void close() {

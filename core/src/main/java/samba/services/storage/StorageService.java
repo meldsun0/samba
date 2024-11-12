@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.StorageConfig;
+import samba.storage.HistoryRocksDB;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 

@@ -12,7 +12,6 @@ public enum ContentType {
 
     ContentType(int value) {
         this.value = (byte) (value & BYTE_MASK);
-
     }
 
     public byte getByteValue() {

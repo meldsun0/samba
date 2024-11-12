@@ -3,8 +3,8 @@ package samba.services.storage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-import samba.rocksdb.RocksDBConfiguration;
-import samba.rocksdb.RocksDBMetricsFactory;
+import samba.storage.HistoryRocksDB;
+import samba.storage.rocksdb.RocksDBMetricsFactory;
 
 import java.io.File;
 import java.io.IOException;

@@ -12,16 +12,21 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
-import org.hyperledger.besu.plugin.services.metrics.Counter;
-import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
+import java.nio.file.Path;
 
-/**
- * The Rocks db metrics.
- */
-public record RocksDBMetrics(OperationTimer readLatency,
-                             OperationTimer removeLatency,
-                             OperationTimer writeLatency,
-                             OperationTimer commitLatency,
-                             Counter rollbackCount) { }
+
+public record RocksDBConfiguration(Path databaseDir,
+                                   int maxOpenFiles,
+                                   String label,
+                                   int backgroundThreadCount,
+                                   long cacheCapacity,
+                                   boolean isHighSpec) {
+  public static RocksDBConfiguration createDefault(Path databaseDir) {
+      return new RocksDBConfiguration(databaseDir, 1024, "rocksDB", 4, 134217728, false);
+  }
+}
+
+
+

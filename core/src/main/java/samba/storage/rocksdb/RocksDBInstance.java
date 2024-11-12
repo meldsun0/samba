@@ -1,8 +1,6 @@
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-import org.hyperledger.besu.plugin.services.storage.SegmentIdentifier;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.TransactionDB;

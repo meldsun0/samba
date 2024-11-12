@@ -1,6 +1,8 @@
 package samba.rocksdb;
 
 
+import samba.storage.rocksdb.Segment;
+
 import java.nio.charset.StandardCharsets;
 
 public enum TestSegment implements Segment {

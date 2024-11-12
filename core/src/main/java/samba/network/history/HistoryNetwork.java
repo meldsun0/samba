@@ -5,7 +5,9 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -13,7 +15,9 @@ import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
-import samba.services.storage.HistoryDB;
+import org.jetbrains.annotations.NotNull;
+import samba.domain.messages.MessageType;
+import samba.storage.HistoryDB;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
@@ -33,9 +37,8 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequests, HistoryNetworkIncomingRequests, LivenessChecker {
 
-
     private UInt256 nodeRadius;
-    private HistoryDB historyDB;
+    private final HistoryDB historyDB;
     final NodeRecordFactory nodeRecordFactory;
     protected RoutingTable routingTable;
 
@@ -86,20 +89,17 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                         nodesMessage -> {
                             Nodes nodes = nodesMessage.getMessage();
                             //SafeFuture.runAsync(() -> {
-                                nodes.getEnrList().stream()
-                                        .map(nodeRecordFactory::fromEnr)
-                                        .filter(this::isNotHomeNode)
-                                        .filter(node -> !node.asEnr().equals(nodeRecord.asEnr()))
-                                        .filter(this::isPossibleNodeCandidate)
-                                        .forEach(node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
-                         //   });
+                            nodes.getEnrList().stream()
+                                    .map(nodeRecordFactory::fromEnr)
+                                    .filter(this::isNotHomeNode)
+                                    .filter(node -> !node.asEnr().equals(nodeRecord.asEnr()))
+                                    .filter(this::isPossibleNodeCandidate)
+                                    .forEach(node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
+                            //   });
                             return SafeFuture.completedFuture(Optional.of(nodes));
                         })
                 .exceptionallyCompose(
-                        error -> {
-                            LOG.info("Something when wrong when sending a {}", message.getMessageType());
-                            return SafeFuture.completedFuture(Optional.empty());
-                        });
+                        createDefaultErrorWhenSendingMessage(message.getMessageType()));
     }
 
 
@@ -110,30 +110,30 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                 .thenCompose(
                         contentMessage -> {
                             Content content = contentMessage.getMessage();
-                            //Parse for three subtypes and then opperate accordingly
+
+                            //If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
+
                             switch (content.getContentType()) {
-                                case 0 -> {/*
+                                case Content.UTP_CONNECTION_ID-> {/*
                                     SafeFuture.runAsync(() -> {
                                     //TODO async UTP opperation
-                                    });*/}
-                                case 1 -> historyDB.put(message.getContentKey(), content.getContent());
-                                case 2 -> {
+                                    });*/
+                                }
+                                case Content.CONTENT_TYPE -> historyDB.saveContent(message.getContentKey(), content.getContent());
+                                case Content.ENRS -> {
                                     List<String> nodesList = content.getEnrList();
                                     //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
                                     //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
                                     //nodesList.removeIf(routingTable::isKnown);
                                     //nodesList.forEach(this::pingUnknownNode);
-                                    }
+                                }
                                 default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
                             }
                             return SafeFuture.completedFuture(Optional.of(content));
                         })
-                .exceptionallyCompose(
-                        error -> {
-                            LOG.info("Something when wrong when sending a {}", message.getMessageType());
-                            return SafeFuture.completedFuture(Optional.empty());
-                        });
+                .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
     }
+
 
     @Override
     public SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer message) {
@@ -145,11 +145,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             //TODO create UTP stream using connectionId
                             return SafeFuture.completedFuture(Optional.of(accept));
                         })
-                .exceptionallyCompose(
-                        error -> {
-                            LOG.info("Something when wrong when sending a {}", message.getMessageType());
-                            return SafeFuture.completedFuture(Optional.empty());
-                        });
+                .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
     }
 
     @Override
@@ -260,6 +256,14 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     private boolean isNotHomeNode(NodeRecord node) {
         return !(this.discv5Client.getHomeNodeRecord().equals(node));
+    }
+
+    @NotNull
+    private static <V> Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(MessageType message) {
+        return error -> {
+            LOG.info("Something when wrong when sending a {}", message);
+            return SafeFuture.completedFuture(Optional.empty());
+        };
     }
 
 }

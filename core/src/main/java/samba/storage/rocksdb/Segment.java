@@ -1,4 +1,4 @@
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 public interface Segment {
 

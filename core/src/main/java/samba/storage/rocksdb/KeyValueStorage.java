@@ -1,4 +1,4 @@
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 import org.apache.commons.lang3.tuple.Pair;
 

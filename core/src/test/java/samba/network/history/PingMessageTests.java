@@ -19,8 +19,7 @@ import static org.mockito.Mockito.when;
 import samba.TestHelper;
 import static samba.TestHelper.createNodeRecord;
 
-import samba.services.storage.HistoryDB;
-import samba.services.storage.HistoryRocksDB;
+import samba.storage.HistoryDB;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;

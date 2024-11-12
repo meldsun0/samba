@@ -12,21 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
-import java.nio.file.Path;
-
-
-public record RocksDBConfiguration(Path databaseDir,
-                                   int maxOpenFiles,
-                                   String label,
-                                   int backgroundThreadCount,
-                                   long cacheCapacity,
-                                   boolean isHighSpec) {
-  public static RocksDBConfiguration createDefault(Path databaseDir) {
-      return new RocksDBConfiguration(databaseDir, 1024, "rocksDB", 4, 134217728, false);
+/** The Invalid configuration exception. */
+public class InvalidConfigurationException extends IllegalArgumentException {
+  /**
+   * Instantiates a new Invalid configuration exception.
+   *
+   * @param message the message
+   */
+  public InvalidConfigurationException(final String message) {
+    super(message);
   }
 }
-
-
-

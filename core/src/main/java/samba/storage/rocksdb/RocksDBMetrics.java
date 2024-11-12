@@ -12,16 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
-/** The Invalid configuration exception. */
-public class InvalidConfigurationException extends IllegalArgumentException {
-  /**
-   * Instantiates a new Invalid configuration exception.
-   *
-   * @param message the message
-   */
-  public InvalidConfigurationException(final String message) {
-    super(message);
-  }
-}
+import org.hyperledger.besu.plugin.services.metrics.Counter;
+import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
+
+/**
+ * The Rocks db metrics.
+ */
+public record RocksDBMetrics(OperationTimer readLatency,
+                             OperationTimer removeLatency,
+                             OperationTimer writeLatency,
+                             OperationTimer commitLatency,
+                             Counter rollbackCount) { }

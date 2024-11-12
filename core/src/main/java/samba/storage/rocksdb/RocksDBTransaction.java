@@ -1,4 +1,4 @@
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 
 import org.hyperledger.besu.plugin.services.metrics.OperationTimer;

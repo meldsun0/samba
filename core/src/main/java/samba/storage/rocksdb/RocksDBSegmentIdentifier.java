@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;

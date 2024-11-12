@@ -9,7 +9,6 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 
 import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
-import samba.services.storage.HistoryRocksDB;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.handler.FindContentHandler;

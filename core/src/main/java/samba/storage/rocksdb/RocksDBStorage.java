@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;

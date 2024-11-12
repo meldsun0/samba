@@ -22,8 +22,7 @@ import static org.mockito.Mockito.when;
 
 import static samba.TestHelper.createNodeRecord;
 
-import samba.services.storage.HistoryDB;
-import samba.services.storage.HistoryRocksDB;
+import samba.storage.HistoryDB;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindNodes;

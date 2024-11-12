@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.rocksdb;
+package samba.storage.rocksdb;
 
 import io.prometheus.client.Collector;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
