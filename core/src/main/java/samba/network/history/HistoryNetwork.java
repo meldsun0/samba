@@ -109,17 +109,20 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                 .thenApply(Optional::get)
                 .thenCompose(
                         contentMessage -> {
+
                             Content content = contentMessage.getMessage();
 
-                            //If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
 
+                            //If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
                             switch (content.getContentType()) {
-                                case Content.UTP_CONNECTION_ID-> {/*
+                                case Content.UTP_CONNECTION_ID -> {/*
                                     SafeFuture.runAsync(() -> {
                                     //TODO async UTP opperation
                                     });*/
                                 }
-                                case Content.CONTENT_TYPE -> historyDB.saveContent(message.getContentKey(), content.getContent());
+                                case Content.CONTENT_TYPE -> {
+                                    historyDB.saveContent(message.getContentKey(), content.getContent());
+                                }
                                 case Content.ENRS -> {
                                     List<String> nodesList = content.getEnrList();
                                     //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.

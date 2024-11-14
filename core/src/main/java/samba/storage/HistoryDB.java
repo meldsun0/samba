@@ -1,11 +1,17 @@
 package samba.storage;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.ethereum.core.BlockHeader;
+
+
+import java.util.Optional;
 
 public interface HistoryDB {
 
 
     void saveContent(Bytes key, Bytes value);
+
+    Optional<BlockHeader> getBlockHeader(Bytes blockHash);
 
     Bytes get(Bytes key);
 
