@@ -70,7 +70,7 @@ public class HistoryRocksDB  implements HistoryDB {
                 save(KeyValueSegment.RECEIPT, blockHash, value);
             }
             case ContentType.BLOCK_HEADER_BY_NUMBER -> {
-                Bytes blockNumber = contentKey.slice(1, contentKey.size()); //blockNumbergit dif is in ssz.
+                Bytes blockNumber = contentKey.slice(1, contentKey.size()); //blockNumber is in ssz.
             }
             default ->
                     throw new RuntimeException(String.format("Creation of a Content from contentType %s is not supported", contentType)); //TODO build own runtime exception.

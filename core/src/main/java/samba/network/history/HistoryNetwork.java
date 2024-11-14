@@ -121,6 +121,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                                     });*/
                                 }
                                 case Content.CONTENT_TYPE -> {
+
                                     historyDB.saveContent(message.getContentKey(), content.getContent());
                                 }
                                 case Content.ENRS -> {
