@@ -31,13 +31,13 @@ vertx-web= { module = "io.vertx:vertx-web", version.ref = "vertex"}
 besu-internal-metrics-core= { module = "org.hyperledger.besu.internal:metrics-core", version.ref = "besuInternal"}
 besu-internal-core = { module = "org.hyperledger.besu.internal:core", version.ref = "besuInternal"}
 besu-internal-config = { module = "org.hyperledger.besu.internal:config", version.ref = "besuInternal"}
+besu-internal-rlp = { module = "org.hyperledger.besu.internal:rlp", version.ref = "besuInternal"}
 besu-internal-plugin-api = { module = "org.hyperledger.besu:plugin-api", version.ref = "besuInternal"}
 
 teku-internal-infrastructure-events = { module = "tech.pegasys.teku.internal:infrastructure-events", version.ref = "tekuInternal"}
 teku-internal-async = { module = "tech.pegasys.teku.internal:async", version.ref = "tekuInternal"}
 teku-internal-infrastructure-restapi = { module = "tech.pegasys.teku.internal:infrastructure-restapi", version.ref = "tekuInternal"}
 teku-internal-serviceutils = { module = "tech.pegasys.teku.internal:serviceutils", version.ref = "tekuInternal"}
-
 teku-internal-io = { module = "tech.pegasys.teku.internal:io", version.ref = "tekuInternal"}
 teku-internal-ssz = { module = "tech.pegasys.teku.internal:ssz", version.ref = "tekuInternal"}
 teku-internal-unsigned = { module = "tech.pegasys.teku.internal:unsigned", version.ref = "tekuInternal"}

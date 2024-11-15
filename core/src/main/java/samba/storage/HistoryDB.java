@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface HistoryDB {
 
 
-    void saveContent(Bytes key, Bytes value);
+    boolean saveContent(Bytes key, Bytes value);
 
     Optional<BlockHeader> getBlockHeader(Bytes blockHash);
 

@@ -4,9 +4,10 @@ import java.nio.charset.StandardCharsets;
 
 public enum KeyValueSegment implements Segment {
     DEFAULT("default".getBytes(StandardCharsets.UTF_8)),
-    BLOCK_HEADER(new byte[]{13}),
+    BLOCK_HEADER(new byte[]{14}),
     BLOCK_BODY(new byte[]{14}),
-    RECEIPT(new byte[]{14});
+    RECEIPT(new byte[]{14}),
+    BLOCK_HEADER_BY_NUMBER(new byte[]{14});
 
     private final byte[] id;
     private final boolean containsStaticData;

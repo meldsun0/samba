@@ -15,7 +15,7 @@ public class ContentUtil {
         return Optional.empty();
     }
 
-    public static boolean isBlockBodyValid(BlockHeader blockHeader, Bytes value) {
+    public static boolean isBlockBodyValid(BlockHeader blockHeader, Bytes blockBody) {
         //TODO given a BlockHeader we should validate that value that is a sszbytes of a blockBody
         /*
         Compare header timestamp against SHANGHAI_TIMESTAMP to determine what encoding scheme the block body uses.
@@ -24,7 +24,7 @@ public class ContentUtil {
         return true;
     }
 
-    public static boolean isBlockHeaderValid(Bytes blockHash, Bytes value) {
+    public static boolean isBlockHeaderValid(Bytes blockHash, Bytes blockHeader) {
     //TODO validate blockHeader.
         return true;
     }

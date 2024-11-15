@@ -7,16 +7,21 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.rlp.RLP;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 import org.jetbrains.annotations.NotNull;
+import org.web3j.rlp.RlpString;
 import samba.domain.messages.MessageType;
+import samba.rlp.RLPDecoder;
 import samba.storage.HistoryDB;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.PortalWireMessage;
@@ -48,7 +53,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
         this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
         this.historyDB = historyDB;
         this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
-        LOG.info("Home Record :" + client.getHomeNodeRecord().asEnr());
+        LOG.info("Home Record :{}", client.getHomeNodeRecord().asEnr());
     }
 
 
@@ -103,6 +108,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
     }
 
 
+    //TODO validate what to answer if there is an error. Should we answer with a Content if we know for example that the is not valid ?
     @Override
     public SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent message) {
         return sendMessage(nodeRecord, message)
@@ -112,24 +118,31 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
                             Content content = contentMessage.getMessage();
 
-
-                            //If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
+                            //TODO how we validate NodeRadius ?
+                            //If the node does not hold the requested content, and the node does not know of
+                            // any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
                             switch (content.getContentType()) {
-                                case Content.UTP_CONNECTION_ID -> {/*
+                                case Content.UTP_CONNECTION_ID -> {
+                                    /*
+                                    Open a uTP Connection on this port content.getConnectionId()
                                     SafeFuture.runAsync(() -> {
-                                    //TODO async UTP opperation
+                                    //TODO async UTP opperation once we get the specific content we should call    historyDB.saveContent(
                                     });*/
                                 }
                                 case Content.CONTENT_TYPE -> {
+                                    boolean successfullySaved = historyDB.saveContent(message.getContentKey(), content.getContent());
+                                    if(successfullySaved){
+                                        //gossipNetwork
+                                    }
 
-                                    historyDB.saveContent(message.getContentKey(), content.getContent());
                                 }
                                 case Content.ENRS -> {
-                                    List<String> nodesList = content.getEnrList();
-                                    //nodesList.removeIf(nodeRecord::getSeq); //The ENR record of the requesting node SHOULD be filtered out of the list.
-                                    //nodesList.removeIf(node -> connectionPool.isIgnored(node.getSeq()));
-                                    //nodesList.removeIf(routingTable::isKnown);
-                                    //nodesList.forEach(this::pingUnknownNode);
+                                    List<String> enrs = content.getEnrList();
+                                    if(!enrs.isEmpty()) {
+                                        content.getEnrList().stream().map(RLPDecoder::decodeRlpEnr)
+                                                .filter(enr -> !enr.equals(nodeRecord.asEnr()) ||!enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
+                                                .toList();
+                                    }
                                 }
                                 default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
                             }
@@ -214,6 +227,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
             }
         } else {
             //TODO return list of ENRs that we know of that are closest to the requested content
+            /*If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.*/
             return new Content(List.of());
         }
     }

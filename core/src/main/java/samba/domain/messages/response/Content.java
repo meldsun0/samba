@@ -4,10 +4,12 @@ import java.util.Base64;
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.rlp.RLP;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.schema.messages.ssz.containers.ContentContainer;
@@ -86,7 +88,6 @@ public class Content implements PortalWireMessage {
                         throw new IllegalArgumentException("CONTENT: One or more ENRs exceed maximum payload size");
                     }
                 }
-                // TODO: Remove requesting node (this node) from the list of ENRs
                 return new Content(enrs);
             }
             default -> {

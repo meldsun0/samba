@@ -16,6 +16,7 @@ dependencies {
     implementation libs.besu.internal.core
     implementation libs.besu.internal.config
     implementation libs.besu.internal.plugin.api
+    implementation libs.besu.internal.rlp
 
     implementation libs.teku.internal.async
     implementation libs.teku.internal.infrastructure.events
