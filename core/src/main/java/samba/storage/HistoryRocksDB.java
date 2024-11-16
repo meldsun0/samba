@@ -4,7 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 
+import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
+import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.domain.content.ContentType;
 import samba.domain.content.ContentUtil;
@@ -20,9 +22,6 @@ import static com.google.common.base.Preconditions.*;
 public class HistoryRocksDB implements HistoryDB {
 
     protected static final Logger LOG = LogManager.getLogger();
-
-    private static final int SHANGHAI_TIMESTAMP = 1681338455;
-
     private final RocksDBInstance rocksDBInstance;
 
     public HistoryRocksDB(Path path, MetricsSystem metricsSystem, RocksDBMetricsFactory rocksDBMetricsFactory) throws StorageException {
@@ -33,18 +32,17 @@ public class HistoryRocksDB implements HistoryDB {
                 rocksDBMetricsFactory);
     }
 
+    //TODO reduce the verbosity of this method once is ready.
     @Override
     public boolean saveContent(Bytes contentKey, Bytes value) {
-        Bytes selector = contentKey.slice(0, 1);
-        ContentType contentType = ContentType.fromInt(selector.toInt());
-        checkNotNull(contentType, "Invalid content type from byte: " + selector);
+        ContentType contentType = ContentType.fromContentKey(contentKey);
         LOG.info("Store {} with Key: {} and Value {}", contentType, contentKey, value);
         try {
             switch (contentType) {
                 case ContentType.BLOCK_HEADER -> {
                     Bytes blockHash = contentKey.slice(1, contentKey.size()); //blockHash is in ssz.
                     //block_header_with_proof = BlockHeaderWithProof(header: rlp.encode(header), proof: proof)
-                    if(!ContentUtil.isBlockHeaderValid(blockHash, value)) {
+                    if (!ContentUtil.isBlockHeaderValid(blockHash, value)) {
                         LOG.info("BlockHeader for blockHash: {} is invalid", blockHash);
                         break;
                     }
@@ -52,7 +50,7 @@ public class HistoryRocksDB implements HistoryDB {
                 }
                 case ContentType.BLOCK_BODY -> {
                     Bytes blockHash = contentKey.slice(1, contentKey.size()); //blockHash is in ssz.
-                    this.getBlockHeader(blockHash).ifPresentOrElse(blockHeader -> {
+                    this.getBlockHeaderByBlockHash(blockHash).ifPresentOrElse(blockHeader -> {
                         if (!ContentUtil.isBlockBodyValid(blockHeader, value)) {
                             save(KeyValueSegment.BLOCK_BODY, blockHash, value);
                         } else {
@@ -64,20 +62,24 @@ public class HistoryRocksDB implements HistoryDB {
                     });
                 }
                 case ContentType.RECEIPT -> {
-                    Bytes blockHash = contentKey.slice(1, contentKey.size()); //blockHash is in ssz.
+                    Bytes blockHashInSSZ = contentKey.slice(1, contentKey.size());
                     //TODO should we do any validation?
-                    save(KeyValueSegment.RECEIPT, blockHash, value);
+                    save(KeyValueSegment.RECEIPT, blockHashInSSZ, value);
                 }
                 case ContentType.BLOCK_HEADER_BY_NUMBER -> {
-                    Bytes blockNumber = contentKey.slice(1, contentKey.size()); //blockNumber is in ssz.
-                    if (!ContentUtil.isBlockHeaderValid(blockNumber, value)) {
-                        LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumber);
+                    Bytes blockNumberInSSZ = contentKey.slice(1, contentKey.size());
+                    if (!ContentUtil.isBlockHeaderValid(blockNumberInSSZ, value)) {
+                        LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberInSSZ);
                         break;
                     }
-                    //TODO replace double persistence and create an index blockNumber -> blockHash.
-                    save(KeyValueSegment.BLOCK_HEADER_BY_NUMBER, blockNumber, value);
+                    //TODO once ssz is solve change this.
+                    var blockHash = Bytes.EMPTY;
+                    var blockNumber = Bytes.EMPTY;
+                    save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumber, blockHash);
+                    save(KeyValueSegment.BLOCK_HEADER, blockHash, value);
                 }
-                default ->  throw new IllegalArgumentException(String.format("CONTENT: Invalid payload type {}", contentType));
+                default ->
+                        throw new IllegalArgumentException(String.format("CONTENT: Invalid payload type {}", contentType));
             }
             return true;
         } catch (Exception e) {
@@ -87,29 +89,33 @@ public class HistoryRocksDB implements HistoryDB {
     }
 
     @Override
-    public Optional<BlockHeader> getBlockHeader(Bytes blockHash) {
+    public Optional<BlockHeader> getBlockHeaderByBlockHash(Bytes blockHash) {
         Optional<byte[]> sszBlockHeader = this.rocksDBInstance.get(KeyValueSegment.BLOCK_HEADER, blockHash.toArray());
         return sszBlockHeader.flatMap(ContentUtil::createBlockHeaderfromSSZBytes);
-
     }
 
-
-    public Bytes get(Bytes key) {
-        // TODO Auto-generated method stub
-        return null;
+    @Override
+    public Optional<Bytes> getBlockHashByBlockNumber(Bytes blockNumber) {
+        Optional<byte[]> blockHash = this.rocksDBInstance.get(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumber.toArray());
+        return blockHash.flatMap(ContentUtil::createBlockHashFromSSZBytes);
     }
 
-
-    public void delete(Bytes key) {
-        // TODO Auto-generated method stub
+    @Override
+    public Optional<BlockBody> getBlockBodyByBlockHash(Bytes blockHash) {
+        Optional<byte[]> sszBlockBody = this.rocksDBInstance.get(KeyValueSegment.BLOCK_BODY, blockHash.toArray());
+        return sszBlockBody.flatMap(ContentUtil::createBlockBodyFromSSZBytes);
     }
 
-
-    public boolean contains(Bytes key) {
-        // TODO Auto-generated method stub
-        return false;
+    @Override
+    public Optional<BlockWithReceipts> getBlockReceiptByBlockHash(Bytes blockHash) {
+        Optional<byte[]> sszBlockHeader = this.rocksDBInstance.get(KeyValueSegment.RECEIPT, blockHash.toArray());
+        return sszBlockHeader.flatMap(ContentUtil::createBlockWithReceiptsfromSSZBytes);
     }
 
+    @Override
+    public Optional<byte[]> get(ContentType contentType, Bytes contentKey){
+        return this.rocksDBInstance.get(getSegmentFromContentType(contentType), contentKey.toArray());
+    }
 
     private void save(Segment segment, Bytes key, Bytes content) {
         checkArgument(!content.isEmpty(), "Content should have more than 1 byte when persisting {}", segment.getName());
@@ -118,6 +124,14 @@ public class HistoryRocksDB implements HistoryDB {
         tx.commit();
     }
 
+    private Segment getSegmentFromContentType(ContentType contentType) {
+        return switch(contentType) {
+            case ContentType.BLOCK_HEADER -> KeyValueSegment.BLOCK_HEADER;
+            case ContentType.BLOCK_BODY -> KeyValueSegment.BLOCK_BODY;
+            case ContentType.RECEIPT -> KeyValueSegment.RECEIPT;
+            case ContentType.BLOCK_HEADER_BY_NUMBER ->  KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER;
+        };
+    }
 
     public void close() {
         this.rocksDBInstance.close();

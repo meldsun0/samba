@@ -1,5 +1,9 @@
 package samba.domain.content;
 
+import org.apache.tuweni.bytes.Bytes;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public enum ContentType {
 
     BLOCK_HEADER(0x00),
@@ -18,7 +22,15 @@ public enum ContentType {
         return value;
     }
 
-    public static ContentType fromInt(int value) {
+    public static ContentType fromContentKey(Bytes contentKey) {
+        checkNotNull(contentKey, "ContentKey is null");
+        Bytes selector = contentKey.slice(0, 1);
+        ContentType contentType = fromInt(selector.toInt());
+        checkNotNull(contentType, "Invalid content type from byte: " + selector);
+        return contentType;
+    }
+
+    private static ContentType fromInt(int value) {
         value = value & BYTE_MASK;
         for (ContentType contentType : ContentType.values()) {
             if (contentType.value == value) {

@@ -18,8 +18,10 @@ import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
+import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.rlp.RlpString;
+import samba.domain.content.ContentType;
 import samba.domain.messages.MessageType;
 import samba.rlp.RLPDecoder;
 import samba.storage.HistoryDB;
@@ -119,8 +121,7 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                             Content content = contentMessage.getMessage();
 
                             //TODO how we validate NodeRadius ?
-                            //If the node does not hold the requested content, and the node does not know of
-                            // any nodes with eligible ENR values, then the node MUST return enrs as an empty list.
+
                             switch (content.getContentType()) {
                                 case Content.UTP_CONNECTION_ID -> {
                                     /*
@@ -131,17 +132,20 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
                                 }
                                 case Content.CONTENT_TYPE -> {
                                     boolean successfullySaved = historyDB.saveContent(message.getContentKey(), content.getContent());
-                                    if(successfullySaved){
+                                    if (successfullySaved) {
                                         //gossipNetwork
                                     }
 
                                 }
-                                case Content.ENRS -> {
+                                case Content.ENRS -> { //ENR records of nodes that are closest to the requested content.
                                     List<String> enrs = content.getEnrList();
-                                    if(!enrs.isEmpty()) {
+                                    if (!enrs.isEmpty()) {
                                         content.getEnrList().stream().map(RLPDecoder::decodeRlpEnr)
-                                                .filter(enr -> !enr.equals(nodeRecord.asEnr()) ||!enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
+                                                .filter(enr -> !enr.equals(nodeRecord.asEnr()) || !enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
                                                 .toList();
+                                        //TODO what to do ?
+                                    } else {
+                                        LOG.info("Node: {} does not hold the requested content or knows any eligible node", nodeRecord.asEnr());
                                     }
                                 }
                                 default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
@@ -215,73 +219,73 @@ public class HistoryNetwork extends BaseNetwork implements HistoryNetworkRequest
 
     @Override
     public PortalWireMessage handleFindContent(NodeRecord srcNode, FindContent findContent) {
-        if (historyDB.contains(findContent.getContentKey())) {
-            Bytes content = historyDB.get(findContent.getContentKey());
-            if (content.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-                //TODO initiate UTP connection
-                //int connectionId = UTP.generateConnectionId();
-                //UTP async listen on connectionId
-                return new Content(0);
-            } else {
-                return new Content(content);
-            }
-        } else {
+        Bytes contentKey = findContent.getContentKey();
+        ContentType contentType = ContentType.fromContentKey(contentKey);
+        Bytes value = contentKey.slice(0, 1);
+        Optional<byte[]> content = historyDB.get(contentType, value);
+        if (content.isEmpty()) {
             //TODO return list of ENRs that we know of that are closest to the requested content
             /*If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.*/
             return new Content(List.of());
         }
-    }
-
-    @Override
-    public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
-        BitSet missingContent = new BitSet(offer.getContentKeys().size());
-        for (int i = 0; i < offer.getContentKeys().size(); i++) {
-            if (!historyDB.contains(offer.getContentKeys().get(i))) {
-                missingContent.set(i);
-            }
+        if (content.get().length > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
+            //TODO initiate UTP connection and UTP async listen on connectionId
+            return new Content(0);
         }
-
-        int sliceLength = (offer.getContentKeys().size() + 7) / 8;
-        Bytes contentKeysBitList = Bytes.wrap(missingContent.toByteArray()).slice(sliceLength);
-        //int connectionId = UTP.generateConnectionId();
-        Accept accept = new Accept(0, contentKeysBitList);
-        return accept;
+        return new Content(Bytes.of(content.get()));
     }
 
-    private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {
-        return discv5Client.getEnrSeq();
-    }
 
-    @Override
-    public NetworkType getNetworkType() {
-        return networkType;
-    }
+@Override
+public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
+    BitSet missingContent = new BitSet(offer.getContentKeys().size());
+//    for (int i = 0; i < offer.getContentKeys().size(); i++) {
+//        if (!historyDB.contains(offer.getContentKeys().get(i))) {
+//            missingContent.set(i);
+//        }
+//    }
 
-    @Override
-    public CompletableFuture<Void> checkLiveness(NodeRecord nodeRecord) {
-        LOG.info("checkLiveness");
-        Ping pingMessage = new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius);
-        return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage)).thenCompose((__) -> new CompletableFuture<>());
-    }
+    int sliceLength = (offer.getContentKeys().size() + 7) / 8;
+    Bytes contentKeysBitList = Bytes.wrap(missingContent.toByteArray()).slice(sliceLength);
+    //int connectionId = UTP.generateConnectionId();
+    Accept accept = new Accept(0, contentKeysBitList);
+    return accept;
+}
 
-    private String getHomeNodeAsEnr() {
-        return this.discv5Client.getHomeNodeRecord().asEnr();
-    }
+private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {
+    return discv5Client.getEnrSeq();
+}
 
-    private boolean isPossibleNodeCandidate(NodeRecord node) {
-        return !this.routingTable.isNodeConnected(node.getNodeId()) || !this.routingTable.isNodeIgnored(node);
-    }
+@Override
+public NetworkType getNetworkType() {
+    return networkType;
+}
 
-    private boolean isNotHomeNode(NodeRecord node) {
-        return !(this.discv5Client.getHomeNodeRecord().equals(node));
-    }
+@Override
+public CompletableFuture<Void> checkLiveness(NodeRecord nodeRecord) {
+    LOG.info("checkLiveness");
+    Ping pingMessage = new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius);
+    return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage)).thenCompose((__) -> new CompletableFuture<>());
+}
 
-    @NotNull
-    private static <V> Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(MessageType message) {
-        return error -> {
-            LOG.info("Something when wrong when sending a {}", message);
-            return SafeFuture.completedFuture(Optional.empty());
-        };
-    }
+private String getHomeNodeAsEnr() {
+    return this.discv5Client.getHomeNodeRecord().asEnr();
+}
+
+private boolean isPossibleNodeCandidate(NodeRecord node) {
+    return !this.routingTable.isNodeConnected(node.getNodeId()) || !this.routingTable.isNodeIgnored(node);
+}
+
+private boolean isNotHomeNode(NodeRecord node) {
+    return !(this.discv5Client.getHomeNodeRecord().equals(node));
+}
+
+@NotNull
+private static <V> Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(MessageType message) {
+    return error -> {
+        LOG.info("Something when wrong when sending a {}", message);
+        return SafeFuture.completedFuture(Optional.empty());
+    };
+}
 
 }

@@ -1,5 +1,7 @@
 package samba.storage.rocksdb;
 
+import samba.domain.content.ContentType;
+
 public interface Segment {
 
     String getName();
@@ -32,4 +34,5 @@ public interface Segment {
     default boolean isStaticDataGarbageCollectionEnabled() {
         return false;
     }
+
 }

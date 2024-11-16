@@ -12,8 +12,6 @@ import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /**
  * Request message to get the content with content_key.
- * In case the recipient does not have the data, a list of ENR records of nodes that
- * are closest to the requested content.
  */
 public class FindContent implements PortalWireMessage {
 
@@ -21,7 +19,6 @@ public class FindContent implements PortalWireMessage {
 
     public FindContent(Bytes contentKey) {
         checkArgument(contentKey != null && contentKey.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "contentKey cannot be null or exceed maximum payload size");
-        
         this.contentKey = contentKey;
     }
 

@@ -74,7 +74,7 @@ public class FindContentMessageTests {
 
         Optional<Content> content = historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
 
-        assertEquals(List.of("-LI=", "-LI=", "-LI="), content.get().getEnrList());
+        assertEquals(Optional.empty(), content);
     }
 
     @Test

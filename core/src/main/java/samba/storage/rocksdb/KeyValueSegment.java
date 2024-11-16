@@ -1,5 +1,7 @@
 package samba.storage.rocksdb;
 
+import samba.domain.content.ContentType;
+
 import java.nio.charset.StandardCharsets;
 
 public enum KeyValueSegment implements Segment {
@@ -7,7 +9,7 @@ public enum KeyValueSegment implements Segment {
     BLOCK_HEADER(new byte[]{14}),
     BLOCK_BODY(new byte[]{14}),
     RECEIPT(new byte[]{14}),
-    BLOCK_HEADER_BY_NUMBER(new byte[]{14});
+    BLOCK_HASH_BY_BLOCK_NUMBER(new byte[]{14});
 
     private final byte[] id;
     private final boolean containsStaticData;
@@ -44,6 +46,8 @@ public enum KeyValueSegment implements Segment {
     public boolean containsStaticData() {
         return containsStaticData;
     }
+
+
 
     @Override
     public boolean isEligibleToHighSpecFlag() {

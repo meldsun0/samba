@@ -1,21 +1,25 @@
 package samba.storage;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
+import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
+import samba.domain.content.ContentType;
 
 
 import java.util.Optional;
 
 public interface HistoryDB {
 
-
     boolean saveContent(Bytes key, Bytes value);
 
-    Optional<BlockHeader> getBlockHeader(Bytes blockHash);
+    Optional<BlockHeader> getBlockHeaderByBlockHash(Bytes blockHash);
 
-    Bytes get(Bytes key);
+    Optional<Bytes> getBlockHashByBlockNumber(Bytes blockNumber);
 
-    void delete(Bytes key);
+    Optional<BlockBody> getBlockBodyByBlockHash(Bytes blockHash);
 
-    boolean contains(Bytes key);
+    Optional<BlockWithReceipts> getBlockReceiptByBlockHash(Bytes blockHash);     //TODO or return List<TransactionReceipt>
+
+    Optional<byte[]> get(ContentType contentType, Bytes contentKey);
 }

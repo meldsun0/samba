@@ -2,7 +2,9 @@ package samba.domain.content;
 
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
+import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 
 import java.util.Optional;
 
@@ -27,5 +29,17 @@ public class ContentUtil {
     public static boolean isBlockHeaderValid(Bytes blockHash, Bytes blockHeader) {
     //TODO validate blockHeader.
         return true;
+    }
+
+    public static Optional<? extends BlockWithReceipts> createBlockWithReceiptsfromSSZBytes(byte[] bytes) {
+        return Optional.empty();
+    }
+
+    public static Optional<BlockBody> createBlockBodyFromSSZBytes(byte[] bytes) {
+        return Optional.empty();
+    }
+
+    public static Optional<? extends Bytes> createBlockHashFromSSZBytes(byte[] bytes) {
+        return Optional.empty();
     }
 }
