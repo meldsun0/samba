@@ -58,3 +58,4 @@ junit-jupiter-engine= { module = "org.junit.jupiter:junit-jupiter-engine", versi
 rocksdbjni = { module = "org.rocksdb:rocksdbjni", version.ref = "rocksdbjni"}
 prometheus-simpleclient= { module = "io.prometheus:simpleclient", version.ref = "prometheus"}
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson"}
+jackson-datatype-jdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson"}

@@ -15,7 +15,7 @@ dependencies {
     implementation libs.besu.internal.metrics.core
     implementation libs.besu.internal.core
     implementation libs.besu.internal.config
-    implementation libs.besu.internal.plugin.api
+    implementation libs.besu.internal.plugin.api //TODO need to be removed
     implementation libs.besu.internal.rlp
 
     implementation libs.teku.internal.async
@@ -37,6 +37,8 @@ dependencies {
     implementation libs.rocksdbjni
     implementation libs.prometheus.simpleclient
     implementation libs.jackson.dataformat.yaml
+    implementation libs.jackson.datatype.jdk8
+
 
 
     compileOnly libs.projectlombok

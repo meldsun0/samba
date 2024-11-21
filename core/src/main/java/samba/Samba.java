@@ -2,7 +2,7 @@ package samba;
 
 import samba.config.SambaConfiguration;
 
-import static org.hyperledger.besu.ethereum.storage.keyvalue.KeyValueSegmentIdentifier.VARIABLES;
+
 
 public class Samba {
 
