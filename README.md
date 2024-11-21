@@ -43,6 +43,8 @@ TO-DO
 
 
 ### Useful links:
+* [Devcon SEA History Expiry and Portal Network session](https://notes.ethereum.org/_XVO7jmXTGOwZmhR5-3T9Q)
+* [EIP-4444 Implementation Plan: History Expiry in Ethereum](https://hackmd.io/Dobc38YVQ1qmbbyI6LcFqA)
 * [Playground](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/portal-network-specs/assembled-spec/jsonrpc/openrpc.json)
 * https://eips.ethereum.org/EIPS/eip-7639
 * https://eips.ethereum.org/EIPS/eip-4444
