@@ -20,8 +20,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import samba.services.jsonrpc.config.JsonRpcConfiguration;
-import samba.services.jsonrpc.JsonRpcExecutor;
-import samba.services.jsonrpc.context.ContextKey;
+import samba.services.jsonrpc.config.ContextKey;
 import samba.services.jsonrpc.reponse.RpcErrorType;
 
 import java.io.IOException;

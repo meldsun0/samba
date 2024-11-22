@@ -17,7 +17,6 @@ package samba.services.jsonrpc.config;
 import com.google.common.base.MoreObjects;
 import lombok.Setter;
 import lombok.Getter;
-import samba.services.jsonrpc.TimeoutOptions;
 
 import java.util.*;
 
@@ -41,7 +40,6 @@ public class JsonRpcConfiguration {
     @Getter
     @Setter
     private List<String> rpcApis;
-    private List<String> noAuthRpcApis = Collections.emptyList();
     @Setter
     private List<String> hostsAllowlist = Arrays.asList("localhost", "127.0.0.1");
     @Setter
@@ -104,11 +102,6 @@ public class JsonRpcConfiguration {
             this.corsAllowedDomains = corsAllowedDomains;
         }
     }
-
-    public Collection<String> getNoAuthRpcApis() {
-        return this.noAuthRpcApis;
-    }
-
 
     public void addRpcApi(final String rpcApi) {
         this.rpcApis = new ArrayList<>(rpcApis);

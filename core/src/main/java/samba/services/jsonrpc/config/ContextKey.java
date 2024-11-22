@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.services.jsonrpc.context;
+package samba.services.jsonrpc.config;
 
 import io.vertx.ext.web.RoutingContext;
 

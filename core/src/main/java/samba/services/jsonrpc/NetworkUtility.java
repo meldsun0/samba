@@ -13,8 +13,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 package samba.services.jsonrpc;
-import java.net.*;
 
+import java.net.*;
 
 public class NetworkUtility {
 

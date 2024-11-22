@@ -21,48 +21,46 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.RoutingContext;
-import samba.services.jsonrpc.context.ContextKey;
+import samba.services.jsonrpc.config.ContextKey;
 import samba.services.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.services.jsonrpc.reponse.RpcErrorType;
 
 
 public class JsonRpcParserHandler {
 
-  private JsonRpcParserHandler() {}
-
-  public static Handler<RoutingContext> handler() {
-    return ctx -> {
-      final HttpServerResponse response = ctx.response();
-      if (ctx.getBody() == null) {
-        errorResponse(response, RpcErrorType.PARSE_ERROR);
-      } else {
-        try {
-          ctx.put(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name(), ctx.getBodyAsJson());
-        } catch (DecodeException | ClassCastException jsonObjectDecodeException) {
-          try {
-            final JsonArray batchRequest = ctx.getBodyAsJsonArray();
-            if (batchRequest.isEmpty()) {
-              errorResponse(response, RpcErrorType.INVALID_REQUEST);
-              return;
-            } else {
-              ctx.put(ContextKey.REQUEST_BODY_AS_JSON_ARRAY.name(), batchRequest);
-            }
-          } catch (DecodeException | ClassCastException jsonArrayDecodeException) {
-            errorResponse(response, RpcErrorType.PARSE_ERROR);
-            return;
-          }
-        }
-        ctx.next();
-      }
-    };
-  }
-
-  private static void errorResponse(
-      final HttpServerResponse response, final RpcErrorType rpcError) {
-    if (!response.closed()) {
-      response
-          .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
-          .end(Json.encode(new JsonRpcErrorResponse(null, rpcError)));
+    private JsonRpcParserHandler() {
     }
-  }
+
+    public static Handler<RoutingContext> handler() {
+        return ctx -> {
+            final HttpServerResponse response = ctx.response();
+            if (ctx.getBody() == null) {
+                errorResponse(response, RpcErrorType.PARSE_ERROR);
+            } else {
+                try {
+                    ctx.put(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name(), ctx.getBodyAsJson());
+                } catch (DecodeException | ClassCastException jsonObjectDecodeException) {
+                    try {
+                        final JsonArray batchRequest = ctx.getBodyAsJsonArray();
+                        if (batchRequest.isEmpty()) {
+                            errorResponse(response, RpcErrorType.INVALID_REQUEST);
+                            return;
+                        } else {
+                            ctx.put(ContextKey.REQUEST_BODY_AS_JSON_ARRAY.name(), batchRequest);
+                        }
+                    } catch (DecodeException | ClassCastException jsonArrayDecodeException) {
+                        errorResponse(response, RpcErrorType.PARSE_ERROR);
+                        return;
+                    }
+                }
+                ctx.next();
+            }
+        };
+    }
+
+    private static void errorResponse(final HttpServerResponse response, final RpcErrorType rpcError) {
+        if (!response.closed()) {
+            response.setStatusCode(HttpResponseStatus.BAD_REQUEST.code()).end(Json.encode(new JsonRpcErrorResponse(null, rpcError)));
+        }
+    }
 }

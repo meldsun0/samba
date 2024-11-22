@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys AG.
+ * Copyright contributors to Hyperledger Besu.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,30 +12,15 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.services.jsonrpc.methods;
+package samba.services.jsonrpc.handler.processor;
 
 
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
 import samba.services.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.services.jsonrpc.reponse.JsonRpcRequestId;
 import samba.services.jsonrpc.reponse.JsonRpcResponse;
-import samba.services.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.services.jsonrpc.RpcMethod;
 
-public class Web3ClientVersion implements JsonRpcMethod {
+public interface JsonRpcProcessor {
 
-  private final String clientVersion;
-
-  public Web3ClientVersion(final String clientVersion) {
-    this.clientVersion = clientVersion;
-  }
-
-  @Override
-  public String getName() {
-    return RpcMethod.CLIENT_VERSION.getMethodName();
-  }
-
-  @Override
-  public JsonRpcResponse response(final JsonRpcRequestContext requestContext) {
-    return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), clientVersion);
-  }
+  JsonRpcResponse process(final JsonRpcRequestId id, final JsonRpcMethod method, final JsonRpcRequestContext request);
 }

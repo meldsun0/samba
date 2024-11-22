@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.services.jsonrpc;
+package samba.services.jsonrpc.config;
 
 import java.util.Collection;
 import java.util.HashSet;

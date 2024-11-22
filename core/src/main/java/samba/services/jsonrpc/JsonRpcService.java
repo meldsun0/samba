@@ -16,8 +16,8 @@ package samba.services.jsonrpc;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxException;
 import io.vertx.core.http.*;
-import io.vertx.core.net.HostAndPort;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -25,14 +25,14 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 
 
-import org.hyperledger.besu.metrics.BesuMetricCategory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-import org.hyperledger.besu.plugin.services.metrics.LabelledMetric;
-import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import samba.services.jsonrpc.config.JsonRpcConfiguration;
+import samba.services.jsonrpc.config.TimeoutOptions;
 import samba.services.jsonrpc.exception.JsonRpcServiceException;
+import samba.services.jsonrpc.handler.*;
+import samba.services.jsonrpc.handler.processor.BaseJsonRpcProcessor;
 import samba.services.jsonrpc.health.HealthService;
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -44,6 +44,8 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -59,7 +61,8 @@ public class JsonRpcService extends Service {
     private final Vertx vertx;
     private final JsonRpcConfiguration config;
     private final Map<String, JsonRpcMethod> rpcMethods;
-    private final LabelledMetric<OperationTimer> requestTimer;
+
+
     private final int maxActiveConnections;
     private final AtomicInteger activeConnectionsCount = new AtomicInteger();
 
@@ -67,18 +70,12 @@ public class JsonRpcService extends Service {
     private HttpServer httpServer;
     private final HealthService livenessService;
     //private final HealthService readinessService;
-    private final MetricsSystem metricsSystem;
 
 
-    public JsonRpcService(
-            final Vertx vertx,
-            final JsonRpcConfiguration config,
-            final MetricsSystem metricsSystem,
-            final Map<String, JsonRpcMethod> methods,
-            final HealthService livenessService) {
-        this.requestTimer = metricsSystem.createLabelledTimer(BesuMetricCategory.RPC, "request_time", "Time taken to process a JSON-RPC request", "methodName");
-        JsonRpcProcessor jsonRpcProcessor = new BaseJsonRpcProcessor();
-        final JsonRpcExecutor jsonRpcExecutor = new JsonRpcExecutor(jsonRpcProcessor, methods);
+    public JsonRpcService(final Vertx vertx, final JsonRpcConfiguration config,
+                          final MetricsSystem metricsSystem,
+                          final Map<String, JsonRpcMethod> methods,
+                          final HealthService livenessService) {
         validateConfig(config);
         this.config = config;
         this.vertx = vertx;
@@ -86,7 +83,6 @@ public class JsonRpcService extends Service {
         this.livenessService = livenessService;
         //this.readinessService = readinessService;
         this.maxActiveConnections = config.getMaxActiveConnections();
-        this.metricsSystem = metricsSystem;
     }
 
 
@@ -96,9 +92,8 @@ public class JsonRpcService extends Service {
         LOG.debug("max number of active connections {}", maxActiveConnections);
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         try {
-            // Create the HTTP server and a router object.
-            httpServer = vertx.createHttpServer(getHttpServerOptions());
-            httpServer.connectionHandler(connectionHandler());
+            httpServer = vertx.createHttpServer(this.getHttpServerOptions());
+            httpServer.connectionHandler(this.createConnectionHandler());
             httpServer
                     .requestHandler(buildRouter())
                     .listen(
@@ -111,20 +106,22 @@ public class JsonRpcService extends Service {
                                 }
 
                                 httpServer = null;
-                                resultFuture.completeExceptionally(getFailureException(res.cause()));
+                                resultFuture.completeExceptionally(
+                                        new JsonRpcServiceException(String.format("Failed to bind JSON-RPC listener to %s:%s: %s",
+                                                config.getHost(),
+                                                config.getPort(), res.cause().getMessage()))
+                                );
                             });
-        } catch (final Exception exception) {
+        } catch (final VertxException listenException) {
             httpServer = null;
-            resultFuture.completeExceptionally(new RuntimeException(String.format("JSON-RPC listener failed to start: %s", exception.getMessage())));
+            resultFuture.completeExceptionally(new JsonRpcServiceException(String.format("JSON-RPC listener failed to start: %s", listenException.getMessage())));
         }
         return SafeFuture.COMPLETE;
     }
 
     @Override
     protected SafeFuture<?> doStop() {
-        if (httpServer == null) {
-            return SafeFuture.COMPLETE;
-        }
+        if (httpServer == null)  return SafeFuture.COMPLETE;
 
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         httpServer.close(
@@ -139,7 +136,47 @@ public class JsonRpcService extends Service {
         return SafeFuture.COMPLETE;
     }
 
-    private Handler<HttpConnection> connectionHandler() {
+
+    private Router buildRouter() {
+        final Router router = Router.router(vertx);
+        // Verify Host header to avoid rebind attack. ?
+        router.route().handler(new DenyRouteToBlockedHostHandler(this.config));
+        router.errorHandler(403, new Logging403ErrorHandler());
+        //router.route().handler(this::createSpan);
+        router.route().handler(this.createCorsHandler());
+        router.route().handler(BodyHandler.create().setBodyLimit(config.getMaxRequestContentLength()));//.setUploadsDirectory(dataDir.resolve("uploads").toString()).setDeleteUploadedFilesOnEnd(true));
+        router.route("/").method(HttpMethod.GET).handler(this::handleEmptyRequest);
+
+        router.route(HealthService.LIVENESS_PATH).method(HttpMethod.GET).handler(livenessService::handleRequest);
+        //router.route(HealthService.READINESS_PATH).method(HttpMethod.GET).handler(readinessService::handleRequest);
+
+        Route mainRoute = router.route("/").method(HttpMethod.POST).produces(APPLICATION_JSON);
+        mainRoute.handler(this.createJsonParserHandler());
+        mainRoute.handler(this.createTimeoutHandler());
+        mainRoute.blockingHandler(this.createExecutiorHandler());
+        return router;
+    }
+
+    private Handler<RoutingContext> createTimeoutHandler() {
+        checkArgument(rpcMethods != null);
+        final TimeoutOptions globalOptions = new TimeoutOptions(config.getHttpTimeoutSec());
+        return TimeoutHandler.handler(Optional.of(globalOptions),
+                rpcMethods.keySet().stream().collect(Collectors.toMap(Function.identity(), ignored -> globalOptions)));
+    }
+
+    private Handler<RoutingContext> createJsonParserHandler() {
+        return JsonRpcParserHandler.handler();
+    }
+
+    private Handler<RoutingContext> createExecutiorHandler() {
+        return JsonRpcExecutorHandler.handler(new JsonRpcExecutor(new BaseJsonRpcProcessor(), rpcMethods), config);
+    }
+
+    private CorsHandler createCorsHandler() {
+        return CorsHandler.create().addRelativeOrigin(buildCorsRegexFromConfig()).allowedHeader("*").allowedHeader("content-type");
+    }
+
+    private Handler<HttpConnection> createConnectionHandler() {
         return connection -> {
             if (activeConnectionsCount.get() >= maxActiveConnections) {
                 LOG.warn("Rejecting new connection from {}. Max {} active connections limit reached.", connection.remoteAddress(), activeConnectionsCount.getAndIncrement());
@@ -158,86 +195,12 @@ public class JsonRpcService extends Service {
         checkArgument(config.getMaxActiveConnections() > 0, "Invalid max active connections configuration.");
     }
 
-    private Router buildRouter() {
-        // Handle json rpc requests
-
-        final Router router = Router.router(vertx);
-        // Verify Host header to avoid rebind attack.
-        router.route().handler(denyRouteToBlockedHost());
-        router.errorHandler(403, new Logging403ErrorHandler());
-        //router.route().handler(this::createSpan);
-        router.route().handler(CorsHandler.create().addRelativeOrigin(buildCorsRegexFromConfig()).allowedHeader("*").allowedHeader("content-type"));
-        router.route().handler(BodyHandler.create().setBodyLimit(config.getMaxRequestContentLength()));//.setUploadsDirectory(dataDir.resolve("uploads").toString()).setDeleteUploadedFilesOnEnd(true));
-        router.route("/").method(HttpMethod.GET).handler(this::handleEmptyRequest);
-        router.route(HealthService.LIVENESS_PATH).method(HttpMethod.GET).handler(livenessService::handleRequest);
-        //router.route(HealthService.READINESS_PATH).method(HttpMethod.GET).handler(readinessService::handleRequest);
-        Route mainRoute = router.route("/").method(HttpMethod.POST).produces(APPLICATION_JSON);
-        mainRoute.handler(HandlerFactory.jsonRpcParser()).handler(HandlerFactory.timeout(new TimeoutOptions(config.getHttpTimeoutSec()), rpcMethods));
-        mainRoute.blockingHandler(HandlerFactory.jsonRpcExecutor(new JsonRpcExecutor(new BaseJsonRpcProcessor(), rpcMethods), config));
-        return router;
-    }
-
-
     private HttpServerOptions getHttpServerOptions() {
         return new HttpServerOptions()
                 .setHost(config.getHost())
                 .setPort(config.getPort())
                 .setHandle100ContinueAutomatically(true)
                 .setCompressionSupported(true);
-    }
-
-
-    private Throwable getFailureException(final Throwable listenFailure) {
-
-        JsonRpcServiceException servFail =
-                new JsonRpcServiceException(
-                        String.format(
-                                "Failed to bind Ethereum JSON-RPC listener to %s:%s: %s",
-                                config.getHost(), config.getPort(), listenFailure.getMessage()));
-        servFail.initCause(listenFailure);
-
-        return servFail;
-    }
-
-    private Handler<RoutingContext> denyRouteToBlockedHost() {
-        return event -> {
-            final Optional<String> hostHeader = getAndValidateHostHeader(event);
-            if (config.getHostsAllowlist().contains("*")
-                    || (hostHeader.isPresent() && hostIsInAllowlist(hostHeader.get()))) {
-                event.next();
-            } else {
-                final HttpServerResponse response = event.response();
-                if (!response.closed()) {
-                    response
-                            .setStatusCode(403)
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
-                            .end("{\"message\":\"Host not authorized.\"}");
-                }
-            }
-        };
-    }
-
-    private Optional<String> getAndValidateHostHeader(final RoutingContext event) {
-        final HostAndPort hostAndPort = event.request().authority();
-        return Optional.ofNullable(hostAndPort).map(HostAndPort::host);
-    }
-
-    private boolean hostIsInAllowlist(final String hostHeader) {
-        if (config.getHostsAllowlist().contains("*")
-                || config.getHostsAllowlist().stream()
-                .anyMatch(allowlistEntry -> allowlistEntry.equalsIgnoreCase(hostHeader))) {
-            return true;
-        } else {
-            LOG.trace("Host not in allowlist: '{}'", hostHeader);
-            return false;
-        }
-    }
-
-    public InetSocketAddress socketAddress() {
-        if (httpServer == null) {
-            return EMPTY_SOCKET_ADDRESS;
-        }
-        return new InetSocketAddress(config.getHost(), httpServer.actualPort());
     }
 
     private void handleEmptyRequest(final RoutingContext routingContext) {
@@ -250,10 +213,10 @@ public class JsonRpcService extends Service {
         }
         if (config.getCorsAllowedDomains().contains("*")) {
             return ".*";
-        } else {
-            final StringJoiner stringJoiner = new StringJoiner("|");
-            config.getCorsAllowedDomains().stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
-            return stringJoiner.toString();
         }
+        final StringJoiner stringJoiner = new StringJoiner("|");
+        config.getCorsAllowedDomains().stream().filter(s -> !s.isEmpty()).forEach(stringJoiner::add);
+        return stringJoiner.toString();
+
     }
 }
