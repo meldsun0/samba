@@ -21,6 +21,7 @@ import io.vertx.core.net.HostAndPort;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 
 
@@ -34,6 +35,8 @@ import samba.services.jsonrpc.config.JsonRpcConfiguration;
 import samba.services.jsonrpc.exception.JsonRpcServiceException;
 import samba.services.jsonrpc.health.HealthService;
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
+import tech.pegasys.teku.infrastructure.async.SafeFuture;
+import tech.pegasys.teku.service.serviceutils.Service;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -46,7 +49,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 //TODO Tracker, OpenTelemetrySystem,  dataDir          The data directory where requests can be buffered
 //TODO websocket, authentication, traceFormacts, scheduler, NatService
-public class JsonRpcService {
+public class JsonRpcService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcService.class);
 
@@ -86,16 +89,16 @@ public class JsonRpcService {
         this.metricsSystem = metricsSystem;
     }
 
-    public CompletableFuture<Void> start() {
+
+    @Override
+    protected SafeFuture<?> doStart() {
         LOG.info("Starting JSON-RPC service on {}:{}", config.getHost(), config.getPort());
         LOG.debug("max number of active connections {}", maxActiveConnections);
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         try {
             // Create the HTTP server and a router object.
             httpServer = vertx.createHttpServer(getHttpServerOptions());
-            //httpServer.webSocketHandler(webSocketHandler()); TODO implement also a websocketHandler
             httpServer.connectionHandler(connectionHandler());
-
             httpServer
                     .requestHandler(buildRouter())
                     .listen(
@@ -114,13 +117,13 @@ public class JsonRpcService {
             httpServer = null;
             resultFuture.completeExceptionally(new RuntimeException(String.format("JSON-RPC listener failed to start: %s", exception.getMessage())));
         }
-
-        return resultFuture;
+        return SafeFuture.COMPLETE;
     }
 
-    public CompletableFuture<Void> stop() {
+    @Override
+    protected SafeFuture<?> doStop() {
         if (httpServer == null) {
-            return CompletableFuture.completedFuture(null);
+            return SafeFuture.COMPLETE;
         }
 
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
@@ -133,7 +136,7 @@ public class JsonRpcService {
                         resultFuture.complete(null);
                     }
                 });
-        return resultFuture;
+        return SafeFuture.COMPLETE;
     }
 
     private Handler<HttpConnection> connectionHandler() {
@@ -157,16 +160,20 @@ public class JsonRpcService {
 
     private Router buildRouter() {
         // Handle json rpc requests
+
         final Router router = Router.router(vertx);
         // Verify Host header to avoid rebind attack.
         router.route().handler(denyRouteToBlockedHost());
         router.errorHandler(403, new Logging403ErrorHandler());
-        router.route().handler(CorsHandler.create(buildCorsRegexFromConfig()).allowedHeader("*").allowedHeader("content-type"));
+        //router.route().handler(this::createSpan);
+        router.route().handler(CorsHandler.create().addRelativeOrigin(buildCorsRegexFromConfig()).allowedHeader("*").allowedHeader("content-type"));
+        router.route().handler(BodyHandler.create().setBodyLimit(config.getMaxRequestContentLength()));//.setUploadsDirectory(dataDir.resolve("uploads").toString()).setDeleteUploadedFilesOnEnd(true));
         router.route("/").method(HttpMethod.GET).handler(this::handleEmptyRequest);
         router.route(HealthService.LIVENESS_PATH).method(HttpMethod.GET).handler(livenessService::handleRequest);
         //router.route(HealthService.READINESS_PATH).method(HttpMethod.GET).handler(readinessService::handleRequest);
         Route mainRoute = router.route("/").method(HttpMethod.POST).produces(APPLICATION_JSON);
         mainRoute.handler(HandlerFactory.jsonRpcParser()).handler(HandlerFactory.timeout(new TimeoutOptions(config.getHttpTimeoutSec()), rpcMethods));
+        mainRoute.blockingHandler(HandlerFactory.jsonRpcExecutor(new JsonRpcExecutor(new BaseJsonRpcProcessor(), rpcMethods), config));
         return router;
     }
 

@@ -25,6 +25,7 @@ import java.util.Optional;
 
 public class TimeoutHandler {
 
+
   public static Handler<RoutingContext> handler(
       final Optional<TimeoutOptions> globalOptions,
       final Map<String, TimeoutOptions> timeoutOptionsByMethod) {
@@ -39,8 +40,7 @@ public class TimeoutHandler {
     try {
       Optional<TimeoutOptions> methodTimeoutOptions = Optional.empty();
       if (ctx.data().containsKey(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name())) {
-        final JsonObject requestBodyJsonObject =
-            ctx.get(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name());
+        final JsonObject requestBodyJsonObject = ctx.get(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name());
         final String method = requestBodyJsonObject.getString("method");
         methodTimeoutOptions = Optional.ofNullable(timeoutOptionsByMethod.get(method));
       }

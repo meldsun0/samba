@@ -28,13 +28,11 @@ import java.util.stream.Collectors;
 
 public class HandlerFactory {
 
-    public static Handler<RoutingContext> timeout(
-            final TimeoutOptions globalOptions, final Map<String, JsonRpcMethod> methods) {
+    public static Handler<RoutingContext> timeout(final TimeoutOptions globalOptions, final Map<String, JsonRpcMethod> methods) {
         assert methods != null && globalOptions != null;
         return TimeoutHandler.handler(
                 Optional.of(globalOptions),
-                methods.keySet().stream()
-                        .collect(Collectors.toMap(Function.identity(), ignored -> globalOptions)));
+                methods.keySet().stream().collect(Collectors.toMap(Function.identity(), ignored -> globalOptions)));
     }
 
 

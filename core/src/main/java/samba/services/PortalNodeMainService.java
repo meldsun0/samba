@@ -26,9 +26,11 @@ import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
 import samba.services.jsonrpc.JsonRpcService;
+import samba.services.jsonrpc.RpcMethod;
 import samba.services.jsonrpc.config.JsonRpcConfiguration;
 import samba.services.jsonrpc.health.HealthService;
 import samba.services.jsonrpc.health.LivenessCheck;
+import samba.services.jsonrpc.methods.Web3ClientVersion;
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
 import samba.services.storage.StorageService;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
@@ -88,7 +90,7 @@ public class PortalNodeMainService extends Service {
         final JsonRpcConfiguration jsonRpcConfiguration = JsonRpcConfiguration.createDefault();
         if (jsonRpcConfiguration.isEnabled()) {
             final Map<String, JsonRpcMethod> methods = new HashMap<>();
-            methods.put();
+            methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new Web3ClientVersion("1"));
             jsonRpcService = Optional.of(new JsonRpcService(this.vertx, jsonRpcConfiguration, metricsSystem, methods, new HealthService(new LivenessCheck())));
         }
 
@@ -138,6 +140,7 @@ public class PortalNodeMainService extends Service {
         this.incomingRequestProcessor.build(this.historyNetwork);
         return SafeFuture.allOfFailFast(discoveryService.start())
                 .thenCompose(__ -> connectionService.start())
+                .thenCompose(__ -> jsonRpcService.map(JsonRpcService::start).orElse(SafeFuture.completedFuture(null)))
                 .thenCompose(__ -> portalRestAPI.map(PortalRestAPI::start).orElse(SafeFuture.completedFuture(null)));
     }
 

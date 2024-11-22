@@ -19,8 +19,8 @@ import java.util.HashSet;
 
 //TODO add methods
 public enum RpcMethod {
-  WEB3_SHA3("web3_sha3"),
-  PLUGINS_RELOAD_CONFIG("plugins_reloadPluginConfig");
+
+  CLIENT_VERSION("clientVersion");
 
   private final String methodName;
 
