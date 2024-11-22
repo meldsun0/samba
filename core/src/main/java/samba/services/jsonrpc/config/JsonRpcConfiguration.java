@@ -12,13 +12,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.services.jsonrpc;
+package samba.services.jsonrpc.config;
 
 import com.google.common.base.MoreObjects;
 import lombok.Setter;
 import lombok.Getter;
+import samba.services.jsonrpc.TimeoutOptions;
 
-import java.io.File;
 import java.util.*;
 
 public class JsonRpcConfiguration {
@@ -60,7 +60,7 @@ public class JsonRpcConfiguration {
 
     public static JsonRpcConfiguration createDefault() {
         final JsonRpcConfiguration config = new JsonRpcConfiguration();
-        config.setEnabled(false);
+        config.setEnabled(true);
         config.setPort(DEFAULT_JSON_RPC_PORT);
         config.setHost(DEFAULT_JSON_RPC_HOST);
         config.setRpcApis(DEFAULT_RPC_APIS);

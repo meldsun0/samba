@@ -1,7 +1,10 @@
 package samba.services;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -22,9 +25,16 @@ import samba.services.api.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
+import samba.services.jsonrpc.JsonRpcService;
+import samba.services.jsonrpc.config.JsonRpcConfiguration;
+import samba.services.jsonrpc.health.HealthService;
+import samba.services.jsonrpc.health.LivenessCheck;
+import samba.services.jsonrpc.reponse.JsonRpcMethod;
 import samba.services.storage.StorageService;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
+
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
+
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
@@ -48,7 +58,9 @@ public class PortalNodeMainService extends Service {
 
 
     protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
+    protected volatile Optional<JsonRpcService> jsonRpcService = Optional.empty();
 
+    private final Vertx vertx;
     private Discv5Service discoveryService;
     private ConnectionService connectionService;
     private HistoryNetwork historyNetwork;
@@ -56,18 +68,29 @@ public class PortalNodeMainService extends Service {
     private final IncomingRequestHandler incomingRequestProcessor = new IncomingRequestHandler();
 
 
-    public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration) {
+    public PortalNodeMainService(final MainServiceConfig mainServiceConfig, final SambaConfiguration sambaConfiguration, final Vertx vertx) {
         this.timeProvider = mainServiceConfig.getTimeProvider();
         this.eventChannels = mainServiceConfig.getEventChannels();
         this.metricsSystem = mainServiceConfig.getMetricsSystem();
         this.asyncRunner = mainServiceConfig.createAsyncRunner("p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
         this.sambaConfiguration = sambaConfiguration;
-
+        this.vertx = vertx;
         initDiscoveryService();
         initStorageService();
         initHistoryNetwork();
         initConnectionService();
         initRestAPI();
+        initJsonRPCService();
+
+    }
+
+    private void initJsonRPCService() {
+        final JsonRpcConfiguration jsonRpcConfiguration = JsonRpcConfiguration.createDefault();
+        if (jsonRpcConfiguration.isEnabled()) {
+            final Map<String, JsonRpcMethod> methods = new HashMap<>();
+            methods.put();
+            jsonRpcService = Optional.of(new JsonRpcService(this.vertx, jsonRpcConfiguration, metricsSystem, methods, new HealthService(new LivenessCheck())));
+        }
 
     }
 

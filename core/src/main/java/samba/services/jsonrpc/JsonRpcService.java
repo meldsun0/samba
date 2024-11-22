@@ -30,6 +30,8 @@ import org.hyperledger.besu.plugin.services.metrics.LabelledMetric;
 import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import samba.services.jsonrpc.config.JsonRpcConfiguration;
+import samba.services.jsonrpc.exception.JsonRpcServiceException;
 import samba.services.jsonrpc.health.HealthService;
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
 
@@ -43,12 +45,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.base.Preconditions.checkArgument;
 
 //TODO Tracker, OpenTelemetrySystem,  dataDir          The data directory where requests can be buffered
-//TODO websocket, authentication, traceFormacts, scheduler,
-public class EngineJsonRpcService {
+//TODO websocket, authentication, traceFormacts, scheduler, NatService
+public class JsonRpcService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EngineJsonRpcService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JsonRpcService.class);
 
-    private static final String SPAN_CONTEXT = "span_context";
     private static final InetSocketAddress EMPTY_SOCKET_ADDRESS = new InetSocketAddress("0.0.0.0", 0);
     private static final String APPLICATION_JSON = "application/json";
 
@@ -62,41 +63,25 @@ public class EngineJsonRpcService {
 
     private HttpServer httpServer;
     private final HealthService livenessService;
-    private final HealthService readinessService;
-    private final NatService natService;
-
+    //private final HealthService readinessService;
     private final MetricsSystem metricsSystem;
 
 
-    /**
-     * Construct a EngineJsonRpcService to handle either http
-     *
-     * @param vertx            The vertx process that will be running this service
-     * @param config           Configuration for the rpc methods being loaded
-     * @param metricsSystem    The metrics service that activities should be reported to
-     * @param natService       The NAT environment manager.
-     * @param methods          The json rpc methods that should be enabled
-     * @param livenessService  A service responsible for reporting whether this node is live
-     * @param readinessService A service responsible for reporting whether this node has fully started
-     */
-    public EngineJsonRpcService(
+    public JsonRpcService(
             final Vertx vertx,
             final JsonRpcConfiguration config,
             final MetricsSystem metricsSystem,
-            final NatService natService,
             final Map<String, JsonRpcMethod> methods,
-            final HealthService livenessService,
-            final HealthService readinessService) {
+            final HealthService livenessService) {
         this.requestTimer = metricsSystem.createLabelledTimer(BesuMetricCategory.RPC, "request_time", "Time taken to process a JSON-RPC request", "methodName");
         JsonRpcProcessor jsonRpcProcessor = new BaseJsonRpcProcessor();
         final JsonRpcExecutor jsonRpcExecutor = new JsonRpcExecutor(jsonRpcProcessor, methods);
         validateConfig(config);
         this.config = config;
         this.vertx = vertx;
-        this.natService = natService;
         this.rpcMethods = methods;
         this.livenessService = livenessService;
-        this.readinessService = readinessService;
+        //this.readinessService = readinessService;
         this.maxActiveConnections = config.getMaxActiveConnections();
         this.metricsSystem = metricsSystem;
     }
@@ -119,13 +104,6 @@ public class EngineJsonRpcService {
                                     resultFuture.complete(null);
                                     config.setPort(httpServer.actualPort());
                                     LOG.info("JSON-RPC service started and listening on {}:{}", config.getHost(), config.getPort());
-                                    natService.ifNatEnvironment(
-                                            NatMethod.UPNP,
-                                            natManager ->
-                                                    ((UpnpNatManager) natManager)
-                                                            .requestPortForward(
-                                                                    config.getPort(), NetworkProtocol.TCP, NatServiceType.JSON_RPC));
-
                                     return;
                                 }
 
@@ -186,7 +164,7 @@ public class EngineJsonRpcService {
         router.route().handler(CorsHandler.create(buildCorsRegexFromConfig()).allowedHeader("*").allowedHeader("content-type"));
         router.route("/").method(HttpMethod.GET).handler(this::handleEmptyRequest);
         router.route(HealthService.LIVENESS_PATH).method(HttpMethod.GET).handler(livenessService::handleRequest);
-        router.route(HealthService.READINESS_PATH).method(HttpMethod.GET).handler(readinessService::handleRequest);
+        //router.route(HealthService.READINESS_PATH).method(HttpMethod.GET).handler(readinessService::handleRequest);
         Route mainRoute = router.route("/").method(HttpMethod.POST).produces(APPLICATION_JSON);
         mainRoute.handler(HandlerFactory.jsonRpcParser()).handler(HandlerFactory.timeout(new TimeoutOptions(config.getHttpTimeoutSec()), rpcMethods));
         return router;

@@ -14,6 +14,7 @@
 package samba.services;
 
 
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import samba.config.SambaConfiguration;
@@ -30,8 +31,8 @@ public class PortalNodeMainController extends Service {
     private static final Logger LOG = LogManager.getLogger();
     protected final List<Service> services = new ArrayList<>();
 
-    public PortalNodeMainController(final MainServiceConfig mainServiceConfig, SambaConfiguration sambaConfiguration) {
-          services.add(new PortalNodeMainService(mainServiceConfig, sambaConfiguration));
+    public PortalNodeMainController(final MainServiceConfig mainServiceConfig, SambaConfiguration sambaConfiguration, final Vertx vertx ) {
+          services.add(new PortalNodeMainService(mainServiceConfig, sambaConfiguration, vertx));
     }
 
     @Override

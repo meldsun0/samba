@@ -29,6 +29,10 @@ public enum RpcErrorType implements RpcMethodError {
     INVALID_PARAMS(-32602, "Invalid params"),
     UNKNOWN(INVALID_PARAMS_ERROR_CODE, "Unknown internal error"),
     INVALID_ID_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid ID params"),
+    INTERNAL_ERROR(-32603, "Internal error"),
+    METHOD_NOT_ENABLED(-32604, "Method not enabled"),
+    TIMEOUT_ERROR(-32603, "Timeout expired"),
+    EXCEEDS_RPC_MAX_BATCH_SIZE(-32005, "Number of requests exceeds max batch size"),
     INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params");
 
     private final int code;
