@@ -54,8 +54,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JsonRpcService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcService.class);
-
-    private static final InetSocketAddress EMPTY_SOCKET_ADDRESS = new InetSocketAddress("0.0.0.0", 0);
     private static final String APPLICATION_JSON = "application/json";
 
     private final Vertx vertx;
@@ -122,7 +120,6 @@ public class JsonRpcService extends Service {
     @Override
     protected SafeFuture<?> doStop() {
         if (httpServer == null)  return SafeFuture.COMPLETE;
-
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         httpServer.close(
                 res -> {

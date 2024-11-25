@@ -32,10 +32,10 @@ public interface JsonRpcMethod {
   /**
    * Applies the method to given request.
    *
-   * @param request input data for the JSON-RPC method.
+   * @param requestContext input data for the JSON-RPC method.
    * @return output from applying the JSON-RPC method to the input.
    */
-  JsonRpcResponse response(JsonRpcRequestContext request);
+  JsonRpcResponse response(JsonRpcRequestContext requestContext);
 
   /**
    * The list of Permissions that correspond to this JSON-RPC method.
