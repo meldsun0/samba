@@ -36,4 +36,5 @@ public class Discv5UpdateNodeInfo implements JsonRpcMethod {
             return new JsonRpcErrorResponse(requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
         }
     }
+
 }

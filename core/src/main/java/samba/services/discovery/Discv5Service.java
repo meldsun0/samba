@@ -190,8 +190,12 @@ public class Discv5Service extends Service implements Discv5Client {
         final boolean isIpV6 = multiaddr.has(Protocol.IP6);
         final Bytes address =  MultiaddrUtil.getMultiAddrValue(multiaddr, isIpV6 ? Protocol.IP6:Protocol.IP4);
         this.updateCustomENRField(isIpV6 ? EnrField.IP_V6 : EnrField.IP_V4,  address);
-        this.updateCustomENRField(isIpV6 ? EnrField.UDP_V6 : EnrField.UDP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.UDP));
-        this.updateCustomENRField(isIpV6 ? EnrField.TCP_V6 : EnrField.TCP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.TCP));
+        if( multiaddr.has(Protocol.UDP)){
+            this.updateCustomENRField(isIpV6 ? EnrField.UDP_V6 : EnrField.UDP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.UDP));
+        }
+        if( multiaddr.has(Protocol.TCP)){
+            this.updateCustomENRField(isIpV6 ? EnrField.TCP_V6 : EnrField.TCP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.TCP));
+        }
         return this.getHomeNodeRecord();
     }
 
