@@ -1,5 +1,7 @@
 package samba.services.jsonrpc.methods.discv5;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.libp2p.core.multiformats.Multiaddr;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.services.discovery.Discv5Client;
@@ -25,10 +27,10 @@ public class Discv5UpdateNodeInfo implements JsonRpcMethod {
     @Override
     public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
         try {
-            final String socketAddr = requestContext.getRequiredParameter(0, String.class);
-            final Optional<Boolean> isTCP = requestContext.getOptionalParameter(1, Boolean.class);  //TODO what to do with this ?
+            final SocketAddr socketAddr = requestContext.getRequiredParameter(0, SocketAddr.class);
+            final Optional<IsTcpParam> isTCP = requestContext.getOptionalParameter(1, IsTcpParam.class);
 
-            Multiaddr multiaddr = Multiaddr.fromString(socketAddr);
+            Multiaddr multiaddr = Multiaddr.fromString(socketAddr.socketAddr());
             NodeRecord nodeRecord = this.discv5Client.updateNodeRecordSocket(multiaddr);
             NodeInfo nodeInfo = new NodeInfo(nodeRecord.asEnr(), nodeRecord.getNodeId().toHexString());
             return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), nodeInfo);
@@ -37,4 +39,17 @@ public class Discv5UpdateNodeInfo implements JsonRpcMethod {
         }
     }
 
+    record SocketAddr(String socketAddr) {
+        @JsonCreator
+        public SocketAddr(@JsonProperty final String socketAddr) {
+            this.socketAddr = socketAddr;
+        }
+    }
+
+    record IsTcpParam(Boolean isTcp) {
+        @JsonCreator
+        public IsTcpParam(@JsonProperty final Boolean isTcp) {
+            this.isTcp = isTcp;
+        }
+    }
 }
