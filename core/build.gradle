@@ -38,8 +38,7 @@ dependencies {
     implementation libs.prometheus.simpleclient
     implementation libs.jackson.dataformat.yaml
     implementation libs.jackson.datatype.jdk8
-
-
+    implementation libs.jvm.libp2p
 
     compileOnly libs.projectlombok
     annotationProcessor libs.projectlombok

@@ -1,9 +1,11 @@
 package samba.services.discovery;
 
 
+import io.libp2p.core.multiformats.Multiaddr;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import samba.util.MultiaddrUtil;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 
@@ -30,6 +32,8 @@ public interface Discv5Client {
     CompletableFuture<Collection<NodeRecord>> sendDiscv5FindNodes(NodeRecord nodeRecord, List<Integer> distances);
 
     void updateCustomENRField(final String fieldName, final Bytes value);
+
+    NodeRecord updateNodeRecordSocket(Multiaddr multiaddr);
 
 
 

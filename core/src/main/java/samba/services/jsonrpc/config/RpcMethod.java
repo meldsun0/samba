@@ -20,7 +20,7 @@ import java.util.HashSet;
 public enum RpcMethod {
   CLIENT_VERSION("clientVersion"),
 
-  DISCV5_NODE_INFO ("discv5_nodeInfo"),
+  DISCV5_NODE_INFO ("discv5_nodeInfo"),  //DONE
   DISCV5_UPDATE_NODE_INFO("discv5_updateNodeInfo"),
 
   DISCV5_ROUTING_TABLE_INFO("discv5_routingTableInfo"),
