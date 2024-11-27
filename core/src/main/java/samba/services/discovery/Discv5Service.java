@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
@@ -99,7 +100,6 @@ public class Discv5Service extends Service implements Discv5Client {
                 "live_nodes_current",
                 "Current number of live nodes tracked by the discovery system",
                 () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
-     //   discoverySystem.getLocalNodeRecord().forEachField((x,y)->{System.out.println(x +y);});
     }
 
     private void createLocalNodeRecordListener(NodeRecord oldRecord, NodeRecord newRecord) {
@@ -127,9 +127,14 @@ public class Discv5Service extends Service implements Discv5Client {
     @Override
     public SafeFuture<Collection<NodeRecord>> streamLiveNodes() {
         //TODO maybe searchForNewPeers?
-        return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList()); //   .thenApply(this::converToPeer);
+        return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList());
     }
 
+    @Override
+    public Optional<String> lookupEnr(final UInt256 nodeId) {
+         final Optional<NodeRecord> maybeNodeRecord = discoverySystem.lookupNode(nodeId.toBytes());
+         return maybeNodeRecord.map(NodeRecord::asEnr);
+    }
 
     @Override
     public Optional<Bytes> getNodeId() {

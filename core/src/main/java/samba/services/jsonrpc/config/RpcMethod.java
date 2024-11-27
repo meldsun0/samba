@@ -21,13 +21,13 @@ public enum RpcMethod {
   CLIENT_VERSION("clientVersion"),
 
   DISCV5_NODE_INFO ("discv5_nodeInfo"),  //DONE
-  DISCV5_UPDATE_NODE_INFO("discv5_updateNodeInfo"),
+  DISCV5_UPDATE_NODE_INFO("discv5_updateNodeInfo"), //DONE
 
-  DISCV5_ROUTING_TABLE_INFO("discv5_routingTableInfo"),
+  DISCV5_ROUTING_TABLE_INFO("discv5_routingTableInfo"), //TODO need to change disvc5 library
 
-  DISCV5_ADD_ENR("discv5_addEnr"),
-  DISCV5_GET_ENR("discv5_getEnr"),
-  DISCV5_DELETE_ENR("discv5_deleteEnr"),
+  DISCV5_ADD_ENR("discv5_addEnr"), //TODO need to change disvc5 library
+  DISCV5_GET_ENR("discv5_getEnr"), //DONE
+  DISCV5_DELETE_ENR("discv5_deleteEnr"),  //TODO need to change disvc5 library
   DISCV5_LOOK_UP_ENR("discv5_lookupEnr"),
 
   DISCV5_PING("discv5_ping"),

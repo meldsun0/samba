@@ -31,7 +31,9 @@ import samba.services.jsonrpc.config.JsonRpcConfiguration;
 import samba.services.jsonrpc.health.HealthService;
 import samba.services.jsonrpc.health.LivenessCheck;
 import samba.services.jsonrpc.methods.ClientVersion;
+import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
+import samba.services.jsonrpc.methods.discv5.Discv5RoutingTableInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
 import samba.services.jsonrpc.reponse.JsonRpcMethod;
 import samba.services.storage.StorageService;
@@ -96,6 +98,9 @@ public class PortalNodeMainService extends Service {
             methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));
             methods.put(RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.discoveryService));
             methods.put(RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(), new Discv5UpdateNodeInfo(this.discoveryService));
+            methods.put(RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(), new Discv5UpdateNodeInfo(this.discoveryService));
+            methods.put(RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discoveryService));
+
 
             jsonRpcService = Optional.of(new JsonRpcService(this.vertx, jsonRpcConfiguration, metricsSystem, methods, new HealthService(new LivenessCheck())));
         }
