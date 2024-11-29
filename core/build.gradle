@@ -1,5 +1,5 @@
 plugins {
-    id 'samba.java-common-conventions'
+    id 'samba.java-application-conventions'
 }
 
 dependencies {
@@ -39,6 +39,9 @@ dependencies {
     implementation libs.jackson.dataformat.yaml
     implementation libs.jackson.datatype.jdk8
     implementation libs.jvm.libp2p
+
+    implementation project(':storage-rocksdb')
+    implementation project(':server-json-rpc')
 
     compileOnly libs.projectlombok
     annotationProcessor libs.projectlombok

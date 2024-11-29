@@ -1,0 +1,6 @@
+plugins {
+    id 'samba.java-library-conventions'
+}
+
+group = 'samba.server-json-rpc'
+version = '1.0.0'
