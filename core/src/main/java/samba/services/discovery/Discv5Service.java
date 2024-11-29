@@ -1,13 +1,17 @@
 package samba.services.discovery;
 
 import com.google.common.base.Preconditions;
+import io.libp2p.core.multiformats.Multiaddr;
+import io.libp2p.core.multiformats.Protocol;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
+import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
@@ -15,11 +19,15 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 import samba.config.DiscoveryConfig;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.metrics.SambaMetricCategory;
+import samba.util.MultiaddrUtil;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.service.serviceutils.Service;
+import io.libp2p.core.multiformats.Protocol.*;
 
+import java.net.Inet6Address;
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -38,13 +46,15 @@ public class Discv5Service extends Service implements Discv5Client {
     private final AsyncRunner asyncRunner;
     private volatile Cancellable bootnodeRefreshTask;
 
+    private static volatile Bytes local_enr_seqno; //TODO take to a KV
+
     public Discv5Service(final MetricsSystem metricsSystem,
                          final AsyncRunner asyncRunner,
                          final DiscoveryConfig discoveryConfig,
                          final Bytes privateKey,
                          final IncomingRequestHandler incomingRequestProcessor) {
-        //add node Record converter.
         this.asyncRunner = asyncRunner;
+
         //  this.localNodePrivateKey = SECP256K1.SecretKey.fromInteger(new BigInteger(privateKey.toArrayUnsafe()));
 
         final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
@@ -52,7 +62,7 @@ public class Discv5Service extends Service implements Discv5Client {
         final List<String> networkInterfaces = List.of("0.0.0.0");
         Preconditions.checkState(networkInterfaces.size() == 1 || networkInterfaces.size() == 2, "The configured network interfaces must be either 1 or 2");
 
-
+//TODO fix this
 //        if (networkInterfaces.size() == 1) {
 //            final String listenAddress = networkInterfaces.get(0);
 //            discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUdpPort());
@@ -81,7 +91,7 @@ public class Discv5Service extends Service implements Discv5Client {
                         .listen("0.0.0.0", 9090)
                         .secretKey(keyPair.secretKey())
                         .bootnodes(discoveryConfig.getBootnodes())
-                        .localNodeRecord(createNodeRecord(keyPair, "0.0.0.0", 9090)) // "181.28.127.143", Integer.parseInt("9001")))
+                        .localNodeRecord(createNodeRecord(keyPair, "0.0.0.0", 9090))
                         .localNodeRecordListener(this::createLocalNodeRecordListener)
                         .talkHandler(incomingRequestProcessor).build();
 
@@ -92,8 +102,8 @@ public class Discv5Service extends Service implements Discv5Client {
                 () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
     }
 
-    private void createLocalNodeRecordListener(NodeRecord nodeRecord, NodeRecord nodeRecord1) {
-        LOG.info("Implement createLocalNodeRecordListener");
+    private void createLocalNodeRecordListener(NodeRecord oldRecord, NodeRecord newRecord) {
+        local_enr_seqno = newRecord.getSeq().toBytes();
     }
 
     private NodeRecord createNodeRecord(final SECP256K1.KeyPair keyPair, final String ip, final int port) {
@@ -117,9 +127,14 @@ public class Discv5Service extends Service implements Discv5Client {
     @Override
     public SafeFuture<Collection<NodeRecord>> streamLiveNodes() {
         //TODO maybe searchForNewPeers?
-        return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList()); //   .thenApply(this::converToPeer);
+        return SafeFuture.of(()->discoverySystem.streamLiveNodes().toList());
     }
 
+    @Override
+    public Optional<String> lookupEnr(final UInt256 nodeId) {
+         final Optional<NodeRecord> maybeNodeRecord = discoverySystem.lookupNode(nodeId.toBytes());
+         return maybeNodeRecord.map(NodeRecord::asEnr);
+    }
 
     @Override
     public Optional<Bytes> getNodeId() {
@@ -173,6 +188,20 @@ public class Discv5Service extends Service implements Discv5Client {
 
     public void updateCustomENRField(final String fieldName, final Bytes value) {
         discoverySystem.updateCustomFieldValue(fieldName, value);
-
     }
+
+    @Override
+    public NodeRecord updateNodeRecordSocket(Multiaddr multiaddr) {
+        final boolean isIpV6 = multiaddr.has(Protocol.IP6);
+        final Bytes address =  MultiaddrUtil.getMultiAddrValue(multiaddr, isIpV6 ? Protocol.IP6:Protocol.IP4);
+        this.updateCustomENRField(isIpV6 ? EnrField.IP_V6 : EnrField.IP_V4,  address);
+        if( multiaddr.has(Protocol.UDP)){
+            this.updateCustomENRField(isIpV6 ? EnrField.UDP_V6 : EnrField.UDP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.UDP));
+        }
+        if( multiaddr.has(Protocol.TCP)){
+            this.updateCustomENRField(isIpV6 ? EnrField.TCP_V6 : EnrField.TCP,  MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.TCP));
+        }
+        return this.getHomeNodeRecord();
+    }
+
 }

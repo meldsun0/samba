@@ -14,11 +14,12 @@
  */
 package samba.services.jsonrpc.methods;
 
-import samba.services.jsonrpc.reponse.JsonRpcMethod;
-import samba.services.jsonrpc.reponse.JsonRpcRequestContext;
-import samba.services.jsonrpc.reponse.JsonRpcResponse;
-import samba.services.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.services.jsonrpc.config.RpcMethod;
+
+import samba.jsonrpc.config.RpcMethod;
+import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
 public class ClientVersion implements JsonRpcMethod {
 

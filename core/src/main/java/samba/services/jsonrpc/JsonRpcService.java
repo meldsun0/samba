@@ -28,13 +28,13 @@ import io.vertx.ext.web.handler.CorsHandler;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.services.jsonrpc.config.JsonRpcConfiguration;
-import samba.services.jsonrpc.config.TimeoutOptions;
-import samba.services.jsonrpc.exception.JsonRpcServiceException;
-import samba.services.jsonrpc.handler.*;
-import samba.services.jsonrpc.handler.processor.BaseJsonRpcProcessor;
-import samba.services.jsonrpc.health.HealthService;
-import samba.services.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.config.JsonRpcConfiguration;
+import samba.jsonrpc.config.TimeoutOptions;
+import samba.jsonrpc.exception.JsonRpcServiceException;
+import samba.jsonrpc.handler.*;
+import samba.jsonrpc.handler.processor.BaseJsonRpcProcessor;
+import samba.jsonrpc.health.HealthService;
+import samba.jsonrpc.reponse.JsonRpcMethod;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.service.serviceutils.Service;
 
@@ -54,8 +54,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class JsonRpcService extends Service {
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonRpcService.class);
-
-    private static final InetSocketAddress EMPTY_SOCKET_ADDRESS = new InetSocketAddress("0.0.0.0", 0);
     private static final String APPLICATION_JSON = "application/json";
 
     private final Vertx vertx;
@@ -122,7 +120,6 @@ public class JsonRpcService extends Service {
     @Override
     protected SafeFuture<?> doStop() {
         if (httpServer == null)  return SafeFuture.COMPLETE;
-
         final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
         httpServer.close(
                 res -> {
