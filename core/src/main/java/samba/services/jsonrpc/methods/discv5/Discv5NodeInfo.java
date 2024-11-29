@@ -1,16 +1,15 @@
 package samba.services.jsonrpc.methods.discv5;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
-import samba.network.history.HistoryNetwork;
-import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.config.RpcMethod;
-import samba.services.jsonrpc.methods.results.NodeInfo;
-import samba.services.jsonrpc.reponse.JsonRpcMethod;
-import samba.services.jsonrpc.reponse.JsonRpcRequestContext;
-import samba.services.jsonrpc.reponse.JsonRpcResponse;
-import samba.services.jsonrpc.reponse.JsonRpcSuccessResponse;
 
-import java.util.List;
+import samba.services.discovery.Discv5Client;
+import samba.jsonrpc.config.RpcMethod;
+import samba.services.jsonrpc.methods.results.NodeInfo;
+import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
+
 
 public class Discv5NodeInfo implements JsonRpcMethod {
 

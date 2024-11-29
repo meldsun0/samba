@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.libp2p.core.multiformats.Multiaddr;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.config.RpcMethod;
+import samba.jsonrpc.config.RpcMethod;
 import samba.services.jsonrpc.methods.results.NodeInfo;
-import samba.services.jsonrpc.reponse.*;
+import samba.jsonrpc.reponse.*;
 import java.util.Optional;
 
 public class Discv5UpdateNodeInfo implements JsonRpcMethod {

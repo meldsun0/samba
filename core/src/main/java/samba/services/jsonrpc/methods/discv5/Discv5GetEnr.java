@@ -1,16 +1,11 @@
 package samba.services.jsonrpc.methods.discv5;
 
-import io.libp2p.core.multiformats.Multiaddr;
 import org.apache.tuweni.units.bigints.UInt256;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.config.RpcMethod;
-import samba.services.jsonrpc.methods.parameters.InputsValidations;
-import samba.services.jsonrpc.methods.results.NodeInfo;
-import samba.services.jsonrpc.reponse.*;
+import samba.jsonrpc.config.RpcMethod;
 
-import java.util.Optional;
-import java.util.regex.Pattern;
+import samba.services.jsonrpc.methods.parameters.InputsValidations;
+import samba.jsonrpc.reponse.*;
 
 public class Discv5GetEnr implements JsonRpcMethod {
 
