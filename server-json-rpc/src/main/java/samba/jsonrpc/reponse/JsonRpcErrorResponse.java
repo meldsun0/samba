@@ -20,12 +20,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 import org.apache.tuweni.bytes.Bytes;
 
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.AbiTypes;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-
 import java.util.*;
 
 @JsonPropertyOrder({"jsonrpc", "id", "error"})
@@ -103,30 +97,5 @@ public class JsonRpcErrorResponse implements JsonRpcResponse {
         .filter(e -> e.getCode() == code && message.startsWith(e.getMessage()))
         .findFirst()
         .orElse(RpcErrorType.UNKNOWN);
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static Optional<String> decodeRevertReason(final Bytes revertReason) {
-    if (revertReason.toHexString().startsWith(errorMethodABI)) {
-      // Remove the "Error(string)" prefix
-      final String encodedReasonText =
-          revertReason.toHexString().substring(errorMethodABI.length());
-
-      try {
-        List<TypeReference<Type>> revertReasonTypes =
-            Collections.singletonList(
-                TypeReference.create((Class<Type>) AbiTypes.getType("string")));
-        List<Type> decoded = FunctionReturnDecoder.decode(encodedReasonText, revertReasonTypes);
-
-        // Expect a single decoded string
-        if (decoded.size() == 1 && (decoded.get(0) instanceof Utf8String)) {
-          Utf8String decodedRevertReason = (Utf8String) decoded.get(0);
-          return Optional.of(decodedRevertReason.getValue());
-        }
-      } catch (StringIndexOutOfBoundsException exception) {
-        return Optional.of("ABI decode error");
-      }
-    }
-    return Optional.empty();
   }
 }

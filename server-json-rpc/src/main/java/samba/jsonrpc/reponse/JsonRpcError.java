@@ -15,8 +15,6 @@
 package samba.jsonrpc.reponse;
 
 import com.fasterxml.jackson.annotation.*;
-import org.hyperledger.besu.ethereum.mainnet.ValidationResult;
-import org.hyperledger.besu.ethereum.transaction.TransactionInvalidReason;
 import org.hyperledger.besu.plugin.services.rpc.RpcMethodError;
 import samba.jsonrpc.reponse.RpcErrorType;
 
@@ -50,14 +48,6 @@ public class JsonRpcError {
 
   public JsonRpcError(final RpcErrorType errorType) {
     this(errorType, null);
-  }
-
-  public static JsonRpcError from(
-      final ValidationResult<TransactionInvalidReason> validationResult) {
-    final var jsonRpcError =
-        new JsonRpcError(RpcErrorType.INTERNAL_ERROR); //TODO validate if this is correct
-    jsonRpcError.reason = validationResult.getErrorMessage();
-    return jsonRpcError;
   }
 
   @JsonGetter("code")
