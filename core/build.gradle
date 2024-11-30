@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation libs.log4j.api
-    implementation libs.log4j.core
+    implementation libs.apache.logging.log4j.api
+    implementation libs.apache.logging.log4j.core
     implementation libs.tuweni.bytes
     implementation libs.tuweni.crypto
     implementation libs.tuweni.rlp

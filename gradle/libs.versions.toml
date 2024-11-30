@@ -16,6 +16,8 @@ rocksdbjni = "8.3.2"
 prometheus = "0.16.0"
 jackson = "2.17.2"
 libp2p = "1.2.1-RELEASE"
+guava = "24.1-jre"
+slf4j-api = "2.0.16"
 
 [libraries]
 tuweni-bytes = { module = "org.apache.tuweni:tuweni-bytes", version.ref = "tuweni"}
@@ -23,8 +25,8 @@ tuweni-crypto = { module = "org.apache.tuweni:tuweni-crypto", version.ref = "tuw
 tuweni-rlp = { module = "org.apache.tuweni:tuweni-rlp", version.ref = "tuweni"}
 tuweni-ssz = { module = "org.apache.tuweni:tuweni-ssz", version.ref = "tuweni"}
 
-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j"}
-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j"}
+apache-logging-log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j"}
+apache-logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j"}
 
 vertx-core= { module = "io.vertx:vertx-core", version.ref = "vertex"}
 vertx-web= { module = "io.vertx:vertx-web", version.ref = "vertex"}
@@ -61,3 +63,5 @@ prometheus-simpleclient= { module = "io.prometheus:simpleclient", version.ref = 
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson"}
 jackson-datatype-jdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson"}
 jvm-libp2p = { module = "io.libp2p:jvm-libp2p", version.ref = "libp2p"}
+google-guava = { module = "com.google.guava:guava", version.ref = "guava"}
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api"}

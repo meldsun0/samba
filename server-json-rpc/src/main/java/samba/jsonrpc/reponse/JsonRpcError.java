@@ -15,8 +15,8 @@
 package samba.jsonrpc.reponse;
 
 import com.fasterxml.jackson.annotation.*;
-import org.hyperledger.besu.plugin.services.rpc.RpcMethodError;
-import samba.jsonrpc.reponse.RpcErrorType;
+
+import samba.jsonrpc.reponse.RpcMethodError;
 
 import java.util.Objects;
 

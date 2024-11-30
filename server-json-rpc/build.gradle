@@ -6,18 +6,12 @@ group = 'samba.server-json-rpc'
 version = '1.0.0'
 
 dependencies {
-    implementation libs.log4j.api
-    implementation libs.log4j.core
+    implementation libs.slf4j.api
     implementation libs.vertx.core
     implementation libs.vertx.web
+    implementation libs.tuweni.bytes
 
-    implementation libs.besu.internal.metrics.core
-    implementation libs.besu.internal.plugin.api //TODO need to be removed
-
-
-    implementation 'com.google.guava:guava:24.1-jre'
-
-
+    implementation libs.google.guava
     implementation libs.jackson.dataformat.yaml
     implementation libs.jackson.datatype.jdk8
 
@@ -28,4 +22,5 @@ dependencies {
     testImplementation libs.junit.jupiter.api
     testImplementation libs.assertj.core
     testRuntimeOnly libs.junit.jupiter.engine
+
 }
