@@ -16,8 +16,6 @@ package samba.jsonrpc.reponse;
 
 import com.fasterxml.jackson.annotation.*;
 
-import samba.jsonrpc.reponse.RpcMethodError;
-
 import java.util.Objects;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)

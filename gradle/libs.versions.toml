@@ -9,7 +9,7 @@ netty = "4.1.110.Final"
 discovery = "24.9.1"
 oshi = "6.6.2"
 assertj = "3.26.0"
-mockito = "5.12.0"
+mockito = "5.14.2"
 lombok = "1.18.34"
 jupiter = "5.8.1"
 rocksdbjni = "8.3.2"
@@ -52,7 +52,7 @@ netty-all = { module = "io.netty:netty-all", version.ref = "netty"}
 discovery = { module = "tech.pegasys.discovery:discovery", version.ref = "discovery"}
 oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi"}
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj"}
-mockito-core= { module = "org.mockito:mockito-core", version.ref = "picocli"}
+mockito-core= { module = "org.mockito:mockito-core", version.ref = "mockito"}
 projectlombok= { module = "org.projectlombok:lombok", version.ref = "lombok"}
 
 junit-jupiter-api= { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter"}
