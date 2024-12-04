@@ -1,56 +1,66 @@
 plugins {
-    id 'samba.java-application-conventions'
+  id 'samba.java-library-conventions'
+}
+
+jar {
+  archiveBaseName = 'samba'
+  manifest {
+    attributes(
+      'Specification-Title': archiveBaseName,
+      'Specification-Version': project.version,
+      'Implementation-Title': archiveBaseName,
+      'Implementation-Version': calculateVersion(),
+      'Commit-Hash': getGitCommitDetails(40).hash
+      )
+  }
 }
 
 dependencies {
-    implementation libs.apache.logging.log4j.api
-    implementation libs.apache.logging.log4j.core
-    implementation libs.tuweni.bytes
-    implementation libs.tuweni.crypto
-    implementation libs.tuweni.rlp
-    implementation libs.tuweni.ssz
-    implementation libs.vertx.core
-    implementation libs.vertx.web
+  implementation libs.apache.logging.log4j.api
+  implementation libs.apache.logging.log4j.core
+  implementation libs.tuweni.bytes
+  implementation libs.tuweni.crypto
+  implementation libs.tuweni.rlp
+  implementation libs.tuweni.ssz
+  implementation libs.vertx.core
+  implementation libs.vertx.web
 
-    implementation libs.besu.internal.metrics.core
-    implementation libs.besu.internal.core
-    implementation libs.besu.internal.config
-    implementation libs.besu.internal.plugin.api //TODO need to be removed
-    implementation libs.besu.internal.rlp
+  implementation libs.besu.internal.metrics.core
+  implementation libs.besu.internal.core
+  implementation libs.besu.internal.config
+  implementation libs.besu.internal.plugin.api //TODO need to be removed
+  implementation libs.besu.internal.rlp
 
-    implementation libs.teku.internal.async
-    implementation libs.teku.internal.infrastructure.events
-    implementation libs.teku.internal.infrastructure.restapi
-    implementation libs.teku.internal.serviceutils
-    implementation libs.teku.internal.io
-    implementation libs.teku.internal.ssz
-    implementation libs.teku.internal.unsigned
-    implementation libs.teku.internal.http
-    implementation libs.teku.internal.json
+  implementation libs.teku.internal.async
+  implementation libs.teku.internal.infrastructure.events
+  implementation libs.teku.internal.infrastructure.restapi
+  implementation libs.teku.internal.serviceutils
+  implementation libs.teku.internal.io
+  implementation libs.teku.internal.ssz
+  implementation libs.teku.internal.unsigned
+  implementation libs.teku.internal.http
+  implementation libs.teku.internal.json
 
-    implementation libs.picocli
-    implementation libs.netty.all
-    implementation libs.discovery
-    implementation libs.oshi.core
-    implementation libs.assertj.core
-    implementation libs.mockito.core
-    implementation libs.rocksdbjni
-    implementation libs.prometheus.simpleclient
-    implementation libs.jackson.dataformat.yaml
-    implementation libs.jackson.datatype.jdk8
-    implementation libs.jvm.libp2p
+  implementation libs.picocli
+  implementation libs.netty.all
+  implementation libs.discovery
+  implementation libs.oshi.core
+  implementation libs.assertj.core
+  implementation libs.mockito.core
+  implementation libs.rocksdbjni
+  implementation libs.prometheus.simpleclient
+  implementation libs.jackson.dataformat.yaml
+  implementation libs.jackson.datatype.jdk8
+  implementation libs.jvm.libp2p
 
-    implementation project(':storage-rocksdb')
-    implementation project(':server-json-rpc')
+  implementation project(':storage-rocksdb')
+  implementation project(':server-json-rpc')
 
-    compileOnly libs.projectlombok
-    annotationProcessor libs.projectlombok
-    testCompileOnly libs.projectlombok
-    testAnnotationProcessor libs.projectlombok
-    testImplementation libs.junit.jupiter.api
-    testImplementation libs.assertj.core
-    testRuntimeOnly libs.junit.jupiter.engine
-}
-application {
-    mainClass = 'samba.Samba'
+  compileOnly libs.projectlombok
+  annotationProcessor libs.projectlombok
+  testCompileOnly libs.projectlombok
+  testAnnotationProcessor libs.projectlombok
+  testImplementation libs.junit.jupiter.api
+  testImplementation libs.assertj.core
+  testRuntimeOnly libs.junit.jupiter.engine
 }

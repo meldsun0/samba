@@ -1,0 +1,510 @@
+import groovy.transform.CompileStatic
+import groovy.transform.Memoized
+import net.ltgt.gradle.errorprone.CheckSeverity
+import java.text.SimpleDateFormat
+
+
+plugins {
+  id 'com.diffplug.spotless' version '6.25.0'
+  id 'net.ltgt.errorprone' version '4.0.1'
+  id 'jacoco'
+  id 'jacoco-report-aggregation'
+}
+
+
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
+  throw new GradleException("Java 21 or later is required to build Samba.\n" + "Detected version ${JavaVersion.current()}")
+}
+
+group = 'samba'
+
+defaultTasks 'build', 'javadoc'
+
+apply from: 'buildscripts/buildAliases.gradle'
+
+//TODO licenseReport, checkMavenCoordinateCollisions, checklicenses
+
+configure(allprojects - project(':platform')) {
+  apply plugin: 'java-library'
+  apply plugin: 'jacoco'
+  apply plugin: 'net.ltgt.errorprone'
+
+  version = calculateVersion()
+
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.outputDirectory
+  }
+
+  tasks.build {
+    dependsOn 'javadoc'
+  }
+  sourceCompatibility = 21
+  targetCompatibility = 21
+
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven { url "https://artifacts.consensys.net/public/maven/maven/" }
+    maven { url "https://artifacts.consensys.net/public/teku/maven/" }
+    maven { url "https://mvnrepository.com" }
+    maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
+    maven { url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/" }
+  }
+
+  dependencies {
+    api platform(project(':platform'))
+    annotationProcessor(platform(project(':platform')))
+    testAnnotationProcessor(platform(project(':platform')))
+    components.all(BouncyCastleCapability)
+    errorprone 'com.google.errorprone:error_prone_core:2.7.1'
+  }
+
+  configurations.all {
+    resolutionStrategy.capabilitiesResolution.withCapability('org.bouncycastle:bcprov-jdk18on') {
+      selectHighestVersion()
+    }
+    resolutionStrategy.capabilitiesResolution.withCapability('org.bouncycastle:bcpkix-jdk18on') {
+      selectHighestVersion()
+    }
+  }
+
+
+  apply from: "${project.rootDir}/buildscripts/spotless.gradle"
+
+  tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+      '-Xlint:unchecked',
+      '-Xlint:cast',
+      '-Xlint:rawtypes',
+      '-Xlint:overloads',
+      '-Xlint:divzero',
+      '-Xlint:finally',
+      '-Xlint:static',
+      '-Werror',
+    ]
+
+    options.errorprone {
+      excludedPaths = '.*/generated/*.*'
+      disableWarningsInGeneratedCode = true
+      check('EqualsGetClass', CheckSeverity.OFF)
+      check('FutureReturnValueIgnored', CheckSeverity.OFF)
+      check('ImmutableEnumChecker', CheckSeverity.OFF)
+      check('UnnecessaryParentheses', CheckSeverity.OFF)
+
+      // This check is broken in Java 12.  See https://github.com/google/error-prone/issues/1257
+      if (JavaVersion.current() == JavaVersion.VERSION_12) {
+        check('Finally', CheckSeverity.OFF)
+      }
+      // This check is broken after Java 12.  See https://github.com/google/error-prone/issues/1352
+      if (JavaVersion.current() > JavaVersion.VERSION_12) {
+        check('TypeParameterUnusedInFormals', CheckSeverity.OFF)
+      }
+
+      check('FieldCanBeFinal', CheckSeverity.WARN)
+      check('InsecureCryptoUsage', CheckSeverity.WARN)
+      check('WildcardImport', CheckSeverity.WARN)
+    }
+
+    options.encoding = 'UTF-8'
+  }
+
+  // IntelliJ workaround to allow repeated debugging of unchanged code
+  tasks.withType(JavaExec) {
+    if (it.name.contains(".")) {
+      outputs.upToDateWhen { false }
+    }
+  }
+
+  test {
+    useJUnitPlatform {}
+    finalizedBy jacocoTestReport // report is always generated after tests run
+  }
+}
+
+dependencies {
+  implementation 'com.google.errorprone:error_prone_core:2.7.1'  // Use the appropriate version of ErrorProne
+  // https://github.com/hyperledger/besu-errorprone-checks/
+  implementation project(':core')
+}
+
+subprojects {
+
+  tasks.withType(JavaCompile) {
+    options.fork = true
+    options.incremental = true
+    options.compilerArgs.remove('-Werror')
+    options.errorprone.disableWarningsInGeneratedCode = true
+  }
+
+
+  configurations {
+    testSupportAnnotationProcessor.extendsFrom annotationProcessor
+    testSupportImplementation.extendsFrom implementation
+    integrationTestAnnotationProcessor.extendsFrom annotationProcessor
+    integrationTestImplementation.extendsFrom implementation
+    testSupportArtifacts
+  }
+}
+
+jar { enabled = false }
+
+apply plugin: 'application'
+mainClassName = 'samba.Samba'
+
+applicationDefaultJvmArgs = [
+  '-Dvertx.disableFileCPResolving=true',
+  '-Dlog4j.shutdownHookEnabled=false',
+  '-Dlog4j2.formatMsgNoLookups=true',
+  '-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager',
+  '--add-opens',
+  'java.base/sun.security.provider=ALL-UNNAMED',
+  '--add-opens',
+  'java.base/java.util=ALL-UNNAMED',
+  "-Dio.netty.tryReflectionSetAccessible=true",
+  "--add-exports",
+  "java.base/jdk.internal.misc=ALL-UNNAMED",
+  "--add-opens",
+  "java.base/java.nio=ALL-UNNAMED"
+]
+
+run {
+  args project.hasProperty("samba.run.args") ? project.property("samba.run.args").toString().split("\\s+") : []
+  doFirst {
+    println 'run'
+    applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect {
+      it.replace('SAMBA_HOME', "$buildDir/samba")
+    }
+  }
+}
+
+
+
+def archiveBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
+
+apply from: 'buildscripts/startScripts.gradle'
+apply from: 'buildscripts/autocomplete.gradle'
+
+installDist { dependsOn untunedStartScripts }
+
+ext.archiveBuildVersion =  archiveBuildVersion
+
+apply from: 'buildscripts/buildTar.gradle'
+
+apply from: 'buildscripts/buildZip.gradle'
+
+
+jacocoTestReport {
+  reports {
+    xml.required = true
+  }
+}
+
+
+//done
+def dockerBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
+def dockerOrgName = project.hasProperty('dockerOrgName') ? project.getProperty("dockerOrgName") : "meldsun"
+def dockerArtifactName = project.hasProperty("dockerArtifactName") ? project.getProperty("dockerArtifactName") : "samba"
+def dockerImageName = "${dockerOrgName}/${dockerArtifactName}"
+
+tasks.register("dockerDistUntar") {
+  dependsOn distTar
+  dependsOn distZip
+  def dockerBuildDir = "build/docker-samba/"
+  def distTarFile = distTar.outputs.files.singleFile
+  def distTarFileName = distTar.outputs.files.singleFile.name.replace(".tar.gz", "")
+
+  doFirst {
+    new File(dockerBuildDir).mkdir()
+    copy {
+      from tarTree(distTarFile)
+      into(dockerBuildDir)
+    }
+    project.delete(files("${dockerBuildDir}/samba"))
+    file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/samba")
+  }
+}
+
+tasks.register('distDocker') {
+  dependsOn dockerDistUntar
+  inputs.dir("build/docker-samba/")
+  def dockerBuildDir = "build/docker-samba/"
+
+  doLast {
+    copy {
+      from file("${projectDir}/docker/Dockerfile")
+      into(dockerBuildDir)
+    }
+    exec {
+      def image = "${dockerImageName}:${dockerBuildVersion}"
+      def dockerPlatform = ""
+      if (project.hasProperty('docker-platform')) {
+        dockerPlatform = "--platform ${project.getProperty('docker-platform')}"
+        println "Building for platform ${project.getProperty('docker-platform')}"
+      }
+      def gitDetails = getGitCommitDetails(7)
+      executable shell
+      workingDir dockerBuildDir
+      args "-c", "docker build ${dockerPlatform} --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${gitDetails.hash} -t ${image} ."
+    }
+  }
+}
+
+tasks.register('testDocker') {
+  dependsOn distDocker
+  def dockerReportsDir = "docker/reports/"
+
+  doFirst {
+    new File(dockerReportsDir).mkdir()
+  }
+
+  doLast {
+    exec {
+      def image = project.hasProperty('release.releaseVersion') ? "${dockerImageName}:" + project.property('release.releaseVersion') : "${dockerImageName}:${project.version}"
+      workingDir "${projectDir}/docker"
+      executable shell
+      args "-c", "./test.sh ${image}"
+    }
+  }
+}
+
+tasks.register('dockerUpload') {
+  dependsOn distDocker
+  def architecture = System.getenv('architecture')
+  def image = "${dockerImageName}:${dockerBuildVersion}"
+  def additionalTags = []
+
+  if (project.hasProperty('branch') && project.property('branch') == 'main') {
+    additionalTags.add('develop')
+  }
+
+  if (!isInterimBuild(dockerBuildVersion)) {
+    additionalTags.add(dockerBuildVersion.split(/\./)[0..1].join('.'))
+  }
+
+  doLast {
+    exec {
+      def archVariantImage = "${image}-${architecture}"
+      def cmd = "docker tag '${image}' '${archVariantImage}' && docker push '${archVariantImage}'"
+      println "Executing '${cmd}'"
+      executable shell
+      args "-c", cmd
+    }
+  }
+}
+
+tasks.register('dockerUploadRelease') {
+  def archs = ["arm64", "amd64"]
+  def image = "${dockerImageName}:${dockerBuildVersion}"
+
+  doLast {
+    for (def architecture in archs) {
+
+      exec {
+        def cmd = "docker pull '${image}-${architecture}' && docker tag '${image}-${architecture}' '${dockerImageName}:latest-${architecture}'"
+        println "Executing '${cmd}'"
+        executable shell
+        args "-c", cmd
+      }
+      exec {
+        def cmd = "docker push '${dockerImageName}:latest-${architecture}'"
+        println "Executing '${cmd}'"
+        executable shell
+        args "-c", cmd
+      }
+
+
+      exec {
+        def archImage = "${image}-${architecture}"
+        def cmd = "docker pull '${archImage}' && docker tag ${archImage} '${dockerImageName}:latest-${architecture}'"
+        println "Executing '${cmd}'"
+        executable shell
+        args "-c", cmd
+      }
+      exec {
+        def cmd = "docker push '${dockerImageName}:latest-${architecture}'"
+        println "Executing '${cmd}'"
+        executable shell
+        args "-c", cmd
+      }
+    }
+  }
+}
+
+tasks.register('manifestDocker') {
+  def image = "${dockerImageName}:${dockerBuildVersion}"
+  def archs = [
+    "arm64",
+    "amd64"] //TODO: this assumes dockerUpload task has already been run on 2 different archs!
+  doLast {
+    exec {
+      def targets = ""
+      archs.forEach { arch -> targets += "'${image}-${arch}' " }
+      def cmd = "docker manifest create '${image}' ${targets}"
+      println "Executing '${cmd}'"
+      executable shell
+      args "-c", cmd
+    }
+    exec {
+      def cmd = "docker manifest push '${image}'"
+      println "Executing '${cmd}'"
+      executable shell
+      args "-c", cmd
+    }
+  }
+}
+
+tasks.register('manifestDockerRelease') {
+  def archs = ["arm64", "amd64"]
+  def baseTag = "${dockerImageName}:latest";
+
+  doLast {
+
+    exec {
+      def targets = ""
+      archs.forEach { arch -> targets += "'${baseTag}-${arch}' " }
+      def cmd = "docker manifest create '${baseTag}' ${targets} --amend"
+      println "Executing '${cmd}'"
+      executable shell
+      args "-c", cmd
+    }
+    exec {
+      def cmd = "docker manifest push '${baseTag}'"
+      println "Executing '${cmd}'"
+      executable shell
+      args "-c", cmd
+    }
+  }
+}
+
+
+
+// Takes the version and if it contains SNAPSHOT, alpha, beta or RC in version then return true indicating an interim build
+def isInterimBuild(dockerBuildVersion) {
+  return (dockerBuildVersion ==~ /.*-SNAPSHOT/) || (dockerBuildVersion ==~ /.*-alpha/)
+  || (dockerBuildVersion ==~ /.*-beta/) || (dockerBuildVersion ==~ /.*-RC.*/)
+  || (dockerBuildVersion ==~ /.*develop.*/)
+}
+
+tasks.register("verifyDistributions") {
+  dependsOn distTar
+  dependsOn distZip
+  def distTarFile = distTar.outputs.files.singleFile
+  def distZipFile = distZip.outputs.files.singleFile
+  def minDistributionSize = 20000000
+
+  // Sanity check the distributions by checking they are at least a reasonable size
+  doFirst {
+    if (distTarFile.length() < minDistributionSize) {
+      throw new GradleException("Distribution tar is suspiciously small: " + distTarFile.length() + " bytes")
+    }
+    if (distZipFile.length() < minDistributionSize) {
+      throw new GradleException("Distribution zip is suspiciously small: " + distZipFile.length() + " bytes")
+    }
+  }
+}
+
+distributions {
+  main {
+    contents {
+      from("./LICENSE") { into "." }
+      from("build/reports/license/license-dependency.html") { into "." }
+      from("./docs/GettingStartedBinaries.md") { into "." }
+      from("./docs/DocsArchive0.8.0.html") { into "." }
+      from("./core/src/main/scripts/samba-entry.sh") { into "./bin/" }
+      from(autocomplete) { into "." }
+    }
+  }
+}
+
+build.dependsOn verifyDistributions
+
+
+// http://label-schema.org/rc1/
+// using the RFC3339 format "2016-04-12T23:20:50.52Z"
+def buildTime() {
+  def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+  df.setTimeZone(TimeZone.getTimeZone("UTC"))
+  return df.format(new Date())
+}
+
+
+
+def getGitCommitDetails(length = 8) {
+  try {
+    def gitFolder = "$projectDir/.git/"
+    if (!file(gitFolder).isDirectory()) {
+      gitFolder = file(gitFolder).text.substring(length).trim() + "/"
+    }
+    def takeFromHash = length
+    def head = new File(gitFolder + "HEAD").text.split(":")
+    def isCommit = head.length == 1
+
+    def commitHash, refHeadFile
+    if (isCommit) {
+      commitHash = head[0].trim().take(takeFromHash)
+      refHeadFile = new File(gitFolder + "HEAD")
+    } else {
+      refHeadFile = new File(gitFolder + head[1].trim())
+      commitHash = refHeadFile.text.trim().take(takeFromHash)
+    }
+
+    // Use head file modification time as a proxy for the build date
+    def lastModified = new Date(refHeadFile.lastModified())
+    // Format the date as "yy.M" (e.g. 24.3 for March 2024)
+    def formattedDate = new SimpleDateFormat("yy.M").format(lastModified)
+
+    return [hash: commitHash, date: formattedDate]
+  } catch (Exception e) {
+    logger.warn('Could not calculate git commit details, using defaults (run with --info for stacktrace)')
+    logger.info('Error retrieving git commit details', e)
+    return [hash: "xxxxxxxx", date: "00.0"]
+  }
+}
+
+@CompileStatic
+class BouncyCastleCapability implements ComponentMetadataRule {
+  void execute(ComponentMetadataContext context) {
+    context.details.with {
+      if (id.group == "org.bouncycastle") {
+        if (id.name == "bcprov-jdk15on") {
+          allVariants {
+            it.withCapabilities {
+              it.addCapability("org.bouncycastle", "bcprov-jdk18on", "0")
+            }
+          }
+        } else if (id.name == "bcpkix-jdk15on") {
+          allVariants {
+            it.withCapabilities {
+              it.addCapability("org.bouncycastle", "bcpkix-jdk18on", "0")
+            }
+          }
+        }
+      }
+    }
+  }
+}
+@Memoized
+def calculateVersion() {
+  // Regex pattern for basic calendar versioning, with provision to omit patch rev
+  def calVerPattern = ~/\d+\.\d+(\.\d+)?(-.*)?/
+
+  if (project.hasProperty('version') && (project.version =~ calVerPattern)) {
+    if (project.hasProperty('versionappendcommit') && project.versionappendcommit == "true") {
+      def gitDetails = getGitCommitDetails(7) // Adjust length as needed
+      return "${project.version}-${gitDetails.hash}"
+    }
+    return "${project.version}"
+  } else {
+    // If no version is supplied or it doesn't match the semantic versioning, calculate from git
+    println("Generating project version as supplied is version not semver: ${project.version}")
+    def gitDetails = getGitCommitDetails(7) // Adjust length as needed
+    return "${gitDetails.date}-develop-${gitDetails.hash}"
+  }
+}

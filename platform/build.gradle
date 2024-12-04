@@ -1,0 +1,49 @@
+plugins {
+  id 'java-platform'
+  id 'com.diffplug.spotless'
+}
+
+javaPlatform {
+  allowDependencies()
+}
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url "https://jitpack.io" }
+  maven { url "https://artifacts.consensys.net/public/maven/maven/" }
+  maven { url "https://artifacts.consensys.net/public/teku/maven/" }
+  maven { url "https://mvnrepository.com" }
+  maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
+  maven { url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/" }
+}
+
+dependencies {
+  api platform('com.fasterxml.jackson:jackson-bom:2.18.0')
+  api platform('io.grpc:grpc-bom:1.68.0')
+  api platform('io.netty:netty-bom:4.1.114.Final')
+  api platform('io.opentelemetry:opentelemetry-bom:1.43.0')
+  api platform('io.prometheus:simpleclient_bom:0.16.0')
+  api platform('io.vertx:vertx-stack-depchain:4.5.10')
+  api platform('org.apache.logging.log4j:log4j-bom:2.24.1')
+  api platform('org.assertj:assertj-bom:3.26.3')
+  api platform('org.immutables:bom:2.10.1')
+  api platform('org.junit:junit-bom:5.11.2')
+  api platform('org.mockito:mockito-bom:5.14.2')
+  api platform('org.slf4j:slf4j-bom:2.0.16')
+
+  constraints {
+    api project(':core')
+    api project(':server-json-rpc')
+    api project(':storage-rocksdb')
+    api project(':execution-history-network')
+    api project(':execution-state-network')
+  }
+}
+
+spotless {
+  groovyGradle {
+    target '*.gradle'
+    greclipse('4.31').configFile(rootProject.file('gradle/spotless/greclipse.properties'))
+    endWithNewline()
+  }
+}

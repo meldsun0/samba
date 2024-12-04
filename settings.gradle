@@ -4,4 +4,4 @@ include 'execution-state-network'
 include 'execution-history-network'
 include 'server-json-rpc'
 include 'storage-rocksdb'
-
+include 'platform'
