@@ -1,12 +1,12 @@
 package samba.domain.messages.requests;
 
-import com.google.common.base.Objects;
-import org.apache.tuweni.bytes.Bytes;
-
 import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.*;
 import samba.schema.messages.ssz.containers.PingContainer;
+
+import com.google.common.base.Objects;
+import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
@@ -16,79 +16,80 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
  */
 public class Ping implements PortalWireMessage {
 
-    private final UInt64 enrSeq;
-    private final Bytes customPayload;
+  private final UInt64 enrSeq;
+  private final Bytes customPayload;
 
+  public Ping(UInt64 enrSeq, Bytes customPayload) {
+    checkArgument(
+        enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
+    checkArgument(
+        customPayload.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Custom payload size exceeds limit");
 
-      public Ping(UInt64 enrSeq, Bytes customPayload) {
-        checkArgument(enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
-        checkArgument(customPayload.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Custom payload size exceeds limit");
+    this.enrSeq = enrSeq;
+    this.customPayload = customPayload;
+  }
 
-        this.enrSeq = enrSeq;
-        this.customPayload = customPayload;
+  public Ping(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
+    this(UInt64.valueOf(enrSeq.toBytes().toLong()), customPayload);
+  }
+
+  public static Ping fromSSZBytes(Bytes sszbytes) {
+    Bytes container = sszbytes.slice(1);
+    PingContainer pingContainer = PingContainer.decodePacket(container);
+    UInt64 enrSeq = pingContainer.getEnrSeq();
+    Bytes customPayload = pingContainer.getCustomPayload();
+
+    if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
+      throw new IllegalArgumentException(
+          "PING: Custom payload size exceeds limit"); // TODO change exception
     }
+    return new Ping(enrSeq, customPayload);
+  }
 
-    public Ping(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
-          this(UInt64.valueOf(enrSeq.toBytes().toLong()), customPayload);
+  @Override
+  public MessageType getMessageType() {
+    return MessageType.PING;
+  }
+
+  public Bytes getCustomPayload() {
+    return customPayload;
+  }
+
+  public UInt64 getEnrSeq() {
+    return enrSeq;
+  }
+
+  @Override
+  public Bytes getSszBytes() {
+    return Bytes.concatenate(
+        SszByte.of(getMessageType().getByteValue()).sszSerialize(),
+        new PingContainer(enrSeq, customPayload).sszSerialize());
+  }
+
+  @Override
+  public Ping getMessage() {
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-
-    public static Ping fromSSZBytes(Bytes sszbytes){
-            Bytes container = sszbytes.slice(1);
-            PingContainer pingContainer = PingContainer.decodePacket(container);
-            UInt64 enrSeq = pingContainer.getEnrSeq();
-            Bytes customPayload = pingContainer.getCustomPayload();
-
-            if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-                throw new IllegalArgumentException("PING: Custom payload size exceeds limit"); //TODO change exception
-            }
-            return new Ping(enrSeq, customPayload);
+    if (o == null || getClass() != o.getClass()) {
+      return false;
     }
+    Ping that = (Ping) o;
+    return Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
+  }
 
-    @Override
-    public MessageType getMessageType() {
-        return MessageType.PING;
-    }
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(enrSeq, customPayload);
+  }
 
-    public Bytes getCustomPayload() {
-        return customPayload;
-    }
-
-    public UInt64 getEnrSeq() {
-        return enrSeq;
-    }
-
-    @Override
-    public Bytes getSszBytes() {
-        return Bytes.concatenate(
-            SszByte.of(getMessageType().getByteValue()).sszSerialize(), 
-            new PingContainer(enrSeq, customPayload).sszSerialize());
-    }
-
-    @Override
-    public Ping getMessage() {
-        return this;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Ping that = (Ping) o;
-        return  Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(enrSeq, customPayload);
-    }
-
-    @Override
-    public String toString() {
-        return "Ping{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
-    }
+  @Override
+  public String toString() {
+    return "Ping{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
+  }
 }

@@ -16,7 +16,6 @@ package samba.jsonrpc.reponse;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 
-
 public interface JsonRpcResponse extends RpcResponse {
 
   @JsonGetter("jsonrpc")

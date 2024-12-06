@@ -11,12 +11,13 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package tech.pegasys.teku.infrastructure.exceptions;
+package samba.samba.exceptions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.InvalidClassException;
+
 import org.junit.jupiter.api.Test;
 
 public class ExceptionUtilTest {

@@ -14,12 +14,12 @@
  */
 package samba.jsonrpc.reponse;
 
-import io.vertx.ext.auth.User;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import io.vertx.ext.auth.User;
 
 public class JsonRpcRequestContext {
 

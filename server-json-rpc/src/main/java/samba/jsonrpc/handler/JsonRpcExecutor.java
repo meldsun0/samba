@@ -14,11 +14,8 @@
  */
 package samba.jsonrpc.handler;
 
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static samba.jsonrpc.reponse.RpcErrorType.INVALID_REQUEST;
+
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.handler.processor.JsonRpcProcessor;
 import samba.jsonrpc.reponse.*;
@@ -28,8 +25,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static samba.jsonrpc.reponse.RpcErrorType.INVALID_REQUEST;
-
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonRpcExecutor {
 
@@ -62,7 +62,8 @@ public class JsonRpcExecutor {
         return new JsonRpcErrorResponse(id, unavailableMethod.get());
       }
       final JsonRpcMethod method = rpcMethods.get(requestBody.getMethod());
-      return rpcProcessor.process(id, method, new JsonRpcRequestContext(requestBody, optionalUser, alive));
+      return rpcProcessor.process(
+          id, method, new JsonRpcRequestContext(requestBody, optionalUser, alive));
     } catch (final IllegalArgumentException e) {
       try {
         final Integer id = jsonRpcRequest.getInteger("id", null);

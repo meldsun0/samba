@@ -14,6 +14,18 @@
  */
 package samba.timeout;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
+import samba.jsonrpc.config.ContextKey;
+import samba.jsonrpc.config.TimeoutOptions;
+import samba.jsonrpc.handler.TimeoutHandler;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.collect.ImmutableMap;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -23,17 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
-import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.config.TimeoutOptions;
-import samba.jsonrpc.handler.TimeoutHandler;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 public class TimeoutHandlerTest {
 

@@ -14,7 +14,6 @@
  */
 package samba.jsonrpc.reponse;
 
-
 public class JsonRpcNoResponse implements JsonRpcResponse {
 
   @Override

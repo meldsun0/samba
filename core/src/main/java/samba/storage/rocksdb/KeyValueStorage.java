@@ -1,16 +1,14 @@
 package samba.storage.rocksdb;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-
 import java.io.Closeable;
 import java.util.Optional;
-
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-//SegmentdKeyValueStorage and KeyValueStorage
+import org.apache.commons.lang3.tuple.Pair;
+
+// SegmentdKeyValueStorage and KeyValueStorage
 public interface KeyValueStorage extends Closeable {
 
   Optional<byte[]> get(Segment segment, byte[] key) throws StorageException;
@@ -23,7 +21,7 @@ public interface KeyValueStorage extends Closeable {
 
   boolean tryDelete(Segment segment, byte[] key) throws StorageException;
 
-  void clear(Segment segment)  throws StorageException;
+  void clear(Segment segment) throws StorageException;
 
   Stream<Pair<byte[], byte[]>> stream(final Segment segment);
 

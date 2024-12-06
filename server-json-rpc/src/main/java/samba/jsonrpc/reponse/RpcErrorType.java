@@ -14,54 +14,51 @@
  */
 package samba.jsonrpc.reponse;
 
-
+import static samba.jsonrpc.reponse.RpcMethodError.INVALID_PARAMS_ERROR_CODE;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-import static samba.jsonrpc.reponse.RpcMethodError.INVALID_PARAMS_ERROR_CODE;
-
 public enum RpcErrorType implements RpcMethodError {
+  PARSE_ERROR(-32700, "Parse error"),
+  INVALID_REQUEST(-32600, "Invalid Request"),
+  METHOD_NOT_FOUND(-32601, "Method not found"),
+  INVALID_PARAMS(-32602, "Invalid params"),
+  UNKNOWN(INVALID_PARAMS_ERROR_CODE, "Unknown internal error"),
+  INVALID_ID_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid ID params"),
+  INTERNAL_ERROR(-32603, "Internal error"),
+  METHOD_NOT_ENABLED(-32604, "Method not enabled"),
+  TIMEOUT_ERROR(-32603, "Timeout expired"),
+  EXCEEDS_RPC_MAX_BATCH_SIZE(-32005, "Number of requests exceeds max batch size"),
+  INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params");
 
-    PARSE_ERROR(-32700, "Parse error"),
-    INVALID_REQUEST(-32600, "Invalid Request"),
-    METHOD_NOT_FOUND(-32601, "Method not found"),
-    INVALID_PARAMS(-32602, "Invalid params"),
-    UNKNOWN(INVALID_PARAMS_ERROR_CODE, "Unknown internal error"),
-    INVALID_ID_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid ID params"),
-    INTERNAL_ERROR(-32603, "Internal error"),
-    METHOD_NOT_ENABLED(-32604, "Method not enabled"),
-    TIMEOUT_ERROR(-32603, "Timeout expired"),
-    EXCEEDS_RPC_MAX_BATCH_SIZE(-32005, "Number of requests exceeds max batch size"),
-    INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params");
+  private final int code;
+  private final String message;
+  private final Function<String, Optional<String>> dataDecoder;
 
-    private final int code;
-    private final String message;
-    private final Function<String, Optional<String>> dataDecoder;
+  RpcErrorType(final int code, final String message) {
+    this(code, message, null);
+  }
 
-    RpcErrorType(final int code, final String message) {
-        this(code, message, null);
-    }
+  RpcErrorType(
+      final int code, final String message, final Function<String, Optional<String>> dataDecoder) {
+    this.code = code;
+    this.message = message;
+    this.dataDecoder = dataDecoder;
+  }
 
-    RpcErrorType(
-            final int code, final String message, final Function<String, Optional<String>> dataDecoder) {
-        this.code = code;
-        this.message = message;
-        this.dataDecoder = dataDecoder;
-    }
+  @Override
+  public int getCode() {
+    return code;
+  }
 
-    @Override
-    public int getCode() {
-        return code;
-    }
+  @Override
+  public String getMessage() {
+    return message;
+  }
 
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    @Override
-    public Optional<String> decodeData(final String data) {
-        return dataDecoder == null ? Optional.empty() : dataDecoder.apply(data);
-    }
+  @Override
+  public Optional<String> decodeData(final String data) {
+    return dataDecoder == null ? Optional.empty() : dataDecoder.apply(data);
+  }
 }

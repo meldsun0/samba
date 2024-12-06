@@ -13,25 +13,38 @@
 
 package samba.logging;
 
+import samba.config.StartupLogConfig;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import samba.config.StartupLogConfig;
 
 public class StatusLogger {
 
-    public static final StatusLogger STATUS_LOG = new StatusLogger("samba-status-log");
+  public static final StatusLogger STATUS_LOG = new StatusLogger("samba-status-log");
 
-    final Logger log;
+  final Logger log;
 
-    private StatusLogger(final String name) {
-        this.log = LogManager.getLogger(name);
-    }
+  private StatusLogger(final String name) {
+    this.log = LogManager.getLogger(name);
+  }
 
-    public void onStartup(final String version) {
-        log.info("Samba version: {}", version);
-    }
+  public void onStartup(final String version) {
+    log.info("Samba version: {}", version);
+  }
 
-    public void startupConfigurations(final StartupLogConfig config) {
-        config.getReport().forEach(log::info);
-    }
+  public void startupConfigurations(final StartupLogConfig config) {
+    config.getReport().forEach(log::info);
+  }
+
+  public void fatalError(final String description, final Throwable cause) {
+    log.fatal("Exiting due to fatal error in {}", description, cause);
+  }
+
+  public void specificationFailure(final String description, final Throwable cause) {
+    log.warn("Spec failed for {}: {}", description, cause, cause);
+  }
+
+  public void unexpectedFailure(final String description, final Throwable cause) {
+    log.error("PLEASE FIX OR REPORT | Unexpected exception thrown for {}", description, cause);
+  }
 }

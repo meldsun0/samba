@@ -13,45 +13,37 @@
 
 package samba.services.api.endpoints.health;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static tech.pegasys.teku.infrastructure.http.HttpStatusCodes.*;
+import static tech.pegasys.teku.infrastructure.http.RestApiConstants.TAG_NODE;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import tech.pegasys.teku.infrastructure.restapi.endpoints.EndpointMetadata;
 import tech.pegasys.teku.infrastructure.restapi.endpoints.RestApiEndpoint;
 import tech.pegasys.teku.infrastructure.restapi.endpoints.RestApiRequest;
 
-import java.util.Optional;
-
-import static tech.pegasys.teku.infrastructure.http.HttpStatusCodes.*;
-
-import static tech.pegasys.teku.infrastructure.http.RestApiConstants.TAG_NODE;
-
 public class GetHealth extends RestApiEndpoint {
 
-    private static final Logger LOG = LogManager.getLogger();
-    public static final String ROUTE = "/health";
+  private static final Logger LOG = LogManager.getLogger();
+  public static final String ROUTE = "/health";
 
+  public GetHealth() {
+    super(
+        EndpointMetadata.get(ROUTE)
+            .operationId("getHealth")
+            .summary("Get health check")
+            .description("Returns node health status in http status codes")
+            .tags(TAG_NODE)
+            .response(SC_OK, "Node is ready")
+            .withBadRequestResponse(Optional.of("Invalid syncing status code"))
+            .build());
+  }
 
-    public GetHealth() {
-        super(
-                EndpointMetadata.get(ROUTE)
-                        .operationId("getHealth")
-                        .summary("Get health check")
-                        .description("Returns node health status in http status codes")
-                        .tags(TAG_NODE)
-                        .response(SC_OK, "Node is ready")
-                        .withBadRequestResponse(Optional.of("Invalid syncing status code"))
-                        .build());
-
-    }
-
-    @Override
-    public void handleRequest(final RestApiRequest request) throws JsonProcessingException {
-        request.respondWithCode(SC_OK);
-
-    }
-
-
+  @Override
+  public void handleRequest(final RestApiRequest request) throws JsonProcessingException {
+    request.respondWithCode(SC_OK);
+  }
 }

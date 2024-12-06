@@ -1,4 +1,3 @@
 package samba.services.jsonrpc.methods.results;
 
-public class RoutingTableInfo {
-}
+public class RoutingTableInfo {}

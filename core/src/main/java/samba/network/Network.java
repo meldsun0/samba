@@ -6,11 +6,11 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface Network {
 
-    SafeFuture<String> connect(NodeRecord node);
+  SafeFuture<String> connect(NodeRecord node);
 
-    int getNumberOfConnectedPeers();
+  int getNumberOfConnectedPeers();
 
-    boolean isNodeConnected(NodeRecord node);
+  boolean isNodeConnected(NodeRecord node);
 
-    UInt256 getRadiusFromNode(NodeRecord node);
+  UInt256 getRadiusFromNode(NodeRecord node);
 }

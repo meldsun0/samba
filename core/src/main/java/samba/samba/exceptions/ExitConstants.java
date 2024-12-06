@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package samba.samba;
+package samba.samba.exceptions;
 
 /**
  * Constants to be used as a parameter for {@link System#exit(int)} to perform shutdown of the Teku,

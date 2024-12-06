@@ -14,11 +14,7 @@
  */
 package samba.storage.rocksdb;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.rocksdb.RocksDBException;
-import org.rocksdb.RocksIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,7 +24,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.google.common.base.Preconditions.checkState;
+import org.apache.commons.lang3.tuple.Pair;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** The Rocks db iterator. */
 public class RocksDBIterator implements Iterator<Pair<byte[], byte[]>>, AutoCloseable {

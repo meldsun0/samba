@@ -1,18 +1,15 @@
-
 package samba.domain.dht;
-
-
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import samba.TestHelper;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static samba.domain.dht.BucketEntry.*;
 
+import samba.TestHelper;
+
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class BucketEntryTest {
 
@@ -35,7 +32,6 @@ class BucketEntryTest {
     entry.checkLiveness(START_TIME + MIN_MILLIS_BETWEEN_PINGS - 1);
     verifyNoMoreInteractions(livenessManager);
   }
-
 
   @Test
   void checkLiveness_shouldNotCheckLivenessWhenLivenessConfirmedRecently() {

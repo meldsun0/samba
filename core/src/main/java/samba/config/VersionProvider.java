@@ -13,8 +13,6 @@
 
 package samba.config;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -22,6 +20,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class VersionProvider {
   public static final String ENV_XDG_DATA_HOME = "XDG_DATA_HOME";

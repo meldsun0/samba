@@ -14,15 +14,10 @@
  */
 package samba.jsonrpc.handler;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
-import samba.jsonrpc.config.JsonRpcConfiguration;
+import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
+
 import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.handler.AbstractJsonRpcExecutor;
+import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
@@ -30,7 +25,12 @@ import samba.jsonrpc.reponse.RpcResponseType;
 
 import java.io.IOException;
 
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 
 public class JsonRpcObjectExecutor extends AbstractJsonRpcExecutor {
   private final ObjectWriter jsonObjectWriter = createObjectWriter();
@@ -39,7 +39,7 @@ public class JsonRpcObjectExecutor extends AbstractJsonRpcExecutor {
       final JsonRpcExecutor jsonRpcExecutor,
       final RoutingContext ctx,
       final JsonRpcConfiguration jsonRpcConfiguration) {
-    super(jsonRpcExecutor,  ctx, jsonRpcConfiguration);
+    super(jsonRpcExecutor, ctx, jsonRpcConfiguration);
   }
 
   @Override
@@ -49,8 +49,7 @@ public class JsonRpcObjectExecutor extends AbstractJsonRpcExecutor {
 
     final JsonObject jsonRequest = ctx.get(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name());
     lazyTraceLogger(jsonRequest::toString);
-    final JsonRpcResponse jsonRpcResponse =
-        executeRequest(jsonRpcExecutor, jsonRequest, ctx);
+    final JsonRpcResponse jsonRpcResponse = executeRequest(jsonRpcExecutor, jsonRequest, ctx);
     handleJsonObjectResponse(response, jsonRpcResponse, ctx);
   }
 

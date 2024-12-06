@@ -18,33 +18,32 @@ import java.net.*;
 
 public class NetworkUtility {
 
-    public static final String INADDR_ANY = "0.0.0.0";
-    public static final String INADDR_NONE = "255.255.255.255";
-    public static final String INADDR6_ANY = "0:0:0:0:0:0:0:0";
-    public static final String INADDR6_NONE = "::";
+  public static final String INADDR_ANY = "0.0.0.0";
+  public static final String INADDR_NONE = "255.255.255.255";
+  public static final String INADDR6_ANY = "0:0:0:0:0:0:0:0";
+  public static final String INADDR6_NONE = "::";
 
-    private NetworkUtility() {
-    }
+  private NetworkUtility() {}
 
-    public static String urlForSocketAddress(final String scheme, final InetSocketAddress address) {
-        String hostName = address.getHostName();
-        if (isUnspecifiedAddress(hostName)) {
-            hostName = InetAddress.getLoopbackAddress().getHostName();
-        }
-        if (hostName.contains(":")) {
-            hostName = "[" + hostName + "]";
-        }
-        return scheme + "://" + hostName + ":" + address.getPort();
+  public static String urlForSocketAddress(final String scheme, final InetSocketAddress address) {
+    String hostName = address.getHostName();
+    if (isUnspecifiedAddress(hostName)) {
+      hostName = InetAddress.getLoopbackAddress().getHostName();
     }
+    if (hostName.contains(":")) {
+      hostName = "[" + hostName + "]";
+    }
+    return scheme + "://" + hostName + ":" + address.getPort();
+  }
 
-    public static boolean isValidPort(final int port) {
-        return port > 0 && port < 65536;
-    }
+  public static boolean isValidPort(final int port) {
+    return port > 0 && port < 65536;
+  }
 
-    public static boolean isUnspecifiedAddress(final String ipAddress) {
-        return INADDR_ANY.equals(ipAddress)
-                || INADDR6_ANY.equals(ipAddress)
-                || INADDR_NONE.equals(ipAddress)
-                || INADDR6_NONE.equals(ipAddress);
-    }
+  public static boolean isUnspecifiedAddress(final String ipAddress) {
+    return INADDR_ANY.equals(ipAddress)
+        || INADDR6_ANY.equals(ipAddress)
+        || INADDR_NONE.equals(ipAddress)
+        || INADDR6_NONE.equals(ipAddress);
+  }
 }

@@ -1,4 +1,3 @@
 package samba.schema.content;
 
-public class BlockBodyPreShanghai {
-}
+public class BlockBodyPreShanghai {}

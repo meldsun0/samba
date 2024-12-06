@@ -13,14 +13,13 @@
 
 package samba.services;
 
+import java.util.function.IntSupplier;
+
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
-
-
-import java.util.function.IntSupplier;
 
 public class MainServiceConfig {
 
@@ -29,9 +28,9 @@ public class MainServiceConfig {
   private final EventChannels eventChannels;
   private final MetricsSystem metricsSystem;
 
-
   private final IntSupplier rejectedExecutionsSupplier;
-  private final int executorThreads = Math.max(5, Math.min(Runtime.getRuntime().availableProcessors(), 12));
+  private final int executorThreads =
+      Math.max(5, Math.min(Runtime.getRuntime().availableProcessors(), 12));
 
   public MainServiceConfig(
       final AsyncRunnerFactory asyncRunnerFactory,
@@ -45,7 +44,6 @@ public class MainServiceConfig {
     this.metricsSystem = metricsSystem;
 
     this.rejectedExecutionsSupplier = rejectedExecutionsSupplier;
-
   }
 
   public TimeProvider getTimeProvider() {

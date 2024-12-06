@@ -14,6 +14,13 @@
  */
 package samba.storage.rocksdb;
 
+import static org.hyperledger.besu.metrics.BesuMetricCategory.KVSTORE_ROCKSDB_STATS;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
 import io.prometheus.client.Collector;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
 import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
@@ -21,13 +28,6 @@ import org.rocksdb.HistogramData;
 import org.rocksdb.HistogramType;
 import org.rocksdb.Statistics;
 import org.rocksdb.TickerType;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-
-import static org.hyperledger.besu.metrics.BesuMetricCategory.KVSTORE_ROCKSDB_STATS;
 
 /** The Rocks db stats. */
 public class RocksDBStats {

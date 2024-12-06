@@ -14,9 +14,9 @@
  */
 package samba.jsonrpc.config;
 
-import io.vertx.ext.web.RoutingContext;
-
 import java.util.function.Supplier;
+
+import io.vertx.ext.web.RoutingContext;
 
 public enum ContextKey {
   REQUEST_BODY_AS_JSON_OBJECT,

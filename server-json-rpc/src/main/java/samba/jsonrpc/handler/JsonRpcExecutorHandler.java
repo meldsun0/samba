@@ -14,20 +14,20 @@
  */
 package samba.jsonrpc.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.Handler;
-import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import samba.jsonrpc.config.JsonRpcConfiguration;
+import static samba.jsonrpc.handler.AbstractJsonRpcExecutor.handleJsonRpcError;
+
 import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.handler.AbstractJsonRpcExecutor;
+import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.jsonrpc.reponse.RpcErrorType;
 
 import java.io.IOException;
 import java.util.Optional;
 
-import static samba.jsonrpc.handler.AbstractJsonRpcExecutor.handleJsonRpcError;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.Handler;
+import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonRpcExecutorHandler {
   private static final Logger LOG = LoggerFactory.getLogger(JsonRpcExecutorHandler.class);
@@ -45,8 +45,7 @@ public class JsonRpcExecutorHandler {
   }
 
   public static Handler<RoutingContext> handler(
-      final JsonRpcExecutor jsonRpcExecutor,
-      final JsonRpcConfiguration jsonRpcConfiguration) {
+      final JsonRpcExecutor jsonRpcExecutor, final JsonRpcConfiguration jsonRpcConfiguration) {
     return ctx -> {
       final long timerId =
           ctx.vertx()
@@ -107,10 +106,10 @@ public class JsonRpcExecutorHandler {
       final RoutingContext ctx,
       final JsonRpcConfiguration jsonRpcConfiguration) {
     if (isJsonObjectRequest(ctx)) {
-      return Optional.of(new JsonRpcObjectExecutor(jsonRpcExecutor,  ctx, jsonRpcConfiguration));
+      return Optional.of(new JsonRpcObjectExecutor(jsonRpcExecutor, ctx, jsonRpcConfiguration));
     }
     if (isJsonArrayRequest(ctx)) {
-      return Optional.of(new JsonRpcArrayExecutor(jsonRpcExecutor,  ctx, jsonRpcConfiguration));
+      return Optional.of(new JsonRpcArrayExecutor(jsonRpcExecutor, ctx, jsonRpcConfiguration));
     }
     return Optional.empty();
   }

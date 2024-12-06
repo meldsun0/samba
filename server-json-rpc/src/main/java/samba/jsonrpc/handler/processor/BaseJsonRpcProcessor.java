@@ -14,24 +14,29 @@
  */
 package samba.jsonrpc.handler.processor;
 
+import samba.jsonrpc.exception.InvalidJsonRpcParameters;
+import samba.jsonrpc.reponse.*;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.jsonrpc.exception.InvalidJsonRpcParameters;
-import samba.jsonrpc.reponse.*;
-
 
 public class BaseJsonRpcProcessor implements JsonRpcProcessor {
 
   private static final Logger LOG = LoggerFactory.getLogger(BaseJsonRpcProcessor.class);
 
   @Override
-  public JsonRpcResponse process(final JsonRpcRequestId id, final JsonRpcMethod method, final JsonRpcRequestContext request) {
+  public JsonRpcResponse process(
+      final JsonRpcRequestId id, final JsonRpcMethod method, final JsonRpcRequestContext request) {
     try {
       return method.response(request);
     } catch (final InvalidJsonRpcParameters e) {
-      LOG.debug("Invalid Params for method: {}, error: {}", method.getName(), e.getRpcErrorType().getMessage(), e);
+      LOG.debug(
+          "Invalid Params for method: {}, error: {}",
+          method.getName(),
+          e.getRpcErrorType().getMessage(),
+          e);
       return new JsonRpcErrorResponse(id, e.getRpcErrorType());
     } catch (final RuntimeException e) {
       final JsonArray params = JsonObject.mapFrom(request.getRequest()).getJsonArray("params");
@@ -39,5 +44,4 @@ public class BaseJsonRpcProcessor implements JsonRpcProcessor {
       return new JsonRpcErrorResponse(id, RpcErrorType.INTERNAL_ERROR);
     }
   }
-
 }

@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package samba.samba;
+package samba.samba.exceptions;
 
 public class FatalServiceFailureException extends RuntimeException {
 

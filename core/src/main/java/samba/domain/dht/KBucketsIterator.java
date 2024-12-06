@@ -4,9 +4,7 @@
 
 package samba.domain.dht;
 
-import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import org.ethereum.beacon.discovery.util.Functions;
+import static java.util.stream.Collectors.toCollection;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,7 +12,9 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toCollection;
+import org.apache.tuweni.bytes.Bytes;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.ethereum.beacon.discovery.util.Functions;
 
 public class KBucketsIterator implements Iterator<NodeRecord> {
 
@@ -25,9 +25,11 @@ public class KBucketsIterator implements Iterator<NodeRecord> {
 
   private Iterator<NodeRecord> currentBatch = Collections.emptyIterator();
 
-  public KBucketsIterator(final NodeTable buckets, final Bytes homeNodeId, final Bytes targetNodeId) {
+  public KBucketsIterator(
+      final NodeTable buckets, final Bytes homeNodeId, final Bytes targetNodeId) {
     this.buckets = buckets;
-    this.distanceComparator = Comparator.comparing(node -> Functions.distance(targetNodeId, node.getNodeId()));
+    this.distanceComparator =
+        Comparator.comparing(node -> Functions.distance(targetNodeId, node.getNodeId()));
     final int initialDistance = Functions.logDistance(homeNodeId, targetNodeId);
     lowDistance = initialDistance;
     highDistance = initialDistance;
@@ -43,11 +45,11 @@ public class KBucketsIterator implements Iterator<NodeRecord> {
     }
     return currentBatch.hasNext();
   }
+
   @Override
   public NodeRecord next() {
     return currentBatch.next();
   }
-
 
   private boolean hasMoreBucketsToScan() {
     return lowDistance > 0 || highDistance <= NodeTable.MAXIMUM_BUCKET;

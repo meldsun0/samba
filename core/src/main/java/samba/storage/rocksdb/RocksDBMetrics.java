@@ -17,11 +17,10 @@ package samba.storage.rocksdb;
 import org.hyperledger.besu.plugin.services.metrics.Counter;
 import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
 
-/**
- * The Rocks db metrics.
- */
-public record RocksDBMetrics(OperationTimer readLatency,
-                             OperationTimer removeLatency,
-                             OperationTimer writeLatency,
-                             OperationTimer commitLatency,
-                             Counter rollbackCount) { }
+/** The Rocks db metrics. */
+public record RocksDBMetrics(
+    OperationTimer readLatency,
+    OperationTimer removeLatency,
+    OperationTimer writeLatency,
+    OperationTimer commitLatency,
+    Counter rollbackCount) {}

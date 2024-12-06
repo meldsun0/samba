@@ -14,7 +14,6 @@
  */
 package samba.services.jsonrpc.methods;
 
-
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;

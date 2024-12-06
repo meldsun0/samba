@@ -14,6 +14,18 @@
  */
 package samba.jsonrpc.handler;
 
+import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
+
+import samba.jsonrpc.config.ContextKey;
+import samba.jsonrpc.config.JsonRpcConfiguration;
+import samba.jsonrpc.reponse.JsonRpcErrorResponse;
+import samba.jsonrpc.reponse.JsonRpcRequest;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.RpcErrorType;
+
+import java.io.IOException;
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -24,22 +36,11 @@ import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import samba.jsonrpc.config.JsonRpcConfiguration;
-import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.reponse.JsonRpcErrorResponse;
-import samba.jsonrpc.reponse.JsonRpcRequest;
-import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.RpcErrorType;
-
-import java.io.IOException;
-import java.util.Optional;
-
-import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
 public abstract class AbstractJsonRpcExecutor {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractJsonRpcExecutor.class);
 
-  private static final String SPAN_CONTEXT = "span_context";
+  //  private static final String SPAN_CONTEXT = "span_context";
   final JsonRpcExecutor jsonRpcExecutor;
   final RoutingContext ctx;
   final JsonRpcConfiguration jsonRpcConfiguration;
@@ -52,7 +53,6 @@ public abstract class AbstractJsonRpcExecutor {
    * Creates a new AbstractJsonRpcExecutor.
    *
    * @param jsonRpcExecutor The executor used to process the JSON RPC requests.
-   *
    * @param ctx The context of the routing, containing information about the HTTP request and
    *     response.
    * @param jsonRpcConfiguration The configuration for JSON RPC operations
@@ -77,10 +77,7 @@ public abstract class AbstractJsonRpcExecutor {
     final Optional<User> user = ContextKey.AUTHENTICATED_USER.extractFrom(ctx, Optional::empty);
 
     return jsonRpcExecutor.execute(
-        user,
-        () -> !ctx.response().closed(),
-        jsonRequest,
-        req -> req.mapTo(JsonRpcRequest.class));
+        user, () -> !ctx.response().closed(), jsonRequest, req -> req.mapTo(JsonRpcRequest.class));
   }
 
   protected static void handleJsonRpcError(

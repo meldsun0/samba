@@ -14,23 +14,23 @@
  */
 package samba.configs;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static samba.jsonrpc.config.ContextKey.REQUEST_BODY_AS_JSON_OBJECT;
+
 import samba.jsonrpc.config.ContextKey;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static samba.jsonrpc.config.ContextKey.REQUEST_BODY_AS_JSON_OBJECT;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class ContextKeyTest<T> {
 

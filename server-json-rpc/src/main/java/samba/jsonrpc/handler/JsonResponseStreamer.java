@@ -14,15 +14,15 @@
  */
 package samba.jsonrpc.handler;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicReference;
+
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.net.SocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class JsonResponseStreamer extends OutputStream {
 

@@ -14,8 +14,6 @@
  */
 package samba.jsonrpc.reponse;
 
-import samba.jsonrpc.reponse.RpcResponseType;
-
 /** Represent a Json RPC response */
 public interface RpcResponse {
 

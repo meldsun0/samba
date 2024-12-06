@@ -14,6 +14,14 @@
  */
 package samba.handlers;
 
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import samba.jsonrpc.config.ContextKey;
+import samba.jsonrpc.config.JsonRpcConfiguration;
+import samba.jsonrpc.handler.JsonRpcExecutor;
+import samba.jsonrpc.handler.JsonRpcExecutorHandler;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -22,14 +30,6 @@ import io.vertx.ext.web.RoutingContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.config.JsonRpcConfiguration;
-import samba.jsonrpc.handler.JsonRpcExecutor;
-import samba.jsonrpc.handler.JsonRpcExecutorHandler;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 
 class JsonRpcExecutorHandlerTest {
 
@@ -56,8 +56,7 @@ class JsonRpcExecutorHandlerTest {
   @Test
   void testTimeoutHandling() {
     // Arrange
-    Handler<RoutingContext> handler =
-        JsonRpcExecutorHandler.handler(mockExecutor, mockConfig);
+    Handler<RoutingContext> handler = JsonRpcExecutorHandler.handler(mockExecutor, mockConfig);
     ArgumentCaptor<Long> delayCaptor = ArgumentCaptor.forClass(Long.class);
     @SuppressWarnings("unchecked")
     ArgumentCaptor<Handler<Long>> timerHandlerCaptor = ArgumentCaptor.forClass(Handler.class);
@@ -85,8 +84,7 @@ class JsonRpcExecutorHandlerTest {
   @Test
   void testCancelTimerOnSuccessfulExecution() {
     // Arrange
-    Handler<RoutingContext> handler =
-        JsonRpcExecutorHandler.handler(mockExecutor, mockConfig);
+    Handler<RoutingContext> handler = JsonRpcExecutorHandler.handler(mockExecutor, mockConfig);
     when(mockContext.get(eq(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name()))).thenReturn("{}");
     when(mockVertx.setTimer(anyLong(), any())).thenReturn(1L);
     when(mockContext.get("timerId")).thenReturn(1L);

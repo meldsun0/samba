@@ -13,46 +13,49 @@
 
 package samba.services;
 
-
-import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import samba.config.SambaConfiguration;
-import tech.pegasys.teku.infrastructure.async.SafeFuture;
-import tech.pegasys.teku.service.serviceutils.Service;
-import tech.pegasys.teku.service.serviceutils.ServiceFacade;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import tech.pegasys.teku.infrastructure.async.SafeFuture;
+import tech.pegasys.teku.service.serviceutils.Service;
+import tech.pegasys.teku.service.serviceutils.ServiceFacade;
+
 public class PortalNodeMainController extends Service {
 
-    private static final Logger LOG = LogManager.getLogger();
-    protected final List<Service> services = new ArrayList<>();
+  private static final Logger LOG = LogManager.getLogger();
+  protected final List<Service> services = new ArrayList<>();
 
-    public PortalNodeMainController(final MainServiceConfig mainServiceConfig, SambaConfiguration sambaConfiguration, final Vertx vertx ) {
-          services.add(new PortalNodeMainService(mainServiceConfig, sambaConfiguration, vertx));
-    }
+  public PortalNodeMainController(
+      final MainServiceConfig mainServiceConfig,
+      SambaConfiguration sambaConfiguration,
+      final Vertx vertx) {
+    services.add(new PortalNodeMainService(mainServiceConfig, sambaConfiguration, vertx));
+  }
 
-    @Override
-    protected SafeFuture<?> doStart() {
-        LOG.debug("Starting {}", this.getClass().getSimpleName());
-        final Iterator<Service> iterator = services.iterator();
-        SafeFuture<?> startupFuture = iterator.next().start();
-        while (iterator.hasNext()) {
-            final Service nextService = iterator.next();
-            startupFuture = startupFuture.thenCompose(__ -> nextService.start());
-        }
-        return startupFuture;
+  @Override
+  protected SafeFuture<?> doStart() {
+    LOG.debug("Starting {}", this.getClass().getSimpleName());
+    final Iterator<Service> iterator = services.iterator();
+    SafeFuture<?> startupFuture = iterator.next().start();
+    while (iterator.hasNext()) {
+      final Service nextService = iterator.next();
+      startupFuture = startupFuture.thenCompose(__ -> nextService.start());
     }
+    return startupFuture;
+  }
 
-    @Override
-    protected SafeFuture<?> doStop() {
-        return SafeFuture.allOf(services.stream().map(Service::stop).toArray(SafeFuture[]::new));
-    }
+  @Override
+  protected SafeFuture<?> doStop() {
+    return SafeFuture.allOf(services.stream().map(Service::stop).toArray(SafeFuture[]::new));
+  }
 
-    public List<? extends ServiceFacade> getServices() {
-        return services;
-    }
+  public List<? extends ServiceFacade> getServices() {
+    return services;
+  }
 }

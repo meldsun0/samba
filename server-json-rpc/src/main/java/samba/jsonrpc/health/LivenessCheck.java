@@ -21,7 +21,7 @@ public class LivenessCheck implements HealthService.HealthCheck {
   private static final Logger LOG = LoggerFactory.getLogger(LivenessCheck.class);
 
   @Override
-  public boolean isHealthy(final HealthService.ParamSource params) {
+  public boolean isHealthy(HealthService.ParamSource paramSource) {
     LOG.debug("Invoking liveness check.");
     return true;
   }

@@ -11,39 +11,41 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package tech.pegasys.teku;
+package samba.samba;
 
-import static tech.pegasys.teku.infrastructure.exceptions.ExitConstants.ERROR_EXIT_CODE;
-import static tech.pegasys.teku.infrastructure.exceptions.ExitConstants.FATAL_EXIT_CODE;
+import static samba.samba.exceptions.ExitConstants.ERROR_EXIT_CODE;
+import static samba.samba.exceptions.ExitConstants.FATAL_EXIT_CODE;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Throwables;
+import samba.logging.StatusLogger;
+import samba.samba.exceptions.ExceptionUtil;
+import samba.samba.exceptions.FatalServiceFailureException;
+import samba.samba.exceptions.ShuttingDownException;
+import samba.services.storage.DatabaseStorageException;
+
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
 import java.nio.channels.ClosedChannelException;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tech.pegasys.teku.infrastructure.events.ChannelExceptionHandler;
-import tech.pegasys.teku.infrastructure.exceptions.ExceptionUtil;
-import tech.pegasys.teku.infrastructure.exceptions.FatalServiceFailureException;
-import tech.pegasys.teku.infrastructure.logging.StatusLogger;
-import tech.pegasys.teku.storage.server.DatabaseStorageException;
-import tech.pegasys.teku.storage.server.ShuttingDownException;
 
-public final class TekuDefaultExceptionHandler
+public final class SambaDefaultExceptionHandler
     implements ChannelExceptionHandler, UncaughtExceptionHandler {
   private static final Logger LOG = LogManager.getLogger();
 
   private final StatusLogger statusLog;
 
-  public TekuDefaultExceptionHandler() {
+  public SambaDefaultExceptionHandler() {
     this(StatusLogger.STATUS_LOG);
   }
 
   @VisibleForTesting
-  TekuDefaultExceptionHandler(final StatusLogger statusLog) {
+  SambaDefaultExceptionHandler(final StatusLogger statusLog) {
     this.statusLog = statusLog;
   }
 

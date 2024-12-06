@@ -14,9 +14,9 @@
  */
 package samba.jsonrpc.reponse;
 
-import com.fasterxml.jackson.annotation.*;
-
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.*;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

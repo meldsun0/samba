@@ -14,11 +14,11 @@
  */
 package samba.jsonrpc.reponse;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import java.util.Objects;
 
 @JsonPropertyOrder({"jsonrpc", "id", "result"})
 public class JsonRpcSuccessResponse implements JsonRpcResponse {

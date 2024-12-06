@@ -14,52 +14,53 @@
  */
 package samba.jsonrpc.handler;
 
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
-import samba.jsonrpc.config.TimeoutOptions;
 import samba.jsonrpc.config.ContextKey;
+import samba.jsonrpc.config.TimeoutOptions;
 
 import java.util.Map;
 import java.util.Optional;
 
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
+
 public class TimeoutHandler {
 
+  public static Handler<RoutingContext> handler(
+      final Optional<TimeoutOptions> globalOptions,
+      final Map<String, TimeoutOptions> timeoutOptionsByMethod) {
+    assert timeoutOptionsByMethod != null;
+    return ctx -> processHandler(ctx, globalOptions, timeoutOptionsByMethod);
+  }
 
-    public static Handler<RoutingContext> handler(
-            final Optional<TimeoutOptions> globalOptions,
-            final Map<String, TimeoutOptions> timeoutOptionsByMethod) {
-        assert timeoutOptionsByMethod != null;
-        return ctx -> processHandler(ctx, globalOptions, timeoutOptionsByMethod);
-    }
-
-    private static void processHandler(
-            final RoutingContext ctx,
-            final Optional<TimeoutOptions> globalOptions,
-            final Map<String, TimeoutOptions> timeoutOptionsByMethod) {
-        try {
-            Optional<TimeoutOptions> methodTimeoutOptions = Optional.empty();
-            if (ctx.data().containsKey(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name())) {
-                final JsonObject requestBodyJsonObject = ctx.get(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name());
-                final String method = requestBodyJsonObject.getString("method");
-                methodTimeoutOptions = Optional.ofNullable(timeoutOptionsByMethod.get(method));
-            }
-            methodTimeoutOptions
-                    .or(() -> globalOptions)
-                    .ifPresent(
-                            timeoutOptions -> {
-                                long tid =
-                                        ctx.vertx()
-                                                .setTimer(
-                                                        timeoutOptions.getTimeoutMillis(),
-                                                        t -> {
-                                                            ctx.fail(timeoutOptions.getErrorCode());
-                                                            ctx.response().close();
-                                                        });
-                                ctx.addBodyEndHandler(v -> ctx.vertx().cancelTimer(tid));
+  private static void processHandler(
+      final RoutingContext ctx,
+      final Optional<TimeoutOptions> globalOptions,
+      final Map<String, TimeoutOptions> timeoutOptionsByMethod) {
+    try {
+      Optional<TimeoutOptions> methodTimeoutOptions = Optional.empty();
+      if (ctx.data().containsKey(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name())) {
+        final JsonObject requestBodyJsonObject =
+            ctx.get(ContextKey.REQUEST_BODY_AS_JSON_OBJECT.name());
+        final String method = requestBodyJsonObject.getString("method");
+        methodTimeoutOptions = Optional.ofNullable(timeoutOptionsByMethod.get(method));
+      }
+      methodTimeoutOptions
+          .or(() -> globalOptions)
+          .ifPresent(
+              timeoutOptions -> {
+                long tid =
+                    ctx.vertx()
+                        .setTimer(
+                            timeoutOptions.getTimeoutMillis(),
+                            t -> {
+                              ctx.fail(timeoutOptions.getErrorCode());
+                              ctx.response().close();
                             });
-        } finally {
-            ctx.next();
-        }
+                ctx.addBodyEndHandler(v -> ctx.vertx().cancelTimer(tid));
+              });
+    } finally {
+      ctx.next();
     }
+  }
 }

@@ -14,12 +14,13 @@
  */
 package samba.jsonrpc.reponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import samba.jsonrpc.exception.InvalidJsonRpcRequestException;
 
 import java.math.BigInteger;
 import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public class JsonRpcRequestId {
 

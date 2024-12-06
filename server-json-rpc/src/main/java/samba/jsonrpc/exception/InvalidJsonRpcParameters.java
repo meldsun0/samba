@@ -1,6 +1,5 @@
 package samba.jsonrpc.exception;
 
-
 import samba.jsonrpc.reponse.RpcErrorType;
 
 public class InvalidJsonRpcParameters extends InvalidJsonRpcRequestException {

@@ -14,30 +14,29 @@
  */
 package samba.jsonrpc.handler;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.RoutingContext;
-import samba.jsonrpc.config.JsonRpcConfiguration;
+import static samba.jsonrpc.reponse.RpcErrorType.EXCEEDS_RPC_MAX_BATCH_SIZE;
+import static samba.jsonrpc.reponse.RpcErrorType.INVALID_REQUEST;
+
 import samba.jsonrpc.config.ContextKey;
-import samba.jsonrpc.handler.AbstractJsonRpcExecutor;
+import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.RpcResponseType;
 
 import java.io.IOException;
 
-import static samba.jsonrpc.reponse.RpcErrorType.EXCEEDS_RPC_MAX_BATCH_SIZE;
-import static samba.jsonrpc.reponse.RpcErrorType.INVALID_REQUEST;
-
+import com.fasterxml.jackson.core.JsonGenerator;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 
 public class JsonRpcArrayExecutor extends AbstractJsonRpcExecutor {
   public JsonRpcArrayExecutor(
       final JsonRpcExecutor jsonRpcExecutor,
       final RoutingContext ctx,
       final JsonRpcConfiguration jsonRpcConfiguration) {
-    super(jsonRpcExecutor,  ctx, jsonRpcConfiguration);
+    super(jsonRpcExecutor, ctx, jsonRpcConfiguration);
   }
 
   /**

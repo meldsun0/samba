@@ -16,7 +16,6 @@ package samba.storage.rocksdb;
 
 import org.hyperledger.besu.metrics.BesuMetricCategory;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
-
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.hyperledger.besu.plugin.services.metrics.Counter;
 import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
@@ -72,7 +71,7 @@ public class RocksDBMetricsFactory {
       final RocksDBConfiguration rocksDbConfiguration,
       final RocksDB db,
       final Statistics stats) {
-      final OperationTimer readLatency =
+    final OperationTimer readLatency =
         metricsSystem
             .createLabelledTimer(
                 rocksDbMetricCategory,

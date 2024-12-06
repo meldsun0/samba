@@ -14,12 +14,6 @@
  */
 package samba.jsonrpc.reponse;
 
-
-
-
-import samba.jsonrpc.reponse.JsonRpcRequestContext;
-import samba.jsonrpc.reponse.JsonRpcResponse;
-
 import java.util.ArrayList;
 import java.util.List;
 

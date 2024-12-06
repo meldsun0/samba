@@ -3,17 +3,17 @@
  */
 package samba.domain.dht;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.database.ExpirationSet;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
+import org.ethereum.beacon.discovery.database.ExpirationSet;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 public class LivenessManager {
   private static final Logger LOG = LogManager.getLogger();
@@ -25,7 +25,7 @@ public class LivenessManager {
 
   private final Set<NodeRecord> activePings = new HashSet<>();
   private final Set<NodeRecord> queuedPings = new LinkedHashSet<>();
-  private final ExpirationSet<Bytes> ignoredNodes; //TODO make thread-safe
+  private final ExpirationSet<Bytes> ignoredNodes; // TODO make thread-safe
   private final LivenessChecker livenessChecker;
 
   public LivenessManager(final Clock clock, final LivenessChecker livenessChecker) {
@@ -78,6 +78,6 @@ public class LivenessManager {
   }
 
   public synchronized void ignoreNode(final NodeRecord nodeRecord) {
-      ignoredNodes.add(nodeRecord.getNodeId());
+    ignoredNodes.add(nodeRecord.getNodeId());
   }
 }

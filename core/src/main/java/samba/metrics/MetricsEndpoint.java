@@ -13,58 +13,57 @@
 
 package samba.metrics;
 
+import samba.config.MetricsConfig;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import io.vertx.core.Vertx;
 import org.hyperledger.besu.metrics.MetricsService;
 import org.hyperledger.besu.metrics.prometheus.MetricsConfiguration;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-import samba.config.MetricsConfig;
-
-
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class MetricsEndpoint {
 
-    private final Optional<MetricsService> metricsService;
-    private final PrometheusMetricsSystem metricsSystem;
-    private final MetricsConfig config;
+  private final Optional<MetricsService> metricsService;
+  private final PrometheusMetricsSystem metricsSystem;
+  private final MetricsConfig config;
 
-    public MetricsEndpoint(final MetricsConfig config, final Vertx vertx) {
-        final MetricsConfiguration metricsConfig = createMetricsConfiguration(config);
-        metricsSystem = new PrometheusMetricsSystem(config.getMetricsCategories(), true);
-        metricsSystem.init();
-        metricsService = MetricsService.create(vertx, metricsConfig, metricsSystem);
-        this.config = config;
-    }
+  public MetricsEndpoint(final MetricsConfig config, final Vertx vertx) {
+    final MetricsConfiguration metricsConfig = createMetricsConfiguration(config);
+    metricsSystem = new PrometheusMetricsSystem(config.getMetricsCategories(), true);
+    metricsSystem.init();
+    metricsService = MetricsService.create(vertx, metricsConfig, metricsSystem);
+    this.config = config;
+  }
 
-    public CompletableFuture<?> start() {
-        return metricsService
-                .map(MetricsService::start)
-                .orElse(CompletableFuture.completedFuture(null));
-    }
+  public CompletableFuture<?> start() {
+    return metricsService
+        .map(MetricsService::start)
+        .orElse(CompletableFuture.completedFuture(null));
+  }
 
-    public CompletableFuture<?> stop() {
-        return metricsService.map(MetricsService::stop).orElse(CompletableFuture.completedFuture(null));
-    }
+  public CompletableFuture<?> stop() {
+    return metricsService.map(MetricsService::stop).orElse(CompletableFuture.completedFuture(null));
+  }
 
-    public MetricsSystem getMetricsSystem() {
-        return metricsSystem;
-    }
+  public MetricsSystem getMetricsSystem() {
+    return metricsSystem;
+  }
 
+  public MetricsConfig getMetricConfig() {
+    return this.config;
+  }
 
-    public MetricsConfig getMetricConfig() {
-        return this.config;
-    }
-
-    private MetricsConfiguration createMetricsConfiguration(final MetricsConfig config) {
-        return MetricsConfiguration.builder()
-                .enabled(config.isMetricsEnabled())
-                .port(config.getMetricsPort())
-                .host(config.getMetricsInterface())
-                .metricCategories(config.getMetricsCategories())
-                .hostsAllowlist(config.getMetricsHostAllowlist())
-                .idleTimeout(config.getIdleTimeoutSeconds())
-                .build();
-    }
+  private MetricsConfiguration createMetricsConfiguration(final MetricsConfig config) {
+    return MetricsConfiguration.builder()
+        .enabled(config.isMetricsEnabled())
+        .port(config.getMetricsPort())
+        .host(config.getMetricsInterface())
+        .metricCategories(config.getMetricsCategories())
+        .hostsAllowlist(config.getMetricsHostAllowlist())
+        .idleTimeout(config.getIdleTimeoutSeconds())
+        .build();
+  }
 }

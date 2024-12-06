@@ -4,9 +4,9 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface PortalRestAPI {
 
-    SafeFuture<?> start();
+  SafeFuture<?> start();
 
-    SafeFuture<?> stop();
+  SafeFuture<?> stop();
 
-    int getListenPort();
+  int getListenPort();
 }

@@ -14,16 +14,15 @@
  */
 package samba.jsonrpc.reponse;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import samba.jsonrpc.exception.InvalidJsonRpcRequestException;
-import samba.jsonrpc.reponse.JsonRpcParameter;
-import samba.jsonrpc.reponse.JsonRpcRequestId;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class JsonRpcRequest {
@@ -45,7 +44,8 @@ public class JsonRpcRequest {
     this.method = method;
     this.params = params;
     if (method == null) {
-      throw new InvalidJsonRpcRequestException("Field 'method' is required", RpcErrorType.INVALID_METHOD_PARAMS);
+      throw new InvalidJsonRpcRequestException(
+          "Field 'method' is required", RpcErrorType.INVALID_METHOD_PARAMS);
     }
   }
 

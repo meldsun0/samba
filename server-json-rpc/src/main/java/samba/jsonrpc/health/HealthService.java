@@ -14,12 +14,12 @@
  */
 package samba.jsonrpc.health;
 
+import static java.util.Collections.singletonMap;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
-
-import static java.util.Collections.singletonMap;
 
 public final class HealthService {
 
