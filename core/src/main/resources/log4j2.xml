@@ -4,10 +4,19 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss} - [%t] - %highlight{%level}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue} - %logger{36} - %msg%n"/>
         </Console>
+        <Console name="ErrorConsole" target="SYSTEM_ERR">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level: %msg%n</Pattern>
+            </PatternLayout>
+        </Console>
     </Appenders>
+
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="Console" />
+            <AppenderRef ref="ErrorConsole"/>
         </Root>
     </Loggers>
 </Configuration>
+
+

@@ -1,0 +1,10 @@
+distZip {
+//    dependsOn autocomplete, untunedStartScripts
+    dependsOn untunedStartScripts
+    doFirst {
+        println 'distZip'
+        delete fileTree(dir: 'build/distributions', include: '*.zip')
+    }
+    setVersion(archiveBuildVersion)
+    setVersion(archiveBuildVersion)
+}

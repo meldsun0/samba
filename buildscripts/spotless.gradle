@@ -1,0 +1,24 @@
+apply plugin: 'com.diffplug.spotless'
+spotless {
+    java {
+        // This path needs to be relative to each project
+        target 'src/**/*.java'
+        targetExclude '**/src/reference-test/**', '**/src/main/generated/**', '**/src/test/generated/**', '**/src/jmh/generated/**'
+        removeUnusedImports()
+        googleJavaFormat('1.22.0')
+        importOrder 'samba', 'java', ''
+        trimTrailingWhitespace()
+        endWithNewline()
+        // apply appropriate license header files.
+        //            licenseHeaderFile("${rootDir}/gradle/spotless/java.former.license").named("older").onlyIfContentMatches("^/\\*\\r?\\n.*Copyright ConsenSys AG\\.")
+        //            licenseHeaderFile("${rootDir}/gradle/spotless/java.former.date.license").named("older.year").onlyIfContentMatches("^/\\*\\r?\\n.* Copyright \\d{4} ConsenSys AG\\.")
+        //            licenseHeaderFile("${rootDir}/gradle/spotless/java.current.license").named("current").onlyIfContentMatches("^(?!/\\*\\r?\\n \\*.*(ConsenSys AG|Hyperledger Besu)\\.)")
+    }
+    println 'spotless'
+    // spotless check applied to build.gradle (groovy) files
+    groovyGradle {
+        target '*.gradle'
+        greclipse('4.31').configFile(rootProject.file('gradle/spotless/greclipse.properties'))
+        endWithNewline()
+    }
+}

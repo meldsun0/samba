@@ -1,0 +1,18 @@
+//tasks.register('autocomplete', JavaExec) {
+//    dependsOn compileJava
+//    println 'autocomplete'
+//    def tempAutocompleteFile = File.createTempFile("samba", ".autocomplete")
+//    standardOutput tempAutocompleteFile.newOutputStream()
+//    outputs.file "$buildDir/samba.autocomplete.sh"
+//
+//    mainClass = application.mainClass
+//    args "generate-completion"
+//    classpath sourceSets.main.runtimeClasspath
+//    doLast {
+//        copy {
+//            from tempAutocompleteFile
+//            into "$buildDir"
+//            rename tempAutocompleteFile.getName(), 'samba.autocomplete.sh'
+//        }
+//    }
+//}

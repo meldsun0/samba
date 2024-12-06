@@ -56,6 +56,7 @@ configure(allprojects - project(':platform')) {
     maven { url "https://mvnrepository.com" }
     maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
     maven { url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/" }
+    maven { url 'https://repo.eclipse.org/content/repositories/releases/' }
   }
 
   dependencies {
@@ -132,6 +133,11 @@ dependencies {
   implementation 'com.google.errorprone:error_prone_core:2.7.1'  // Use the appropriate version of ErrorProne
   // https://github.com/hyperledger/besu-errorprone-checks/
   implementation project(':core')
+  implementation 'org.apache.logging.log4j:log4j-api:2.17.0'        // Log4j2 API
+  implementation 'org.apache.logging.log4j:log4j-core:2.17.0'       // Log4j2 Core
+  implementation 'org.apache.logging.log4j:log4j-jul:2.17.0'        // JUL to Log4j2 Bridge
+  implementation 'org.slf4j:slf4j-api:1.7.32'                        // SLF4J API if using SLF4J with Log4j2
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.0'
 }
 
 subprojects {
@@ -171,7 +177,8 @@ applicationDefaultJvmArgs = [
   "--add-exports",
   "java.base/jdk.internal.misc=ALL-UNNAMED",
   "--add-opens",
-  "java.base/java.nio=ALL-UNNAMED"
+  "java.base/java.nio=ALL-UNNAMED",
+  //"-Dlog4j.configurationFile=core/src/main/resources/log4j2.xml"
 ]
 
 run {
@@ -189,7 +196,7 @@ run {
 def archiveBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
 
 apply from: 'buildscripts/startScripts.gradle'
-apply from: 'buildscripts/autocomplete.gradle'
+//apply from: 'buildscripts/autocomplete.gradle'
 
 installDist { dependsOn untunedStartScripts }
 
@@ -249,9 +256,15 @@ tasks.register('distDocker') {
         println "Building for platform ${project.getProperty('docker-platform')}"
       }
       def gitDetails = getGitCommitDetails(7)
-      executable shell
+      // Detect the OS and set the executable
       workingDir dockerBuildDir
-      args "-c", "docker build ${dockerPlatform} --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${gitDetails.hash} -t ${image} ."
+      if (System.getProperty('os.name').toLowerCase().contains('win')) {
+        executable 'cmd'
+        args '/c', "docker build ${dockerPlatform} --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${gitDetails.hash} -t ${image} ."
+      } else {
+        executable 'bash'  // or 'sh'
+        args '-c', "docker build ${dockerPlatform} --build-arg BUILD_DATE=${buildTime()} --build-arg VERSION=${dockerBuildVersion} --build-arg VCS_REF=${gitDetails.hash} -t ${image} ."
+      }
     }
   }
 }
@@ -268,8 +281,13 @@ tasks.register('testDocker') {
     exec {
       def image = project.hasProperty('release.releaseVersion') ? "${dockerImageName}:" + project.property('release.releaseVersion') : "${dockerImageName}:${project.version}"
       workingDir "${projectDir}/docker"
-      executable shell
-      args "-c", "./test.sh ${image}"
+      if (System.getProperty('os.name').toLowerCase().contains('win')) {
+        executable 'cmd'
+        args "-c", "./test.sh ${image}"
+      } else {
+        executable 'bash'  // or 'sh'
+        args "-c", "./test.sh ${image}"
+      }
     }
   }
 }
@@ -418,7 +436,7 @@ distributions {
       from("./docs/GettingStartedBinaries.md") { into "." }
       from("./docs/DocsArchive0.8.0.html") { into "." }
       from("./core/src/main/scripts/samba-entry.sh") { into "./bin/" }
-      from(autocomplete) { into "." }
+      //   from(autocomplete) { into "." }
     }
   }
 }

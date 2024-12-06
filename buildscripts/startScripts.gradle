@@ -1,0 +1,40 @@
+startScripts {
+    defaultJvmOpts = applicationDefaultJvmArgs + [
+            "-XX:G1ConcRefinementThreads=2",
+            "-XX:G1HeapWastePercent=15",
+            "-XX:MaxGCPauseMillis=100",
+            "-XX:StartFlightRecording,settings=default.jfc",
+            "-Xlog:jfr*=off"
+    ]
+    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/windowsStartScript.txt")
+    doLast { tweakStartScript(startScripts) }
+}
+
+tasks.register('untunedStartScripts', CreateStartScripts) {
+    println 'untunedStartScripts'
+    mainClass = 'samba.Samba'
+    classpath = startScripts.classpath
+    outputDir = startScripts.outputDir
+    applicationName = 'samba-untuned'
+    defaultJvmOpts = applicationDefaultJvmArgs
+    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/windowsStartScript.txt")
+    doLast { tweakStartScript(untunedStartScripts) }
+}
+
+def tweakStartScript(createScriptTask) {
+    def shortenWindowsClasspath = { line ->
+        line.replaceAll(/^set CLASSPATH=.*$/, "set CLASSPATH=%APP_HOME%/lib/*")
+    }
+
+    createScriptTask.unixScript.text = createScriptTask.unixScript.text.replace('SAMBA_HOME', '\$APP_HOME')
+    createScriptTask.windowsScript.text = createScriptTask.windowsScript.text.replace('SAMBA_HOME', '%~dp0..')
+
+    // Prevent the error originating from the 8191 chars limit on Windows
+    createScriptTask.windowsScript.text =
+            createScriptTask.windowsScript
+                    .readLines()
+                    .collect(shortenWindowsClasspath)
+                    .join('\r\n')
+}

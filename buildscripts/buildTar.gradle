@@ -1,0 +1,11 @@
+distTar {
+//    dependsOn autocomplete, untunedStartScripts
+    dependsOn  untunedStartScripts
+    doFirst {
+        println 'distTar'
+        delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
+    }
+    compression = Compression.GZIP
+    setVersion(archiveBuildVersion)
+    archiveExtension = 'tar.gz'
+}
