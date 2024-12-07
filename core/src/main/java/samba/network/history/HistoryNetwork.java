@@ -60,7 +60,7 @@ public class HistoryNetwork extends BaseNetwork
         .thenApply(Optional::get)
         .thenCompose(
             pongMessage -> {
-              LOG.info(
+              LOG.trace(
                   "{} message being processed from {}",
                   message.getMessageType(),
                   nodeRecord.asEnr());
