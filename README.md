@@ -11,31 +11,73 @@ The name is inspired by the shortened name of of rescue dog named Sambayon that 
 
 ![Node architecture](docs/node-architecture.png "Node Architecture")
 
-## Building the source
+## Build Instructions
 
-TODO
+### Install Prerequisites
 
-```shell
+* Java 21+
+
+Building on a more recent version of Java is supported, but the resulting build will not work on earlier versions of Java.
+
+
+### Build and Dist
+
+To create a ready to run distribution:
+
+```shell script
+git clone https://github.com/meldsun0/samba
+cd samba && ./gradlew
 
 ```
 
-## Running `samba`
+This produces:
+- Fully packaged distribution in `build/distributions`
+### Build and Test
 
+To build, clone this repo and run with `gradle`:
 
-
-```shell
+```shell script
+git clone https://github.com/meldsun0/samba
+cd samba && ./gradlew
 
 ```
 
-### Supported options
+After a successful build, distribution packages are available in `build/distributions`.
 
-TODO
+### Other Useful Gradle Targets
 
-### Hardware Requirements
+| Target      | Builds                                                  |
+|-------------|---------------------------------------------------------|
+| distTar     | Full distribution in build/distributions (as `.tar.gz`) |
+| distZip     | Full distribution in build/distributions (as `.zip`)    |
+| distDocker  | The `meldsun_labs/samba` docker image                   |
+
+## Code Style
+
+We use Google's Java coding conventions for the project. To reformat code, run:
+
+```shell script
+./gradlew spotlessApply
+```
+
+Code style is checked automatically during a build.
+
+## Testing
+
+All the unit tests are run as part of the build, but can be explicitly triggered with:
+
+```shell script
+./gradlew test
+```
+
+## Docker
+
+
+## Hardware Requirements
 
 Minimum:
 
-TODO
+TO-DO
 
 Recommended:
 

@@ -55,10 +55,10 @@ ARG BUILD_DATE
 ARG VCS_REF
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="Samba" \
-      org.label-schema.description="Samba client" \
-      org.label-schema.url="" \
+      org.label-schema.description="Samba Portal Client" \
+      org.label-schema.url="https://github.com/meldsun0/samba" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="" \
-      org.label-schema.vendor="" \
+      org.label-schema.vcs-url="https://github.com/meldsun0/samba.git" \
+      org.label-schema.vendor="Meldsun Labs" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"

@@ -12,7 +12,7 @@ startScripts {
 }
 
 tasks.register('untunedStartScripts', CreateStartScripts) {
-    println 'untunedStartScripts'
+    println "Executing task: ${name}"
     mainClass = 'samba.Samba'
     classpath = startScripts.classpath
     outputDir = startScripts.outputDir

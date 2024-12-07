@@ -1,5 +1,6 @@
 apply plugin: 'com.diffplug.spotless'
 spotless {
+    println "Executing task Spotless: ${name}"
     java {
         // This path needs to be relative to each project
         target 'src/**/*.java'
@@ -14,7 +15,6 @@ spotless {
         //            licenseHeaderFile("${rootDir}/gradle/spotless/java.former.date.license").named("older.year").onlyIfContentMatches("^/\\*\\r?\\n.* Copyright \\d{4} ConsenSys AG\\.")
         //            licenseHeaderFile("${rootDir}/gradle/spotless/java.current.license").named("current").onlyIfContentMatches("^(?!/\\*\\r?\\n \\*.*(ConsenSys AG|Hyperledger Besu)\\.)")
     }
-    println 'spotless'
     // spotless check applied to build.gradle (groovy) files
     groovyGradle {
         target '*.gradle'

@@ -1,7 +1,7 @@
 distTar {
     dependsOn  untunedStartScripts
+    println "Executing task: ${name}"
     doFirst {
-        println 'distTar'
         delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
     }
     compression = Compression.GZIP
