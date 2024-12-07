@@ -46,11 +46,12 @@ After a successful build, distribution packages are available in `build/distribu
 
 ### Other Useful Gradle Targets
 
-| Target      | Builds                                                  |
-|-------------|---------------------------------------------------------|
-| distTar     | Full distribution in build/distributions (as `.tar.gz`) |
-| distZip     | Full distribution in build/distributions (as `.zip`)    |
-| distDocker  | The `meldsun_labs/samba` docker image                   |
+| Target       | Builds                                                  |
+|--------------|---------------------------------------------------------|
+| distTar      | Full distribution in build/distributions (as `.tar.gz`) |
+| distZip      | Full distribution in build/distributions (as `.zip`)    |
+| distDocker   | The `meldsun_labs/samba` docker image                   |
+| runContainer | A docker container running                              |
 
 ## Code Style
 

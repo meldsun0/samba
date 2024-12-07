@@ -53,3 +53,20 @@ tasks.register('distDocker') {
         }
     }
 }
+
+tasks.register('runContainer') {
+    dependsOn distDocker
+    println "Executing task: ${name}"
+    doLast {
+        exec {
+            def image = "${dockerImageName}:${dockerBuildVersion}"
+            if (System.getProperty('os.name').toLowerCase().contains('win')) {
+                executable 'cmd'
+                args '/c', "docker run  -p 8545:8545 -p 5051:5051 -p 8001:8001 -p 9000:9000/udp ${image}"
+            } else {
+                executable 'bash'  // or 'sh'
+                args '-c',  "docker run -p 8545:8545 -p 5051:5051 -p 8001:8001 ${image}"
+            }
+        }
+    }
+}
