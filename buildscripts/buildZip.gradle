@@ -1,5 +1,4 @@
 distZip {
-//    dependsOn autocomplete, untunedStartScripts
     dependsOn untunedStartScripts
     doFirst {
         println 'distZip'

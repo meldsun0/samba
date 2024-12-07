@@ -1,5 +1,4 @@
 distTar {
-//    dependsOn autocomplete, untunedStartScripts
     dependsOn  untunedStartScripts
     doFirst {
         println 'distTar'

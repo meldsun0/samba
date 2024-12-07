@@ -196,7 +196,6 @@ run {
 def archiveBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
 
 apply from: 'buildscripts/startScripts.gradle'
-//apply from: 'buildscripts/autocomplete.gradle'
 
 installDist { dependsOn untunedStartScripts }
 
@@ -436,7 +435,6 @@ distributions {
       from("./docs/GettingStartedBinaries.md") { into "." }
       from("./docs/DocsArchive0.8.0.html") { into "." }
       from("./core/src/main/scripts/samba-entry.sh") { into "./bin/" }
-      //   from(autocomplete) { into "." }
     }
   }
 }
