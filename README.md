@@ -1,5 +1,8 @@
 # Samba
 
+[![GitHub License](https://img.shields.io/badge/license-Apache%202.0-blue?style=flat-square)]()
+[![Discord](https://img.shields.io/badge/Chat-on%20Discord-%235865F2?logo=discord&logoColor=white)](https://discord.com/channels/890617081744220180/1301231225276465152)
+
 
 Samba is an [Ethereum portal client](https://github.com/ethereum/portal-network-specs) written in Java language based
 on [Teku](https://github.com/Consensys/teku) and [Besu](https://github.com/hyperledger/besu).
