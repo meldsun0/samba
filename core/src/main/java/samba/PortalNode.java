@@ -51,7 +51,7 @@ public class PortalNode implements Node {
   // private final MetricsPublisherManager metricsPublisher;
 
   public PortalNode(final SambaConfiguration sambaConfiguration) {
-    this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.metricsConfig(), vertx);
+    this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig(), vertx);
     this.eventChannels =
         new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
     this.asyncRunnerFactory =
@@ -59,7 +59,7 @@ public class PortalNode implements Node {
             new MetricTrackingExecutorFactory(
                 metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
 
-    final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.portalRestApiConfig();
+    final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.getPortalRestApiConfig();
     STATUS_LOG.onStartup("1.0");
     STATUS_LOG.startupConfigurations(
         StartupLogConfig.builder()

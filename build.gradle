@@ -183,14 +183,15 @@ applicationDefaultJvmArgs = [
 run {
   args project.hasProperty("samba.run.args") ? project.property("samba.run.args").toString().split("\\s+") : []
   doFirst {
-    println 'run'
+    println 'Running Samba'
     applicationDefaultJvmArgs = applicationDefaultJvmArgs.collect {
       it.replace('SAMBA_HOME', "$buildDir/samba")
     }
+    if (args) {
+      println "Custom parameters: ${args.join(' ')}"
+    }
   }
 }
-
-
 
 def archiveBuildVersion = project.hasProperty('release.releaseVersion') ? project.property('release.releaseVersion') : "${rootProject.version}"
 

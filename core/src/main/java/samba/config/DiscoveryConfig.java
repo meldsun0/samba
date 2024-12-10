@@ -226,8 +226,8 @@ public class DiscoveryConfig {
     private OptionalInt advertisedPort = OptionalInt.empty();
     private OptionalInt advertisedPortIpv6 = OptionalInt.empty();
 
-    private List<NodeRecord> bootnodes;
-    private List<String> networkInterfaces = DEFAULT_P2P_INTERFACE;
+    private List<NodeRecord> bootnodes = List.of();
+    private List<String> networkInterfaces = List.of();
     private Optional<List<String>> advertisedIps = Optional.empty();
 
     private Builder() {}
@@ -244,7 +244,7 @@ public class DiscoveryConfig {
           listenPortIpv6,
           advertisedPort,
           advertisedPortIpv6,
-          bootnodes == null ? Collections.emptyList() : bootnodes,
+          bootnodes,
           networkInterfaces,
           advertisedIps);
     }
@@ -255,6 +255,9 @@ public class DiscoveryConfig {
       }
       if (listenUdpPortIpv6.isEmpty()) {
         listenUdpPortIpv6 = OptionalInt.of(DEFAULT_UDP_PORT_IPV6);
+      }
+      if (networkInterfaces.isEmpty()) {
+        networkInterfaces = DEFAULT_P2P_INTERFACE;
       }
     }
 
@@ -348,10 +351,6 @@ public class DiscoveryConfig {
         this.advertisedUdpPortIpv6 = advertisedUdpPortIpv6;
       }
       return this;
-    }
-
-    public Builder networkInterface(final String networkInterface) {
-      return networkInterfaces(Collections.singletonList(networkInterface));
     }
 
     public Builder networkInterfaces(final List<String> networkInterfaces) {

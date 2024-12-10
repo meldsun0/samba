@@ -102,7 +102,7 @@ public class MetricsConfig {
 
   public static final class MetricsConfigBuilder {
 
-    private boolean metricsEnabled = false;
+    private boolean metricsEnabled = true;
     private int metricsPort = DEFAULT_METRICS_PORT;
     private String metricsInterface = DEFAULT_METRICS_INTERFACE;
     private Set<MetricCategory> metricsCategories = DEFAULT_METRICS_CATEGORIES;

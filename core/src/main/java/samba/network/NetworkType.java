@@ -30,4 +30,13 @@ public enum NetworkType {
   public boolean isEquals(Bytes bytes) {
     return getValue().equals(bytes);
   }
+
+  public static NetworkType fromString(String networkName) {
+    for (NetworkType type : NetworkType.values()) {
+      if (type.getName().equalsIgnoreCase(networkName)) {
+        return type;
+      }
+    }
+    throw new IllegalArgumentException("No enum constant with name " + networkName);
+  }
 }

@@ -1,6 +1,5 @@
 package samba.config;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,7 +13,8 @@ public class PortalRestApiConfig {
   public static final int DEFAULT_REST_API_PORT = 5051;
   public static final String DEFAULT_REST_API_INTERFACE = "0.0.0.0";
   public static final int DEFAULT_MAX_URL_LENGTH = 65535;
-  public static final List<String> DEFAULT_REST_API_CORS_ALLOWED_ORIGINS = new ArrayList<>();
+  public static final List<String> DEFAULT_REST_API_CORS_ALLOWED_ORIGINS =
+      List.of("127.0.0.1", "localhost");
   public static final List<String> DEFAULT_REST_API_HOST_ALLOWLIST =
       List.of("127.0.0.1", "localhost", "0.0.0.0");
 

@@ -49,7 +49,7 @@ public class Discv5Service extends Service implements Discv5Client {
       final MetricsSystem metricsSystem,
       final AsyncRunner asyncRunner,
       final DiscoveryConfig discoveryConfig,
-      final SECP256K1.KeyPair keyPair,
+      final SECP256K1.SecretKey secretKey,
       final IncomingRequestHandler incomingRequestProcessor) {
 
     this.asyncRunner = asyncRunner;
@@ -76,13 +76,13 @@ public class Discv5Service extends Service implements Discv5Client {
     // final UInt64 seqNo =local_enr_seqno.map(UInt64::fromBytes).orElse(UInt64.ZERO).add(1);
     final UInt64 seqNo = UInt64.ZERO.add(1);
     final NodeRecordBuilder nodeRecordBuilder =
-        new NodeRecordBuilder().secretKey(keyPair.secretKey()).seq(seqNo);
+        new NodeRecordBuilder().secretKey(secretKey).seq(seqNo);
 
     this.addAdvertisedIpToNodeRecordBuilder(discoveryConfig, nodeRecordBuilder);
 
     this.discoverySystem =
         discoverySystemBuilder
-            .secretKey(keyPair.secretKey())
+            .secretKey(secretKey)
             .bootnodes(discoveryConfig.getBootnodes())
             .localNodeRecord(nodeRecordBuilder.build())
             .localNodeRecordListener(this::createLocalNodeRecordListener)

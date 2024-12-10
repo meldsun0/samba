@@ -1,17 +1,15 @@
 package samba;
 
-import samba.config.InvalidConfigurationException;
+import samba.cli.SambaCommand;
 import samba.config.SambaConfiguration;
 import samba.node.Node;
 import samba.samba.SambaDefaultExceptionHandler;
-import samba.samba.exceptions.ExceptionUtil;
-import samba.services.storage.DatabaseStorageException;
 
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.logging.log4j.LogManager;
 
 public final class Samba {
 
@@ -36,16 +34,24 @@ public final class Samba {
 
   static Optional<Node> startFromCLIArgs(final String[] cliArgs) throws CLIException {
     AtomicReference<Node> nodeRef = new AtomicReference<>();
-    try {
-
-      final Node node = new PortalNode(SambaConfiguration.builder().build());
-      nodeRef.set(node);
-      node.start();
-
-    } catch (final Throwable t) {
-      handleExceptionAndReturnExitCode(t);
+    int result = start((config) -> nodeRef.set(start(config)), cliArgs);
+    if (result != 0) {
+      throw new CLIException(result);
     }
     return Optional.ofNullable(nodeRef.get());
+  }
+
+  private static int start(final StartAction startAction, final String... args) {
+    final PrintWriter outputWriter = new PrintWriter(System.out, true, Charset.defaultCharset());
+    final PrintWriter errorWriter = new PrintWriter(System.err, true, Charset.defaultCharset());
+
+    return new SambaCommand(outputWriter, errorWriter, System.getenv(), startAction).parse(args);
+  }
+
+  private static Node start(final SambaConfiguration config) {
+    final Node node = new PortalNode(config);
+    node.start();
+    return node;
   }
 
   private static class CLIException extends RuntimeException {
@@ -61,14 +67,8 @@ public final class Samba {
     }
   }
 
-  public static void handleExceptionAndReturnExitCode(final Throwable e) {
-    final Optional<Throwable> maybeUserErrorException =
-        ExceptionUtil.<Throwable>getCause(e, InvalidConfigurationException.class)
-            .or(() -> ExceptionUtil.getCause(e, DatabaseStorageException.class));
-    if (maybeUserErrorException.isPresent()) {
-      LogManager.getLogger().fatal(e.getMessage(), e);
-    } else {
-      LogManager.getLogger().fatal("Samba failed to start", e);
-    }
+  @FunctionalInterface
+  public interface StartAction {
+    void start(SambaConfiguration config);
   }
 }

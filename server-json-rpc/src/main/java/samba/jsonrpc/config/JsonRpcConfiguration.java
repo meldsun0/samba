@@ -21,9 +21,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class JsonRpcConfiguration {
-  public static final String DEFAULT_JSON_RPC_HOST = "0.0.0.0";
+  public static final String DEFAULT_JSON_RPC_HOST = "127.0.0.1";
   public static final int DEFAULT_JSON_RPC_PORT = 8545;
-  public static final int DEFAULT_ENGINE_JSON_RPC_PORT = 8551;
+
   public static final int DEFAULT_MAX_ACTIVE_CONNECTIONS = 80;
   public static final int DEFAULT_MAX_BATCH_SIZE = 1024;
   public static final long DEFAULT_MAX_REQUEST_CONTENT_LENGTH = 5 * 1024 * 1024; // 5MB
@@ -53,14 +53,6 @@ public class JsonRpcConfiguration {
     config.setMaxBatchSize(DEFAULT_MAX_BATCH_SIZE);
     config.setMaxRequestContentLength(DEFAULT_MAX_REQUEST_CONTENT_LENGTH);
     config.setPrettyJsonEnabled(DEFAULT_PRETTY_JSON_ENABLED);
-    return config;
-  }
-
-  public static JsonRpcConfiguration createEngineDefault() {
-    final JsonRpcConfiguration config = createDefault();
-    config.setEnabled(false);
-    config.setPort(DEFAULT_ENGINE_JSON_RPC_PORT);
-    config.setRpcApis(DEFAULT_RPC_APIS);
     return config;
   }
 

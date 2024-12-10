@@ -2,7 +2,6 @@ package samba.services;
 
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
-import samba.config.DiscoveryConfig;
 import samba.config.SambaConfiguration;
 import samba.domain.messages.IncomingRequestHandler;
 import samba.domain.messages.MessageType;
@@ -15,12 +14,10 @@ import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.health.HealthService;
 import samba.jsonrpc.health.LivenessCheck;
 import samba.jsonrpc.reponse.JsonRpcMethod;
-import samba.network.NetworkType;
 import samba.network.history.HistoryNetwork;
 import samba.services.api.PortalAPI;
 import samba.services.api.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
-import samba.services.discovery.Bootnodes;
 import samba.services.discovery.Discv5Service;
 import samba.services.jsonrpc.JsonRpcService;
 import samba.services.jsonrpc.methods.ClientVersion;
@@ -32,14 +29,11 @@ import samba.services.storage.StorageService;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.crypto.SECP256K1;
-import org.ethereum.beacon.discovery.util.Functions;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -141,15 +135,13 @@ public class PortalNodeMainService extends Service {
 
   protected void initDiscoveryService() {
     LOG.info("PortalNodeMainService.initDiscoveryService()");
-    final SECP256K1.KeyPair keyPair = Functions.randomKeyPair(new Random(new Random().nextInt()));
+
     this.discoveryService =
         new Discv5Service(
             this.metricsSystem,
             this.asyncRunner,
-            DiscoveryConfig.builder()
-                .bootnodes(Bootnodes.loadBootnodes(NetworkType.EXECUTION_HISTORY_NETWORK))
-                .build(),
-            keyPair,
+            this.sambaConfiguration.getDiscoveryConfig(),
+            this.sambaConfiguration.getSecreteKey(),
             incomingRequestProcessor);
   }
 
@@ -185,7 +177,7 @@ public class PortalNodeMainService extends Service {
     portalRestAPI =
         Optional.of(
             new PortalAPI(
-                sambaConfiguration.portalRestApiConfig(),
+                sambaConfiguration.getPortalRestApiConfig(),
                 eventChannels,
                 asyncRunner,
                 timeProvider));
