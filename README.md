@@ -10,10 +10,6 @@ The name is inspired by the shortened name of of rescue dog named Sambayon that 
 
 > **Note:** Samba is still **under heavy development** and is not yet ready for production use.
 
-## High level node architecture diagram
-
-![Node architecture](docs/node-architecture.png "Node Architecture")
-
 ## Build Instructions
 
 ### Install Prerequisites
@@ -75,6 +71,38 @@ All the unit tests are run as part of the build, but can be explicitly triggered
 ```
 
 ## Docker
+
+## Running Hive locally
+
+To run Hive locally against Samab you should follow these instractions: 
+
+Clone Hive:
+```shell script
+git clone https://github.com/ethereum/hive
+```
+
+Build a local Docker image from Samba:
+```shell script
+./gradlew build         
+./gradlew distDocker  
+```
+
+* Copy hive/samba folder to hive/clients
+* Change /hive/samba/Dockerfile by adding the recent created image. 
+
+Run Hive tests:
+```shell script
+./hive -sim portal -client samba,trin -sim.limit history 
+```
+View logs output and results:
+```shell script
+./hiveview --serve --logdir ./workspace/logs
+```
+
+
+
+
+
 
 
 ## Hardware Requirements
