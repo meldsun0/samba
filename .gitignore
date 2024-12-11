@@ -37,3 +37,5 @@ build
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+!gradle/wrapper/gradle-wrapper.jar
