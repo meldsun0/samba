@@ -140,10 +140,10 @@ public class JsonRpcService extends Service {
   private Router buildRouter() {
     final Router router = Router.router(vertx);
     // Verify Host header to avoid rebind attack. ?
-    router.route().handler(new DenyRouteToBlockedHostHandler(this.config));
-    router.errorHandler(403, new Logging403ErrorHandler());
+    // router.route().handler(new DenyRouteToBlockedHostHandler(this.config));
+    // router.errorHandler(403, new Logging403ErrorHandler());
     // router.route().handler(this::createSpan);
-    router.route().handler(this.createCorsHandler());
+    // router.route().handler(this.createCorsHandler());
     router
         .route()
         .handler(

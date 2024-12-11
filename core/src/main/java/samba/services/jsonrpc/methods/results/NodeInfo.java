@@ -3,7 +3,7 @@ package samba.services.jsonrpc.methods.results;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-@JsonPropertyOrder({"nodeENR", "nodeId"})
+@JsonPropertyOrder({"enr", "nodeId"})
 public class NodeInfo {
 
   private final String nodeENR;
@@ -14,7 +14,7 @@ public class NodeInfo {
     this.nodeId = nodeId;
   }
 
-  @JsonGetter(value = "nodeENR")
+  @JsonGetter(value = "enr")
   public String getNodeENR() {
     return nodeENR;
   }
