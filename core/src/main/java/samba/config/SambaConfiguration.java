@@ -55,6 +55,10 @@ public class SambaConfiguration {
     return secretKey;
   }
 
+  public JsonRpcConfiguration getJsonRpcConfigurationn() {
+    return jsonRpcConfigurationn;
+  }
+
   public static class Builder {
     private final MetricsConfig.MetricsConfigBuilder metricsConfigBuilder = MetricsConfig.builder();
     private final PortalRestApiConfig.PortalRestApiConfigBuilder portalRestApiConfigBuilder =

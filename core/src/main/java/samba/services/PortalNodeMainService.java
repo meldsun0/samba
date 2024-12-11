@@ -87,7 +87,7 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initJsonRPCService() {
-    final JsonRpcConfiguration jsonRpcConfiguration = JsonRpcConfiguration.createDefault();
+    final JsonRpcConfiguration jsonRpcConfiguration = sambaConfiguration.getJsonRpcConfigurationn();
     if (jsonRpcConfiguration.isEnabled()) {
       final Map<String, JsonRpcMethod> methods = new HashMap<>();
 
