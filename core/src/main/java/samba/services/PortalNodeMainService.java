@@ -33,7 +33,6 @@ import java.util.Optional;
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -41,7 +40,6 @@ import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
 
-// Check DiscoveryNetwork
 public class PortalNodeMainService extends Service {
 
   private static final Logger LOG = LogManager.getLogger();
@@ -52,7 +50,6 @@ public class PortalNodeMainService extends Service {
   protected volatile MetricsSystem metricsSystem;
   protected volatile TimeProvider timeProvider;
   protected volatile AsyncRunner asyncRunner;
-  private final Bytes privKey = null;
 
   protected volatile SambaConfiguration sambaConfiguration;
 
@@ -115,8 +112,6 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initHistoryNetwork() {
-    LOG.info("PortalNodeMainService.initHistoryNetwork()");
-    // Get and initialize HistoryDB object from persistent storage
     this.historyNetwork =
         new HistoryNetwork(this.discoveryService, this.storageService.getDatabase());
     incomingRequestProcessor
@@ -127,15 +122,12 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initConnectionService() {
-    LOG.info("PortalNodeMainService.initConnectionService()");
     this.connectionService =
         new ConnectionService(
             this.metricsSystem, this.asyncRunner, this.discoveryService, this.historyNetwork);
   }
 
   protected void initDiscoveryService() {
-    LOG.info("PortalNodeMainService.initDiscoveryService()");
-
     this.discoveryService =
         new Discv5Service(
             this.metricsSystem,
@@ -146,7 +138,6 @@ public class PortalNodeMainService extends Service {
   }
 
   protected void initStorageService() {
-    LOG.info("PortalNodeMainService.initStorageService()");
     this.storageService = new StorageService(this.metricsSystem, this.asyncRunner, null);
   }
 
@@ -173,7 +164,6 @@ public class PortalNodeMainService extends Service {
   }
 
   public void initRestAPI() {
-    LOG.debug("PortalNodeMainService.initRestAPI()");
     portalRestAPI =
         Optional.of(
             new PortalAPI(

@@ -95,6 +95,8 @@ public class Discv5Service extends Service implements Discv5Client {
         "live_nodes_current",
         "Current number of live nodes tracked by the discovery system",
         () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
+
+    LOG.info("ENR :{}", this.getHomeNodeRecord());
   }
 
   private void createLocalNodeRecordListener(NodeRecord oldRecord, NodeRecord newRecord) {
@@ -159,7 +161,6 @@ public class Discv5Service extends Service implements Discv5Client {
 
   @Override
   protected SafeFuture<?> doStart() {
-    LOG.info("Starting DiscV5 service");
     return SafeFuture.of(discoverySystem.start());
   }
 

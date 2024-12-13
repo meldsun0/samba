@@ -101,6 +101,7 @@ public abstract class AbstractJsonRpcExecutor {
   protected HttpServerResponse prepareHttpResponse(final RoutingContext ctx) {
     HttpServerResponse response = ctx.response();
     response = response.putHeader("Content-Type", APPLICATION_JSON);
+    LOG.info("Response" + String.valueOf(response));
     return response;
   }
 

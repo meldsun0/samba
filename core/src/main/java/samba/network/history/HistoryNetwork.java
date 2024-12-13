@@ -50,7 +50,6 @@ public class HistoryNetwork extends BaseNetwork
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
-    LOG.info("Home Record :{}", client.getHomeNodeRecord().asEnr());
   }
 
   @Override
