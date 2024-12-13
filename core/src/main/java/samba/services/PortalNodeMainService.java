@@ -24,6 +24,9 @@ import samba.services.jsonrpc.methods.ClientVersion;
 import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
+import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryPing;
 import samba.services.storage.StorageService;
 
 import java.util.HashMap;
@@ -91,7 +94,7 @@ public class PortalNodeMainService extends Service {
     if (jsonRpcConfiguration.isEnabled()) {
       final Map<String, JsonRpcMethod> methods = new HashMap<>();
 
-      methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));
+      methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1.2"));
       methods.put(
           RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.discoveryService));
       methods.put(
@@ -102,6 +105,16 @@ public class PortalNodeMainService extends Service {
           new Discv5UpdateNodeInfo(this.discoveryService));
       methods.put(
           RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discoveryService));
+      // History
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName(),
+          new PortalHistoryGetEnr(this.historyNetwork));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
+          new PortalHistoryAddEnr(this.historyNetwork));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_PING.getMethodName(),
+          new PortalHistoryPing(this.historyNetwork));
 
       jsonRpcService =
           Optional.of(
@@ -115,8 +128,7 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initHistoryNetwork() {
-    LOG.info("PortalNodeMainService.initHistoryNetwork()");
-    // Get and initialize HistoryDB object from persistent storage
+    LOG.trace("PortalNodeMainService.initHistoryNetwork()");
     this.historyNetwork =
         new HistoryNetwork(this.discoveryService, this.storageService.getDatabase());
     incomingRequestProcessor
@@ -127,15 +139,14 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initConnectionService() {
-    LOG.info("PortalNodeMainService.initConnectionService()");
+    LOG.trace("PortalNodeMainService.initConnectionService()");
     this.connectionService =
         new ConnectionService(
             this.metricsSystem, this.asyncRunner, this.discoveryService, this.historyNetwork);
   }
 
   protected void initDiscoveryService() {
-    LOG.info("PortalNodeMainService.initDiscoveryService()");
-
+    LOG.trace("PortalNodeMainService.initDiscoveryService()");
     this.discoveryService =
         new Discv5Service(
             this.metricsSystem,
@@ -146,7 +157,7 @@ public class PortalNodeMainService extends Service {
   }
 
   protected void initStorageService() {
-    LOG.info("PortalNodeMainService.initStorageService()");
+    LOG.trace("PortalNodeMainService.initStorageService()");
     this.storageService = new StorageService(this.metricsSystem, this.asyncRunner, null);
   }
 
@@ -173,7 +184,7 @@ public class PortalNodeMainService extends Service {
   }
 
   public void initRestAPI() {
-    LOG.debug("PortalNodeMainService.initRestAPI()");
+    LOG.trace("PortalNodeMainService.initRestAPI()");
     portalRestAPI =
         Optional.of(
             new PortalAPI(

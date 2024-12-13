@@ -47,6 +47,7 @@ public class IncomingRequestHandler implements TalkHandler {
         "TALKKREQ message is not from the {}",
         this.network.getNetworkType().getName());
 
+    LOG.info("Message received");
     PortalWireMessage message = PortalWireMessageDecoder.decode(srcNode, request);
     PortalWireMessageHandler handler = messageHandlers.get(message.getMessageType());
     Bytes response = Bytes.EMPTY;

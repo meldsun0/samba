@@ -84,7 +84,7 @@ public class JsonRpcService extends Service {
 
   @Override
   protected SafeFuture<?> doStart() {
-    LOG.info("Starting JSON-RPC service on {}:{}", config.getHost(), config.getPort());
+    LOG.debug("Starting JSON-RPC service on {}:{}", config.getHost(), config.getPort());
     LOG.debug("max number of active connections {}", maxActiveConnections);
     final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
     try {

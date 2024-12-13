@@ -14,7 +14,6 @@
     <Loggers>
         <Root level="INFO">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="ErrorConsole"/>
         </Root>
     </Loggers>
 </Configuration>

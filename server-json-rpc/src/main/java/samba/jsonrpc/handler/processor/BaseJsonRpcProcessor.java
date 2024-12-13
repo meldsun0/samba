@@ -30,6 +30,8 @@ public class BaseJsonRpcProcessor implements JsonRpcProcessor {
   public JsonRpcResponse process(
       final JsonRpcRequestId id, final JsonRpcMethod method, final JsonRpcRequestContext request) {
     try {
+      final JsonArray params = JsonObject.mapFrom(request.getRequest()).getJsonArray("params");
+      LOG.info("Process: Params for method: {}, params: {}", method.getName(), params);
       return method.response(request);
     } catch (final InvalidJsonRpcParameters e) {
       LOG.debug(
@@ -40,7 +42,7 @@ public class BaseJsonRpcProcessor implements JsonRpcProcessor {
       return new JsonRpcErrorResponse(id, e.getRpcErrorType());
     } catch (final RuntimeException e) {
       final JsonArray params = JsonObject.mapFrom(request.getRequest()).getJsonArray("params");
-      LOG.error(String.format("Error processing method: %s %s", method.getName(), params), e);
+      LOG.info(String.format("Error processing method: %s %s", method.getName(), params), e);
       return new JsonRpcErrorResponse(id, RpcErrorType.INTERNAL_ERROR);
     }
   }

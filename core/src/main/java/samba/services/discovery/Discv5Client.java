@@ -35,6 +35,7 @@ public interface Discv5Client {
 
   Optional<String> lookupEnr(final UInt256 nodeId);
 
+  CompletableFuture<Void> establishConnection(NodeRecord nodeRecord);
   //
   //    @Override
   //    public SafeFuture<Collection<DiscoveryPeer>> searchForPeers() {

@@ -24,10 +24,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
@@ -50,7 +52,29 @@ public class HistoryNetwork extends BaseNetwork
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
-    LOG.info("Home Record :{}", client.getHomeNodeRecord().asEnr());
+    LOG.info("Home Record :{}", client.getHomeNodeRecord());
+    LOG.info("Home NodeId :{}", client.getHomeNodeRecord().getNodeId().toHexString());
+  }
+
+  public Optional<Pong> ping2(NodeRecord nodeRecord) {
+    try {
+      Ping pingMessage = new Ping(this.discv5Client.getHomeNodeRecord().getSeq(), Bytes32.random());
+      establishConnectionIfNecesary(nodeRecord);
+      LOG.info("Connecting");
+      return this.ping(nodeRecord, pingMessage).get();
+
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void establishConnectionIfNecesary(NodeRecord nodeRecord)
+      throws ExecutionException, InterruptedException {
+    if (!this.isNodeConnected(nodeRecord)) {
+      this.discv5Client.establishConnection(nodeRecord).get();
+    }
   }
 
   @Override
@@ -60,13 +84,19 @@ public class HistoryNetwork extends BaseNetwork
         .thenApply(Optional::get)
         .thenCompose(
             pongMessage -> {
-              LOG.trace(
+              LOG.info(
                   "{} message being processed from {}",
                   message.getMessageType(),
-                  nodeRecord.asEnr());
+                  nodeRecord.getNodeId());
               Pong pong = pongMessage.getMessage();
               if (pong.containsPayload()) {
+                LOG.info("adding node to routing table");
                 this.routingTable.addOrUpdateNode(nodeRecord);
+                LOG.info(
+                    "save it"
+                        + this.routingTable
+                            .findNode(nodeRecord.getNodeId())
+                            .map(NodeRecord::getNodeId));
                 this.routingTable.updateRadius(
                     nodeRecord.getNodeId(), UInt256.fromBytes(pong.getCustomPayload()));
               } else {
@@ -76,7 +106,7 @@ public class HistoryNetwork extends BaseNetwork
             })
         .exceptionallyCompose(
             error -> {
-              LOG.trace(
+              LOG.info(
                   "Something when wrong when processing message {} to {}",
                   message.getMessageType(),
                   nodeRecord.asEnr());
@@ -202,6 +232,7 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handlePing(NodeRecord srcNode, Ping ping) {
+    LOG.info("*********ping{}", ping);
     Bytes srcNodeId = srcNode.getNodeId();
     routingTable.addOrUpdateNode(srcNode);
     routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload()));
@@ -302,5 +333,17 @@ public class HistoryNetwork extends BaseNetwork
       LOG.info("Something when wrong when sending a {}", message);
       return SafeFuture.completedFuture(Optional.empty());
     };
+  }
+
+  public Optional<NodeRecord> getENRFromRoutingTable(Bytes nodeId) {
+    Bytes x = this.discv5Client.getHomeNodeRecord().getNodeId();
+    if ((x.equals(nodeId))) {
+      return Optional.of(this.discv5Client.getHomeNodeRecord());
+    }
+    return this.routingTable.findNode(nodeId);
+  }
+
+  public void addNodeRecordToRoutingTable(NodeRecord nodeRecod) {
+    this.routingTable.addOrUpdateNode(nodeRecod);
   }
 }

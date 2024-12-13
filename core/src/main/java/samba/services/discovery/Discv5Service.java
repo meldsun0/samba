@@ -59,24 +59,29 @@ public class Discv5Service extends Service implements Discv5Client {
     Preconditions.checkState(
         networkInterfaces.size() == 1 || networkInterfaces.size() == 2,
         "The configured network interfaces must be either 1 or 2");
+    final UInt64 seqNo = UInt64.ZERO.add(1);
+    final NodeRecordBuilder nodeRecordBuilder =
+        new NodeRecordBuilder()
+            .secretKey(secretKey)
+            .seq(seqNo)
+            .customField("c", Bytes.of(new String("a").getBytes()));
 
     if (networkInterfaces.size() == 1) {
       final String listenAddress = networkInterfaces.get(0);
       discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUdpPort());
       this.supportsIpv6 =
           IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
+      nodeRecordBuilder.address(listenAddress, discoveryConfig.getListenUdpPort()); // TODO fix this
     } else {
       final InetSocketAddress[] listenAddresses =
           getDualStackNetworkInterfaces(discoverySystemBuilder, networkInterfaces, discoveryConfig);
       discoverySystemBuilder.listen(listenAddresses);
+
       this.supportsIpv6 = true;
     }
 
     // TODO save seqNo Locally
     // final UInt64 seqNo =local_enr_seqno.map(UInt64::fromBytes).orElse(UInt64.ZERO).add(1);
-    final UInt64 seqNo = UInt64.ZERO.add(1);
-    final NodeRecordBuilder nodeRecordBuilder =
-        new NodeRecordBuilder().secretKey(secretKey).seq(seqNo);
 
     this.addAdvertisedIpToNodeRecordBuilder(discoveryConfig, nodeRecordBuilder);
 
@@ -127,6 +132,11 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
+  public CompletableFuture<Void> establishConnection(NodeRecord nodeRecord) {
+    return this.discoverySystem.ping(nodeRecord);
+  }
+
+  @Override
   public Optional<Bytes> getNodeId() {
     return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
   }
@@ -159,7 +169,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
   @Override
   protected SafeFuture<?> doStart() {
-    LOG.info("Starting DiscV5 service");
+    LOG.trace("Starting DiscV5 service");
     return SafeFuture.of(discoverySystem.start());
   }
 

@@ -57,7 +57,7 @@ public class ConnectionService extends Service {
 
   @Override
   protected SafeFuture<?> doStart() {
-    LOG.info("Starting ConnectionService");
+    LOG.trace("Starting ConnectionService");
     activeNodesSearchingTask();
     return SafeFuture.COMPLETE;
   }
