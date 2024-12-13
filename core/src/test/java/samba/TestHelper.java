@@ -2,7 +2,8 @@ package samba;
 
 import java.util.Random;
 
-import org.ethereum.beacon.discovery.schema.*;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.util.Functions;
 
 public class TestHelper {

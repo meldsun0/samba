@@ -34,30 +34,4 @@ public interface Discv5Client {
   NodeRecord updateNodeRecordSocket(Multiaddr multiaddr);
 
   Optional<String> lookupEnr(final UInt256 nodeId);
-
-  //
-  //    @Override
-  //    public SafeFuture<Collection<DiscoveryPeer>> searchForPeers() {
-  //        return SafeFuture.of(discoverySystem.searchForNewPeers())
-  //                // Current version of discovery doesn't return the found peers but next version
-  // will
-  //                .<Collection<NodeRecord>>thenApply(__ -> emptyList())
-  //                .thenApply(this::convertToDiscoveryPeers);
-  //    }
-  //
-  //    private List<DiscoveryPeer> convertToDiscoveryPeers(final Collection<NodeRecord> foundNodes)
-  // {
-  //        LOG.debug("Found {} nodes prior to filtering", foundNodes.size());
-  //        final SchemaDefinitions schemaDefinitions =
-  //                currentSchemaDefinitionsSupplier.getSchemaDefinitions();
-  //        return foundNodes.stream()
-  //                .flatMap(
-  //                        nodeRecord ->
-  //                                nodeRecordConverter
-  //                                        .convertToDiscoveryPeer(nodeRecord, supportsIpv6,
-  // schemaDefinitions)
-  //                                        .stream())
-  //                .toList();
-  //    }
-
 }

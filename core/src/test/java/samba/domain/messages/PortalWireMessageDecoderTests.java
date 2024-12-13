@@ -2,8 +2,14 @@ package samba.domain.messages;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import samba.domain.messages.requests.*;
-import samba.domain.messages.response.*;
+import samba.domain.messages.requests.FindContent;
+import samba.domain.messages.requests.FindNodes;
+import samba.domain.messages.requests.Offer;
+import samba.domain.messages.requests.Ping;
+import samba.domain.messages.response.Accept;
+import samba.domain.messages.response.Content;
+import samba.domain.messages.response.Nodes;
+import samba.domain.messages.response.Pong;
 
 import java.util.List;
 import java.util.Random;

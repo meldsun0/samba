@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Mockito.*;
 
 import samba.storage.rocksdb.*;
 
@@ -21,11 +20,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.tuweni.bytes.Bytes;
 import org.assertj.core.api.Assertions;
-import org.hyperledger.besu.metrics.ObservableMetricsSystem;
 import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
-import org.hyperledger.besu.plugin.services.metrics.Counter;
-import org.hyperledger.besu.plugin.services.metrics.LabelledMetric;
-import org.hyperledger.besu.plugin.services.metrics.OperationTimer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -33,11 +28,12 @@ import org.junit.jupiter.api.io.TempDir;
 public class RocksDBStorageTest {
 
   @TempDir public Path folder;
-  private ObservableMetricsSystem metricsSystemMock = mock(ObservableMetricsSystem.class);
-  private LabelledMetric<OperationTimer> labelledMetricOperationTimerMock =
+
+  /* private final ObservableMetricsSystem metricsSystemMock = mock(ObservableMetricsSystem.class);
+  private final LabelledMetric<OperationTimer> labelledMetricOperationTimerMock =
       mock(LabelledMetric.class);
-  private LabelledMetric<Counter> labelledMetricCounterMock = mock(LabelledMetric.class);
-  private OperationTimer operationTimerMock = mock(OperationTimer.class);
+  private  final LabelledMetric<Counter> labelledMetricCounterMock = mock(LabelledMetric.class);
+  private final OperationTimer operationTimerMock = mock(OperationTimer.class);*/
 
   @Test
   public void twoStoresAreIndependent() throws Exception {
