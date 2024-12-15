@@ -1,13 +1,11 @@
 package samba.services.jsonrpc.methods;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.jsonrpc.reponse.JsonRpcRequest;
-import samba.jsonrpc.reponse.JsonRpcRequestContext;
-import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
+import samba.jsonrpc.reponse.*;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.results.NodeInfo;
@@ -49,15 +47,14 @@ public class Discv5NodeInfoTest {
         new JsonRpcSuccessResponse(request.getRequest().getId(), buildNodeInfo(homeNodeRecord));
     final JsonRpcResponse actual = method.response(request);
 
+    assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
   @Test
-  public void shouldReturnCorrectResultWithEvenWithParameters() {
+  public void shouldReturnCorrectResultDespiteParameters() {
     final JsonRpcRequestContext request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(
-                JSON_RPC_VERSION, DISCV5_NODE_INFO, new Object[] {"0x68656c6c6f20776f726c6"}));
+        new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, DISCV5_NODE_INFO, new Object[] {"0x68656c6c6f20776f726c6"}));
     final NodeRecord homeNodeRecord = nodeRecordFactory.fromEnr(ENR);
     when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
 
@@ -65,6 +62,19 @@ public class Discv5NodeInfoTest {
         new JsonRpcSuccessResponse(request.getRequest().getId(), buildNodeInfo(homeNodeRecord));
     final JsonRpcResponse actual = method.response(request);
 
+    assertNotNull(actual);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+  }
+
+  @Test
+  public void testResponseWithNullNodeRecord() {
+    final JsonRpcRequestContext request = new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, DISCV5_NODE_INFO,new Object[] {}));
+    when(discv5Client.getHomeNodeRecord()).thenReturn(null);
+
+    final JsonRpcResponse expected = new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INTERNAL_ERROR);
+    final JsonRpcResponse actual = method.response(request);
+
+    assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
