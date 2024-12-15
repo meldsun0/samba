@@ -54,7 +54,9 @@ public class Discv5NodeInfoTest {
   @Test
   public void shouldReturnCorrectResultDespiteParameters() {
     final JsonRpcRequestContext request =
-        new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, DISCV5_NODE_INFO, new Object[] {"0x68656c6c6f20776f726c6"}));
+        new JsonRpcRequestContext(
+            new JsonRpcRequest(
+                JSON_RPC_VERSION, DISCV5_NODE_INFO, new Object[] {"0x68656c6c6f20776f726c6"}));
     final NodeRecord homeNodeRecord = nodeRecordFactory.fromEnr(ENR);
     when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
 
@@ -68,10 +70,13 @@ public class Discv5NodeInfoTest {
 
   @Test
   public void testResponseWithNullNodeRecord() {
-    final JsonRpcRequestContext request = new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, DISCV5_NODE_INFO,new Object[] {}));
+    final JsonRpcRequestContext request =
+        new JsonRpcRequestContext(
+            new JsonRpcRequest(JSON_RPC_VERSION, DISCV5_NODE_INFO, new Object[] {}));
     when(discv5Client.getHomeNodeRecord()).thenReturn(null);
 
-    final JsonRpcResponse expected = new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INTERNAL_ERROR);
+    final JsonRpcResponse expected =
+        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INTERNAL_ERROR);
     final JsonRpcResponse actual = method.response(request);
 
     assertNotNull(actual);

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.web3j.utils.Strings;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
@@ -52,6 +53,8 @@ public class DiscoveryConfig {
   private final List<NodeRecord> bootnodes;
   private final List<String> networkInterfaces;
   private final Optional<List<String>> advertisedIps;
+  private final String clientValue = "a";
+  private final String clientKey = "c";
 
   private DiscoveryConfig(
       final int listenUdpPort,
@@ -125,6 +128,14 @@ public class DiscoveryConfig {
 
   public List<String> getNetworkInterfaces() {
     return networkInterfaces;
+  }
+
+  public String getClientKey() {
+    return this.clientKey;
+  }
+
+  public Bytes getClientValue() {
+    return Bytes.wrap(this.clientValue.getBytes());
   }
 
   public List<NodeRecord> getBootnodes() {
