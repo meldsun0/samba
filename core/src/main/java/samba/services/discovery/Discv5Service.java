@@ -9,12 +9,10 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Stream;
 
 import com.google.common.base.Preconditions;
 import io.libp2p.core.multiformats.Multiaddr;
 import io.libp2p.core.multiformats.Protocol;
-import io.libp2p.core.multiformats.Protocol.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -56,24 +54,6 @@ public class Discv5Service extends Service implements Discv5Client {
     final DiscoverySystemBuilder discoverySystemBuilder = new DiscoverySystemBuilder();
     final List<String> networkInterfaces = discoveryConfig.getNetworkInterfaces();
 
-    Preconditions.checkState(
-        networkInterfaces.size() == 1 || networkInterfaces.size() == 2,
-        "The configured network interfaces must be either 1 or 2");
-
-    if (networkInterfaces.size() == 1) {
-      final String listenAddress = networkInterfaces.get(0);
-      discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUdpPort());
-      this.supportsIpv6 =
-          IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
-    } else {
-      final InetSocketAddress[] listenAddresses =
-          getDualStackNetworkInterfaces(discoverySystemBuilder, networkInterfaces, discoveryConfig);
-      discoverySystemBuilder.listen(listenAddresses);
-      this.supportsIpv6 = true;
-    }
-
-    // TODO save seqNo Locally
-    // final UInt64 seqNo =local_enr_seqno.map(UInt64::fromBytes).orElse(UInt64.ZERO).add(1);
     final UInt64 seqNo = UInt64.ZERO.add(1);
     final NodeRecordBuilder nodeRecordBuilder =
         new NodeRecordBuilder()
@@ -81,7 +61,34 @@ public class Discv5Service extends Service implements Discv5Client {
             .seq(seqNo)
             .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
 
-    this.addAdvertisedIpToNodeRecordBuilder(discoveryConfig, nodeRecordBuilder);
+    Preconditions.checkState(
+        networkInterfaces.size() == 1 || networkInterfaces.size() == 2,
+        "The configured network interfaces must be either 1 or 2");
+
+    if (networkInterfaces.size() == 1) {
+      final String listenAddress = networkInterfaces.getFirst();
+      discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUDPPortIpv4());
+      this.supportsIpv6 =
+          IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
+      nodeRecordBuilder.address(
+          listenAddress,
+          discoveryConfig.getListenUDPPortIpv4(),
+          discoveryConfig.getListenTCPPortIpv4());
+    } else {
+      final InetSocketAddress[] listenAddresses =
+          getDualStackNetworkInterfaces(discoverySystemBuilder, networkInterfaces, discoveryConfig);
+      discoverySystemBuilder.listen(listenAddresses);
+      discoveryConfig
+          .getIps()
+          .forEach(
+              ip -> {
+                final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
+                final int advertisedUdpPort = discoveryConfig.getUDPPort(ipVersion);
+                final int advertisedTcpPort = discoveryConfig.getTCPPort(ipVersion);
+                nodeRecordBuilder.address(ip, advertisedUdpPort, advertisedTcpPort);
+              });
+      this.supportsIpv6 = true;
+    }
 
     this.discoverySystem =
         discoverySystemBuilder
@@ -157,11 +164,6 @@ public class Discv5Service extends Service implements Discv5Client {
     return discoverySystem.findNodes(nodeRecord, distances);
   }
 
-  private Stream<NodeRecord> converToPeer(NodeRecord nodeRecord) {
-    // TODO convert to our on definition of Node
-    return null;
-  }
-
   @Override
   protected SafeFuture<?> doStart() {
     return SafeFuture.of(discoverySystem.start());
@@ -210,36 +212,11 @@ public class Discv5Service extends Service implements Discv5Client {
             networkInterface -> {
               final int listenUdpPort =
                   switch (IPVersionResolver.resolve(networkInterface)) {
-                    case IP_V4 -> discoveryConfig.getListenUdpPort();
-                    case IP_V6 -> discoveryConfig.getListenUdpPortIpv6();
+                    case IP_V4 -> discoveryConfig.getListenUDPPortIpv4();
+                    case IP_V6 -> discoveryConfig.getListenUDPPortIpv6();
                   };
               return new InetSocketAddress(networkInterface, listenUdpPort);
             })
         .toArray(InetSocketAddress[]::new);
-  }
-
-  private void addAdvertisedIpToNodeRecordBuilder(
-      final DiscoveryConfig discoveryConfig, final NodeRecordBuilder nodeRecordBuilder) {
-    boolean hasUserExplicitlySetAdvertisedIps = false;
-    if (hasUserExplicitlySetAdvertisedIps) { // TODO fix when acceptin parameters.
-      final List<String> advertisedIps = discoveryConfig.getAdvertisedIps();
-      Preconditions.checkState(
-          advertisedIps.size() == 1 || advertisedIps.size() == 2,
-          "The configured advertised IPs must be either 1 or 2");
-      if (advertisedIps.size() == 1) {
-        nodeRecordBuilder.address(
-            advertisedIps.get(0),
-            discoveryConfig.getAdvertisedUdpPort(),
-            discoveryConfig.getAdvertisedPort());
-      } else {
-        advertisedIps.forEach(
-            advertisedIp -> {
-              final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(advertisedIp);
-              final int advertisedUdpPort = discoveryConfig.getAdvertisedUdpPort(ipVersion);
-              final int advertisedTcpPort = discoveryConfig.getAdvertisedTcpPort(ipVersion);
-              nodeRecordBuilder.address(advertisedIp, advertisedUdpPort, advertisedTcpPort);
-            });
-      }
-    }
   }
 }
