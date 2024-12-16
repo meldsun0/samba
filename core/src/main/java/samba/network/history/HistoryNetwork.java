@@ -37,7 +37,7 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryNetwork extends BaseNetwork
-    implements HistoryNetworkRequests, HistoryNetworkIncomingRequests, LivenessChecker {
+    implements HistoryJsonRpcRequests, HistoryNetworkIncomingRequests, LivenessChecker {
 
   private UInt256 nodeRadius;
   private final HistoryDB historyDB;
@@ -171,6 +171,12 @@ public class HistoryNetwork extends BaseNetwork
               return SafeFuture.completedFuture(Optional.of(accept));
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
+  }
+
+  @Override
+  public void addEnr(String enr) {
+    final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
+    this.routingTable.addOrUpdateNode(nodeRecord);
   }
 
   @Override

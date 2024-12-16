@@ -14,7 +14,7 @@ import java.util.Optional;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
-public interface HistoryNetworkRequests {
+public interface HistoryJsonRpcRequests {
 
   SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
 
@@ -23,4 +23,6 @@ public interface HistoryNetworkRequests {
   SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent findContent);
 
   SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer offer);
+
+  void addEnr(String enr);
 }

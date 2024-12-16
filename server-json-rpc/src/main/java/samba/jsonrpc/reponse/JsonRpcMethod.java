@@ -48,4 +48,10 @@ public interface JsonRpcMethod {
     permissions.add(this.getName().replace('_', ':'));
     return permissions;
   }
+
+  default JsonRpcErrorResponse createJsonRpcInvalidRequestResponse(
+      JsonRpcRequestContext requestContext) {
+    return new JsonRpcErrorResponse(
+        requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+  }
 }

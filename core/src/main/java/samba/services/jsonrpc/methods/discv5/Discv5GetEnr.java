@@ -28,20 +28,16 @@ public class Discv5GetEnr implements JsonRpcMethod {
     try {
       nodeId = requestContext.getRequiredParameter(0, String.class);
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
-      return returnInvalidRequest(requestContext);
+      return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    if (!InputsValidations.isNodeIdValid(nodeId)) return returnInvalidRequest(requestContext);
+    if (!InputsValidations.isNodeIdValid(nodeId))
+      return createJsonRpcInvalidRequestResponse(requestContext);
 
     nodeId = nodeId.startsWith("0x") ? nodeId.substring(2) : nodeId;
     Optional<String> enr = discv5Client.lookupEnr(UInt256.fromHexString(nodeId));
     if (enr.isPresent()) {
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), enr.get());
     }
-    return returnInvalidRequest(requestContext);
-  }
-
-  private JsonRpcErrorResponse returnInvalidRequest(JsonRpcRequestContext requestContext) {
-    return new JsonRpcErrorResponse(
-        requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+    return createJsonRpcInvalidRequestResponse(requestContext);
   }
 }
