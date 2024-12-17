@@ -5,32 +5,37 @@ import samba.jsonrpc.reponse.*;
 import samba.network.history.HistoryJsonRpcRequests;
 import samba.services.jsonrpc.methods.parameters.InputsValidations;
 
-public class PortalHistoryAddEnr implements JsonRpcMethod {
+import java.util.Optional;
+
+public class PortalHistoryGetEnr implements JsonRpcMethod {
 
   private HistoryJsonRpcRequests historyJsonRpcRequests;
 
-  public PortalHistoryAddEnr(HistoryJsonRpcRequests historyJsonRpcRequests) {
+  public PortalHistoryGetEnr(HistoryJsonRpcRequests historyJsonRpcRequests) {
     this.historyJsonRpcRequests = historyJsonRpcRequests;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName();
+    return RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    String enr;
+    String nodeId;
     try {
-      enr = requestContext.getRequiredParameter(0, String.class);
+      nodeId = requestContext.getRequiredParameter(0, String.class);
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    if (!InputsValidations.isEnrValid(enr))
+    if (!InputsValidations.isNodeIdValid(nodeId)) {
       return createJsonRpcInvalidRequestResponse(requestContext);
+    }
+    Optional<String> enr = this.historyJsonRpcRequests.getEnr(nodeId);
 
-    historyJsonRpcRequests.addEnr(enr);
-
-    return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), true);
+    if (enr.isPresent()) {
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), enr.get());
+    }
+    return createJsonRpcInvalidRequestResponse(requestContext);
   }
 }

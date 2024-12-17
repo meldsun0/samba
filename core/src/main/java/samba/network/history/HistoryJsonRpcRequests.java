@@ -25,4 +25,6 @@ public interface HistoryJsonRpcRequests {
   SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer offer);
 
   void addEnr(String enr);
+
+  Optional<String> getEnr(String nodeId);
 }

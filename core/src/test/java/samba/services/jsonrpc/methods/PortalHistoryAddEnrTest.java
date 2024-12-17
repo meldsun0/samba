@@ -1,15 +1,15 @@
 package samba.services.jsonrpc.methods;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
+
 import samba.jsonrpc.reponse.*;
 import samba.network.history.HistoryNetwork;
 import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class PortalHistoryAddEnrTest {
   private final String JSON_RPC_VERSION = "2.0";
@@ -30,8 +30,11 @@ public class PortalHistoryAddEnrTest {
 
   @Test
   public void shouldReturnCorrectResult() {
-    final String enr = "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
-    final JsonRpcRequestContext request = new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR , new Object[] {enr}));
+    final String enr =
+        "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
+    final JsonRpcRequestContext request =
+        new JsonRpcRequestContext(
+            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {enr}));
 
     doNothing().when(historyJsonRpc).addEnr(enr);
 
@@ -44,11 +47,14 @@ public class PortalHistoryAddEnrTest {
   @Test
   public void shouldReturnInvalidResultAsENRIsNotValid() {
     final String enr = "enr:-IS4QHkAX2H0A";
-    final JsonRpcRequestContext request = new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR , new Object[] {enr}));
+    final JsonRpcRequestContext request =
+        new JsonRpcRequestContext(
+            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {enr}));
 
     doNothing().when(historyJsonRpc).addEnr(enr);
 
-    final JsonRpcErrorResponse  expected = new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+    final JsonRpcErrorResponse expected =
+        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
@@ -56,8 +62,11 @@ public class PortalHistoryAddEnrTest {
 
   @Test
   public void shouldReturnInvalidResultAsNoParameterisSent() {
-    final JsonRpcRequestContext request = new JsonRpcRequestContext(new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR , new Object[] {}));
-    final JsonRpcResponse expected = new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+    final JsonRpcRequestContext request =
+        new JsonRpcRequestContext(
+            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {}));
+    final JsonRpcResponse expected =
+        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

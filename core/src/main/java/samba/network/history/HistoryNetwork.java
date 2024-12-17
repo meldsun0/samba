@@ -180,6 +180,21 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
+  public Optional<String> getEnr(String nodeId) {
+    Bytes nodeIdInBytes = Bytes.fromHexString(nodeId);
+    final NodeRecord homeNodeRecord = this.discv5Client.getHomeNodeRecord();
+    if (homeNodeRecord == null) {
+      return Optional.empty();
+    }
+    if (homeNodeRecord.getNodeId().equals(nodeIdInBytes)) {
+      return Optional.of(homeNodeRecord.asEnr());
+    }
+    Optional<NodeRecord> nodeRecord = this.routingTable.findNode(nodeIdInBytes);
+
+    return nodeRecord.map(NodeRecord::asEnr);
+  }
+
+  @Override
   public SafeFuture<String> connect(NodeRecord nodeRecord) {
     Ping ping = new Ping(nodeRecord.getSeq(), this.nodeRadius.toBytes());
     return this.ping(nodeRecord, ping)
