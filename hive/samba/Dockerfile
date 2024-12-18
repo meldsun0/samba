@@ -1,5 +1,6 @@
-ARG baseimage=meldsun/samba:24.12-develop-109fe34
-FROM $baseimage
+ARG baseimage=meldsun/samba
+ARG tag=latest
+FROM $baseimage:$tag
 RUN echo "latest" > /version.txt
 
 ENTRYPOINT ["samba-entry.sh"]

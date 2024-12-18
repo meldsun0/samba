@@ -49,7 +49,8 @@ After a successful build, distribution packages are available in `build/distribu
 |--------------|---------------------------------------------------------|
 | distTar      | Full distribution in build/distributions (as `.tar.gz`) |
 | distZip      | Full distribution in build/distributions (as `.zip`)    |
-| distDocker   | The `meldsun_labs/samba` docker image                   |
+| distDocker   | The `meldsun/samba` docker image                        |
+| dockerUpload | Push imges to Docker Hub                                |
 | runContainer | A docker container running                              |
 
 ## Code Style
@@ -79,6 +80,8 @@ To run Hive locally against Samab you should follow these instractions:
 Clone Hive:
 ```shell script
 git clone https://github.com/ethereum/hive
+go build .
+go build ./cmd/hiveview  
 ```
 
 Build a local Docker image from Samba:
