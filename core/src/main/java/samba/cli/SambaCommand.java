@@ -43,7 +43,7 @@ public class SambaCommand implements Callable<Integer> {
   @Option(
       names = {"--portal-subnetworks"},
       description = "Portal Subnetwork")
-  private String portalSubNetwork = "history-network";
+  private String portalSubNetwork = "history";
 
   @Option(
       names = {"--use-default-bootnodes"},

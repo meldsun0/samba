@@ -10,7 +10,11 @@ if [ "$HIVE_CLIENT_PRIVATE_KEY" != "" ]; then
     FLAGS="$FLAGS  --unsafe-private-key=0x$HIVE_CLIENT_PRIVATE_KEY"
 fi
 
- echo $HIVE_CLIENT_PRIVATE_KEY
+if [ "$HIVE_PORTAL_NETWORKS_SELECTED" != "" ]; then
+    FLAGS="$FLAGS  --portal-subnetworks=$HIVE_PORTAL_NETWORKS_SELECTED"
+else
+    FLAGS="$FLAGS  --portal-subnetworks=history"
+fi
 
 /opt/samba/bin/samba \
     --jsonrpc-port=8545 \
