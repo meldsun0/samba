@@ -34,4 +34,6 @@ public interface Discv5Client {
   NodeRecord updateNodeRecordSocket(Multiaddr multiaddr);
 
   Optional<String> lookupEnr(final UInt256 nodeId);
+
+  CompletableFuture<Void> ping(NodeRecord nodeRecord);
 }

@@ -34,7 +34,6 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.jetbrains.annotations.NotNull;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryNetwork extends BaseNetwork
     implements HistoryJsonRpcRequests, HistoryNetworkIncomingRequests, LivenessChecker {
@@ -55,7 +54,7 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) {
     return sendMessage(nodeRecord, message)
-        .orTimeout(30, TimeUnit.SECONDS)
+        .orTimeout(5, TimeUnit.SECONDS)
         .thenApply(Optional::get)
         .thenCompose(
             pongMessage -> {
@@ -195,14 +194,9 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
-  public SafeFuture<String> connect(NodeRecord nodeRecord) {
+  public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord) {
     Ping ping = new Ping(nodeRecord.getSeq(), this.nodeRadius.toBytes());
-    return this.ping(nodeRecord, ping)
-        .thenApply(Optional::get)
-        .thenCompose(
-            pong -> {
-              return SafeFuture.completedFuture(pong.getEnrSeq().toString());
-            });
+    return this.ping(nodeRecord, ping);
   }
 
   @Override
@@ -295,8 +289,7 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public CompletableFuture<Void> checkLiveness(NodeRecord nodeRecord) {
     LOG.info("checkLiveness");
-    Ping pingMessage =
-        new Ping(UInt64.valueOf(nodeRecord.getSeq().toBytes().toLong()), this.nodeRadius);
+    Ping pingMessage = new Ping(nodeRecord.getSeq(), this.nodeRadius);
     return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage))
         .thenCompose((__) -> new CompletableFuture<>());
   }

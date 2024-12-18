@@ -139,6 +139,11 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
+  public CompletableFuture<Void> ping(NodeRecord nodeRecord) {
+    return this.discoverySystem.ping(nodeRecord);
+  }
+
+  @Override
   public Optional<Bytes> getNodeId() {
     return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
   }

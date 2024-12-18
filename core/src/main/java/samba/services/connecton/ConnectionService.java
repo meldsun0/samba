@@ -98,7 +98,7 @@ public class ConnectionService extends Service {
 
     attemptedConnectionCounter.inc();
     network
-        .connect(nodeRecord)
+        .ping(nodeRecord)
         .finish(
             peer -> {
               LOG.trace("Successfully connected to node {}", nodeRecord.getNodeId());
