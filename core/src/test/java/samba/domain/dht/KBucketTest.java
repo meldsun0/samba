@@ -111,4 +111,15 @@ class KBucketTest {
     bucket.addOrUpdate(node2Seq2);
     assertThat(bucket.getAllNodes()).containsExactly(node2Seq2, node1);
   }
+
+  @Test
+  void removeNodeRecordFromTheBucket() {
+    final NodeRecord node1 = TestHelper.createNodeRecord();
+    final NodeRecord node2 = TestHelper.createNodeRecord();
+    bucket.addOrUpdate(node2);
+    bucket.addOrUpdate(node1);
+    assertThat(bucket.getAllNodes()).containsExactly(node1, node2);
+    bucket.remove(node1);
+    assertThat(bucket.getAllNodes()).containsExactly(node2);
+  }
 }

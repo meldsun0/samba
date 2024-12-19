@@ -194,6 +194,16 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
+  public boolean deleteEnr(String nodeId) {
+    Bytes nodeIdInBytes = Bytes.fromHexString(nodeId);
+    Optional<NodeRecord> nodeRecordToBeRemoved = this.routingTable.findNode(nodeIdInBytes);
+    nodeRecordToBeRemoved.ifPresent(
+        this.routingTable
+            ::removeNode); // TODO refactor inner functions to return the state of the operation.
+    return nodeRecordToBeRemoved.isPresent();
+  }
+
+  @Override
   public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord) {
     Ping ping = new Ping(nodeRecord.getSeq(), this.nodeRadius.toBytes());
     return this.ping(nodeRecord, ping);

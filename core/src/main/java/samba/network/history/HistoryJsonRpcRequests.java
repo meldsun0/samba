@@ -27,4 +27,6 @@ public interface HistoryJsonRpcRequests {
   void addEnr(String enr);
 
   Optional<String> getEnr(String nodeId);
+
+  boolean deleteEnr(String nodeId);
 }

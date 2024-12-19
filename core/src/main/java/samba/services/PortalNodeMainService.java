@@ -25,6 +25,7 @@ import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
 import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryDeleteEnr;
 import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
 import samba.services.jsonrpc.methods.history.PortalHistoryPing;
 import samba.services.storage.StorageService;
@@ -111,6 +112,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.PORTAL_HISTORY_PING.getMethodName(),
           new PortalHistoryPing(this.historyNetwork, this.discoveryService));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_DELETE_ENR.getMethodName(),
+          new PortalHistoryDeleteEnr(this.historyNetwork));
 
       jsonRpcService =
           Optional.of(

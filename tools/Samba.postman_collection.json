@@ -1,0 +1,195 @@
+{
+	"info": {
+		"_postman_id": "e34f7e50-e4d9-4869-9dd2-8760e6e36b10",
+		"name": "Samba",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33150235"
+	},
+	"item": [
+		{
+			"name": "discv5",
+			"item": [
+				{
+					"name": "discv5_nodeInfo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"discv5_nodeInfo\",\n    \"params\": [],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "discv5_getEnr",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"discv5_getEnr\",\n    \"params\": [\"0x95c8df0a57c901c5d4561403a77067996b03b64e7beb1bdee662fae236d2188c\"],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "history",
+			"item": [
+				{
+					"name": "portal_historyPing",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"portal_historyPing\",\n    \"params\": [\"enr:-LS4QA-JQS6S_e_Tl7K1YqxzWo-Ih7oAOhd6XZdhe5WSf_jpcWeQBah7cpzYLFDX2PsHUuXGzME4JFjO77AS81YEGWeEZ1F6lmOqdCAzZGI4NDg4NGUyNzc2YzUzMzYzOTExMDY0Y2ViMTk4NThhZTQ0MmJigmlkgnY0gmlwhJ31OTWJc2VjcDI1NmsxoQPC0eRkjRajDiETr_DRa5N5VJRm-ttCWDoO1QAMMCg5pIN1ZHCCIyg\"],\n    \"id\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "portal_historyGetEnr",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"portal_historyGetEnr\",\n    \"params\": [\"0xa98708af942be9f8a199b8871560347a985a58f175368e20ea891c3f278f78d8\"],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "portal_historyDeleteEnr",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"portal_historyDeleteEnr\",\n    \"params\": [\"0xa98708af942be9f8a199b8871560347a985a58f175368e20ea891c3f278f78d8\"],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "portal_historyAddEnr",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"portal_historyAddEnr\",\n    \"params\": [\"enr:-IS4QD5KbxrvRQaWOWwxNXyU9k0zzHiJceCQ5DGkq2DfT5nfWRQJ9MGP37iHUtRgPq1QOGvdtWpqKlnDCGnA1E20hYkCgmlkgnY0gmlwhLXmnGmJc2VjcDI1NmsxoQLOgUpqF2IiVjDh0Q0fJwx79cloWNr7Qu-sOJqKRw4xKIN1ZHCCIyg\"],\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+							"protocol": "http",
+							"host": [
+								"{{rpc-http-host}}"
+							],
+							"port": "{{rpc-http-port}}"
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "clientVersion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"jsonrpc\": \"2.0\",\n    \"method\": \"clientVersion\",\n    \"params\": [],\n    \"id\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{rpc-http-host}}:{{rpc-http-port}}",
+					"protocol": "http",
+					"host": [
+						"{{rpc-http-host}}"
+					],
+					"port": "{{rpc-http-port}}"
+				}
+			},
+			"response": []
+		}
+	]
+}
