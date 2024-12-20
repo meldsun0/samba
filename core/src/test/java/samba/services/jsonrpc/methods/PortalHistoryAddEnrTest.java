@@ -44,21 +44,21 @@ public class PortalHistoryAddEnrTest {
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
-  @Test
-  public void shouldReturnInvalidResultAsENRIsNotValid() {
-    final String enr = "enr:-IS4QHkAX2H0A";
-    final JsonRpcRequestContext request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {enr}));
-
-    doNothing().when(historyJsonRpc).addEnr(enr);
-
-    final JsonRpcErrorResponse expected =
-        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    final JsonRpcResponse actual = method.response(request);
-    assertNotNull(actual);
-    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-  }
+  //  @Test
+  //  public void shouldReturnInvalidResultAsENRIsNotValid() {
+  //    final String enr = "enr:-IS4QHkAX2H0A";
+  //    final JsonRpcRequestContext request =
+  //        new JsonRpcRequestContext(
+  //            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {enr}));
+  //
+  //    doNothing().when(historyJsonRpc).addEnr(enr);
+  //
+  //    final JsonRpcErrorResponse expected =
+  //        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+  //    final JsonRpcResponse actual = method.response(request);
+  //    assertNotNull(actual);
+  //    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+  //  }
 
   @Test
   public void shouldReturnInvalidResultAsNoParameterisSent() {

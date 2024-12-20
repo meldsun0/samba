@@ -137,7 +137,8 @@ public class FindNodeMessageTests {
 
     assertEquals(MessageType.NODES, portalWireMessage.getMessageType());
     assertEquals(
-        homeNodeRecord.asEnr(), ((Nodes) portalWireMessage.getMessage()).getEnrList().getFirst());
+        homeNodeRecord.asBase64(),
+        ((Nodes) portalWireMessage.getMessage()).getEnrList().getFirst());
   }
 
   @NotNull

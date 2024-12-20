@@ -101,10 +101,17 @@ View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
 ```
+## JSON-RPC API 
+- portal_historyPing
+- portal_historyFindNodes
+- portal_historyAddEnr
+- portal_historyGetEnr
+- portal_historyDeleteEnr
 
 
-
-
+- discv5_nodeInfo, 
+- discv5_updateNodeInfo, 
+- discv5_getEnr
 
 
 

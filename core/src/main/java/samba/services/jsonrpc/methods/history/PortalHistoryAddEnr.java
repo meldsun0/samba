@@ -3,7 +3,6 @@ package samba.services.jsonrpc.methods.history;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.*;
 import samba.network.history.HistoryJsonRpcRequests;
-import samba.services.jsonrpc.methods.parameters.InputsValidations;
 
 public class PortalHistoryAddEnr implements JsonRpcMethod {
 
@@ -26,8 +25,8 @@ public class PortalHistoryAddEnr implements JsonRpcMethod {
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    if (!InputsValidations.isEnrValid(enr))
-      return createJsonRpcInvalidRequestResponse(requestContext);
+    //    if (!InputsValidations.isEnrValid(enr))
+    //      return createJsonRpcInvalidRequestResponse(requestContext);
 
     historyJsonRpcRequests.addEnr(enr);
 

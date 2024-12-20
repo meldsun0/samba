@@ -92,15 +92,18 @@ public class HistoryNetwork extends BaseNetwork
         .thenCompose(
             nodesMessage -> {
               Nodes nodes = nodesMessage.getMessage();
-              // SafeFuture.runAsync(() -> {
-              nodes.getEnrList().stream()
-                  .map(nodeRecordFactory::fromEnr)
-                  .filter(this::isNotHomeNode)
-                  .filter(node -> !node.asEnr().equals(nodeRecord.asEnr()))
-                  .filter(this::isPossibleNodeCandidate)
-                  .forEach(
-                      node -> this.ping(node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
-              //   });
+              SafeFuture.runAsync(
+                  () -> {
+                    nodes.getEnrList().stream()
+                        .map(nodeRecordFactory::fromEnr)
+                        .filter(this::isNotHomeNode)
+                        .filter(node -> !node.asEnr().equals(nodeRecord.asEnr()))
+                        .filter(this::isPossibleNodeCandidate)
+                        .forEach(
+                            node ->
+                                this.ping(
+                                    node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
+                  });
               return SafeFuture.completedFuture(Optional.of(nodes));
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
@@ -240,14 +243,14 @@ public class HistoryNetwork extends BaseNetwork
         .forEach(
             distance -> {
               if (distance == 0) {
-                nodesPayload.add(this.getHomeNodeAsEnr());
+                nodesPayload.add(this.getHomeNodeAsBase64());
               } else {
                 // TODO Check max bytes to be sent and decide what to do if not the initialization
                 // of Nodes will fail.
                 this.routingTable
                     .getNodes(distance)
                     .filter(node -> !srcNode.asEnr().equals(node.asEnr()))
-                    .forEach(node -> nodesPayload.add(node.asEnr()));
+                    .forEach(node -> nodesPayload.add(node.asBase64()));
               }
             });
     return new Nodes(nodesPayload);
@@ -306,6 +309,10 @@ public class HistoryNetwork extends BaseNetwork
 
   private String getHomeNodeAsEnr() {
     return this.discv5Client.getHomeNodeRecord().asEnr();
+  }
+
+  private String getHomeNodeAsBase64() {
+    return this.discv5Client.getHomeNodeRecord().asBase64();
   }
 
   private boolean isPossibleNodeCandidate(NodeRecord node) {

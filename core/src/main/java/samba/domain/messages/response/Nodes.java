@@ -97,6 +97,10 @@ public class Nodes implements PortalWireMessage {
     return Objects.hashCode(getEnrList(), getTotal());
   }
 
+  public List<String> getEnrsWithENRPerItem() {
+    return this.getEnrList().stream().map(item -> "enr:" + item.replace("=", "")).toList();
+  }
+
   public String toString() {
     return "Nodes{ total=" + total + ", enrs=" + enrs + '}';
   }
