@@ -12,9 +12,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.storage.rocksdb;
+package samba.rocksdb;
 
 import static java.util.stream.Collectors.toUnmodifiableSet;
+
+import samba.rocksdb.exceptions.InvalidConfigurationException;
+import samba.rocksdb.exceptions.StorageException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;

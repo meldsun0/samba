@@ -1,4 +1,6 @@
-package samba.storage.rocksdb;
+package samba.rocksdb;
+
+import samba.rocksdb.exceptions.StorageException;
 
 import java.io.Closeable;
 import java.util.Optional;

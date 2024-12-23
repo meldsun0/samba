@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.storage.rocksdb;
+package samba.rocksdb;
 
 import static com.google.common.base.Preconditions.checkState;
 

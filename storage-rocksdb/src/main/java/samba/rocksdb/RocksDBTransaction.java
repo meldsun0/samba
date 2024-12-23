@@ -1,6 +1,8 @@
-package samba.storage.rocksdb;
+package samba.rocksdb;
 
 import static com.google.common.base.Preconditions.checkState;
+
+import samba.rocksdb.exceptions.StorageException;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

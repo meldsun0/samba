@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toUnmodifiableSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import samba.storage.rocksdb.*;
+import samba.rocksdb.exceptions.StorageException;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

@@ -12,7 +12,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.storage.rocksdb;
+package samba.rocksdb;
+
+import samba.rocksdb.exceptions.StorageException;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;

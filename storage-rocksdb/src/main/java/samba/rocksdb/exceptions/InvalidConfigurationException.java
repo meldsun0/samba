@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.storage.rocksdb;
+package samba.rocksdb.exceptions;
 
 /** The Invalid configuration exception. */
 public class InvalidConfigurationException extends IllegalArgumentException {

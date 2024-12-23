@@ -4,7 +4,8 @@ import static com.google.common.base.Preconditions.*;
 
 import samba.domain.content.ContentType;
 import samba.domain.content.ContentUtil;
-import samba.storage.rocksdb.*;
+import samba.rocksdb.*;
+import samba.rocksdb.exceptions.StorageException;
 
 import java.nio.file.Path;
 import java.util.Arrays;

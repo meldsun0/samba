@@ -1,4 +1,6 @@
-package samba.storage.rocksdb;
+package samba.rocksdb;
+
+import samba.rocksdb.exceptions.StorageException;
 
 import java.util.List;
 
@@ -37,6 +39,11 @@ public class RocksDBInstance extends RocksDBStorage {
 
   RocksDB getDB() {
     return transactionDB;
+  }
+
+  @Override
+  public boolean containsKey(Segment segment, byte[] key) throws StorageException {
+    return super.containsKey(segment, key);
   }
 
   @Override

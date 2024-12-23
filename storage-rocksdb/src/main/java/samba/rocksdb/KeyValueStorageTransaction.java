@@ -1,4 +1,6 @@
-package samba.storage.rocksdb;
+package samba.rocksdb;
+
+import samba.rocksdb.exceptions.StorageException;
 
 public interface KeyValueStorageTransaction {
 
