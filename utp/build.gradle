@@ -16,6 +16,8 @@ dependencies {
   implementation libs.assertj.core
   implementation libs.mockito.core
 
+  implementation libs.tuweni.bytes
+
   implementation 'io.netty:netty-all:4.1.111.Final'
   implementation 'io.projectreactor:reactor-core:3.6.7'
 

@@ -8,7 +8,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
-public interface Network {
+public interface  Network {
 
   SafeFuture<Optional<Pong>> ping(NodeRecord node);
 

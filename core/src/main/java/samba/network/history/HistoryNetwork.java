@@ -43,6 +43,7 @@ public class HistoryNetwork extends BaseNetwork
   final NodeRecordFactory nodeRecordFactory;
   protected RoutingTable routingTable;
 
+
   public HistoryNetwork(Discv5Client client, HistoryDB historyDB) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.ONE; // TODO must come from argument
@@ -123,6 +124,7 @@ public class HistoryNetwork extends BaseNetwork
 
               switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID -> {
+
                   /*
                   Open a uTP Connection on this port content.getConnectionId()
                   SafeFuture.runAsync(() -> {

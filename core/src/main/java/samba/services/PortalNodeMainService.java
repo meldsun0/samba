@@ -135,6 +135,7 @@ public class PortalNodeMainService extends Service {
         .addHandler(MessageType.FIND_NODES, new FindNodesHandler())
         .addHandler(MessageType.FIND_CONTENT, new FindContentHandler())
         .addHandler(MessageType.OFFER, new OfferHandler());
+
   }
 
   private void initConnectionService() {
