@@ -78,6 +78,14 @@ public class BlockHeaderProofUnion {
     return null;
   }
 
+  public SszUnion getUnion() {
+    return union;
+  }
+
+  public static SszUnionSchema getSchema() {
+    return schema;
+  }
+
   public static SszUnion decodeBytes(Bytes bytes) {
     SszUnion decodedBytes = (SszUnion) schema.sszDeserialize(bytes);
     return decodedBytes;
