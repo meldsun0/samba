@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+
+import samba.domain.content.ContentProofType;
 import tech.pegasys.teku.infrastructure.ssz.SszUnion;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
@@ -30,29 +32,29 @@ public class BlockHeaderProofUnion {
   }
 
   public BlockHeaderProofUnion(
-      Byte proofType, List<Bytes32> blockProofHistoricalHashesAccumulator) {
+      ContentProofType proofType, List<Bytes32> blockProofHistoricalHashesAccumulator) {
     this.union =
         schema.createFromValue(
-            proofType.intValue(),
+            proofType.getValue(),
             SszBlockProofHistoricalHashesAccumulatorVector.createVector(
                 blockProofHistoricalHashesAccumulator));
   }
 
   public BlockHeaderProofUnion(
-      Byte proofType,
+      ContentProofType proofType,
       List<Bytes32> beaconBlockProof,
       Bytes32 beaconBlockRoot,
       List<Bytes32> executionBlockProof,
       UInt64 slot) {
     this.union =
         schema.createFromValue(
-            proofType.intValue(),
+            proofType.getValue(),
             new BlockProofHistoricalSummariesContainer(
                 beaconBlockProof, beaconBlockRoot, executionBlockProof, slot));
   }
 
-  public int getProofType() {
-    return union.getSelector();
+  public ContentProofType getProofType() {
+    return ContentProofType.fromValue(union.getSelector());
   }
 
   public List<Bytes32> getBlockProofHistoricalHashesAccumulator() {
