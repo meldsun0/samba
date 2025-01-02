@@ -12,7 +12,7 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class BlockHeaderProofUnion {
 
-  private static SszUnionSchema schema =
+  private static SszUnionSchema<SszUnion> schema =
       SszUnionSchema.create(
           SszPrimitiveSchemas.NONE_SCHEMA,
           SszBlockProofHistoricalHashesAccumulatorVector.getSchema(),
@@ -82,12 +82,12 @@ public class BlockHeaderProofUnion {
     return union;
   }
 
-  public static SszUnionSchema getSchema() {
+  public static SszUnionSchema<SszUnion> getSchema() {
     return schema;
   }
 
   public static SszUnion decodeBytes(Bytes bytes) {
-    SszUnion decodedBytes = (SszUnion) schema.sszDeserialize(bytes);
+    SszUnion decodedBytes = schema.sszDeserialize(bytes);
     return decodedBytes;
   }
 
