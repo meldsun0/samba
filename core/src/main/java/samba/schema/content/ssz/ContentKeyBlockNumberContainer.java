@@ -7,7 +7,8 @@ import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
-public class ContentKeyBlockNumberContainer extends Container1<ContentKeyBlockNumberContainer, SszUInt64> {
+public class ContentKeyBlockNumberContainer
+    extends Container1<ContentKeyBlockNumberContainer, SszUInt64> {
 
   public ContentKeyBlockNumberContainer(UInt64 blockNumber) {
     super(ContentKeyBlockNumberContainerSchema.INSTANCE, SszUInt64.of(blockNumber));

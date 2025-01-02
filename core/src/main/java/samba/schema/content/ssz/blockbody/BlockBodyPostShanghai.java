@@ -1,4 +1,4 @@
-package samba.schema.content.ssz;
+package samba.schema.content.ssz.blockbody;
 
 import samba.network.history.HistoryConstants;
 

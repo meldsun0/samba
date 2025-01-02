@@ -1,11 +1,11 @@
 package samba.schema.content.ssz.blockheader;
 
+import samba.domain.content.ContentProofType;
+
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-
-import samba.domain.content.ContentProofType;
 import tech.pegasys.teku.infrastructure.ssz.SszUnion;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;

@@ -1,14 +1,14 @@
 package samba.schema.content.ssz;
 
 import org.apache.tuweni.bytes.Bytes32;
-
 import tech.pegasys.teku.infrastructure.ssz.containers.Container1;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema1;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
-public class ContentKeyBlockHashContainer extends Container1<ContentKeyBlockHashContainer, SszBytes32> {
+public class ContentKeyBlockHashContainer
+    extends Container1<ContentKeyBlockHashContainer, SszBytes32> {
 
   public ContentKeyBlockHashContainer(Bytes32 blockHash) {
     super(ContentKeyBlockHashContainerSchema.INSTANCE, SszBytes32.of(blockHash));
