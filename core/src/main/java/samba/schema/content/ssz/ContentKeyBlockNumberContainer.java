@@ -1,7 +1,6 @@
 package samba.schema.content.ssz;
 
 import org.apache.tuweni.bytes.Bytes;
-
 import tech.pegasys.teku.infrastructure.ssz.containers.Container1;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema1;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszUInt64;

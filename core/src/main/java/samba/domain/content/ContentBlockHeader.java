@@ -1,13 +1,13 @@
 package samba.domain.content;
 
+import samba.schema.content.ssz.blockheader.BlockHeaderProofUnion;
+import samba.schema.content.ssz.blockheader.BlockHeaderWithProofContainer;
+
 import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
-
-import samba.schema.content.ssz.blockheader.BlockHeaderProofUnion;
-import samba.schema.content.ssz.blockheader.BlockHeaderWithProofContainer;
 
 public class ContentBlockHeader {
 
