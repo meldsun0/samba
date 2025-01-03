@@ -1,0 +1,58 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package samba.packet.impl;
+
+import org.apache.tuweni.bytes.Bytes;
+import samba.packet.BytesSerializable;
+import samba.util.DecodeException;
+
+
+import java.util.Objects;
+
+public abstract class AbstractBytes implements BytesSerializable {
+
+  private final Bytes bytes;
+
+  public static Bytes checkStrictSize(Bytes bytes, int expectedSize) throws DecodeException {
+    if (bytes.size() != expectedSize) {
+      throw new DecodeException(
+          "Data size (" + bytes.size() + ") doesn't match expected: " + expectedSize);
+    }
+    return bytes;
+  }
+
+  public static Bytes checkMinSize(Bytes bytes, int minimalSize) throws DecodeException {
+    if (bytes.size() < minimalSize) {
+      throw new DecodeException(
+          "Data is too small: " + bytes.size() + ", (expected at least " + minimalSize + " bytes)");
+    }
+    return bytes;
+  }
+
+  protected AbstractBytes(Bytes bytes) {
+    this.bytes = bytes;
+  }
+
+  @Override
+  public Bytes getBytes() {
+    return bytes;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    AbstractBytes that = (AbstractBytes) o;
+    return Objects.equals(bytes, that.bytes);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(bytes);
+  }
+}

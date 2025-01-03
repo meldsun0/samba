@@ -1,4 +1,4 @@
-package samba.message;
+package samba.packet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 /**

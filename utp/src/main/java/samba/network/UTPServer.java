@@ -1,10 +1,4 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
-
 package samba.network;
-
-
 
 import samba.pipeline.Envelope;
 
@@ -14,6 +8,7 @@ import org.reactivestreams.Publisher;
 
 /** UTP server which listens to incoming messages according to setup */
 public interface UTPServer {
+
   CompletableFuture<?> start();
 
   void stop();

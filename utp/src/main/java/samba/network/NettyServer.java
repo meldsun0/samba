@@ -9,10 +9,10 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.ReplayProcessor;
 import samba.pipeline.Envelope;
 
@@ -25,6 +25,7 @@ public class NettyServer implements UTPServer {
     private static final Logger LOG = LogManager.getLogger(NettyServer.class);
 
     private final ReplayProcessor<Envelope> incomingPackets = ReplayProcessor.cacheLast();
+    private final FluxSink<Envelope> incomingSink = incomingPackets.sink();
     private static final int RECREATION_TIMEOUT = 5000;
     private final InetSocketAddress listenAddress;
     private AtomicBoolean listen = new AtomicBoolean(false);
@@ -57,13 +58,13 @@ public class NettyServer implements UTPServer {
                             public void initChannel(NioDatagramChannel ch) {
                                 final ChannelPipeline pipeline = ch.pipeline();
                                 pipeline
-                                        .addFirst(new LoggingHandler(LogLevel.TRACE))
+                                        .addFirst(new LoggingHandler(LogLevel.INFO))
                                         .addLast(new DatagramToEnvelope())
                                         .addLast(new IncomingMessageSink(incomingSink));
 
-                                if (trafficReadLimit != 0) {
-                                    pipeline.addFirst(new ChannelTrafficShapingHandler(0, trafficReadLimit));
-                                }
+//                                if (trafficReadLimit != 0) {
+//                                    pipeline.addFirst(new ChannelTrafficShapingHandler(0, trafficReadLimit));
+//                                }
                             }
                         });
 
