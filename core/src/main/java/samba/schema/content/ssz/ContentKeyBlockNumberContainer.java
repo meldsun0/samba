@@ -1,5 +1,7 @@
 package samba.schema.content.ssz;
 
+import org.apache.tuweni.bytes.Bytes;
+
 import tech.pegasys.teku.infrastructure.ssz.containers.Container1;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema1;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszUInt64;
@@ -24,6 +26,10 @@ public class ContentKeyBlockNumberContainer
 
   public static ContentKeyBlockNumberContainerSchema createSchema() {
     return new ContentKeyBlockNumberContainerSchema();
+  }
+
+  public static ContentKeyBlockNumberContainer decodeBytes(Bytes sszBytes) {
+    return ContentKeyBlockNumberContainerSchema.INSTANCE.sszDeserialize(sszBytes);
   }
 
   public static class ContentKeyBlockNumberContainerSchema
