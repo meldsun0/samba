@@ -72,6 +72,10 @@ public class SszWithdrawalList {
         .collect(Collectors.toList());
   }
 
+  public static SszWithdrawalList decodeBytes(Bytes bytes) {
+    return new SszWithdrawalList(withdrawalListSchema.sszDeserialize(bytes));
+  }
+
   public Bytes sszSerialize() {
     return withdrawalList.sszSerialize();
   }

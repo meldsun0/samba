@@ -72,6 +72,10 @@ public class SszReceiptList {
         .collect(Collectors.toList());
   }
 
+  public static SszReceiptList decodeBytes(Bytes bytes) {
+    return new SszReceiptList(receiptListSchema.sszDeserialize(bytes));
+  }
+
   public Bytes sszSerialize() {
     return receiptList.sszSerialize();
   }

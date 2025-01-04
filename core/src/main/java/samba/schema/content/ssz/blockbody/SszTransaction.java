@@ -9,7 +9,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszTransaction {
 
-  private static SszByteListSchema transactionSchema =
+  private static SszByteListSchema<SszByteList> transactionSchema =
       SszByteListSchema.create(HistoryConstants.MAX_TRANSACTION_LENGTH);
   private final SszByteList transaction;
 
@@ -25,7 +25,7 @@ public class SszTransaction {
     this.transaction = transactionSchema.fromBytes(transactionTransaction.encoded());
   }
 
-  public static SszByteListSchema getSchema() {
+  public static SszByteListSchema<SszByteList> getSchema() {
     return transactionSchema;
   }
 

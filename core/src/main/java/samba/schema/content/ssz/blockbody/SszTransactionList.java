@@ -66,6 +66,10 @@ public class SszTransactionList {
         .collect(Collectors.toList());
   }
 
+  public static SszTransactionList decodeBytes(Bytes bytes) {
+    return new SszTransactionList(transactionListSchema.sszDeserialize(bytes));
+  }
+
   public Bytes sszSerialize() {
     return transactionList.sszSerialize();
   }

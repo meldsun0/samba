@@ -15,7 +15,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszUnclesByteList {
 
-  private static SszByteListSchema unclesSchema =
+  private static SszByteListSchema<SszByteList> unclesSchema =
       SszByteListSchema.create(HistoryConstants.MAX_ENCODED_UNCLES_LENGTH);
   private final SszByteList uncles;
 
@@ -35,7 +35,7 @@ public class SszUnclesByteList {
     this.uncles = unclesSchema.fromBytes(unclesRLP.encoded());
   }
 
-  public static SszByteListSchema getSchema() {
+  public static SszByteListSchema<SszByteList> getSchema() {
     return unclesSchema;
   }
 

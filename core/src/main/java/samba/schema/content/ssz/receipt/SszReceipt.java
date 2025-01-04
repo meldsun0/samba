@@ -11,7 +11,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszReceipt {
 
-  private static SszByteListSchema receiptSchema =
+  private static SszByteListSchema<SszByteList> receiptSchema =
       SszByteListSchema.create(HistoryConstants.MAX_RECEIPT_LENGTH);
   private final SszByteList receipt;
 
@@ -29,7 +29,7 @@ public class SszReceipt {
     this.receipt = receiptSchema.fromBytes(receiptBytes.encoded());
   }
 
-  public static SszByteListSchema getSchema() {
+  public static SszByteListSchema<SszByteList> getSchema() {
     return receiptSchema;
   }
 

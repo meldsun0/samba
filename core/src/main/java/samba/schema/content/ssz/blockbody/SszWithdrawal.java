@@ -10,7 +10,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszWithdrawal {
 
-  private static SszByteListSchema withdrawalSchema =
+  private static SszByteListSchema<SszByteList> withdrawalSchema =
       SszByteListSchema.create(HistoryConstants.MAX_WITHDRAWAL_LENGTH);
   private final SszByteList withdrawal;
 
@@ -28,7 +28,7 @@ public class SszWithdrawal {
     this.withdrawal = withdrawalSchema.fromBytes(withdrawalBytes.encoded());
   }
 
-  public static SszByteListSchema getSchema() {
+  public static SszByteListSchema<SszByteList> getSchema() {
     return withdrawalSchema;
   }
 

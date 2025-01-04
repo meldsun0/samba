@@ -1,9 +1,6 @@
 package samba.schema.content.ssz.blockbody;
 
-import samba.network.history.HistoryConstants;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
@@ -13,8 +10,6 @@ import tech.pegasys.teku.infrastructure.ssz.SszList;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszByteList;
 import tech.pegasys.teku.infrastructure.ssz.containers.Container3;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema3;
-import tech.pegasys.teku.infrastructure.ssz.schema.SszListSchema;
-import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
 public class BlockBodyPostShanghaiContainer
@@ -31,16 +26,6 @@ public class BlockBodyPostShanghaiContainer
 
   public BlockBodyPostShanghaiContainer(TreeNode backingNode) {
     super(BlockBodyPostShanghaiContainerSchema.INSTANCE, backingNode);
-  }
-
-  private static SszList<SszByteList> createSszBytesList(List<Bytes> list) {
-    SszByteListSchema byteListSchema =
-        SszByteListSchema.create(HistoryConstants.MAX_TRANSACTION_LENGTH);
-    List<SszByteList> sszByteLists =
-        list.stream().map(byteListSchema::fromBytes).collect(Collectors.toList());
-    return (SszList<SszByteList>)
-        SszListSchema.create(byteListSchema, HistoryConstants.MAX_TRANSACTION_COUNT)
-            .createFromElements(sszByteLists);
   }
 
   public List<Transaction> getTransactions() {
