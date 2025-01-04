@@ -20,7 +20,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteVectorSche
 public class ContentContainer {
 
   private static final int CONTENT_KEY_BYTE_SIZE = 2;
-  private static SszUnionSchema schema =
+  private static SszUnionSchema<SszUnion> schema =
       SszUnionSchema.create(
           createByteVectorSchema(CONTENT_KEY_BYTE_SIZE),
           createByteListSchema(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES),
@@ -55,20 +55,22 @@ public class ContentContainer {
     }
   }
 
-  private static SszByteVectorSchema createByteVectorSchema(int size) {
+  private static SszByteVectorSchema<SszByteVector> createByteVectorSchema(int size) {
     return SszByteVectorSchema.create(size);
   }
 
-  private static SszByteListSchema createByteListSchema(int maxSize) {
+  private static SszByteListSchema<SszByteList> createByteListSchema(int maxSize) {
     return SszByteListSchema.create(maxSize);
   }
 
+  @SuppressWarnings("unchecked")
   private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
     SszByteListSchema byteListSchema =
         SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
     return SszListSchema.create(byteListSchema, PortalWireMessage.MAX_ENRS);
   }
 
+  @SuppressWarnings("unchecked")
   private static SszList<SszByteList> createSszBytesList(List<Bytes> enrs) {
     SszByteListSchema byteListSchema =
         SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES);
@@ -99,6 +101,7 @@ public class ContentContainer {
     return Bytes.EMPTY;
   }
 
+  @SuppressWarnings("unchecked")
   public List<String> getEnrs() {
     if (union.getSelector() == 2) {
       SszList<SszByteList> sszByteLists = (SszList<SszByteList>) union.getValue();
@@ -112,7 +115,7 @@ public class ContentContainer {
   }
 
   public static ContentContainer decodePacket(Bytes packet) {
-    SszUnion decodedPacket = (SszUnion) schema.sszDeserialize(packet);
+    SszUnion decodedPacket = schema.sszDeserialize(packet);
     return new ContentContainer(decodedPacket);
   }
 

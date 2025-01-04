@@ -30,6 +30,7 @@ dependencies {
   implementation libs.besu.internal.config
   implementation libs.besu.internal.plugin.api //TODO need to be removed
   implementation libs.besu.internal.rlp
+  implementation libs.besu.evm
 
   implementation libs.teku.internal.async
   implementation libs.teku.internal.infrastructure.events

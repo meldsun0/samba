@@ -3,6 +3,7 @@ tuweni = "2.3.1"
 log4j= "2.23.1"
 vertex= "4.5.9"
 besuInternal = "24.7.0"
+besuEvm = "24.7.0"
 tekuInternal =  "24.8.0"
 picocli = "4.6.1"
 netty = "4.1.110.Final"
@@ -39,6 +40,7 @@ besu-internal-core = { module = "org.hyperledger.besu.internal:core", version.re
 besu-internal-config = { module = "org.hyperledger.besu.internal:config", version.ref = "besuInternal"}
 besu-internal-rlp = { module = "org.hyperledger.besu.internal:rlp", version.ref = "besuInternal"}
 besu-internal-plugin-api = { module = "org.hyperledger.besu:plugin-api", version.ref = "besuInternal"}
+besu-evm = { module = "org.hyperledger.besu:evm", version.ref = "besuEvm" }
 
 teku-internal-infrastructure-events = { module = "tech.pegasys.teku.internal:infrastructure-events", version.ref = "tekuInternal"}
 teku-internal-async = { module = "tech.pegasys.teku.internal:async", version.ref = "tekuInternal"}
