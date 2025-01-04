@@ -30,6 +30,7 @@ public class SszTransactionList {
     return transactionListSchema;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
     SszByteListSchema byteListSchema = SszTransaction.getSchema();
     return SszListSchema.create(byteListSchema, HistoryConstants.MAX_TRANSACTION_COUNT);

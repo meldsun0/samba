@@ -8,16 +8,17 @@ import tech.pegasys.teku.infrastructure.ssz.SszList;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszListSchema;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
-import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszPrimitiveListSchema;
 
 public class SszExecutionBlockProofCapellaList {
 
   private static final int EXECUTION_BLOCK_PROOF_LIMIT = 12;
+
   // TODO
+  @SuppressWarnings("unchecked")
   private static final SszListSchema<SszBytes32, SszList<SszBytes32>> schema =
       (SszListSchema<SszBytes32, SszList<SszBytes32>>)
-          SszPrimitiveListSchema.create(
-              SszPrimitiveSchemas.BYTES32_SCHEMA, EXECUTION_BLOCK_PROOF_LIMIT);
+          SszListSchema.create(SszPrimitiveSchemas.BYTES32_SCHEMA, EXECUTION_BLOCK_PROOF_LIMIT);
+
   private final SszList<SszBytes32> ExecutionBlockProof;
 
   public SszExecutionBlockProofCapellaList(SszList<SszBytes32> ExecutionBlockProof) {

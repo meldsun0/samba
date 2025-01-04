@@ -15,7 +15,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszWithdrawalList {
 
-  private static SszListSchema<SszByteList, SszList<SszByteList>> withdrawalListSchema =
+  private static final SszListSchema<SszByteList, SszList<SszByteList>> withdrawalListSchema =
       createByteListListSchema();
   private final SszList<SszByteList> withdrawalList;
 
@@ -31,6 +31,7 @@ public class SszWithdrawalList {
     return withdrawalListSchema;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
     SszByteListSchema byteListSchema = SszWithdrawal.getSchema();
     return SszListSchema.create(byteListSchema, HistoryConstants.MAX_WITHDRAWAL_COUNT);

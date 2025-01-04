@@ -15,7 +15,7 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 
 public class SszReceiptList {
 
-  private static SszListSchema<SszByteList, SszList<SszByteList>> receiptListSchema =
+  private static final SszListSchema<SszByteList, SszList<SszByteList>> receiptListSchema =
       createByteListListSchema();
   private final SszList<SszByteList> receiptList;
 
@@ -31,6 +31,7 @@ public class SszReceiptList {
     return receiptListSchema;
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static SszListSchema<SszByteList, SszList<SszByteList>> createByteListListSchema() {
     SszByteListSchema byteListSchema = SszReceipt.getSchema();
     return SszListSchema.create(byteListSchema, HistoryConstants.MAX_TRANSACTION_COUNT);
