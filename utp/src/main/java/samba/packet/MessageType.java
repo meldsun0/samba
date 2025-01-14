@@ -6,19 +6,19 @@ import static com.google.common.base.Preconditions.checkArgument;
  * +-------+-------+---------------+---------------+---------------+
  * | type  | ver   | extension     | connection_id                 |
  */
-public enum MessageTypeAndVersion {
-  ST_DATA(0x01),//1
-  ST_FIN(0x11),//17
-  ST_STATE(0x21),//33
-  ST_RESET(0x31),//49
-  ST_SYN(0x41);//65
+public enum MessageType {
+  ST_DATA(0x0),
+  ST_FIN(0x1),
+  ST_STATE(0x2),
+  ST_RESET(0x3),
+  ST_SYN(0x4);
 
   private final byte value;
-  private static final int MAX_VALUE = 0x41;
+  private static final int MAX_VALUE = 0x4;
   private static final int BYTE_MASK = 0xFF;
 
-  MessageTypeAndVersion(int value) {
-    checkArgument(value <= MAX_VALUE, "Packet type ID must be in range [0x01, 0x41)");
+  MessageType(int value) {
+    checkArgument(value <= MAX_VALUE, "Packet type ID must be in range [0x0, 0x4])");
     this.value = (byte) (value & BYTE_MASK);
   }
 
@@ -26,9 +26,9 @@ public enum MessageTypeAndVersion {
     return value;
   }
 
-  public static MessageTypeAndVersion fromInt(int value) {
+  public static MessageType fromInt(int value) {
     value = value & BYTE_MASK;
-    for (MessageTypeAndVersion messageType : MessageTypeAndVersion.values()) {
+    for (MessageType messageType : MessageType.values()) {
       if (messageType.value == value) {
         return messageType;
       }

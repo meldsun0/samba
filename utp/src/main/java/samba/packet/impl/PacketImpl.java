@@ -1,22 +1,8 @@
-/*
- * SPDX-License-Identifier: Apache-2.0
- */
 package samba.packet.impl;
 
-import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.packet.HandshakeMessagePacket.HandshakeAuthData;
-import org.ethereum.beacon.discovery.packet.OrdinaryMessagePacket.OrdinaryAuthData;
-import org.ethereum.beacon.discovery.packet.WhoAreYouPacket.WhoAreYouAuthData;
-import org.ethereum.beacon.discovery.packet.done.AuthData;
-import org.ethereum.beacon.discovery.packet.done.Header;
-import org.ethereum.beacon.discovery.packet.done.Packet;
-import org.ethereum.beacon.discovery.packet.impl.HeaderImpl;
-import org.ethereum.beacon.discovery.packet.impl.done.AbstractBytes;
-import org.ethereum.beacon.discovery.type.Bytes16;
-import org.ethereum.beacon.discovery.util.done.DecodeException;
 
-public abstract class PacketImpl<TAuthData extends AuthData> extends AbstractBytes
-    implements Packet<TAuthData> {
+
+public abstract class PacketImpl extends AbstractBytes implements Packet {
 
   @SuppressWarnings("unchecked")
   public static Packet<?> decrypt(Bytes data, Bytes16 iv, Bytes16 destNodeId)

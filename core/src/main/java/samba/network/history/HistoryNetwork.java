@@ -125,6 +125,8 @@ public class HistoryNetwork extends BaseNetwork
               switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID -> {
 
+                  int conenctionId = content.getConnectionId();
+                  UTP
                   /*
                   Open a uTP Connection on this port content.getConnectionId()
                   SafeFuture.runAsync(() -> {
