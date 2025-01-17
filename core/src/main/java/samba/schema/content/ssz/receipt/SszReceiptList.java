@@ -27,6 +27,10 @@ public class SszReceiptList {
     this.receiptList = createSszBytesList(receipts);
   }
 
+  public SszReceiptList(Bytes bytes) {
+    this.receiptList = receiptListSchema.sszDeserialize(bytes);
+  }
+
   public static SszListSchema<SszByteList, SszList<SszByteList>> getSchema() {
     return receiptListSchema;
   }
