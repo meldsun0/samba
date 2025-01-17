@@ -49,7 +49,6 @@ public class SszUnclesByteList {
 
   public static List<BlockHeader> decodeSszUncles(SszByteList uncles) {
     BytesValueRLPInput unclesRLP = new BytesValueRLPInput(uncles.getBytes(), false);
-    unclesRLP.enterList();
     List<BlockHeader> unclesList =
         unclesRLP.readList(
             (RLPInput in) -> BlockHeader.readFrom(in, new MainnetBlockHeaderFunctions()));
@@ -62,7 +61,6 @@ public class SszUnclesByteList {
 
   public List<BlockHeader> getDecodedUncles() {
     BytesValueRLPInput unclesRLP = new BytesValueRLPInput(uncles.getBytes(), false);
-    unclesRLP.enterList();
     List<BlockHeader> unclesList =
         unclesRLP.readList(
             (RLPInput in) -> BlockHeader.readFrom(in, new MainnetBlockHeaderFunctions()));

@@ -27,6 +27,10 @@ public class SszWithdrawalList {
     this.withdrawalList = createSszBytesList(withdrawals);
   }
 
+  public SszWithdrawalList(Bytes bytes) {
+    this.withdrawalList = withdrawalListSchema.sszDeserialize(bytes);
+  }
+
   public static SszListSchema<SszByteList, SszList<SszByteList>> getSchema() {
     return withdrawalListSchema;
   }
