@@ -71,10 +71,9 @@ public class BlockBodyPostShanghaiContainerTest {
     List<Transaction> decodedTransactions = blockBodyPostShanghaiContainer.getTransactions();
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
-    for (int i = 0; i < 3; i++)
-      assert (this.transactions.get(i).equals(decodedTransactions.get(i)));
-    for (int i = 0; i < 3; i++) assert (this.uncles.get(i).equals(decodedUncles.get(i)));
-    for (int i = 0; i < 3; i++) assert (this.withdrawals.get(i).equals(decodedWithdrawals.get(i)));
+    assertEquals(this.transactions, decodedTransactions);
+    assertEquals(this.uncles, decodedUncles);
+    assertEquals(this.withdrawals, decodedWithdrawals);
   }
 
   @Test
@@ -97,8 +96,8 @@ public class BlockBodyPostShanghaiContainerTest {
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
     assertTrue(decodedTransactions.isEmpty());
-    for (int i = 0; i < 3; i++) assert (this.uncles.get(i).equals(decodedUncles.get(i)));
-    for (int i = 0; i < 3; i++) assert (this.withdrawals.get(i).equals(decodedWithdrawals.get(i)));
+    assertEquals(this.uncles, decodedUncles);
+    assertEquals(this.withdrawals, decodedWithdrawals);
   }
 
   @Test
@@ -108,10 +107,9 @@ public class BlockBodyPostShanghaiContainerTest {
     List<Transaction> decodedTransactions = blockBodyPostShanghaiContainer.getTransactions();
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
-    for (int i = 0; i < 3; i++)
-      assert (this.transactions.get(i).equals(decodedTransactions.get(i)));
+    assertEquals(this.transactions, decodedTransactions);
     assertTrue(decodedUncles.isEmpty());
-    for (int i = 0; i < 3; i++) assert (this.withdrawals.get(i).equals(decodedWithdrawals.get(i)));
+    assertEquals(this.withdrawals, decodedWithdrawals);
   }
 
   @Test
@@ -121,9 +119,8 @@ public class BlockBodyPostShanghaiContainerTest {
     List<Transaction> decodedTransactions = blockBodyPostShanghaiContainer.getTransactions();
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
-    for (int i = 0; i < 3; i++)
-      assert (this.transactions.get(i).equals(decodedTransactions.get(i)));
-    for (int i = 0; i < 3; i++) assert (this.uncles.get(i).equals(decodedUncles.get(i)));
+    assertEquals(this.transactions, decodedTransactions);
+    assertEquals(this.uncles, decodedUncles);
     assertTrue(decodedWithdrawals.isEmpty());
   }
 
@@ -136,7 +133,7 @@ public class BlockBodyPostShanghaiContainerTest {
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
     assertTrue(decodedTransactions.isEmpty());
     assertTrue(decodedUncles.isEmpty());
-    for (int i = 0; i < 3; i++) assert (this.withdrawals.get(i).equals(decodedWithdrawals.get(i)));
+    assertEquals(this.withdrawals, decodedWithdrawals);
   }
 
   @Test
@@ -147,7 +144,7 @@ public class BlockBodyPostShanghaiContainerTest {
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
     assertTrue(decodedTransactions.isEmpty());
-    for (int i = 0; i < 3; i++) assert (this.uncles.get(i).equals(decodedUncles.get(i)));
+    assertEquals(this.uncles, decodedUncles);
     assertTrue(decodedWithdrawals.isEmpty());
   }
 
@@ -158,8 +155,7 @@ public class BlockBodyPostShanghaiContainerTest {
     List<Transaction> decodedTransactions = blockBodyPostShanghaiContainer.getTransactions();
     List<BlockHeader> decodedUncles = blockBodyPostShanghaiContainer.getUncles();
     List<Withdrawal> decodedWithdrawals = blockBodyPostShanghaiContainer.getWithdrawals();
-    for (int i = 0; i < 3; i++)
-      assert (this.transactions.get(i).equals(decodedTransactions.get(i)));
+    assertEquals(this.transactions, decodedTransactions);
     assertTrue(decodedUncles.isEmpty());
     assertTrue(decodedWithdrawals.isEmpty());
   }
