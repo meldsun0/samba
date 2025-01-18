@@ -3,6 +3,7 @@ package samba.schema.content.ssz.blockheader;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.SszList;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
@@ -26,7 +27,15 @@ public class SszExecutionBlockProofCapellaList {
   }
 
   public SszExecutionBlockProofCapellaList(List<Bytes32> ExecutionBlockProof) {
+    if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_LIMIT) {
+      throw new IllegalArgumentException(
+          "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_LIMIT);
+    }
     this.ExecutionBlockProof = schema.createFromElements(createSszBytes32List(ExecutionBlockProof));
+  }
+
+  public SszExecutionBlockProofCapellaList(Bytes ExecutionBlockProof) {
+    this.ExecutionBlockProof = schema.sszDeserialize(ExecutionBlockProof);
   }
 
   public static SszListSchema<SszBytes32, SszList<SszBytes32>> getSchema() {
@@ -34,6 +43,10 @@ public class SszExecutionBlockProofCapellaList {
   }
 
   public static SszList<SszBytes32> createList(List<Bytes32> ExecutionBlockProof) {
+    if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_LIMIT) {
+      throw new IllegalArgumentException(
+          "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_LIMIT);
+    }
     return schema.createFromElements(createSszBytes32List(ExecutionBlockProof));
   }
 
@@ -51,5 +64,9 @@ public class SszExecutionBlockProofCapellaList {
 
   private static List<SszBytes32> createSszBytes32List(List<Bytes32> ExecutionBlockProof) {
     return ExecutionBlockProof.stream().map(SszBytes32::of).collect(Collectors.toList());
+  }
+
+  public Bytes sszSerialize() {
+    return ExecutionBlockProof.sszSerialize();
   }
 }

@@ -26,6 +26,10 @@ public class SszTransactionList {
     this.transactionList = createSszBytesList(transactions);
   }
 
+  public SszTransactionList(Bytes bytes) {
+    this.transactionList = transactionListSchema.sszDeserialize(bytes);
+  }
+
   public static SszListSchema<SszByteList, SszList<SszByteList>> getSchema() {
     return transactionListSchema;
   }

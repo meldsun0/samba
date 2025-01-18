@@ -29,7 +29,8 @@ public class BlockProofHistoricalSummariesContainer
       final UInt64 slot) {
     super(
         BlockProofHistoricalSummariesContainerSchema.INSTANCE,
-        SszBeaconBlockProofHistoricalRootsVector.createVector(beaconBlockProofHistoricalSummaries),
+        SszBeaconBlockProofHistoricalSummariesVector.createVector(
+            beaconBlockProofHistoricalSummaries),
         SszBytes32.of(blockRoot),
         SszExecutionBlockProofCapellaList.createList(executionBlockProof),
         SszUInt64.of(slot));
@@ -39,7 +40,7 @@ public class BlockProofHistoricalSummariesContainer
     super(BlockProofHistoricalSummariesContainerSchema.INSTANCE, backingNode);
   }
 
-  public List<Bytes32> getBeaconBlockProofHistoricalRoots() {
+  public List<Bytes32> getBeaconBlockProofHistoricalSummaries() {
     return getField0().asListUnboxed();
   }
 
@@ -75,7 +76,7 @@ public class BlockProofHistoricalSummariesContainer
 
     private BlockProofHistoricalSummariesContainerSchema() {
       super(
-          SszBeaconBlockProofHistoricalRootsVector.getSchema(),
+          SszBeaconBlockProofHistoricalSummariesVector.getSchema(),
           SszPrimitiveSchemas.BYTES32_SCHEMA,
           SszExecutionBlockProofCapellaList.getSchema(),
           SszPrimitiveSchemas.UINT64_SCHEMA);

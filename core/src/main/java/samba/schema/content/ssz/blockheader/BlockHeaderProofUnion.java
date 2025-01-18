@@ -8,6 +8,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.SszUnion;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
+import tech.pegasys.teku.infrastructure.ssz.primitive.SszNone;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszUnionSchema;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
@@ -27,8 +28,8 @@ public class BlockHeaderProofUnion {
     this.union = union;
   }
 
-  public BlockHeaderProofUnion(Byte proofType) {
-    this.union = schema.createFromValue(proofType.intValue(), null);
+  public BlockHeaderProofUnion(ContentProofType proofType) {
+    this.union = schema.createFromValue(proofType.getValue(), SszNone.INSTANCE);
   }
 
   public BlockHeaderProofUnion(
@@ -49,8 +50,15 @@ public class BlockHeaderProofUnion {
     this.union =
         schema.createFromValue(
             proofType.getValue(),
-            new BlockProofHistoricalSummariesContainer(
-                beaconBlockProof, beaconBlockRoot, executionBlockProof, slot));
+            proofType.getValue() == ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS.getValue()
+                ? new BlockProofHistoricalRootsContainer(
+                    beaconBlockProof, beaconBlockRoot, executionBlockProof, slot)
+                : new BlockProofHistoricalSummariesContainer(
+                    beaconBlockProof, beaconBlockRoot, executionBlockProof, slot));
+  }
+
+  public BlockHeaderProofUnion(Bytes encodedUnion) {
+    this.union = schema.sszDeserialize(encodedUnion);
   }
 
   public ContentProofType getProofType() {

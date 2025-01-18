@@ -3,6 +3,7 @@ package samba.schema.content.ssz.blockheader;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
@@ -23,8 +24,20 @@ public class SszBlockProofHistoricalHashesAccumulatorVector {
   @SuppressWarnings("unchecked")
   public SszBlockProofHistoricalHashesAccumulatorVector(
       List<Bytes32> blockProofHistoricalHashesAccumulator) {
+    if (blockProofHistoricalHashesAccumulator.size()
+        != BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BlockProofHistoricalHashesAccumulator size is not equal to "
+              + BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR_VECTOR_SIZE);
+    }
     this.BlockProofHistoricalHashesAccumulator =
         schema.createFromElements(createSszBytes32List(blockProofHistoricalHashesAccumulator));
+  }
+
+  public SszBlockProofHistoricalHashesAccumulatorVector(
+      Bytes BlockProofHistoricalHashesAccumulator) {
+    this.BlockProofHistoricalHashesAccumulator =
+        schema.sszDeserialize(BlockProofHistoricalHashesAccumulator);
   }
 
   public static SszBytes32VectorSchema<SszBytes32Vector> getSchema() {
@@ -32,6 +45,12 @@ public class SszBlockProofHistoricalHashesAccumulatorVector {
   }
 
   public static SszBytes32Vector createVector(List<Bytes32> BlockProofHistoricalHashesAccumulator) {
+    if (BlockProofHistoricalHashesAccumulator.size()
+        != BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BlockProofHistoricalHashesAccumulator size is not equal to "
+              + BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR_VECTOR_SIZE);
+    }
     return schema.createFromElements(createSszBytes32List(BlockProofHistoricalHashesAccumulator));
   }
 
@@ -56,5 +75,9 @@ public class SszBlockProofHistoricalHashesAccumulatorVector {
     return blockProofHistoricalHashesAccumulator.stream()
         .map(SszBytes32::of)
         .collect(Collectors.toList());
+  }
+
+  public Bytes sszSerialize() {
+    return BlockProofHistoricalHashesAccumulator.sszSerialize();
   }
 }

@@ -3,6 +3,7 @@ package samba.schema.content.ssz.blockheader;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
@@ -20,7 +21,15 @@ public class SszExecutionBlockProofVector {
   }
 
   public SszExecutionBlockProofVector(List<Bytes32> ExecutionBlockProof) {
+    if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_SIZE) {
+      throw new IllegalArgumentException(
+          "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_SIZE);
+    }
     this.ExecutionBlockProof = schema.createFromElements(createSszBytes32List(ExecutionBlockProof));
+  }
+
+  public SszExecutionBlockProofVector(Bytes ExecutionBlockProof) {
+    this.ExecutionBlockProof = schema.sszDeserialize(ExecutionBlockProof);
   }
 
   public static SszBytes32VectorSchema<SszBytes32Vector> getSchema() {
@@ -28,6 +37,10 @@ public class SszExecutionBlockProofVector {
   }
 
   public static SszBytes32Vector createVector(List<Bytes32> ExecutionBlockProof) {
+    if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_SIZE) {
+      throw new IllegalArgumentException(
+          "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_SIZE);
+    }
     return schema.createFromElements(createSszBytes32List(ExecutionBlockProof));
   }
 
@@ -45,5 +58,9 @@ public class SszExecutionBlockProofVector {
 
   private static List<SszBytes32> createSszBytes32List(List<Bytes32> ExecutionBlockProof) {
     return ExecutionBlockProof.stream().map(SszBytes32::of).collect(Collectors.toList());
+  }
+
+  public Bytes sszSerialize() {
+    return ExecutionBlockProof.sszSerialize();
   }
 }

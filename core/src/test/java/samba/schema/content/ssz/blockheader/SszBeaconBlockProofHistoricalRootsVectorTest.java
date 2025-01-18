@@ -1,0 +1,48 @@
+package samba.schema.content.ssz.blockheader;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import samba.domain.content.ContentProofConstants;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.bytes.Bytes32;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class SszBeaconBlockProofHistoricalRootsVectorTest {
+
+  List<Bytes32> beaconBlockProofHistoricalRoots;
+
+  @BeforeEach
+  public void setup() {
+    this.beaconBlockProofHistoricalRoots = new ArrayList<>();
+    for (int i = 0; i < ContentProofConstants.BEACON_BLOCK_PROOF_HISTORICAL_ROOTS_VECTOR_SIZE; i++)
+      this.beaconBlockProofHistoricalRoots.add(Bytes32.repeat((byte) i));
+  }
+
+  @Test
+  public void testSszDecode() {
+    var sszBeaconBlockProofHistoricalRootsVector =
+        new SszBeaconBlockProofHistoricalRootsVector(
+            Bytes.fromHexString(
+                "0x00000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101020202020202020202020202020202020202020202020202020202020202020203030303030303030303030303030303030303030303030303030303030303030404040404040404040404040404040404040404040404040404040404040404050505050505050505050505050505050505050505050505050505050505050506060606060606060606060606060606060606060606060606060606060606060707070707070707070707070707070707070707070707070707070707070707080808080808080808080808080808080808080808080808080808080808080809090909090909090909090909090909090909090909090909090909090909090a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d"));
+    List<Bytes32> decodedBeaconBlockProofHistoricalRoots =
+        sszBeaconBlockProofHistoricalRootsVector.getDecodedVector();
+    assertEquals(this.beaconBlockProofHistoricalRoots, decodedBeaconBlockProofHistoricalRoots);
+  }
+
+  @Test
+  public void testSszEncode() {
+    SszBeaconBlockProofHistoricalRootsVector sszBeaconBlockProofHistoricalRootsVector =
+        new SszBeaconBlockProofHistoricalRootsVector(this.beaconBlockProofHistoricalRoots);
+    Bytes encodedBeaconBlockProofHistoricalRoots =
+        sszBeaconBlockProofHistoricalRootsVector.sszSerialize();
+    assertEquals(
+        encodedBeaconBlockProofHistoricalRoots,
+        Bytes.fromHexString(
+            "0x00000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101020202020202020202020202020202020202020202020202020202020202020203030303030303030303030303030303030303030303030303030303030303030404040404040404040404040404040404040404040404040404040404040404050505050505050505050505050505050505050505050505050505050505050506060606060606060606060606060606060606060606060606060606060606060707070707070707070707070707070707070707070707070707070707070707080808080808080808080808080808080808080808080808080808080808080809090909090909090909090909090909090909090909090909090909090909090a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d"));
+  }
+}
