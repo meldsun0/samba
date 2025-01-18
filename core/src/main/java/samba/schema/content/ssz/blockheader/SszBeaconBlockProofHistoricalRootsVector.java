@@ -3,6 +3,7 @@ package samba.schema.content.ssz.blockheader;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
@@ -21,8 +22,17 @@ public class SszBeaconBlockProofHistoricalRootsVector {
   }
 
   public SszBeaconBlockProofHistoricalRootsVector(List<Bytes32> BeaconBlockProofHistoricalRoots) {
+    if (BeaconBlockProofHistoricalRoots.size() != BEACON_BLOCK_PROOF_HISTORICAL_ROOTS_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BeaconBlockProofHistoricalRoots size is not equal to "
+              + BEACON_BLOCK_PROOF_HISTORICAL_ROOTS_VECTOR_SIZE);
+    }
     this.BeaconBlockProofHistoricalRoots =
         schema.createFromElements(createSszBytes32List(BeaconBlockProofHistoricalRoots));
+  }
+
+  public SszBeaconBlockProofHistoricalRootsVector(Bytes BeaconBlockProofHistoricalRoots) {
+    this.BeaconBlockProofHistoricalRoots = schema.sszDeserialize(BeaconBlockProofHistoricalRoots);
   }
 
   public static SszBytes32VectorSchema<SszBytes32Vector> getSchema() {
@@ -30,6 +40,11 @@ public class SszBeaconBlockProofHistoricalRootsVector {
   }
 
   public static SszBytes32Vector createVector(List<Bytes32> BeaconBlockProofHistoricalRoots) {
+    if (BeaconBlockProofHistoricalRoots.size() != BEACON_BLOCK_PROOF_HISTORICAL_ROOTS_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BeaconBlockProofHistoricalRoots size is not equal to "
+              + BEACON_BLOCK_PROOF_HISTORICAL_ROOTS_VECTOR_SIZE);
+    }
     return schema.createFromElements(createSszBytes32List(BeaconBlockProofHistoricalRoots));
   }
 
@@ -54,5 +69,9 @@ public class SszBeaconBlockProofHistoricalRootsVector {
     return BeaconBlockProofHistoricalRoots.stream()
         .map(SszBytes32::of)
         .collect(Collectors.toList());
+  }
+
+  public Bytes sszSerialize() {
+    return BeaconBlockProofHistoricalRoots.sszSerialize();
   }
 }

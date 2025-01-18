@@ -3,6 +3,7 @@ package samba.schema.content.ssz.blockheader;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
@@ -22,8 +23,19 @@ public class SszBeaconBlockProofHistoricalSummariesVector {
 
   public SszBeaconBlockProofHistoricalSummariesVector(
       List<Bytes32> BeaconBlockProofHistoricalSummaries) {
+    if (BeaconBlockProofHistoricalSummaries.size()
+        != BEACON_BLOCK_PROOF_HISTORICAL_SUMMARIES_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BeaconBlockProofHistoricalSummaries size is not equal to "
+              + BEACON_BLOCK_PROOF_HISTORICAL_SUMMARIES_VECTOR_SIZE);
+    }
     this.BeaconBlockProofHistoricalSummaries =
         schema.createFromElements(createSszBytes32List(BeaconBlockProofHistoricalSummaries));
+  }
+
+  public SszBeaconBlockProofHistoricalSummariesVector(Bytes BeaconBlockProofHistoricalSummaries) {
+    this.BeaconBlockProofHistoricalSummaries =
+        schema.sszDeserialize(BeaconBlockProofHistoricalSummaries);
   }
 
   public static SszBytes32VectorSchema<SszBytes32Vector> getSchema() {
@@ -31,6 +43,12 @@ public class SszBeaconBlockProofHistoricalSummariesVector {
   }
 
   public static SszBytes32Vector createVector(List<Bytes32> BeaconBlockProofHistoricalSummaries) {
+    if (BeaconBlockProofHistoricalSummaries.size()
+        != BEACON_BLOCK_PROOF_HISTORICAL_SUMMARIES_VECTOR_SIZE) {
+      throw new IllegalArgumentException(
+          "BeaconBlockProofHistoricalSummaries size is not equal to "
+              + BEACON_BLOCK_PROOF_HISTORICAL_SUMMARIES_VECTOR_SIZE);
+    }
     return schema.createFromElements(createSszBytes32List(BeaconBlockProofHistoricalSummaries));
   }
 
@@ -55,5 +73,9 @@ public class SszBeaconBlockProofHistoricalSummariesVector {
     return BeaconBlockProofHistoricalSummaries.stream()
         .map(SszBytes32::of)
         .collect(Collectors.toList());
+  }
+
+  public Bytes sszSerialize() {
+    return BeaconBlockProofHistoricalSummaries.sszSerialize();
   }
 }
