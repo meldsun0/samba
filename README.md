@@ -126,9 +126,20 @@ Recommended:
 TO-DO
 
 
-### Useful links:
+### Useful links
 * [Devcon SEA History Expiry and Portal Network session](https://notes.ethereum.org/_XVO7jmXTGOwZmhR5-3T9Q)
 * [EIP-4444 Implementation Plan: History Expiry in Ethereum](https://hackmd.io/Dobc38YVQ1qmbbyI6LcFqA)
 * [Playground](https://playground.open-rpc.org/?schemaUrl=https://raw.githubusercontent.com/ethereum/portal-network-specs/assembled-spec/jsonrpc/openrpc.json)
 * https://eips.ethereum.org/EIPS/eip-7639
 * https://eips.ethereum.org/EIPS/eip-4444
+
+### Donations
+Our work is entirely funded through grants.
+Your contribution will help us to:
+
+* Complete Samba’s full compliance with the Portal History subnetwork.
+* Deploy Samba nodes globally, expanding the Portal network.
+* Drive the ongoing development of additional subnetworks.
+
+
+Here is our Gitcoin Project: [Samba](https://explorer.gitcoin.co/#/projects/0x686ab86d2f92275ae09e2034c56c81b3373a058d868c64c837f8df1540baa001)
