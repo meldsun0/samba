@@ -76,6 +76,9 @@ configure(allprojects - project(':platform')) {
     }
   }
 
+  javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+  }
 
   apply from: "${project.rootDir}/buildscripts/spotless.gradle"
 
