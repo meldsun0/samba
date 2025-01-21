@@ -16,6 +16,7 @@ import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
+import samba.services.utp.UTPService;
 import samba.storage.HistoryDB;
 
 import java.util.ArrayList;
@@ -42,12 +43,14 @@ public class HistoryNetwork extends BaseNetwork
   private final HistoryDB historyDB;
   final NodeRecordFactory nodeRecordFactory;
   protected RoutingTable routingTable;
+  private final UTPService utpService;
 
-  public HistoryNetwork(Discv5Client client, HistoryDB historyDB) {
+  public HistoryNetwork(Discv5Client client, HistoryDB historyDB, UTPService utpService) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.ONE; // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
+    this.utpService = utpService;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
   }
 
@@ -123,11 +126,20 @@ public class HistoryNetwork extends BaseNetwork
 
               switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID -> {
-                  /*
-                  Open a uTP Connection on this port content.getConnectionId()
-                  SafeFuture.runAsync(() -> {
-                  //TODO async UTP opperation once we get the specific content we should call    historyDB.saveContent(
-                  });*/
+                  int connectionID = content.getConnectionId();
+                  this.utpService
+                      .getContent(nodeRecord, connectionID)
+                      .whenComplete(
+                          (answer, error) -> {
+                            if (error != null) {
+                              LOG.trace(
+                                  "Getting content from {} failed for connectionId {}",
+                                  nodeRecord.asEnr(),
+                                  connectionID);
+                            } else {
+                              this.historyDB.saveContent(message.getContentKey(), answer);
+                            }
+                          });
                 }
                 case Content.CONTENT_TYPE -> {
                   boolean successfullySaved =

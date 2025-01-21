@@ -13,6 +13,7 @@ import samba.TestHelper;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
 import samba.services.discovery.Discv5Client;
+import samba.services.utp.UTPService;
 import samba.storage.HistoryDB;
 
 import java.util.Optional;
@@ -41,7 +42,8 @@ public class PingMessageTests {
         .thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-    HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
 
     NodeRecord nodeRecord = createNodeRecord();
     Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -61,7 +63,8 @@ public class PingMessageTests {
         .thenAnswer(invocation -> createPongBytesResponse(Bytes.EMPTY));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
-    HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
     NodeRecord nodeRecord = createNodeRecord();
     Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
 
@@ -79,7 +82,8 @@ public class PingMessageTests {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
 
-    HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
     NodeRecord nodeRecord = createNodeRecord();
 
     Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
@@ -100,7 +104,8 @@ public class PingMessageTests {
     when(discv5Client.getEnrSeq())
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
-    HistoryNetwork historyNetwork = new HistoryNetwork(discv5Client, mock(HistoryDB.class));
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
     Ping pingMessage = createPingMessage();
 

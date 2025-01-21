@@ -3,12 +3,14 @@ package samba.services;
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
 import samba.config.SambaConfiguration;
-import samba.domain.messages.IncomingRequestHandler;
+import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.handler.FindContentHandler;
 import samba.domain.messages.handler.FindNodesHandler;
+import samba.domain.messages.handler.HistoryNetworkIncomingRequestHandler;
 import samba.domain.messages.handler.OfferHandler;
 import samba.domain.messages.handler.PingHandler;
+import samba.domain.messages.utp.UTPNetworkIncomingRequestHandler;
 import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.health.HealthService;
@@ -26,6 +28,7 @@ import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
 import samba.services.jsonrpc.methods.history.*;
 import samba.services.storage.StorageService;
+import samba.services.utp.UTPService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +65,9 @@ public class PortalNodeMainService extends Service {
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
   private StorageService storageService;
-  private final IncomingRequestHandler incomingRequestProcessor = new IncomingRequestHandler();
+  private UTPService utpService;
+  private final IncomingRequestTalkHandler incomingRequestTalkHandler =
+      new IncomingRequestTalkHandler();
 
   public PortalNodeMainService(
       final MainServiceConfig mainServiceConfig,
@@ -78,10 +83,32 @@ public class PortalNodeMainService extends Service {
     this.vertx = vertx;
     initDiscoveryService();
     initStorageService();
+    initUTPService();
     initHistoryNetwork();
+    initIncomingRequestTalkHandlers();
     initConnectionService();
     initRestAPI();
     initJsonRPCService();
+  }
+
+  private void initIncomingRequestTalkHandlers() {
+
+    final HistoryNetworkIncomingRequestHandler historyNetworkIncomingRequestHandler =
+        new HistoryNetworkIncomingRequestHandler(this.historyNetwork);
+    historyNetworkIncomingRequestHandler
+        .addHandler(MessageType.PING, new PingHandler())
+        .addHandler(MessageType.FIND_NODES, new FindNodesHandler())
+        .addHandler(MessageType.FIND_CONTENT, new FindContentHandler())
+        .addHandler(MessageType.OFFER, new OfferHandler());
+
+    final UTPNetworkIncomingRequestHandler utpNetworkIncomingRequestHandler =
+        new UTPNetworkIncomingRequestHandler(this.utpService);
+    this.incomingRequestTalkHandler.addHandlers(
+        historyNetworkIncomingRequestHandler, utpNetworkIncomingRequestHandler);
+  }
+
+  private void initUTPService() {
+    this.utpService = new UTPService();
   }
 
   private void initJsonRPCService() {
@@ -129,12 +156,8 @@ public class PortalNodeMainService extends Service {
 
   private void initHistoryNetwork() {
     this.historyNetwork =
-        new HistoryNetwork(this.discoveryService, this.storageService.getDatabase());
-    incomingRequestProcessor
-        .addHandler(MessageType.PING, new PingHandler())
-        .addHandler(MessageType.FIND_NODES, new FindNodesHandler())
-        .addHandler(MessageType.FIND_CONTENT, new FindContentHandler())
-        .addHandler(MessageType.OFFER, new OfferHandler());
+        new HistoryNetwork(
+            this.discoveryService, this.storageService.getDatabase(), this.utpService);
   }
 
   private void initConnectionService() {
@@ -150,7 +173,7 @@ public class PortalNodeMainService extends Service {
             this.asyncRunner,
             this.sambaConfiguration.getDiscoveryConfig(),
             this.sambaConfiguration.getSecreteKey(),
-            incomingRequestProcessor);
+            this.incomingRequestTalkHandler);
   }
 
   protected void initStorageService() {
@@ -160,7 +183,7 @@ public class PortalNodeMainService extends Service {
   @Override
   protected SafeFuture<?> doStart() {
     LOG.debug("Starting {}", this.getClass().getSimpleName());
-    this.incomingRequestProcessor.build(this.historyNetwork);
+    this.incomingRequestTalkHandler.start();
     return SafeFuture.allOfFailFast(discoveryService.start())
         .thenCompose(__ -> connectionService.start())
         .thenCompose(
