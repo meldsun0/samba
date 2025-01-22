@@ -113,7 +113,7 @@ View logs output and results:
 - discv5_updateNodeInfo, 
 - discv5_getEnr
 
-
+When running against Hive there should be 33 tests passing. 
 
 ## Hardware Requirements
 
