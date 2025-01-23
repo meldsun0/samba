@@ -12,6 +12,7 @@ import samba.domain.messages.response.Pong;
 import java.util.Optional;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import samba.services.jsonrpc.methods.results.FindContentResult;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface HistoryJsonRpcRequests {
@@ -20,7 +21,7 @@ public interface HistoryJsonRpcRequests {
 
   SafeFuture<Optional<Nodes>> findNodes(NodeRecord nodeRecord, FindNodes findNodes);
 
-  SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent findContent);
+  SafeFuture<Optional<FindContentResult>> findContent(NodeRecord nodeRecord, FindContent findContent);
 
   SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer offer);
 

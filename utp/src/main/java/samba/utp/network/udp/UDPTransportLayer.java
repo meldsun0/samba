@@ -16,12 +16,10 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
 
   protected DatagramSocket socket;
   private final Object sendLock = new Object();
-  private UDPAddress remoteAddress;
 
-  public UDPTransportLayer(String serverAddress, int serverPort) {
+  public UDPTransportLayer() {
     try {
       this.socket = new DatagramSocket();
-      this.remoteAddress = new UDPAddress(serverAddress, serverPort);
     } catch (SocketException e) {
       throw new RuntimeException(e);
     }
@@ -45,10 +43,6 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
     return UTPWireMessageDecoder.decode(dgpkt);
   }
 
-  @Override
-  public UDPAddress getRemoteAddress() {
-    return this.remoteAddress;
-  }
 
   @Override
   public void close() {

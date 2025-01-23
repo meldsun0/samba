@@ -57,6 +57,7 @@ dependencies {
 
   implementation project(':storage-rocksdb')
   implementation project(':server-json-rpc')
+  implementation project(':utp')
   compileOnly libs.projectlombok
   annotationProcessor libs.projectlombok
   testCompileOnly libs.projectlombok

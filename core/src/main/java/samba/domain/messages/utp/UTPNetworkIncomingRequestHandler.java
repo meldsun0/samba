@@ -29,7 +29,11 @@ public class UTPNetworkIncomingRequestHandler implements IncomingRequestHandler 
         this.getNetworkType().isEquals(protocol),
         "TALKKREQ message is not from the {}",
         this.getNetworkType().getName());
-    // TODO
+    // TODO refactor
+
+          utpService.onUTPMessageReceive(srcNode, request);
+
+
 
     return CompletableFuture.completedFuture(null);
   }

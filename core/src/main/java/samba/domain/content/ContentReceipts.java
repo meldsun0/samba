@@ -9,29 +9,33 @@ import org.hyperledger.besu.ethereum.core.TransactionReceipt;
 
 public class ContentReceipts {
 
-  private final SszReceiptList sszReceiptList;
+    private final SszReceiptList sszReceiptList;
 
-  public ContentReceipts(SszReceiptList sszReceiptList) {
-    this.sszReceiptList = sszReceiptList;
-  }
+    public ContentReceipts(SszReceiptList sszReceiptList) {
+        this.sszReceiptList = sszReceiptList;
+    }
 
-  public ContentReceipts(Bytes sszBytes) {
-    this.sszReceiptList = SszReceiptList.decodeBytes(sszBytes);
-  }
+    public ContentReceipts(Bytes sszBytes) {
+        this.sszReceiptList = SszReceiptList.decodeBytes(sszBytes);
+    }
 
-  public ContentReceipts(List<TransactionReceipt> transactionReceipts) {
-    this.sszReceiptList = new SszReceiptList(transactionReceipts);
-  }
+    public ContentReceipts(List<TransactionReceipt> transactionReceipts) {
+        this.sszReceiptList = new SszReceiptList(transactionReceipts);
+    }
 
-  public SszReceiptList getSszReceiptList() {
-    return sszReceiptList;
-  }
+    public static ContentReceipts decode(Bytes sszReceipts) {
+        return new ContentReceipts(sszReceipts);
+    }
 
-  public List<TransactionReceipt> getTransactionReceipts() {
-    return sszReceiptList.getDecodedList();
-  }
+    public SszReceiptList getSszReceiptList() {
+        return sszReceiptList;
+    }
 
-  public Bytes getSszBytes() {
-    return sszReceiptList.sszSerialize();
-  }
+    public List<TransactionReceipt> getTransactionReceipts() {
+        return sszReceiptList.getDecodedList();
+    }
+
+    public Bytes getSszBytes() {
+        return sszReceiptList.sszSerialize();
+    }
 }

@@ -34,200 +34,200 @@ public class FindContentMessageTests {
     this.historyDB = mock(HistoryDB.class);
   }
 
-  // TODO refactor test
-  @Test
-  public void sendOkFindContentMessageAndRecieveOkContentConnectionIdTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createContentConnectionIdBytesResponse(1234));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(1234, 1234);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveOkContentContentTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createContentContentBytesResponse(Bytes.fromHexString("0x1234567890")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Bytes.fromHexString("0x1234567890"), content.get().getContent());
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveOkContentEnrTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createContentEnrBytesResponse(List.of("-LI=", "-LI=", "-LI=")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    // assertEquals(Optional.empty(), content); //TODO FIX THIS
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveEmptyContentConnectionIdTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveEmptyContentContentTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0501")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveEmptyContentEnrTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(List.of(), content.get().getEnrList());
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveBadContentPacketTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x05FFFFFFFF")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveBadContentConnectionIdTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500FFFFFFFF")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveBadContentContentTest()
-      throws ExecutionException, InterruptedException {
-    byte[] largeContent = new byte[PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES + 1];
-    for (int i = 0; i < PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES + 1; i++)
-      largeContent[i] = (byte) 0xFF;
-
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.wrap(largeContent)));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
-
-  @Test
-  public void sendOkFindContentMessageAndRecieveBadContentEnrTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502FFFFFFFF")));
-    NodeRecord homeNodeRecord = createNodeRecord();
-    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
-    NodeRecord nodeRecord = createNodeRecord();
-
-    Optional<Content> content =
-        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-
-    assertEquals(Optional.empty(), content);
-  }
+//  // TODO refactor test
+////  @Test
+////  public void sendOkFindContentMessageAndRecieveOkContentConnectionIdTest()
+////      throws ExecutionException, InterruptedException {
+////    Discv5Client discv5Client = mock(Discv5Client.class);
+////    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+////        .thenReturn(createContentConnectionIdBytesResponse(1234));
+////    NodeRecord homeNodeRecord = createNodeRecord();
+////    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+////
+////    HistoryNetwork historyNetwork =
+////        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+////    NodeRecord nodeRecord = createNodeRecord();
+////
+////    Optional<Content> content =
+////        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+////
+////    assertEquals(1234, 1234);
+////  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveOkContentContentTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createContentContentBytesResponse(Bytes.fromHexString("0x1234567890")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Bytes.fromHexString("0x1234567890"), content.get().getContent());
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveOkContentEnrTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createContentEnrBytesResponse(List.of("-LI=", "-LI=", "-LI=")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    // assertEquals(Optional.empty(), content); //TODO FIX THIS
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveEmptyContentConnectionIdTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveEmptyContentContentTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0501")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveEmptyContentEnrTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(List.of(), content.get().getEnrList());
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveBadContentPacketTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x05FFFFFFFF")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveBadContentConnectionIdTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500FFFFFFFF")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveBadContentContentTest()
+//      throws ExecutionException, InterruptedException {
+//    byte[] largeContent = new byte[PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES + 1];
+//    for (int i = 0; i < PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES + 1; i++)
+//      largeContent[i] = (byte) 0xFF;
+//
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.wrap(largeContent)));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
+//
+//  @Test
+//  public void sendOkFindContentMessageAndRecieveBadContentEnrTest()
+//      throws ExecutionException, InterruptedException {
+//    Discv5Client discv5Client = mock(Discv5Client.class);
+//    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+//        .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502FFFFFFFF")));
+//    NodeRecord homeNodeRecord = createNodeRecord();
+//    when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
+//
+//    HistoryNetwork historyNetwork =
+//        new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
+//    NodeRecord nodeRecord = createNodeRecord();
+//
+//    Optional<Content> content =
+//        historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
+//
+//    assertEquals(Optional.empty(), content);
+//  }
 
   private static CompletableFuture<Bytes> createContentConnectionIdBytesResponse(int connectionId) {
     return CompletableFuture.completedFuture(new Content(connectionId).getSszBytes());

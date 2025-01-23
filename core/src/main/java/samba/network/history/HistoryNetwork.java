@@ -1,5 +1,6 @@
 package samba.network.history;
 
+import samba.domain.content.ContentKey;
 import samba.domain.content.ContentType;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.MessageType;
@@ -16,6 +17,7 @@ import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
+import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.utp.UTPService;
 import samba.storage.HistoryDB;
 
@@ -112,67 +114,80 @@ public class HistoryNetwork extends BaseNetwork
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
 
-  // TODO validate what to answer if there is an error. Should we answer with a Content if we know
-  // for example that the is not valid ?
+
+  // TODO validate what to answer if there is an error.
   @Override
-  public SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent message) {
+  public SafeFuture<Optional<FindContentResult>> findContent(NodeRecord nodeRecord, FindContent message) {
     return sendMessage(nodeRecord, message)
-        .thenApply(Optional::get)
-        .thenCompose(
-            contentMessage -> {
-              Content content = contentMessage.getMessage();
-
-              // TODO how we validate NodeRadius ?
-
-              switch (content.getContentType()) {
-                case Content.UTP_CONNECTION_ID -> {
-                  int connectionID = content.getConnectionId();
-                  this.utpService
-                      .getContent(nodeRecord, connectionID)
-                      .whenComplete(
-                          (answer, error) -> {
-                            if (error != null) {
-                              LOG.trace(
-                                  "Getting content from {} failed for connectionId {}",
-                                  nodeRecord.asEnr(),
-                                  connectionID);
-                            } else {
-                              this.historyDB.saveContent(message.getContentKey(), answer);
-                            }
-                          });
-                }
-                case Content.CONTENT_TYPE -> {
-                  boolean successfullySaved =
-                      historyDB.saveContent(message.getContentKey(), content.getContent());
-                  if (successfullySaved) {
-                    // gossipNetwork
-                  }
-                }
-                case Content
-                    .ENRS -> { // ENR records of nodes that are closest to the requested content.
-                  List<String> enrs = content.getEnrList();
-                  if (!enrs.isEmpty()) {
-                    //                    content.getEnrList().stream()
-                    //                        .map(RLPDecoder::decodeRlpEnr)
-                    //                        .filter(
-                    //                            enr ->
-                    //                                !enr.equals(nodeRecord.asEnr())
-                    //                                    ||
-                    // !enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
-                    //                        .toList();
-                    // TODO what to do ?
-                  } else {
-                    LOG.info(
-                        "Node: {} does not hold the requested content or knows any eligible node",
-                        nodeRecord.asEnr());
-                  }
-                }
-                default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
+            .thenApply(contentMessageOpt -> contentMessageOpt.orElse(null))
+            .thenCompose(contentMessage -> {
+                if (contentMessage == null) {
+                  LOG.warn("Content message is empty for node: {}", nodeRecord.asEnr());
+                return SafeFuture.completedFuture(Optional.empty());
               }
-              return SafeFuture.completedFuture(Optional.of(content));
-            })
-        .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
+              Content content = contentMessage.getMessage();
+                // TODO: Validate NodeRadius
+                //ContentType contentType = ContentKey.decode(contentKey)
+              return switch (content.getContentType()) {
+                case Content.UTP_CONNECTION_ID -> requestContentThroughUTP(nodeRecord, content.getConnectionId());
+                case Content.CONTENT_TYPE -> handleContentReceived(message.getContentKey(), content.getContent());
+                case Content.ENRS -> handleEnrs(nodeRecord, content);
+                default -> SafeFuture.completedFuture(Optional.of(new FindContentResult()));
+              };
+            });
   }
+
+    // Handle UTP connection ID case
+    private SafeFuture<Optional<FindContentResult>> requestContentThroughUTP(NodeRecord nodeRecord, int connectionID) {
+
+        return this.utpService
+                .getContent(nodeRecord, connectionID)
+                .thenCompose(answer -> {
+                    System.out.println(answer.toHexString());
+                    //historyDB.saveContent(contentkey, content);
+                    return SafeFuture.completedFuture(Optional.of(new FindContentResult(answer.toHexString(), true)));
+                })
+                .exceptionallyCompose(error -> {
+                    LOG.trace("Error when getting content");
+                    return SafeFuture.failedFuture(error);
+                });
+    }
+
+
+    // ENR records of nodes that are closest to the requested content.
+    private SafeFuture<Optional<FindContentResult>> handleEnrs(NodeRecord nodeRecord, Content content) {
+        List<String> enrs = content.getEnrList();
+        if (!enrs.isEmpty()) {
+            // TODO: Process ENR list (filtering, decoding, etc.)
+            //                    content.getEnrList().stream()
+            //                        .map(RLPDecoder::decodeRlpEnr)
+            //                        .filter(
+            //                            enr ->
+            //                                !enr.equals(nodeRecord.asEnr())
+            //                                    ||
+            // !enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
+            //                        .toList();
+            // TODO what to do ?
+        } else {
+            LOG.info("Node: {} does not hold the requested content or knows any eligible node", nodeRecord.asEnr());
+        }
+        return SafeFuture.completedFuture(Optional.of(new FindContentResult(enrs)));
+    }
+
+
+    private SafeFuture<Optional<FindContentResult>> handleContentReceived(Bytes contentKey, Bytes content) {
+      //   historyDB.saveContent(contentKey, content);
+        // TODO: Save to historyDB or perform other actions
+        //                  boolean successfullySaved =
+//                      historyDB.saveContent(message.getContentKey(), content.getContent());
+//                      if (successfullySaved) {
+//                        // gossipNetwork
+//                      }
+        return SafeFuture.completedFuture(Optional.of(new FindContentResult(content.toHexString(),false)));
+    }
+
+
+
 
   @Override
   public SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer message) {

@@ -1,5 +1,8 @@
 package samba.domain.content;
 
+import org.hyperledger.besu.ethereum.core.BlockBody;
+import samba.domain.messages.PortalWireMessage;
+import samba.domain.messages.requests.FindContent;
 import samba.network.history.HistoryConstants;
 import samba.schema.content.ssz.blockbody.BlockBodyPostShanghaiContainer;
 import samba.schema.content.ssz.blockbody.BlockBodyPreShanghaiContainer;
@@ -10,6 +13,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
+import samba.schema.messages.ssz.containers.FindContentContainer;
 
 public class ContentBlockBody {
 
@@ -79,4 +83,5 @@ public class ContentBlockBody {
       return blockBodyPostShanghaiContainer.sszSerialize();
     }
   }
+
 }

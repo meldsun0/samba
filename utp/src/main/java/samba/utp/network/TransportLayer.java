@@ -10,7 +10,5 @@ public interface TransportLayer<T extends TransportAddress> {
 
   UtpPacket onPacketReceive() throws IOException;
 
-  T getRemoteAddress();
-
   void close();
 }

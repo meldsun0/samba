@@ -2,8 +2,8 @@ package samba.storage;
 
 import static com.google.common.base.Preconditions.*;
 
-import samba.domain.content.ContentType;
-import samba.domain.content.ContentUtil;
+
+import samba.domain.content.*;
 import samba.rocksdb.*;
 import samba.rocksdb.exceptions.StorageException;
 
@@ -19,6 +19,7 @@ import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryRocksDB implements HistoryDB {
 
@@ -37,33 +38,31 @@ public class HistoryRocksDB implements HistoryDB {
             rocksDBMetricsFactory);
   }
 
-  // TODO reduce the verbosity of this method once is ready.
+  // TODO: reduce the verbosity of this method once is ready.
+
   @Override
-  public boolean saveContent(Bytes contentKey, Bytes value) {
-    ContentType contentType = ContentType.fromContentKey(contentKey);
-    LOG.info("Store {} with Key: {} and Value {}", contentType, contentKey, value);
+  public boolean saveContent(ContentKey contentKey, Bytes value) {
     try {
-      switch (contentType) {
+      switch (contentKey.getContentType()) {
         case ContentType.BLOCK_HEADER -> {
-          Bytes blockHash = contentKey.slice(1, contentKey.size()); // blockHash is in ssz.
-          // block_header_with_proof = BlockHeaderWithProof(header: rlp.encode(header), proof:
-          // proof)
-          if (!ContentUtil.isBlockHeaderValid(blockHash, value)) {
-            LOG.info("BlockHeader for blockHash: {} is invalid", blockHash);
-            break;
-          }
-          save(KeyValueSegment.BLOCK_HEADER, blockHash, value); // TODO async
+          Bytes blockHash = contentKey.getBlockHash();
+          ContentBlockHeader contentBlockHeader = ContentBlockHeader.decode(value);
+          //TODO should we validate something ? and if blockhash should be in ssz ?
+          save(KeyValueSegment.BLOCK_HEADER, blockHash, contentBlockHeader.getSszBytes()); // TODO async
+          LOG.info("Store {} with Key: {} and Value {}", contentKey.getContentType(), ContentType.BLOCK_HEADER, contentBlockHeader.getSszBytes().toHexString());
         }
         case ContentType.BLOCK_BODY -> {
-          Bytes blockHash = contentKey.slice(1, contentKey.size()); // blockHash is in ssz.
+          //TODO VALIDATE ALL THIS
+          Bytes blockHash = contentKey.getBlockHash();
+          //TODO  Validate the decoded block body against the roots in the header.
           this.getBlockHeaderByBlockHash(blockHash)
               .ifPresentOrElse(
                   blockHeader -> {
-                    if (!ContentUtil.isBlockBodyValid(blockHeader, value)) {
-                      save(KeyValueSegment.BLOCK_BODY, blockHash, value);
-                    } else {
-                      LOG.info("BlockBody for blockHash: {} is invalid", blockHash);
-                    }
+//                    if (!ContentUtil.isBlockBodyValid(blockHeader, value)) {
+//                      save(KeyValueSegment.BLOCK_BODY, blockHash, value);
+//                    } else {
+//                      LOG.info("BlockBody for blockHash: {} is invalid", blockHash);
+//                    }
                   },
                   () -> {
                     // TODO trigger a lookup: Query X nearest  until either content is found or no
@@ -71,26 +70,20 @@ public class HistoryRocksDB implements HistoryDB {
                     LOG.info("Block Header for {} not found locally", blockHash);
                   });
         }
-        case ContentType.RECEIPT -> {
-          Bytes blockHashInSSZ = contentKey.slice(1, contentKey.size());
-          // TODO should we do any validation?
-          save(KeyValueSegment.RECEIPT, blockHashInSSZ, value);
+        case ContentType.RECEIPT -> { // TODO should we do any validation?
+          Bytes blockHash = contentKey.getBlockHash();
+          save(KeyValueSegment.RECEIPT, blockHash, ContentReceipts.decode(value).getSszBytes());
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {
-          Bytes blockNumberInSSZ = contentKey.slice(1, contentKey.size());
-          if (!ContentUtil.isBlockHeaderValid(blockNumberInSSZ, value)) {
-            LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberInSSZ);
-            break;
-          }
-          // TODO once ssz is solve change this.
-          var blockHash = Bytes.EMPTY;
-          var blockNumber = Bytes.EMPTY;
-          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumber, blockHash);
-          save(KeyValueSegment.BLOCK_HEADER, blockHash, value);
+          UInt64 blockNumber = contentKey.getBlockNumber(); //TODO validate
+          ContentBlockHeader contentBlockHeader = ContentBlockHeader.decode(value);
+          //Hash blockHash = contentBlockHeader.getBlockHeader().getBlockHash();
+
+          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, Bytes.of(), Bytes.of());
+          save(KeyValueSegment.BLOCK_HEADER,  Bytes.of(),  Bytes.of());
         }
         default ->
-            throw new IllegalArgumentException(
-                String.format("CONTENT: Invalid payload type %s", contentType));
+            throw new IllegalArgumentException(String.format("CONTENT: Invalid payload type %s", Bytes.of()));
       }
       return true;
     } catch (Exception e) {

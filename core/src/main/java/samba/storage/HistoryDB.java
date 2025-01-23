@@ -1,5 +1,6 @@
 package samba.storage;
 
+import samba.domain.content.ContentKey;
 import samba.domain.content.ContentType;
 
 import java.util.Optional;
@@ -11,7 +12,7 @@ import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 
 public interface HistoryDB {
 
-  boolean saveContent(Bytes key, Bytes value);
+  boolean saveContent(ContentKey contentKey, Bytes value);
 
   Optional<BlockHeader> getBlockHeaderByBlockHash(Bytes blockHash);
 
@@ -19,8 +20,7 @@ public interface HistoryDB {
 
   Optional<BlockBody> getBlockBodyByBlockHash(Bytes blockHash);
 
-  Optional<BlockWithReceipts> getBlockReceiptByBlockHash(
-      Bytes blockHash); // TODO or return List<TransactionReceipt>
+  Optional<BlockWithReceipts> getBlockReceiptByBlockHash(Bytes blockHash); // TODO or return List<TransactionReceipt>
 
   Optional<byte[]> get(ContentType contentType, Bytes contentKey);
 }

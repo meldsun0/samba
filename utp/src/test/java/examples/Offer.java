@@ -2,6 +2,7 @@ package examples;
 
 import samba.utp.UTPClient;
 import samba.utp.network.TransportLayer;
+import samba.utp.network.udp.UDPAddress;
 import samba.utp.network.udp.UDPTransportLayer;
 
 import java.io.IOException;
@@ -14,12 +15,13 @@ public class Offer {
 
   public static void main(String args[])
       throws ExecutionException, InterruptedException, IOException {
-    UDPTransportLayer udpTransportLayer = new UDPTransportLayer("localhost", 13345);
+    UDPAddress udpaddress = new UDPAddress("localhost", 13345);
+    UDPTransportLayer udpTransportLayer = new UDPTransportLayer();
 
     UTPClient chanel = new UTPClient(udpTransportLayer);
     startListeningIncomingPackets(udpTransportLayer, chanel);
 
-    chanel.connect(333).thenCompose(v -> chanel.write(getContentToSend("Content21"))).get();
+    chanel.connect(333, udpaddress).thenCompose(v -> chanel.write(getContentToSend("Content34"))).get();
   }
 
   private static ByteBuffer getContentToSend(String inputString) {

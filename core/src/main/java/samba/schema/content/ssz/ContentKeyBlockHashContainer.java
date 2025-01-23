@@ -8,7 +8,7 @@ import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
-public class ContentKeyBlockHashContainer
+public class  ContentKeyBlockHashContainer
     extends Container1<ContentKeyBlockHashContainer, SszBytes32> {
 
   public ContentKeyBlockHashContainer(Bytes32 blockHash) {

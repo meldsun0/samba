@@ -26,8 +26,6 @@ public class UTPReadingFuture {
 
   private static final int PACKET_DIFF_WARP = 50000;
   private int lastPayloadLength = UtpAlgConfiguration.MAX_PACKET_SIZE;
-  ;
-
   private final ByteArrayOutputStream buffer;
 
   private final SkippedPacketBuffer skippedBuffer = new SkippedPacketBuffer();

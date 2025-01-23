@@ -53,8 +53,8 @@ public class UTPClient {
     this.connection = new CompletableFuture<>();
   }
 
-  public CompletableFuture<Void> connect(int connectionId) {
-    checkNotNull(this.transportLayer.getRemoteAddress(), "Address");
+  public CompletableFuture<Void> connect(int connectionId, TransportAddress transportAddress) {
+    checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
     LOG.info("Send Connection message to {}", connectionId);
     if (!listen.compareAndSet(false, true)) {
@@ -63,7 +63,7 @@ public class UTPClient {
               "Attempted to start an already started server listening on " + connectionId));
     }
     try {
-      this.session.initConnection(this.transportLayer.getRemoteAddress(), connectionId);
+      this.session.initConnection(transportAddress, connectionId);
       UtpPacket message = InitConnectionMessage.build(timeStamper.utpTimeStamp(), connectionId);
       sendPacket(message);
       this.session.updateStateOnConnectionInitSuccess();

@@ -17,6 +17,7 @@ package samba.utp.data;
 import static samba.utp.data.UtpPacketUtils.*;
 import static samba.utp.data.bytes.UnsignedTypesUtil.longToUshort;
 
+import org.apache.tuweni.bytes.Bytes;
 import samba.utp.data.bytes.UnsignedTypesUtil;
 import samba.utp.message.MessageType;
 
@@ -356,6 +357,12 @@ public class UtpPacket {
   public static UtpPacket decode(final DatagramPacket dgpkt) {
     UtpPacket pkt = new UtpPacket();
     pkt.setFromByteArray(dgpkt.getData(), dgpkt.getLength(), dgpkt.getOffset());
+    return pkt;
+  }
+
+  public static UtpPacket decode(final Bytes bytes) {
+    UtpPacket pkt = new UtpPacket();
+    pkt.setFromByteArray(bytes.toArray(), bytes.toArray().length, 0);
     return pkt;
   }
 

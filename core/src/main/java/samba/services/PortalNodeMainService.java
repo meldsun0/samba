@@ -108,7 +108,7 @@ public class PortalNodeMainService extends Service {
   }
 
   private void initUTPService() {
-    this.utpService = new UTPService();
+    this.utpService = new UTPService(this.discoveryService);
   }
 
   private void initJsonRPCService() {
@@ -142,6 +142,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName(),
           new PortalHistoryFindNodes(this.historyNetwork));
+      methods.put(
+              RpcMethod.PORTAL_HISTORY_FIND_CONTENT.getMethodName(),
+              new PortalHistoryFindContent(this.historyNetwork));
 
       jsonRpcService =
           Optional.of(
