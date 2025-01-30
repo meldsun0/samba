@@ -44,23 +44,12 @@ public class UtpPacketUtils {
   private static final Logger log = LoggerFactory.getLogger(UtpPacketUtils.class);
 
   public static byte[] joinByteArray(byte[] array1, byte[] array2) {
-
-    int length1 = array1 == null ? 0 : array1.length;
-    int length2 = array2 == null ? 0 : array2.length;
-
-    int totalLength = length1 + length2;
+    byte[] safeArray1 = array1 == null ? new byte[0] : array1;
+    byte[] safeArray2 = array2 == null ? new byte[0] : array2;
+    int totalLength = safeArray1.length + safeArray2.length;
     byte[] returnArray = new byte[totalLength];
-
-    int i = 0;
-    for (; i < length1; i++) {
-      returnArray[i] = array1[i];
-    }
-
-    for (int j = 0; j < length2; j++) {
-      returnArray[i] = array2[j];
-      i++;
-    }
-
+    System.arraycopy(safeArray1, 0, returnArray, 0, safeArray1.length);
+    System.arraycopy(safeArray2, 0, returnArray, safeArray1.length, safeArray2.length);
     return returnArray;
   }
 }
