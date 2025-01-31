@@ -2,10 +2,16 @@ package samba.storage;
 
 import static com.google.common.base.Preconditions.*;
 
+import samba.domain.content.ContentBlockBody;
+import samba.domain.content.ContentBlockHeader;
+import samba.domain.content.ContentKey;
+import samba.domain.content.ContentReceipts;
 import samba.domain.content.ContentType;
 import samba.domain.content.ContentUtil;
 import samba.rocksdb.*;
 import samba.rocksdb.exceptions.StorageException;
+import samba.schema.content.ssz.ContentKeyBlockHashContainer;
+import samba.schema.content.ssz.ContentKeyBlockNumberContainer;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -15,10 +21,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.hyperledger.besu.ethereum.core.BlockBody;
-import org.hyperledger.besu.ethereum.core.BlockHeader;
-import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryRocksDB implements HistoryDB {
 
@@ -39,23 +43,35 @@ public class HistoryRocksDB implements HistoryDB {
 
   // TODO reduce the verbosity of this method once is ready.
   @Override
-  public boolean saveContent(Bytes contentKey, Bytes value) {
-    ContentType contentType = ContentType.fromContentKey(contentKey);
-    LOG.info("Store {} with Key: {} and Value {}", contentType, contentKey, value);
+  public boolean saveContent(Bytes key, Bytes value) {
     try {
-      switch (contentType) {
+      ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(key).get();
+      LOG.info("Store {} with Key: {} and Value {}", contentKey.getContentType(), key, value);
+      switch (contentKey.getContentType()) {
         case ContentType.BLOCK_HEADER -> {
-          Bytes blockHash = contentKey.slice(1, contentKey.size()); // blockHash is in ssz.
-          // block_header_with_proof = BlockHeaderWithProof(header: rlp.encode(header), proof:
-          // proof)
-          if (!ContentUtil.isBlockHeaderValid(blockHash, value)) {
-            LOG.info("BlockHeader for blockHash: {} is invalid", blockHash);
+          Bytes blockHashKey = contentKey.getBlockHashSsz();
+
+          if (!ContentUtil.isBlockHeaderValid(blockHashKey, value)) {
+            LOG.info("BlockHeader for blockHeaderKey: {} is invalid", blockHashKey);
             break;
           }
-          save(KeyValueSegment.BLOCK_HEADER, blockHash, value); // TODO async
+
+          Optional<ContentBlockHeader> blockHeader =
+              ContentUtil.createBlockHeaderfromSszBytes(value);
+          if (blockHeader.isEmpty()) {
+            LOG.info("BlockHeader for blockHashKey: {} is invalid", blockHashKey);
+            break;
+          }
+          Bytes blockNumberKey =
+              new ContentKeyBlockNumberContainer(
+                      UInt64.valueOf(blockHeader.get().getBlockHeader().getNumber()))
+                  .sszSerialize();
+          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey);
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKey, value); // TODO async
         }
         case ContentType.BLOCK_BODY -> {
-          Bytes blockHash = contentKey.slice(1, contentKey.size()); // blockHash is in ssz.
+          Bytes blockHash = contentKey.getBlockHashSsz();
+
           this.getBlockHeaderByBlockHash(blockHash)
               .ifPresentOrElse(
                   blockHeader -> {
@@ -72,64 +88,89 @@ public class HistoryRocksDB implements HistoryDB {
                   });
         }
         case ContentType.RECEIPT -> {
-          Bytes blockHashInSSZ = contentKey.slice(1, contentKey.size());
+          Bytes blockHash = contentKey.getBlockHashSsz();
           // TODO should we do any validation?
-          save(KeyValueSegment.RECEIPT, blockHashInSSZ, value);
+          save(KeyValueSegment.RECEIPT, blockHash, value);
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {
-          Bytes blockNumberInSSZ = contentKey.slice(1, contentKey.size());
-          if (!ContentUtil.isBlockHeaderValid(blockNumberInSSZ, value)) {
-            LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberInSSZ);
+          Bytes blockNumberKey = contentKey.getBlockNumberSsz();
+
+          if (!ContentUtil.isBlockHeaderValid(blockNumberKey, value)) {
+            LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
             break;
           }
-          // TODO once ssz is solve change this.
-          var blockHash = Bytes.EMPTY;
-          var blockNumber = Bytes.EMPTY;
-          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumber, blockHash);
-          save(KeyValueSegment.BLOCK_HEADER, blockHash, value);
+
+          Optional<Bytes> blockHashKey = getBlockHashByBlockNumber(blockNumberKey);
+          if (blockHashKey.isEmpty()) {
+            Optional<ContentBlockHeader> blockHeader =
+                ContentUtil.createBlockHeaderfromSszBytes(value);
+            if (blockHeader.isEmpty()) {
+              LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
+              break;
+            }
+            blockHashKey =
+                Optional.of(
+                    new ContentKeyBlockHashContainer(
+                            blockHeader.get().getBlockHeader().getHash().copy())
+                        .sszSerialize());
+            if (blockHashKey.isEmpty()) {
+              LOG.info("BlockHash for blockNumber: {} is invalid", blockNumberKey);
+              break;
+            }
+            save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey.get());
+          }
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKey.get(), value);
         }
         default ->
             throw new IllegalArgumentException(
-                String.format("CONTENT: Invalid payload type %s", contentType));
+                String.format("CONTENT: Invalid payload type %s", contentKey.getContentType()));
       }
       return true;
     } catch (Exception e) {
-      LOG.info("Content could not be saved. ContentKey: {} , ContentValue{}", contentKey, value);
+      LOG.info("Content could not be saved. ContentKey: {} , ContentValue{}", key, value);
       return false;
     }
   }
 
   @Override
-  public Optional<BlockHeader> getBlockHeaderByBlockHash(Bytes blockHash) {
-    Optional<byte[]> sszBlockHeader =
+  public Optional<ContentBlockHeader> getBlockHeaderByBlockHash(Bytes blockHash) {
+    Optional<byte[]> databaseBlockHeader =
         this.rocksDBInstance.get(KeyValueSegment.BLOCK_HEADER, blockHash.toArray());
-    return sszBlockHeader.flatMap(ContentUtil::createBlockHeaderfromSSZBytes);
+    if (databaseBlockHeader.isEmpty()) return Optional.empty();
+    return ContentUtil.createBlockHeaderfromSszBytes(Bytes.wrap(databaseBlockHeader.get()));
   }
 
   @Override
-  public Optional<Bytes> getBlockHashByBlockNumber(Bytes blockNumber) {
-    Optional<byte[]> blockHash =
-        this.rocksDBInstance.get(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumber.toArray());
-    return blockHash.flatMap(ContentUtil::createBlockHashFromSSZBytes);
-  }
-
-  @Override
-  public Optional<BlockBody> getBlockBodyByBlockHash(Bytes blockHash) {
-    Optional<byte[]> sszBlockBody =
+  public Optional<ContentBlockBody> getBlockBodyByBlockHash(Bytes blockHash) {
+    Optional<byte[]> databaseBlockBody =
         this.rocksDBInstance.get(KeyValueSegment.BLOCK_BODY, blockHash.toArray());
-    return sszBlockBody.flatMap(ContentUtil::createBlockBodyFromSSZBytes);
+    if (databaseBlockBody.isEmpty()) return Optional.empty();
+    return ContentUtil.createBlockBodyFromSszBytes(Bytes.wrap(databaseBlockBody.get()));
   }
 
   @Override
-  public Optional<BlockWithReceipts> getBlockReceiptByBlockHash(Bytes blockHash) {
-    Optional<byte[]> sszBlockHeader =
+  public Optional<ContentReceipts> getReceiptsByBlockHash(Bytes blockHash) {
+    Optional<byte[]> databaseReceipts =
         this.rocksDBInstance.get(KeyValueSegment.RECEIPT, blockHash.toArray());
-    return sszBlockHeader.flatMap(ContentUtil::createBlockWithReceiptsfromSSZBytes);
+    if (databaseReceipts.isEmpty()) return Optional.empty();
+    return ContentUtil.createReceiptsFromSszBytes(Bytes.wrap(databaseReceipts.get()));
   }
 
   @Override
-  public Optional<byte[]> get(ContentType contentType, Bytes contentKey) {
-    return this.rocksDBInstance.get(getSegmentFromContentType(contentType), contentKey.toArray());
+  public Optional<Bytes> getBlockHashByBlockNumber(Bytes blockNumberKey) {
+    Optional<byte[]> databaseKey =
+        this.rocksDBInstance.get(
+            KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey.toArray());
+    if (databaseKey.isEmpty()) return Optional.empty();
+    return Optional.of(Bytes.wrap(databaseKey.get()));
+  }
+
+  @Override
+  public Optional<Bytes> get(ContentType contentType, Bytes contentKey) {
+    Optional<byte[]> databaseContent =
+        this.rocksDBInstance.get(getSegmentFromContentType(contentType), contentKey.toArray());
+    if (databaseContent.isEmpty()) return Optional.empty();
+    return Optional.of(Bytes.wrap(databaseContent.get()));
   }
 
   private void save(Segment segment, Bytes key, Bytes content) {

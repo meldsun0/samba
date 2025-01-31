@@ -3,19 +3,31 @@ package samba.domain.content;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.hyperledger.besu.ethereum.core.BlockBody;
-import org.hyperledger.besu.ethereum.core.BlockHeader;
-import org.hyperledger.besu.ethereum.core.BlockWithReceipts;
 
-/*TODO remove once SSZ decoded is done*/
 public class ContentUtil {
 
-  public static Optional<BlockHeader> createBlockHeaderfromSSZBytes(byte[] bytes) {
-    // TODO
-    return Optional.empty();
+  public static Optional<ContentKey> createContentKeyFromSszBytes(Bytes contentkeyBytes) {
+    Optional<ContentKey> contentKey = Optional.of(new ContentKey(contentkeyBytes));
+    return contentKey;
   }
 
-  public static boolean isBlockBodyValid(BlockHeader blockHeader, Bytes blockBody) {
+  public static Optional<ContentBlockHeader> createBlockHeaderfromSszBytes(Bytes blockHeaderBytes) {
+    Optional<ContentBlockHeader> blockHeader =
+        Optional.of(new ContentBlockHeader(blockHeaderBytes));
+    return blockHeader;
+  }
+
+  public static Optional<ContentBlockBody> createBlockBodyFromSszBytes(Bytes blockBodyBytes) {
+    Optional<ContentBlockBody> blockBody = Optional.of(new ContentBlockBody(blockBodyBytes));
+    return blockBody;
+  }
+
+  public static Optional<ContentReceipts> createReceiptsFromSszBytes(Bytes receiptsBytes) {
+    Optional<ContentReceipts> receipts = Optional.of(new ContentReceipts(receiptsBytes));
+    return receipts;
+  }
+
+  public static boolean isBlockBodyValid(ContentBlockHeader blockHeader, Bytes blockBody) {
     // TODO given a BlockHeader we should validate that value that is a sszbytes of a blockBody
     /*
     Compare header timestamp against SHANGHAI_TIMESTAMP to determine what encoding scheme the block body uses.
@@ -24,21 +36,8 @@ public class ContentUtil {
     return true;
   }
 
-  public static boolean isBlockHeaderValid(Bytes blockHash, Bytes blockHeader) {
+  public static boolean isBlockHeaderValid(Bytes blockKey, Bytes blockHeader) {
     // TODO validate blockHeader.
     return true;
-  }
-
-  public static Optional<? extends BlockWithReceipts> createBlockWithReceiptsfromSSZBytes(
-      byte[] bytes) {
-    return Optional.empty();
-  }
-
-  public static Optional<BlockBody> createBlockBodyFromSSZBytes(byte[] bytes) {
-    return Optional.empty();
-  }
-
-  public static Optional<? extends Bytes> createBlockHashFromSSZBytes(byte[] bytes) {
-    return Optional.empty();
   }
 }

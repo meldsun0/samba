@@ -17,6 +17,25 @@ public class ContentBlockBody {
   private final BlockBodyPostShanghaiContainer blockBodyPostShanghaiContainer;
   private final long timestamp;
 
+  public ContentBlockBody(Bytes sszBytes) {
+    BlockBodyPreShanghaiContainer tempBlockBodyPreShanghaiContainer;
+    BlockBodyPostShanghaiContainer tempBlockBodyPostShanghaiContainer;
+    long tempTimestamp;
+    try {
+      tempBlockBodyPreShanghaiContainer = BlockBodyPreShanghaiContainer.decodeBytes(sszBytes);
+      tempBlockBodyPostShanghaiContainer = null;
+      tempTimestamp =
+          HistoryConstants.SHANGHAI_TIMESTAMP - 1; // No guaranteed way to get timestamp from body
+    } catch (Exception e) {
+      tempBlockBodyPreShanghaiContainer = null;
+      tempBlockBodyPostShanghaiContainer = BlockBodyPostShanghaiContainer.decodeBytes(sszBytes);
+      tempTimestamp = HistoryConstants.SHANGHAI_TIMESTAMP;
+    }
+    this.blockBodyPreShanghaiContainer = tempBlockBodyPreShanghaiContainer;
+    this.blockBodyPostShanghaiContainer = tempBlockBodyPostShanghaiContainer;
+    this.timestamp = tempTimestamp;
+  }
+
   public ContentBlockBody(
       BlockBodyPreShanghaiContainer blockBodyPreShanghaiContainer, long timestamp) {
     this.blockBodyPreShanghaiContainer = blockBodyPreShanghaiContainer;
