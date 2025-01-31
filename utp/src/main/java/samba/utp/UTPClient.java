@@ -67,7 +67,10 @@ public class UTPClient {
       this.session.initConnection(transportAddress, connectionId);
 
       UtpPacket message =
-          InitConnectionMessage.build(timeStamper.utpTimeStamp(), connectionId, UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L);
+          InitConnectionMessage.build(
+              timeStamper.utpTimeStamp(),
+              connectionId,
+              UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L);
       sendPacket(message);
       this.session.updateStateOnConnectionInitSuccess();
       startConnectionTimeOutCounter(message);
@@ -152,7 +155,7 @@ public class UTPClient {
     return this.connection.thenCompose(
         v -> {
           this.reader = Optional.of(new UTPReadingFuture(this, timeStamper));
-          return reader.get().startReading(this.session.getAckNumber());  //TODO FIX THIS
+          return reader.get().startReading(this.session.getAckNumber()); // TODO FIX THIS
         });
   }
 
@@ -166,7 +169,7 @@ public class UTPClient {
       return;
     }
     this.session.close();
-    this.transportLayer.close();
+    this.transportLayer.close(this.session.getConnectionIdReceiving());
     this.reader.ifPresent(UTPReadingFuture::graceFullInterrupt);
     this.writer.ifPresent(UTPWritingFuture::graceFullInterrupt);
   }

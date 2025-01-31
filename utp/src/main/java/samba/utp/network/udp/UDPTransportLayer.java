@@ -35,7 +35,7 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
     }
   }
 
-  @Override
+
   public UtpPacket onPacketReceive() throws IOException {
     byte[] buffer = new byte[MAX_UDP_HEADER_LENGTH + MAX_UTP_PACKET_LENGTH];
     DatagramPacket dgpkt = new DatagramPacket(buffer, buffer.length);
@@ -43,9 +43,8 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
     return UTPWireMessageDecoder.decode(dgpkt);
   }
 
-
   @Override
-  public void close() {
+  public void close(long connectionId) {
     this.socket.close();
   }
 

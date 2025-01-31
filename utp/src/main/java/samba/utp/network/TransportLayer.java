@@ -8,7 +8,5 @@ public interface TransportLayer<T extends TransportAddress> {
 
   void sendPacket(UtpPacket packet, T remoteAddress) throws IOException;
 
-  UtpPacket onPacketReceive() throws IOException;
-
-  void close();
+  void close(long connectionId);
 }
