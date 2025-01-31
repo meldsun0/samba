@@ -1,6 +1,6 @@
 package samba.network.history;
 
-import samba.domain.content.ContentKey;
+import samba.domain.content.ContentType;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
@@ -248,19 +248,21 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleFindContent(NodeRecord srcNode, FindContent findContent) {
-    ContentKey contentkey = ContentKey.decode(findContent.getContentKey());
+    Bytes contentKey = findContent.getContentKey();
+    ContentType contentType = ContentType.fromContentKey(contentKey);
+    Bytes value = contentKey.slice(0, 1);
+    Optional<Bytes> content = historyDB.get(contentType, value);
 
-    Optional<byte[]> content = historyDB.get(contentkey.getContentType(), contentkey.getSszBytes());
     if (content.isEmpty()) {
       // TODO return list of ENRs that we know of that are closest to the requested content
       /*If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.*/
       return new Content(List.of());
     }
-    if (content.get().length > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
+    if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
       // TODO initiate UTP connection and UTP async listen on connectionId
       return new Content(0);
     }
-    return new Content(Bytes.of(content.get()));
+    return new Content(content.get());
   }
 
   @Override

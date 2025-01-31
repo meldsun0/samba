@@ -26,7 +26,13 @@ import samba.services.jsonrpc.methods.ClientVersion;
 import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
-import samba.services.jsonrpc.methods.history.*;
+import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryDeleteEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryFindContent;
+import samba.services.jsonrpc.methods.history.PortalHistoryFindNodes;
+import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryPing;
+import samba.services.jsonrpc.methods.history.PortalHistoryStore;
 import samba.services.storage.StorageService;
 import samba.services.utp.UTPService;
 
@@ -142,6 +148,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName(),
           new PortalHistoryFindNodes(this.historyNetwork));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_STORE.getMethodName(),
+          new PortalHistoryStore(this.storageService.getDatabase()));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_CONTENT.getMethodName(),
           new PortalHistoryFindContent(this.historyNetwork));
