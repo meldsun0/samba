@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
 
 public class UTPClient {
 
@@ -64,7 +65,9 @@ public class UTPClient {
     }
     try {
       this.session.initConnection(transportAddress, connectionId);
-      UtpPacket message = InitConnectionMessage.build(timeStamper.utpTimeStamp(), connectionId);
+
+      UtpPacket message =
+          InitConnectionMessage.build(timeStamper.utpTimeStamp(), connectionId, UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L);
       sendPacket(message);
       this.session.updateStateOnConnectionInitSuccess();
       startConnectionTimeOutCounter(message);
@@ -76,7 +79,7 @@ public class UTPClient {
   }
 
   public void receivePacket(UtpPacket utpPacket) {
-
+    LOG.trace("[Receiving Packet: " + utpPacket.toString() + "]");
     switch (utpPacket.getMessageType()) {
       case ST_RESET, ST_SYN -> this.stop();
       case ST_DATA, ST_STATE -> queuePacket(utpPacket);
@@ -145,11 +148,11 @@ public class UTPClient {
         });
   }
 
-  public CompletableFuture<ByteBuffer> read() {
+  public CompletableFuture<Bytes> read() {
     return this.connection.thenCompose(
         v -> {
           this.reader = Optional.of(new UTPReadingFuture(this, timeStamper));
-          return reader.get().startReading();
+          return reader.get().startReading(this.session.getAckNumber());  //TODO FIX THIS
         });
   }
 

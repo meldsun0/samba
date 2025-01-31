@@ -15,28 +15,28 @@ import org.slf4j.LoggerFactory;
 
 public class UTPNetworkIncomingRequestHandler implements IncomingRequestHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UTPNetworkIncomingRequestHandler.class);
+  private static final Logger LOG = LoggerFactory.getLogger(UTPNetworkIncomingRequestHandler.class);
 
-    private UTPService utpService;
+  private UTPService utpService;
 
-    public UTPNetworkIncomingRequestHandler(UTPService utpService) {
-        this.utpService = utpService;
-    }
+  public UTPNetworkIncomingRequestHandler(UTPService utpService) {
+    this.utpService = utpService;
+  }
 
-    @Override
-    public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
-        checkArgument(
-                this.getNetworkType().isEquals(protocol),
-                "TALKKREQ message is not from the {}",
-                this.getNetworkType().getName());
-        //TODO refactor
-        utpService.onUTPMessageReceive(srcNode, request);
+  @Override
+  public CompletableFuture<Bytes> talk(NodeRecord srcNode, Bytes protocol, Bytes request) {
+    checkArgument(
+        this.getNetworkType().isEquals(protocol),
+        "TALKKREQ message is not from the {}",
+        this.getNetworkType().getName());
+    // TODO refactor
+    utpService.onUTPMessageReceive(srcNode, request);
 
-        return CompletableFuture.completedFuture(null);
-    }
+    return CompletableFuture.completedFuture(null);
+  }
 
-    @Override
-    public NetworkType getNetworkType() {
-        return NetworkType.UTP;
-    }
+  @Override
+  public NetworkType getNetworkType() {
+    return NetworkType.UTP;
+  }
 }

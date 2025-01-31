@@ -28,7 +28,7 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
   @Override
   public void sendPacket(UtpPacket packet, UDPAddress remoteAddress) throws IOException {
     synchronized (sendLock) {
-      DatagramPacket UDPPacket = UtpPacket.createDatagramPacket(packet);
+      DatagramPacket UDPPacket = createDatagramPacket(packet);
       UDPPacket.setAddress(remoteAddress.getAddress());
       UDPPacket.setPort(remoteAddress.getPort());
       this.socket.send(UDPPacket);
@@ -47,5 +47,11 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
   @Override
   public void close() {
     this.socket.close();
+  }
+
+  public static DatagramPacket createDatagramPacket(UtpPacket packet) throws IOException {
+    byte[] utpPacketBytes = packet.toByteArray();
+    int length = packet.getPacketLength();
+    return new DatagramPacket(utpPacketBytes, length);
   }
 }

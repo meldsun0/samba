@@ -13,7 +13,6 @@ import samba.utp.data.bytes.UnsignedTypesUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -21,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
 
 public class UTPReadingFuture {
 
@@ -29,7 +29,7 @@ public class UTPReadingFuture {
   private final ByteArrayOutputStream buffer;
 
   private final SkippedPacketBuffer skippedBuffer = new SkippedPacketBuffer();
-  private volatile boolean graceFullInterrupt;
+  private static volatile boolean graceFullInterrupt;
   private MicroSecondsTimeStamp timeStamper;
   private long totalPayloadLength = 0;
   private long lastPacketTimestamp;
@@ -43,20 +43,22 @@ public class UTPReadingFuture {
 
   private static final Logger LOG = LogManager.getLogger(UTPReadingFuture.class);
   private final UTPClient UTPClient;
-  private final CompletableFuture<ByteBuffer> readFuture;
+  private final CompletableFuture<Bytes> readFuture;
+
 
   public UTPReadingFuture(UTPClient UTPClient, MicroSecondsTimeStamp timestamp) {
     this.UTPClient = UTPClient;
     this.buffer = new ByteArrayOutputStream();
     this.timeStamper = timestamp;
     this.startReadingTimeStamp = timestamp.timeStamp();
-    this.readFuture = new CompletableFuture<ByteBuffer>();
+    this.readFuture = new CompletableFuture<>();
   }
 
-  public CompletableFuture<ByteBuffer> startReading() {
+  public CompletableFuture<Bytes> startReading(int startingSequenceNumber) {
     CompletableFuture.runAsync(
         () -> {
           boolean successful = false;
+          Bytes firstPacket = Bytes.EMPTY;
           try {
             while (continueReading()) {
               BlockingQueue<UtpTimestampedPacketDTO> queue = UTPClient.getQueue();
@@ -64,14 +66,18 @@ public class UTPReadingFuture {
                   queue.poll(
                       UtpAlgConfiguration.TIME_WAIT_AFTER_LAST_PACKET / 2, TimeUnit.MICROSECONDS);
               nowtimeStamp = timeStamper.timeStamp();
+
               if (packetDTO != null) {
                 currentPackedAck++;
                 lastPackedRecieved = packetDTO.stamp();
-
                 if (isLastPacket(packetDTO)) {
                   gotLastPacket = true;
                   lastPacketTimestamp = timeStamper.timeStamp();
                   LOG.info("Received the last packet.");
+                }
+                //TODO FIX THIS!!!!
+                if ((startingSequenceNumber & 0xFFFF) == (packetDTO.utpPacket().getSequenceNumber() & 0xFFFF)) {
+                  firstPacket = Bytes.of(packetDTO.utpPacket().getPayload());
                 }
 
                 if (isPacketExpected(packetDTO.utpPacket())) {
@@ -79,9 +85,10 @@ public class UTPReadingFuture {
                 } else {
                   handleUnexpectedPacket(packetDTO);
                 }
-                if (ackThisPacket()) {
-                  currentPackedAck = 0;
-                }
+              }
+
+              if (ackThisPacket()) {
+                currentPackedAck = 0;
               }
 
               /*TODO: How to measure Rtt here for dynamic timeout limit?*/
@@ -99,7 +106,7 @@ public class UTPReadingFuture {
             LOG.debug("Something went wrong during packet processing!");
           } finally {
             if (successful) {
-              readFuture.complete(ByteBuffer.wrap(this.buffer.toByteArray()));
+              readFuture.complete(Bytes.concatenate(firstPacket, Bytes.of(this.buffer.toByteArray())));
             } else {
               readFuture.completeExceptionally(new RuntimeException("Something went wrong!"));
             }
@@ -121,15 +128,10 @@ public class UTPReadingFuture {
   }
 
   private boolean isLastPacket(UtpTimestampedPacketDTO timestampedPair) {
-    //		log.debug("WindowSize: " + (timestampedPair.utpPacket().getWindowSize() & 0xFFFFFFFF));
-    //		log.debug("got Packet: " + (timestampedPair.utpPacket().getSequenceNumber() & 0xFFFF) + "
-    // and will ack? " + ackThisPacket() + " acksizeCounter " + currentPackedAck);
     return (timestampedPair.utpPacket().getWindowSize() & 0xFFFFFFFF) == 0;
   }
 
   private void handleExpectedPacket(UtpTimestampedPacketDTO timestampedPair) throws IOException {
-    //		log.debug("handling expected packet: " + (timestampedPair.utpPacket().getSequenceNumber() &
-    // 0xFFFF));
     if (hasSkippedPackets()) {
       buffer.write(timestampedPair.utpPacket().getPayload());
       int payloadLength = timestampedPair.utpPacket().getPayload().length;
@@ -202,9 +204,7 @@ public class UTPReadingFuture {
 
   private void handleUnexpectedPacket(UtpTimestampedPacketDTO timestampedPair) throws IOException {
     int expected = getExpectedSeqNr();
-    //		log.debug("handling unexpected packet: " + (timestampedPair.utpPacket().getSequenceNumber()
-    // & 0xFFFF));
-    int seqNr = timestampedPair.utpPacket().getSequenceNumber() & 0xFFFF;
+    int receivedSeqNumber = timestampedPair.utpPacket().getSequenceNumber() & 0xFFFF;
     if (skippedBuffer.isEmpty()) {
       skippedBuffer.setExpectedSequenceNumber(expected);
     }
@@ -212,7 +212,8 @@ public class UTPReadingFuture {
     // but buffer can recieve 65xxx, which already has been acked, since seq numbers wrapped.
     // current implementation puts this wrongly into the buffer. it should go in the else block
     // possible fix: alreadyAcked = expected > seqNr || seqNr - expected > CONSTANT;
-    boolean alreadyAcked = expected > seqNr || seqNr - expected > PACKET_DIFF_WARP;
+    boolean alreadyAcked =
+        expected > receivedSeqNumber || receivedSeqNumber - expected > PACKET_DIFF_WARP;
 
     boolean saneSeqNr = expected == skippedBuffer.getExpectedSequenceNumber();
     //		log.debug("saneSeqNr: " + saneSeqNr + " alreadyAcked: " + alreadyAcked + " will ack: " +
@@ -252,16 +253,16 @@ public class UTPReadingFuture {
     if (ackNumber == UnsignedTypesUtil.MAX_USHORT) {
       return 1;
     }
+
     return ackNumber + 1;
   }
 
   public void graceFullInterrupt() {
     if (this.isAlive()) {
-      this.graceFullInterrupt = true;
+      graceFullInterrupt = true;
     }
   }
 
-  // done
   private boolean continueReading() {
     return !graceFullInterrupt
         && (!gotLastPacket || hasSkippedPackets() || !timeAwaitedAfterLastPacket());

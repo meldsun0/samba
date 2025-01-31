@@ -50,14 +50,6 @@ public class UtpTimestampedPacketDTO {
     this.utpTimeStamp = utpStamp;
   }
 
-  public DatagramPacket dataGram() {
-    try {
-      return UtpPacket.createDatagramPacket(this.utpPacket);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   public Long stamp() {
     return timestamp;
   }

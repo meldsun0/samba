@@ -1,6 +1,6 @@
 package samba.utp.network;
 
-public interface TransportAddress {
+public interface TransportAddress<T> {
 
-  <T> T getAddress();
+   T getAddress();
 }

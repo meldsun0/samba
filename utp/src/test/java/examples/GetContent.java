@@ -25,7 +25,7 @@ public class GetContent {
         .thenCompose(v -> chanel.read())
         .thenApply(
             (data) -> {
-              System.out.println(StandardCharsets.UTF_8.decode(data));
+              System.out.println(data);
               return CompletableFuture.completedFuture(data);
             })
         .get();

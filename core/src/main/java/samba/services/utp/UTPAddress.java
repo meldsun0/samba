@@ -1,30 +1,19 @@
 package samba.services.utp;
 
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.utp.network.TransportAddress;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-public class UTPAddress implements TransportAddress {
+public class UTPAddress implements TransportAddress<NodeRecord> {
 
-    private NodeRecord nodeRecord;
-    private int port;
-    private String remoteAddress;
+  private NodeRecord nodeRecord;
 
+  public UTPAddress(NodeRecord nodeRecord) {
+    this.nodeRecord = nodeRecord;
+  }
 
-    public UTPAddress(final String remoteAddress, int port, NodeRecord nodeRecord) {
-        this.port = port;
-        this.remoteAddress = remoteAddress;
-        this.nodeRecord = nodeRecord;
-    }
-
-    @Override
-    public NodeRecord getAddress() {
-        return this.nodeRecord;
-    }
-
-    public int getPort() {
-        return this.port;
-    }
+  @Override
+  public NodeRecord getAddress() {
+    return this.nodeRecord;
+  }
 }

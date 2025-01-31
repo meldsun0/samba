@@ -17,13 +17,14 @@ package samba.utp.data;
 import static samba.utp.data.UtpPacketUtils.*;
 import static samba.utp.data.bytes.UnsignedTypesUtil.longToUshort;
 
-import org.apache.tuweni.bytes.Bytes;
 import samba.utp.data.bytes.UnsignedTypesUtil;
 import samba.utp.message.MessageType;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
+
+import org.apache.tuweni.bytes.Bytes;
 
 /**
  * uTP Package
@@ -104,8 +105,8 @@ public class UtpPacket {
     this.typeVersion = typeVersion;
   }
 
-  public short getConnectionId() {
-    return connectionId;
+  public int getConnectionId() {
+    return connectionId & 0xFFFF;
   }
 
   public void setConnectionId(short connectionId) {
@@ -167,37 +168,39 @@ public class UtpPacket {
     System.arraycopy(extensionlessArray, 0, header, 0, extensionlessArray.length);
 
     for (UtpHeaderExtension extension : extensions) {
-      byte[] extenionBytes = extension.toByteArray();
-      for (byte extenionByte : extenionBytes) {
-        header[offset++] = extenionByte;
-      }
+      byte[] extensionBytes = extension.toByteArray();
+      System.arraycopy(extensionBytes, 0, header, offset, extensionBytes.length);
+      offset += extensionBytes.length;
     }
     return joinByteArray(header, getPayload());
   }
 
   private byte[] getExtensionlessByteArray() {
-    return new byte[] {
-      typeVersion,
-      firstExtension,
-      (byte) (connectionId >> 8),
-      (byte) (connectionId),
-      (byte) (timestamp >> 24),
-      (byte) (timestamp >> 16),
-      (byte) (timestamp >> 8),
-      (byte) (timestamp),
-      (byte) (timestampDifference >> 24),
-      (byte) (timestampDifference >> 16),
-      (byte) (timestampDifference >> 8),
-      (byte) (timestampDifference),
-      (byte) (windowSize >> 24),
-      (byte) (windowSize >> 16),
-      (byte) (windowSize >> 8),
-      (byte) (windowSize),
-      (byte) (sequenceNumber >> 8),
-      (byte) (sequenceNumber),
-      (byte) (ackNumber >> 8),
-      (byte) (ackNumber),
-    };
+    byte[] byteArray =
+        new byte[] {
+          typeVersion,
+          firstExtension,
+          (byte) (connectionId >> 8),
+          (byte) (connectionId),
+          // (byte) (connectionId & 0xFF),
+          (byte) (timestamp >> 24),
+          (byte) (timestamp >> 16),
+          (byte) (timestamp >> 8),
+          (byte) (timestamp),
+          (byte) (timestampDifference >> 24),
+          (byte) (timestampDifference >> 16),
+          (byte) (timestampDifference >> 8),
+          (byte) (timestampDifference),
+          (byte) (windowSize >> 24),
+          (byte) (windowSize >> 16),
+          (byte) (windowSize >> 8),
+          (byte) (windowSize),
+          (byte) (sequenceNumber >> 8),
+          (byte) (sequenceNumber),
+          (byte) (ackNumber >> 8),
+          (byte) (ackNumber),
+        };
+    return byteArray;
   }
 
   private boolean hasExtensions() {
@@ -319,10 +322,14 @@ public class UtpPacket {
 
   @Override
   public String toString() {
+    String payloadHex =
+        (this.payload != null && this.payload.length != 0)
+            ? Bytes.of(this.payload).toHexString()
+            : "";
     StringBuilder ret =
         new StringBuilder(
             "[Type: "
-                + (typeVersion & 0xFF)
+                + this.getMessageType()
                 + "] "
                 + "[FirstExt: "
                 + (firstExtension & 0xFF)
@@ -332,12 +339,15 @@ public class UtpPacket {
                 + "] "
                 + "[Wnd: "
                 + (windowSize & 0xFFFFFFFF)
-                + " "
+                + "] "
                 + "[Seq: "
                 + (sequenceNumber & 0xFFFF)
                 + "] "
                 + "[Ack: "
                 + (ackNumber & 0xFFFF)
+                + "] "
+                + "[Payload: "
+                + (payloadHex)
                 + "] ");
 
     if (extensions != null) {
@@ -366,12 +376,6 @@ public class UtpPacket {
     return pkt;
   }
 
-  public static DatagramPacket createDatagramPacket(UtpPacket packet) throws IOException {
-    byte[] utpPacketBytes = packet.toByteArray();
-    int length = packet.getPacketLength();
-    return new DatagramPacket(utpPacketBytes, length);
-  }
-
   @Override
   public int hashCode() {
     int code;
@@ -390,21 +394,6 @@ public class UtpPacket {
     return code;
   }
 
-  // *** MUST BE MOVED SOMEWHERE
-  public static UtpPacket createPacket(
-      int sequenceNumber,
-      int ackNumber,
-      long connectionIdSending,
-      int utpTimestamp,
-      byte packetType) {
-    UtpPacket pkt = new UtpPacket();
-    pkt.setSequenceNumber(longToUshort(sequenceNumber));
-    pkt.setAckNumber(longToUshort(ackNumber));
-    pkt.setConnectionId(longToUshort(connectionIdSending));
-    pkt.setTimestamp(utpTimestamp);
-    pkt.setTypeVersion(packetType);
-    return pkt;
-  }
 
   public MessageType getMessageType() {
     return MessageType.fromByte(this.typeVersion);
