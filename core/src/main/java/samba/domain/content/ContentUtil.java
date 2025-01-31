@@ -15,7 +15,6 @@ public class ContentUtil {
     return Optional.empty();
   }
 
-
   public static Optional<? extends BlockWithReceipts> createBlockWithReceiptsfromSSZBytes(
       byte[] bytes) {
     return Optional.empty();

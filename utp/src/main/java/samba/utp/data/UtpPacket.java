@@ -15,12 +15,10 @@
 package samba.utp.data;
 
 import static samba.utp.data.UtpPacketUtils.*;
-import static samba.utp.data.bytes.UnsignedTypesUtil.longToUshort;
 
 import samba.utp.data.bytes.UnsignedTypesUtil;
 import samba.utp.message.MessageType;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.ArrayList;
 
@@ -393,7 +391,6 @@ public class UtpPacket {
             + 1000000000 * toByteArray().length;
     return code;
   }
-
 
   public MessageType getMessageType() {
     return MessageType.fromByte(this.typeVersion);

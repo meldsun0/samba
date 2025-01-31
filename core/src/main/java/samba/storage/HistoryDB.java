@@ -20,7 +20,8 @@ public interface HistoryDB {
 
   Optional<BlockBody> getBlockBodyByBlockHash(Bytes blockHash);
 
-  Optional<BlockWithReceipts> getBlockReceiptByBlockHash(Bytes blockHash); // TODO or return List<TransactionReceipt>
+  Optional<BlockWithReceipts> getBlockReceiptByBlockHash(
+      Bytes blockHash); // TODO or return List<TransactionReceipt>
 
   Optional<byte[]> get(ContentType contentType, Bytes contentKey);
 }

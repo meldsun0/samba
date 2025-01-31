@@ -16,9 +16,6 @@ package samba.utp;
 
 import samba.utp.data.UtpPacket;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-
 /**
  * Simple DTO class that stores some meta data about a {@see UtpPacket}
  *

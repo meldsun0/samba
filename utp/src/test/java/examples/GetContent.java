@@ -1,12 +1,10 @@
 package examples;
 
 import samba.utp.UTPClient;
-import samba.utp.network.TransportLayer;
 import samba.utp.network.udp.UDPAddress;
 import samba.utp.network.udp.UDPTransportLayer;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -32,7 +30,7 @@ public class GetContent {
   }
 
   public static void startListeningIncomingPackets(
-      TransportLayer transportLayer, UTPClient utpClient) {
+      UDPTransportLayer transportLayer, UTPClient utpClient) {
     CompletableFuture.runAsync(
         () -> {
           while (true) {

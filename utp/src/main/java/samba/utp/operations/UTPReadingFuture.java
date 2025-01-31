@@ -45,7 +45,6 @@ public class UTPReadingFuture {
   private final UTPClient UTPClient;
   private final CompletableFuture<Bytes> readFuture;
 
-
   public UTPReadingFuture(UTPClient UTPClient, MicroSecondsTimeStamp timestamp) {
     this.UTPClient = UTPClient;
     this.buffer = new ByteArrayOutputStream();
@@ -75,8 +74,9 @@ public class UTPReadingFuture {
                   lastPacketTimestamp = timeStamper.timeStamp();
                   LOG.info("Received the last packet.");
                 }
-                //TODO FIX THIS!!!!
-                if ((startingSequenceNumber & 0xFFFF) == (packetDTO.utpPacket().getSequenceNumber() & 0xFFFF)) {
+                // TODO FIX THIS!!!!
+                if ((startingSequenceNumber & 0xFFFF)
+                    == (packetDTO.utpPacket().getSequenceNumber() & 0xFFFF)) {
                   firstPacket = Bytes.of(packetDTO.utpPacket().getPayload());
                 }
 
@@ -106,7 +106,8 @@ public class UTPReadingFuture {
             LOG.debug("Something went wrong during packet processing!");
           } finally {
             if (successful) {
-              readFuture.complete(Bytes.concatenate(firstPacket, Bytes.of(this.buffer.toByteArray())));
+              readFuture.complete(
+                  Bytes.concatenate(firstPacket, Bytes.of(this.buffer.toByteArray())));
             } else {
               readFuture.completeExceptionally(new RuntimeException("Something went wrong!"));
             }

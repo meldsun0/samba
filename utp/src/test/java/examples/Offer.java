@@ -1,7 +1,6 @@
 package examples;
 
 import samba.utp.UTPClient;
-import samba.utp.network.TransportLayer;
 import samba.utp.network.udp.UDPAddress;
 import samba.utp.network.udp.UDPTransportLayer;
 
@@ -21,7 +20,10 @@ public class Offer {
     UTPClient chanel = new UTPClient(udpTransportLayer);
     startListeningIncomingPackets(udpTransportLayer, chanel);
 
-    chanel.connect(333, udpaddress).thenCompose(v -> chanel.write(getContentToSend("Content34"))).get();
+    chanel
+        .connect(333, udpaddress)
+        .thenCompose(v -> chanel.write(getContentToSend("Content34")))
+        .get();
   }
 
   private static ByteBuffer getContentToSend(String inputString) {
@@ -34,7 +36,7 @@ public class Offer {
   }
 
   public static void startListeningIncomingPackets(
-      TransportLayer transportLayer, UTPClient utpClient) {
+      UDPTransportLayer transportLayer, UTPClient utpClient) {
     CompletableFuture.runAsync(
         () -> {
           while (true) {

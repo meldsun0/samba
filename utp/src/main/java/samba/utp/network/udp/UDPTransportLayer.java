@@ -35,7 +35,6 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
     }
   }
 
-
   public UtpPacket onPacketReceive() throws IOException {
     byte[] buffer = new byte[MAX_UDP_HEADER_LENGTH + MAX_UTP_PACKET_LENGTH];
     DatagramPacket dgpkt = new DatagramPacket(buffer, buffer.length);

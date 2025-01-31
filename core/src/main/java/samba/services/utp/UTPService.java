@@ -67,7 +67,6 @@ public class UTPService extends Service implements TransportLayer<UTPAddress> {
         });
   }
 
-
   public void onUTPMessageReceive(NodeRecord nodeRecord, Bytes response) {
     UtpPacket utpPacket = UtpPacket.decode(response);
     int connectionId = utpPacket.getConnectionId();

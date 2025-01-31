@@ -12,7 +12,8 @@ import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 
 /**
- * Following https://github.com/ethereum/portal-network-specs/blob/master/utp/utp-wire-test-vectors.md
+ * Following
+ * https://github.com/ethereum/portal-network-specs/blob/master/utp/utp-wire-test-vectors.md
  */
 public class UtpPacketTests {
 
