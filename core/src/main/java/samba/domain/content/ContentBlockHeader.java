@@ -115,4 +115,8 @@ public class ContentBlockHeader {
   public Bytes getSszBytes() {
     return blockHeaderWithProofContainer.sszSerialize();
   }
+
+  public static ContentBlockHeader decode(Bytes sszBytes) {
+    return new ContentBlockHeader(sszBytes);
+  }
 }

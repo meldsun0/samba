@@ -15,6 +15,7 @@ class NetworkTypeTest {
     assertEquals("angelfood-state-network", NetworkType.ANGELFOOD_STATE_NETWORK.getName());
     assertEquals("angelfood-history-network", NetworkType.ANGELFOOD_HISTORY_NETWORK.getName());
     assertEquals("angelfood-state-network", NetworkType.ANGELFOOOD_BECACON_CHAIN_NETWORK.getName());
+    assertEquals("utp", NetworkType.UTP.getName());
   }
 
   @Test
@@ -37,6 +38,9 @@ class NetworkTypeTest {
     assertArrayEquals(
         new byte[] {(byte) (0x504C >>> 8), (byte) 0x504C},
         NetworkType.ANGELFOOOD_BECACON_CHAIN_NETWORK.getValue().toArray());
+    assertArrayEquals(
+        new byte[] {(byte) (0x757470 >>> 16), (byte) (0x757470 >>> 8), (byte) 0x757470},
+        NetworkType.UTP.getValue().toArray());
   }
 
   @Test
@@ -59,5 +63,8 @@ class NetworkTypeTest {
     assertEquals(
         "0101000001001100",
         String.format("%16s", Integer.toBinaryString(0x504C)).replace(' ', '0'));
+    assertEquals(
+        "011101010111010001110000",
+        String.format("%24s", Integer.toBinaryString(0x757470)).replace(' ', '0'));
   }
 }

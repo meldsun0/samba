@@ -16,6 +16,8 @@ import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
+import samba.services.jsonrpc.methods.results.FindContentResult;
+import samba.services.utp.UTPService;
 import samba.storage.HistoryDB;
 
 import java.util.ArrayList;
@@ -42,14 +44,18 @@ public class HistoryNetwork extends BaseNetwork
   private final HistoryDB historyDB;
   final NodeRecordFactory nodeRecordFactory;
   protected RoutingTable routingTable;
+  private final UTPService utpService;
 
-  public HistoryNetwork(Discv5Client client, HistoryDB historyDB) {
+  public HistoryNetwork(Discv5Client client, HistoryDB historyDB, UTPService utpService) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.ONE; // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
+    this.utpService = utpService;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
   }
+
+  // TODO check on everymethod if null is received.
 
   @Override
   public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message) {
@@ -109,55 +115,39 @@ public class HistoryNetwork extends BaseNetwork
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
 
-  // TODO validate what to answer if there is an error. Should we answer with a Content if we know
-  // for example that the is not valid ?
   @Override
-  public SafeFuture<Optional<Content>> findContent(NodeRecord nodeRecord, FindContent message) {
+  public SafeFuture<Optional<FindContentResult>> findContent(
+      NodeRecord nodeRecord, FindContent message) {
     return sendMessage(nodeRecord, message)
+        .orTimeout(3, TimeUnit.SECONDS)
         .thenApply(Optional::get)
         .thenCompose(
             contentMessage -> {
               Content content = contentMessage.getMessage();
-
-              // TODO how we validate NodeRadius ?
-
-              switch (content.getContentType()) {
-                case Content.UTP_CONNECTION_ID -> {
-                  /*
-                  Open a uTP Connection on this port content.getConnectionId()
-                  SafeFuture.runAsync(() -> {
-                  //TODO async UTP opperation once we get the specific content we should call    historyDB.saveContent(
-                  });*/
-                }
-                case Content.CONTENT_TYPE -> {
-                  boolean successfullySaved =
-                      historyDB.saveContent(message.getContentKey(), content.getContent());
-                  if (successfullySaved) {
-                    // gossipNetwork
-                  }
-                }
-                case Content
-                    .ENRS -> { // ENR records of nodes that are closest to the requested content.
-                  List<String> enrs = content.getEnrList();
-                  if (!enrs.isEmpty()) {
-                    //                    content.getEnrList().stream()
-                    //                        .map(RLPDecoder::decodeRlpEnr)
-                    //                        .filter(
-                    //                            enr ->
-                    //                                !enr.equals(nodeRecord.asEnr())
-                    //                                    ||
-                    // !enr.equals(this.discv5Client.getHomeNodeRecord().asEnr()))
-                    //                        .toList();
-                    // TODO what to do ?
-                  } else {
-                    LOG.info(
-                        "Node: {} does not hold the requested content or knows any eligible node",
-                        nodeRecord.asEnr());
-                  }
-                }
-                default -> throw new IllegalArgumentException("CONTENT: Invalid payload type");
-              }
-              return SafeFuture.completedFuture(Optional.of(content));
+              // TODO: Validate NodeRadius
+              // ContentType contentType = ContentKey.decode(contentKey)
+              return switch (content.getContentType()) {
+                case Content.UTP_CONNECTION_ID ->
+                    this.utpService
+                        .getContent(nodeRecord, content.getConnectionId())
+                        .thenCompose(
+                            data -> {
+                              // TODO historyDB.saveContent(contentKey., content); and validate it.
+                              return SafeFuture.completedFuture(
+                                  Optional.of(new FindContentResult(data.toHexString(), true)));
+                            });
+                case Content.CONTENT_TYPE ->
+                    // TODO validate content and key before persisting it or responding.-->
+                    // historyDB.saveContent(message.getContentKey(), content.getContent());
+                    SafeFuture.completedFuture(
+                        Optional.of(
+                            new FindContentResult(content.getContent().toHexString(), false)));
+                case Content.ENRS ->
+                    // todo remove us from the list
+                    SafeFuture.completedFuture(
+                        Optional.of(new FindContentResult(content.getEnrList())));
+                default -> SafeFuture.completedFuture(Optional.of(new FindContentResult()));
+              };
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
@@ -262,6 +252,7 @@ public class HistoryNetwork extends BaseNetwork
     ContentType contentType = ContentType.fromContentKey(contentKey);
     Bytes value = contentKey.slice(0, 1);
     Optional<Bytes> content = historyDB.get(contentType, value);
+
     if (content.isEmpty()) {
       // TODO return list of ENRs that we know of that are closest to the requested content
       /*If the node does not hold the requested content, and the node does not know of any nodes with eligible ENR values, then the node MUST return enrs as an empty list.*/
@@ -305,10 +296,6 @@ public class HistoryNetwork extends BaseNetwork
     Ping pingMessage = new Ping(nodeRecord.getSeq(), this.nodeRadius);
     return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage))
         .thenCompose((__) -> new CompletableFuture<>());
-  }
-
-  private String getHomeNodeAsEnr() {
-    return this.discv5Client.getHomeNodeRecord().asEnr();
   }
 
   private String getHomeNodeAsBase64() {

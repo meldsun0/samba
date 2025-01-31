@@ -8,6 +8,7 @@ import static samba.TestHelper.createNodeRecord;
 
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
+import samba.services.utp.UTPService;
 import samba.storage.HistoryDB;
 
 import java.lang.reflect.Field;
@@ -31,7 +32,7 @@ public class GetEnrTest {
   public void setUp() {
     this.discv5Client = mock(Discv5Client.class);
     this.historyDB = mock(HistoryDB.class);
-    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB);
+    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, mock(UTPService.class));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
   }
 

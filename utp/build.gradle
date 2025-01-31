@@ -1,0 +1,25 @@
+plugins {
+  id 'samba.java-library-conventions'
+}
+
+group = 'samba.utp'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+
+  api libs.slf4j.api
+  implementation libs.apache.logging.log4j.api
+  implementation libs.apache.logging.log4j.core
+
+  implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1' // SLF4J to Log4j binding
+  implementation libs.tuweni.bytes
+  implementation libs.google.guava
+
+  compileOnly libs.projectlombok
+  annotationProcessor libs.projectlombok
+  testCompileOnly libs.projectlombok
+  testAnnotationProcessor libs.projectlombok
+  testImplementation libs.junit.jupiter.api
+  testImplementation libs.assertj.core
+  testRuntimeOnly libs.junit.jupiter.engine
+}

@@ -2,12 +2,7 @@ package samba.storage;
 
 import static com.google.common.base.Preconditions.*;
 
-import samba.domain.content.ContentBlockBody;
-import samba.domain.content.ContentBlockHeader;
-import samba.domain.content.ContentKey;
-import samba.domain.content.ContentReceipts;
-import samba.domain.content.ContentType;
-import samba.domain.content.ContentUtil;
+import samba.domain.content.*;
 import samba.rocksdb.*;
 import samba.rocksdb.exceptions.StorageException;
 import samba.schema.content.ssz.ContentKeyBlockHashContainer;
@@ -41,7 +36,8 @@ public class HistoryRocksDB implements HistoryDB {
             rocksDBMetricsFactory);
   }
 
-  // TODO reduce the verbosity of this method once is ready.
+  // TODO: reduce the verbosity of this method once is ready.
+
   @Override
   public boolean saveContent(Bytes key, Bytes value) {
     try {

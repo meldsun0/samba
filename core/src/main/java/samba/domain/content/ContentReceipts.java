@@ -23,6 +23,10 @@ public class ContentReceipts {
     this.sszReceiptList = new SszReceiptList(transactionReceipts);
   }
 
+  public static ContentReceipts decode(Bytes sszReceipts) {
+    return new ContentReceipts(sszReceipts);
+  }
+
   public SszReceiptList getSszReceiptList() {
     return sszReceiptList;
   }

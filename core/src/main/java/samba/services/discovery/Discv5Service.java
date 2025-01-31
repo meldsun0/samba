@@ -1,7 +1,7 @@
 package samba.services.discovery;
 
 import samba.config.DiscoveryConfig;
-import samba.domain.messages.IncomingRequestHandler;
+import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.metrics.SambaMetricCategory;
 import samba.util.MultiaddrUtil;
 
@@ -48,7 +48,7 @@ public class Discv5Service extends Service implements Discv5Client {
       final AsyncRunner asyncRunner,
       final DiscoveryConfig discoveryConfig,
       final SECP256K1.SecretKey secretKey,
-      final IncomingRequestHandler incomingRequestProcessor) {
+      final IncomingRequestTalkHandler incomingRequestTalkHandler) {
 
     this.asyncRunner = asyncRunner;
     final DiscoverySystemBuilder discoverySystemBuilder = new DiscoverySystemBuilder();
@@ -96,7 +96,7 @@ public class Discv5Service extends Service implements Discv5Client {
             .bootnodes(discoveryConfig.getBootnodes())
             .localNodeRecord(nodeRecordBuilder.build())
             .localNodeRecordListener(this::createLocalNodeRecordListener)
-            .talkHandler(incomingRequestProcessor)
+            .talkHandler(incomingRequestTalkHandler)
             .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
             .build();
 

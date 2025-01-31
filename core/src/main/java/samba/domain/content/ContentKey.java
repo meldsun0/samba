@@ -88,4 +88,8 @@ public class ContentKey {
     }
     return Bytes.concatenate(Bytes.of(contentType.getByteValue()), hashContainer.sszSerialize());
   }
+
+  public static ContentKey decode(Bytes sszContentKey) {
+    return new ContentKey(sszContentKey);
+  }
 }
