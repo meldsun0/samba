@@ -68,7 +68,8 @@ public class ContentKey {
 
   public Bytes getBlockNumberSsz() {
     if (ContentType.BLOCK_HEADER_BY_NUMBER == contentType) {
-      return numberContainer.sszSerialize();
+      return Bytes.concatenate(
+          Bytes.of(contentType.getByteValue()), numberContainer.sszSerialize());
     }
     throw new UnsupportedOperationException(
         "Content type is not BLOCK_HEADER_BY_NUMBER compatible");
@@ -76,7 +77,7 @@ public class ContentKey {
 
   public Bytes getBlockHashSsz() {
     if (ContentType.BLOCK_HEADER_BY_NUMBER != contentType) {
-      return hashContainer.sszSerialize();
+      return Bytes.concatenate(Bytes.of(contentType.getByteValue()), hashContainer.sszSerialize());
     }
     throw new UnsupportedOperationException("Content type is not BLOCK_HASH compatible");
   }
