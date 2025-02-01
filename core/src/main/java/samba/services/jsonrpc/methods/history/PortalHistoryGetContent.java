@@ -90,8 +90,7 @@ public class PortalHistoryGetContent implements JsonRpcMethod {
             }
           }
           return new JsonRpcErrorResponse(
-              requestContext.getRequest().getId(),
-              RpcErrorType.CONTENT_NOT_FOUND_ERROR); // new ContentNotFoundError()
+              requestContext.getRequest().getId(), RpcErrorType.CONTENT_NOT_FOUND_ERROR);
         } else {
           content = Optional.of(Bytes.fromHexString(findContentResult.getContent()));
           utpTransfer = findContentResult.getUtpTransfer();
