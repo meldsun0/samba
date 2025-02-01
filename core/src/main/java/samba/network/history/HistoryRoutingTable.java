@@ -4,6 +4,7 @@ import samba.domain.dht.LivenessChecker;
 import samba.domain.dht.NodeTable;
 import samba.network.RoutingTable;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,5 +82,16 @@ public class HistoryRoutingTable implements RoutingTable {
   @Override
   public boolean isNodeIgnored(NodeRecord nodeRecord) {
     return this.nodeTable.isNodeIgnored(nodeRecord);
+  }
+
+  @Override
+  public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
+    return radiusMap.entrySet().stream()
+        .min(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
+        .flatMap(entry -> nodeTable.getNode(entry.getKey()));
+  }
+
+  private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {
+    return radius.xor(UInt256.fromBytes(contentKey));
   }
 }
