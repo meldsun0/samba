@@ -30,7 +30,8 @@ public enum RpcErrorType implements RpcMethodError {
   METHOD_NOT_ENABLED(-32604, "Method not enabled"),
   TIMEOUT_ERROR(-32603, "Timeout expired"),
   EXCEEDS_RPC_MAX_BATCH_SIZE(-32005, "Number of requests exceeds max batch size"),
-  INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params");
+  INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params"),
+  CONTENT_NOT_FOUND_ERROR(-39001, "Content not found");
 
   private final int code;
   private final String message;

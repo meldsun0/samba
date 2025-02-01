@@ -132,16 +132,17 @@ public class HistoryNetwork extends BaseNetwork
                         .getContent(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
-                              // TODO historyDB.saveContent(contentKey., content); and validate it.
+                              historyDB.saveContent(message.getContentKey(), content.getContent());
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
                             });
-                case Content.CONTENT_TYPE ->
-                    // TODO validate content and key before persisting it or responding.-->
-                    // historyDB.saveContent(message.getContentKey(), content.getContent());
-                    SafeFuture.completedFuture(
-                        Optional.of(
-                            new FindContentResult(content.getContent().toHexString(), false)));
+                case Content.CONTENT_TYPE -> {
+                  // TODO validate content and key before persisting it or responding.-->
+                  historyDB.saveContent(message.getContentKey(), content.getContent());
+                  yield SafeFuture.completedFuture(
+                      Optional.of(
+                          new FindContentResult(content.getContent().toHexString(), false)));
+                }
                 case Content.ENRS ->
                     // todo remove us from the list
                     SafeFuture.completedFuture(
@@ -215,6 +216,18 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public UInt256 getRadiusFromNode(NodeRecord node) {
     return this.routingTable.getRadius(node.getNodeId());
+  }
+
+  public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
+    return this.routingTable.findClosestNodeToContentKey(contentKey);
+  }
+
+  public Optional<NodeRecord> nodeRecordFromEnr(String enr) {
+    try {
+      return Optional.ofNullable(nodeRecordFactory.fromEnr(enr));
+    } catch (Exception e) {
+      return Optional.empty();
+    }
   }
 
   @Override
