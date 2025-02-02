@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-public class HistoryRocksDBTests {
+public class HistoryRocksDBTest {
 
   private HistoryRocksDB historyRocksDB;
   private RocksDBInstance rocksDBInstance;

@@ -39,7 +39,7 @@ public class PortalHistoryStore implements JsonRpcMethod {
     if (historyDB.saveContent(contentKey, contentValue)) {
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), true);
     } else {
-      return createJsonRpcInvalidRequestResponse(requestContext);
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), false);
     }
   }
 }
