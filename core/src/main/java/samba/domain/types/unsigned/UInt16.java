@@ -97,4 +97,9 @@ public final class UInt16 implements Comparable<UInt16> {
   public int hashCode() {
     return value;
   }
+
+  @Override
+  public String toString() {
+    return Integer.toString(value);
+  }
 }
