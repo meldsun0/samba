@@ -11,6 +11,7 @@ import tech.pegasys.teku.infrastructure.ssz.tree.LeafDataNode;
 import tech.pegasys.teku.infrastructure.ssz.tree.LeafNode;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
+// TODO move to Teku
 public class SszUInt16 extends AbstractSszPrimitive<UInt16> {
 
   public static final SszUInt16 ZERO = new SszUInt16(UInt16.ZERO);

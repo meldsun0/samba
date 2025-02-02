@@ -2,6 +2,7 @@ package samba.domain.types.unsigned;
 
 import org.apache.tuweni.bytes.Bytes;
 
+// TODO match Teku wrapper classes and move to Teku
 public final class UInt16 implements Comparable<UInt16> {
 
   public static final UInt16 ZERO = new UInt16(0);
