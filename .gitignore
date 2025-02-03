@@ -39,3 +39,5 @@ out/
 !**/src/test/**/out/
 
 !gradle/wrapper/gradle-wrapper.jar
+
+db/

@@ -1,7 +1,6 @@
-package samba.services.storage;
+package samba.storage;
 
 import samba.rocksdb.RocksDBMetricsFactory;
-import samba.storage.HistoryRocksDB;
 
 import java.io.File;
 import java.io.IOException;

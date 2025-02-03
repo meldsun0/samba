@@ -6,16 +6,14 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.storage.HistoryDB;
-
-import org.apache.tuweni.bytes.Bytes;
+import samba.network.history.HistoryJsonRpcRequests;
 
 public class PortalHistoryStore implements JsonRpcMethod {
 
-  private final HistoryDB historyDB;
+  private HistoryJsonRpcRequests historyJsonRpcRequests;
 
-  public PortalHistoryStore(final HistoryDB historyDB) {
-    this.historyDB = historyDB;
+  public PortalHistoryStore(final HistoryJsonRpcRequests historyJsonRpcRequests) {
+    this.historyJsonRpcRequests = historyJsonRpcRequests;
   }
 
   @Override
@@ -25,21 +23,15 @@ public class PortalHistoryStore implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    Bytes contentKey;
-    Bytes contentValue;
     try {
-      contentKey = requestContext.getRequiredParameter(0, Bytes.class);
-      contentValue = requestContext.getRequiredParameter(1, Bytes.class);
+      String contentKey = requestContext.getRequiredParameter(0, String.class);
+      String contentValue = requestContext.getRequiredParameter(1, String.class);
+
+      boolean result = this.historyJsonRpcRequests.store(contentKey, contentValue);
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
-    }
-    if (contentKey.size() == 0 || contentValue.size() == 0) {
-      return createJsonRpcInvalidRequestResponse(requestContext);
-    }
-    if (historyDB.saveContent(contentKey, contentValue)) {
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), true);
-    } else {
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), false);
     }
   }
 }

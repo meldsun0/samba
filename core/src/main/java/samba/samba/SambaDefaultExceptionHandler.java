@@ -20,7 +20,7 @@ import samba.logging.StatusLogger;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.samba.exceptions.FatalServiceFailureException;
 import samba.samba.exceptions.ShuttingDownException;
-import samba.services.storage.DatabaseStorageException;
+import samba.storage.DatabaseStorageException;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;

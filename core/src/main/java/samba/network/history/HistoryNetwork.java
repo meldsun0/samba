@@ -46,7 +46,8 @@ public class HistoryNetwork extends BaseNetwork
   protected RoutingTable routingTable;
   private final UTPService utpService;
 
-  public HistoryNetwork(Discv5Client client, HistoryDB historyDB, UTPService utpService) {
+  public HistoryNetwork(
+      final Discv5Client client, final HistoryDB historyDB, final UTPService utpService) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.ONE; // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
@@ -198,6 +199,12 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
+  public boolean store(String contentKey, String contentValue) {
+    return this.historyDB.saveContent(
+        Bytes.fromHexString(contentKey), Bytes.fromHexString(contentValue));
+  }
+
+  @Override
   public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord) {
     Ping ping = new Ping(nodeRecord.getSeq(), this.nodeRadius.toBytes());
     return this.ping(nodeRecord, ping);
@@ -332,5 +339,10 @@ public class HistoryNetwork extends BaseNetwork
       LOG.info("Something when wrong when sending a {}", message);
       return SafeFuture.completedFuture(Optional.empty());
     };
+  }
+
+  // TODO THIS MUST BE REFACTORED.
+  public Optional<Bytes> getContent(ContentType contentType, Bytes contentKeyBytes) {
+    return this.historyDB.get(contentType, contentKeyBytes);
   }
 }

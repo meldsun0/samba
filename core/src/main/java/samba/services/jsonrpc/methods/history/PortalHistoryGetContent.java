@@ -14,7 +14,6 @@ import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
 import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.jsonrpc.methods.results.GetContentResult;
-import samba.storage.HistoryDB;
 
 import java.util.Optional;
 
@@ -25,11 +24,9 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 public class PortalHistoryGetContent implements JsonRpcMethod {
 
   private final HistoryNetwork historyNetwork;
-  private final HistoryDB historyDB;
 
-  public PortalHistoryGetContent(final HistoryNetwork historyNetwork, final HistoryDB historyDB) {
+  public PortalHistoryGetContent(final HistoryNetwork historyNetwork) {
     this.historyNetwork = historyNetwork;
-    this.historyDB = historyDB;
   }
 
   @Override
@@ -50,7 +47,8 @@ public class PortalHistoryGetContent implements JsonRpcMethod {
     }
     try {
       ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyBytes).get();
-      Optional<Bytes> content = historyDB.get(contentKey.getContentType(), contentKeyBytes);
+      Optional<Bytes> content =
+          this.historyNetwork.getContent(contentKey.getContentType(), contentKeyBytes);
       Boolean utpTransfer = false;
       if (content.isEmpty()) {
         Optional<NodeRecord> nodeRecord =

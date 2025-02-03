@@ -12,7 +12,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.storage.HistoryDB;
+import samba.network.history.HistoryNetwork;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,12 +22,12 @@ public class PortalHistoryStoreTest {
   private final String JSON_RPC_VERSION = "2.0";
   private final String PORTAL_HISTORY_STORE = "portal_historyStore";
   private PortalHistoryStore method;
-  private HistoryDB historyDB;
+  private HistoryNetwork historyNetwork;
 
   @BeforeEach
   public void before() {
-    this.historyDB = mock(HistoryDB.class);
-    method = new PortalHistoryStore(historyDB);
+    this.historyNetwork = mock(HistoryNetwork.class);
+    method = new PortalHistoryStore(historyNetwork);
   }
 
   @Test
@@ -44,12 +44,10 @@ public class PortalHistoryStoreTest {
                 JSON_RPC_VERSION,
                 PORTAL_HISTORY_STORE,
                 new Object[] {
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"),
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c")
+                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c",
+                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
                 }));
-    when(historyDB.saveContent(any(), any())).thenReturn(true);
+    when(historyNetwork.store(any(), any())).thenReturn(true);
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
@@ -65,12 +63,10 @@ public class PortalHistoryStoreTest {
                 JSON_RPC_VERSION,
                 PORTAL_HISTORY_STORE,
                 new Object[] {
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"),
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c")
+                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c",
+                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
                 }));
-    when(historyDB.saveContent(any(), any())).thenReturn(false);
+    when(historyNetwork.store(any(), any())).thenReturn(false);
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(request.getRequest().getId(), false);
     final JsonRpcResponse actual = method.response(request);
@@ -100,9 +96,7 @@ public class PortalHistoryStoreTest {
                 JSON_RPC_VERSION,
                 PORTAL_HISTORY_STORE,
                 new Object[] {
-                  Bytes.EMPTY,
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c")
+                  null, "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
                 }));
     final JsonRpcErrorResponse expected =
         new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
@@ -120,9 +114,7 @@ public class PortalHistoryStoreTest {
                 JSON_RPC_VERSION,
                 PORTAL_HISTORY_STORE,
                 new Object[] {
-                  Bytes.fromHexString(
-                      "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"),
-                  Bytes.EMPTY
+                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c", null
                 }));
     final JsonRpcErrorResponse expected =
         new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);

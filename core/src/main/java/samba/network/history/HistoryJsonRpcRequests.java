@@ -30,4 +30,6 @@ public interface HistoryJsonRpcRequests {
   Optional<String> getEnr(String nodeId);
 
   boolean deleteEnr(String nodeId);
+
+  boolean store(String contentKey, String contentValue);
 }

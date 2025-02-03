@@ -27,9 +27,10 @@ import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
 import samba.services.jsonrpc.methods.history.*;
-import samba.services.storage.StorageService;
 import samba.services.utp.UTPService;
+import samba.storage.HistoryRocksDB;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -64,7 +65,6 @@ public class PortalNodeMainService extends Service {
   private Discv5Service discoveryService;
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
-  private StorageService storageService;
   private UTPService utpService;
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
@@ -82,7 +82,6 @@ public class PortalNodeMainService extends Service {
     this.sambaConfiguration = sambaConfiguration;
     this.vertx = vertx;
     initDiscoveryService();
-    initStorageService();
     initUTPService();
     initHistoryNetwork();
     initIncomingRequestTalkHandlers();
@@ -144,13 +143,13 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryFindNodes(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_STORE.getMethodName(),
-          new PortalHistoryStore(this.storageService.getDatabase()));
+          new PortalHistoryStore(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_CONTENT.getMethodName(),
           new PortalHistoryFindContent(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_CONTENT.getMethodName(),
-          new PortalHistoryGetContent(this.historyNetwork, this.storageService.getDatabase()));
+          new PortalHistoryGetContent(this.historyNetwork));
 
       jsonRpcService =
           Optional.of(
@@ -166,7 +165,9 @@ public class PortalNodeMainService extends Service {
   private void initHistoryNetwork() {
     this.historyNetwork =
         new HistoryNetwork(
-            this.discoveryService, this.storageService.getDatabase(), this.utpService);
+            this.discoveryService,
+            HistoryRocksDB.create(metricsSystem, Paths.get("samba")),
+            this.utpService);
   }
 
   private void initConnectionService() {
@@ -185,16 +186,12 @@ public class PortalNodeMainService extends Service {
             this.incomingRequestTalkHandler);
   }
 
-  protected void initStorageService() {
-    this.storageService = new StorageService(this.metricsSystem, this.asyncRunner, null);
-  }
-
   @Override
   protected SafeFuture<?> doStart() {
     LOG.debug("Starting {}", this.getClass().getSimpleName());
     this.incomingRequestTalkHandler.start();
-    return SafeFuture.allOfFailFast(discoveryService.start())
-        .thenCompose(__ -> connectionService.start())
+    return SafeFuture.allOfFailFast(this.discoveryService.start())
+        .thenCompose(__ -> this.connectionService.start())
         .thenCompose(
             __ ->
                 jsonRpcService.map(JsonRpcService::start).orElse(SafeFuture.completedFuture(null)))

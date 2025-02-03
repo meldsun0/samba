@@ -1,4 +1,4 @@
-package samba.services.storage;
+package samba.storage;
 
 public class DatabaseStorageException extends RuntimeException {
   private final boolean unrecoverable;

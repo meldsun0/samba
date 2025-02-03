@@ -6,6 +6,7 @@ import samba.domain.content.*;
 import samba.rocksdb.*;
 import samba.rocksdb.exceptions.StorageException;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -38,24 +39,34 @@ public class HistoryRocksDB implements HistoryDB {
     this.rocksDBInstance = rocksDBInstance;
   }
 
+  public static HistoryRocksDB create(MetricsSystem metricsSystem, final Path dataDirectory) {
+    try {
+      StorageFactory storageFactory = new StorageFactory(metricsSystem, dataDirectory);
+      return storageFactory.create();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   // TODO: reduce the verbosity of this method once is ready.
 
   @Override
-  public boolean saveContent(Bytes key, Bytes value) {
+  public boolean saveContent(Bytes sszKey, Bytes sszValue) {
     try {
-      ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(key).get();
-      LOG.debug("Store {} with Key: {} and Value {}", contentKey.getContentType(), key, value);
+      ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(sszKey).get();
+      LOG.debug(
+          "Store {} with Key: {} and Value {}", contentKey.getContentType(), sszKey, sszValue);
       switch (contentKey.getContentType()) {
         case ContentType.BLOCK_HEADER -> {
           Bytes blockHashKey = contentKey.getBlockHashSsz();
 
-          if (!ContentUtil.isBlockHeaderValid(blockHashKey, value)) {
+          if (!ContentUtil.isBlockHeaderValid(blockHashKey, sszValue)) {
             LOG.info("BlockHeader for blockHeaderKey: {} is invalid", blockHashKey);
             break;
           }
 
           Optional<ContentBlockHeader> blockHeader =
-              ContentUtil.createBlockHeaderfromSszBytes(value);
+              ContentUtil.createBlockHeaderfromSszBytes(sszValue);
           if (blockHeader.isEmpty()) {
             LOG.info("BlockHeader for blockHashKey: {} is invalid", blockHashKey);
             break;
@@ -67,7 +78,7 @@ public class HistoryRocksDB implements HistoryDB {
                       UInt64.valueOf(blockHeader.get().getBlockHeader().getNumber()))
                   .getBlockNumberSsz();
           save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey);
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKey, value); // TODO async
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKey, sszValue); // TODO async
         }
         case ContentType.BLOCK_BODY -> {
           Bytes blockHash = contentKey.getBlockHashSsz();
@@ -75,8 +86,8 @@ public class HistoryRocksDB implements HistoryDB {
           this.getBlockHeaderByBlockHash(blockHash)
               .ifPresentOrElse(
                   blockHeader -> {
-                    if (ContentUtil.isBlockBodyValid(blockHeader, value)) {
-                      save(KeyValueSegment.BLOCK_BODY, blockHash, value);
+                    if (ContentUtil.isBlockBodyValid(blockHeader, sszValue)) {
+                      save(KeyValueSegment.BLOCK_BODY, blockHash, sszValue);
                     } else {
                       LOG.info("BlockBody for blockHash: {} is invalid", blockHash);
                     }
@@ -90,12 +101,12 @@ public class HistoryRocksDB implements HistoryDB {
         case ContentType.RECEIPT -> {
           Bytes blockHash = contentKey.getBlockHashSsz();
           // TODO should we do any validation?
-          save(KeyValueSegment.RECEIPT, blockHash, value);
+          save(KeyValueSegment.RECEIPT, blockHash, sszValue);
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {
           Bytes blockNumberKey = contentKey.getBlockNumberSsz();
 
-          if (!ContentUtil.isBlockHeaderValid(blockNumberKey, value)) {
+          if (!ContentUtil.isBlockHeaderValid(blockNumberKey, sszValue)) {
             LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
             break;
           }
@@ -103,7 +114,7 @@ public class HistoryRocksDB implements HistoryDB {
           Optional<Bytes> blockHashKey = getBlockHashByBlockNumber(blockNumberKey);
           if (blockHashKey.isEmpty()) {
             Optional<ContentBlockHeader> blockHeader =
-                ContentUtil.createBlockHeaderfromSszBytes(value);
+                ContentUtil.createBlockHeaderfromSszBytes(sszValue);
             if (blockHeader.isEmpty()) {
               LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
               break;
@@ -120,7 +131,7 @@ public class HistoryRocksDB implements HistoryDB {
             }
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey.get());
           }
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKey.get(), value);
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKey.get(), sszValue);
         }
         default ->
             throw new IllegalArgumentException(
@@ -128,7 +139,7 @@ public class HistoryRocksDB implements HistoryDB {
       }
       return true;
     } catch (Exception e) {
-      LOG.info("Content could not be saved. ContentKey: {} , ContentValue{}", key, value);
+      LOG.info("Content could not be saved. ContentKey: {} , ContentValue{}", sszKey, sszValue);
       return false;
     }
   }

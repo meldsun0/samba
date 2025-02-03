@@ -11,7 +11,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 public interface HistoryDB {
 
-  boolean saveContent(Bytes contentKey, Bytes value);
+  boolean saveContent(Bytes sszContentKey, Bytes sszValue);
 
   Optional<ContentBlockHeader> getBlockHeaderByBlockHash(Bytes blockHash);
 

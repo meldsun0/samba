@@ -6,7 +6,7 @@ import samba.config.SambaConfiguration;
 import samba.network.NetworkType;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.services.discovery.Bootnodes;
-import samba.services.storage.DatabaseStorageException;
+import samba.storage.DatabaseStorageException;
 
 import java.io.PrintWriter;
 import java.util.List;
