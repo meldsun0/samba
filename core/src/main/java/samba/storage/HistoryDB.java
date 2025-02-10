@@ -1,9 +1,6 @@
 package samba.storage;
 
-import samba.domain.content.ContentBlockBody;
-import samba.domain.content.ContentBlockHeader;
-import samba.domain.content.ContentReceipts;
-import samba.domain.content.ContentType;
+import samba.domain.content.*;
 
 import java.util.Optional;
 
@@ -21,5 +18,5 @@ public interface HistoryDB {
 
   Optional<ContentReceipts> getReceiptsByBlockHash(Bytes blockHash);
 
-  Optional<Bytes> get(ContentType contentType, Bytes contentKey);
+  Optional<Bytes> get(ContentKey contentKey);
 }

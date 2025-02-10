@@ -105,7 +105,7 @@ public class FindContentMessageTests {
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0501")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
-    assertEquals(Optional.empty(), content);
+    assertEquals("0x", content.get().getContent());
   }
 
   @Test

@@ -3,6 +3,7 @@ package samba.domain.content;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
+import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class ContentUtil {
 
@@ -36,8 +37,15 @@ public class ContentUtil {
     return true;
   }
 
-  public static boolean isBlockHeaderValid(Bytes blockKey, Bytes blockHeader) {
-    // TODO validate blockHeader.
-    return true;
+  public static Bytes createBlockNumberInSSZ(final ContentBlockHeader contentBlockHeader) {
+    return new ContentKey(
+            ContentType.BLOCK_HEADER_BY_NUMBER,
+            UInt64.valueOf(contentBlockHeader.getBlockHeader().getNumber()))
+        .getBlockNumberSsz();
+  }
+
+  public static Bytes createBlockHashKey(final ContentBlockHeader blockHeader) {
+    return new ContentKey(ContentType.BLOCK_HEADER, blockHeader.getBlockHeader().getHash().copy())
+        .getBlockHashSsz();
   }
 }

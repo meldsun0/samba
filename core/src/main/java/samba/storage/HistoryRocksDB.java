@@ -16,7 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
-import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class HistoryRocksDB implements HistoryDB {
 
@@ -48,90 +47,43 @@ public class HistoryRocksDB implements HistoryDB {
     }
   }
 
-  // TODO: reduce the verbosity of this method once is ready.
-
   @Override
   public boolean saveContent(Bytes sszKey, Bytes sszValue) {
     try {
       ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(sszKey).get();
-      LOG.debug(
-          "Store {} with Key: {} and Value {}", contentKey.getContentType(), sszKey, sszValue);
       switch (contentKey.getContentType()) {
         case ContentType.BLOCK_HEADER -> {
-          Bytes blockHashKey = contentKey.getBlockHashSsz();
-
-          if (!ContentUtil.isBlockHeaderValid(blockHashKey, sszValue)) {
-            LOG.info("BlockHeader for blockHeaderKey: {} is invalid", blockHashKey);
-            break;
-          }
-
+          Bytes blockHashKeySSZ = contentKey.getBlockHashSsz();
+          // TODO validate BLOCK_HEADER
           Optional<ContentBlockHeader> blockHeader =
               ContentUtil.createBlockHeaderfromSszBytes(sszValue);
           if (blockHeader.isEmpty()) {
-            LOG.info("BlockHeader for blockHashKey: {} is invalid", blockHashKey);
+            LOG.debug("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
             break;
           }
-          System.out.println(blockHeader.get().getBlockHeader().getNumber());
-          Bytes blockNumberKey =
-              new ContentKey(
-                      ContentType.BLOCK_HEADER_BY_NUMBER,
-                      UInt64.valueOf(blockHeader.get().getBlockHeader().getNumber()))
-                  .getBlockNumberSsz();
-          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey);
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKey, sszValue); // TODO async
+          Bytes blockNumberKeySSZ = ContentUtil.createBlockNumberInSSZ(blockHeader.get());
+          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
         }
         case ContentType.BLOCK_BODY -> {
-          Bytes blockHash = contentKey.getBlockHashSsz();
-
-          this.getBlockHeaderByBlockHash(blockHash)
-              .ifPresentOrElse(
-                  blockHeader -> {
-                    if (ContentUtil.isBlockBodyValid(blockHeader, sszValue)) {
-                      save(KeyValueSegment.BLOCK_BODY, blockHash, sszValue);
-                    } else {
-                      LOG.info("BlockBody for blockHash: {} is invalid", blockHash);
-                    }
-                  },
-                  () -> {
-                    // TODO trigger a lookup: Query X nearest  until either content is found or no
-                    // peers are left to query.
-                    LOG.info("Block Header for {} not found locally", blockHash);
-                  });
+          Bytes blockHashSSZ = contentKey.getBlockHashSsz();
+          // TODO validate BLOCK_BODY
+          save(KeyValueSegment.BLOCK_BODY, blockHashSSZ, sszValue);
         }
         case ContentType.RECEIPT -> {
-          Bytes blockHash = contentKey.getBlockHashSsz();
-          // TODO should we do any validation?
-          save(KeyValueSegment.RECEIPT, blockHash, sszValue);
+          Bytes blockHashSSZ = contentKey.getBlockHashSsz();
+          // TODO validate RECEIPT
+          save(KeyValueSegment.RECEIPT, blockHashSSZ, sszValue);
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {
-          Bytes blockNumberKey = contentKey.getBlockNumberSsz();
+          Bytes blockNumberKeySSZ = contentKey.getBlockNumberSsz();
+          // TODO validate BLOCK_HEADER_BY_NUMBER
+          Optional<ContentBlockHeader> blockHeader =
+              ContentUtil.createBlockHeaderfromSszBytes(sszValue);
+          Bytes blockHashKeySSZ = ContentUtil.createBlockHashKey(blockHeader.get());
 
-          if (!ContentUtil.isBlockHeaderValid(blockNumberKey, sszValue)) {
-            LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
-            break;
-          }
-
-          Optional<Bytes> blockHashKey = getBlockHashByBlockNumber(blockNumberKey);
-          if (blockHashKey.isEmpty()) {
-            Optional<ContentBlockHeader> blockHeader =
-                ContentUtil.createBlockHeaderfromSszBytes(sszValue);
-            if (blockHeader.isEmpty()) {
-              LOG.info("BlockHeader for blockNumber: {} is invalid", blockNumberKey);
-              break;
-            }
-            blockHashKey =
-                Optional.of(
-                    new ContentKey(
-                            ContentType.BLOCK_HEADER,
-                            blockHeader.get().getBlockHeader().getHash().copy())
-                        .getBlockHashSsz());
-            if (blockHashKey.isEmpty()) {
-              LOG.info("BlockHash for blockNumber: {} is invalid", blockNumberKey);
-              break;
-            }
-            save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKey, blockHashKey.get());
-          }
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKey.get(), sszValue);
+          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
+          save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);
         }
         default ->
             throw new IllegalArgumentException(
@@ -139,7 +91,11 @@ public class HistoryRocksDB implements HistoryDB {
       }
       return true;
     } catch (Exception e) {
-      LOG.info("Content could not be saved. ContentKey: {} , ContentValue{}", sszKey, sszValue);
+      LOG.debug(
+          "Content could not be saved. ContentKey: {} , ContentValue: {}. Reason:",
+          sszKey,
+          sszValue,
+          e);
       return false;
     }
   }
@@ -178,21 +134,42 @@ public class HistoryRocksDB implements HistoryDB {
   }
 
   @Override
-  public Optional<Bytes> get(ContentType contentType, Bytes contentKey) {
-    Optional<byte[]> databaseContent =
-        this.rocksDBInstance.get(getSegmentFromContentType(contentType), contentKey.toArray());
-    if (databaseContent.isEmpty()) return Optional.empty();
-    return Optional.of(Bytes.wrap(databaseContent.get()));
+  public Optional<Bytes> get(ContentKey contentKey) {
+    return switch (contentKey.getContentType()) {
+      case ContentType.BLOCK_HEADER, ContentType.BLOCK_BODY, ContentType.RECEIPT -> {
+        Bytes blockHashSSZ = contentKey.getBlockHashSsz();
+        yield this.rocksDBInstance
+            .get(getSegmentFromContentType(contentKey.getContentType()), blockHashSSZ.toArray())
+            .map(Bytes::wrap)
+            .or(Optional::empty);
+      }
+      case ContentType.BLOCK_HEADER_BY_NUMBER -> {
+        Bytes blockNumberSSZ = contentKey.getBlockNumberSsz();
+        yield this.rocksDBInstance
+            .get(
+                getSegmentFromContentType(ContentType.BLOCK_HEADER_BY_NUMBER),
+                blockNumberSSZ.toArray())
+            .flatMap(
+                blockHash ->
+                    this.rocksDBInstance.get(
+                        getSegmentFromContentType(ContentType.BLOCK_HEADER), blockHash))
+            .map(Bytes::wrap)
+            .or(Optional::empty);
+      }
+    };
   }
 
   private void save(Segment segment, Bytes key, Bytes content) {
     checkArgument(
-        !content.isEmpty(),
-        "Content should have more than 1 byte when persisting {}",
-        segment.getName());
+        !key.isEmpty(), "Key should have more than 1 byte when persisting {}", segment.getName());
     KeyValueStorageTransaction tx = rocksDBInstance.startTransaction();
     tx.put(segment, key.toArray(), content.toArray());
     tx.commit();
+    LOG.info(
+        "Saving on segment {}, Key: {} and Value: {} ",
+        segment.getName(),
+        key.toHexString(),
+        content.toHexString());
   }
 
   private Segment getSegmentFromContentType(ContentType contentType) {

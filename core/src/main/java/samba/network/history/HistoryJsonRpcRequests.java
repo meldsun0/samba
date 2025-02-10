@@ -11,6 +11,7 @@ import samba.services.jsonrpc.methods.results.FindContentResult;
 
 import java.util.Optional;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
@@ -31,5 +32,5 @@ public interface HistoryJsonRpcRequests {
 
   boolean deleteEnr(String nodeId);
 
-  boolean store(String contentKey, String contentValue);
+  boolean store(Bytes contentKey, Bytes contentValue);
 }
