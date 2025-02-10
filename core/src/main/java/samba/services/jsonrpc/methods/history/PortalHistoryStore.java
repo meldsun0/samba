@@ -8,6 +8,8 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.HistoryJsonRpcRequests;
 
+import org.apache.tuweni.bytes.Bytes;
+
 public class PortalHistoryStore implements JsonRpcMethod {
 
   private HistoryJsonRpcRequests historyJsonRpcRequests;
@@ -24,8 +26,11 @@ public class PortalHistoryStore implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      String contentKey = requestContext.getRequiredParameter(0, String.class);
-      String contentValue = requestContext.getRequiredParameter(1, String.class);
+      Bytes contentKey = Bytes.fromHexString(requestContext.getRequiredParameter(0, String.class));
+      Bytes contentValue = Bytes.fromHexString(requestContext.getRequiredParameter(1, String.class));
+      if (contentKey.isEmpty()) {
+        return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), false);
+      }
 
       boolean result = this.historyJsonRpcRequests.store(contentKey, contentValue);
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
