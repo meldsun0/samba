@@ -80,6 +80,8 @@ public class FindContentMessageTests {
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createContentEnrBytesResponse(List.of("-LI=", "-LI=", "-LI=")));
+    when(discv5Client.getEnr()).thenReturn(Optional.of("enr"));
+
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
 

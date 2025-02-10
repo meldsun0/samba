@@ -346,6 +346,8 @@ public class UtpPacket {
                 + "] "
                 + "[Payload: "
                 + (payloadHex)
+                + "[Size:"
+                + getPacketLength()
                 + "] ");
 
     if (extensions != null) {

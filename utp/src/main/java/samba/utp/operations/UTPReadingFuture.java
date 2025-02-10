@@ -129,7 +129,7 @@ public class UTPReadingFuture {
   }
 
   private boolean isLastPacket(UtpTimestampedPacketDTO timestampedPair) {
-    return (timestampedPair.utpPacket().getWindowSize() & 0xFFFFFFFF) == 0;
+    return (timestampedPair.utpPacket().getWindowSize() & 0xFFFFFFFF) == 0; // TODO Check specs
   }
 
   private void handleExpectedPacket(UtpTimestampedPacketDTO timestampedPair) throws IOException {

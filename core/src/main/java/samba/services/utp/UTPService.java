@@ -7,8 +7,10 @@ import samba.utp.data.UtpPacket;
 import samba.utp.network.TransportLayer;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +22,6 @@ import tech.pegasys.teku.service.serviceutils.Service;
 public class UTPService extends Service implements TransportLayer<UTPAddress> {
   protected static final Logger LOG = LogManager.getLogger();
 
-  //    // IP address + port + Discovery v5 NodeId + connection_id
   private Map<Integer, UTPClient> connections;
   private Discv5Client discv5Client;
   private NetworkType networkType = NetworkType.UTP;
@@ -48,6 +49,20 @@ public class UTPService extends Service implements TransportLayer<UTPAddress> {
             .thenCompose(__ -> utpClient.read()));
   }
 
+  public void sendContent(NodeRecord nodeRecord, int connectionId, Bytes content) {
+    UTPClient utpClient = this.registerClient(connectionId);
+    ByteBuffer buffer = ByteBuffer.allocate(content.size());
+    buffer.put(content.toArray());
+    try {
+      utpClient
+          .startListening(connectionId, new UTPAddress(nodeRecord))
+          .thenCompose(__ -> utpClient.write(buffer))
+          .get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   private UTPClient registerClient(int connectionId) {
     UTPClient utpClient = new UTPClient(this);
     if (!connections.containsKey(connectionId)) {
@@ -61,7 +76,6 @@ public class UTPService extends Service implements TransportLayer<UTPAddress> {
   public void sendPacket(UtpPacket packet, UTPAddress remoteAddress) throws IOException {
     SafeFuture.runAsync(
         () -> {
-          LOG.trace("[Sending Packet: " + packet.toString() + "]");
           this.discv5Client.sendDisv5Message(
               remoteAddress.getAddress(), networkType.getValue(), Bytes.of(packet.toByteArray()));
         });
@@ -70,7 +84,15 @@ public class UTPService extends Service implements TransportLayer<UTPAddress> {
   public void onUTPMessageReceive(NodeRecord nodeRecord, Bytes response) {
     UtpPacket utpPacket = UtpPacket.decode(response);
     int connectionId = utpPacket.getConnectionId();
-    this.connections.get(connectionId).receivePacket(utpPacket);
+    if (this.connections.get(connectionId) != null) {
+      LOG.info("handleing with connectionId={}", connectionId);
+      this.connections.get(connectionId).receivePacket(utpPacket, new UTPAddress(nodeRecord));
+    } else {
+      LOG.info("handleing with connectionId={}", connectionId - 1);
+      if (this.connections.get(connectionId - 1) != null) {
+        this.connections.get(connectionId - 1).receivePacket(utpPacket, new UTPAddress(nodeRecord));
+      }
+    }
   }
 
   @Override

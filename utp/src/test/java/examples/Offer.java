@@ -41,11 +41,11 @@ public class Offer {
         () -> {
           while (true) {
             if (utpClient.isAlive()) {
-              try {
-                utpClient.receivePacket(transportLayer.onPacketReceive());
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
+              //              try {
+              //                utpClient.receivePacket(transportLayer.onPacketReceive());
+              //              } catch (IOException e) {
+              //                throw new RuntimeException(e);
+              //              }
             }
           }
         });

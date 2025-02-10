@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static samba.utp.SessionState.*;
 import static samba.utp.data.UtpPacketUtils.*;
+import static samba.utp.data.bytes.UnsignedTypesUtil.longToUshort;
+import static samba.utp.message.MessageUtil.*;
 
 import samba.utp.algo.UtpAlgConfiguration;
 import samba.utp.data.MicroSecondsTimeStamp;
@@ -57,17 +59,20 @@ public class UTPClient {
   public CompletableFuture<Void> connect(int connectionId, TransportAddress transportAddress) {
     checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
+
     LOG.info("Send Connection message to {}", connectionId);
+
     if (!listen.compareAndSet(false, true)) {
       CompletableFuture.failedFuture(
           new IllegalStateException(
               "Attempted to start an already started server listening on " + connectionId));
     }
+
     try {
       this.session.initConnection(transportAddress, connectionId);
 
       UtpPacket message =
-          InitConnectionMessage.build(
+          buildSYNMessage(
               timeStamper.utpTimeStamp(),
               connectionId,
               UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L);
@@ -81,13 +86,62 @@ public class UTPClient {
     return connection;
   }
 
-  public void receivePacket(UtpPacket utpPacket) {
-    LOG.trace("[Receiving Packet: " + utpPacket.toString() + "]");
+  public CompletableFuture<Void> startListening(
+      int connectionId, TransportAddress transportAddress) {
+    checkNotNull(transportAddress, "Address");
+    checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
+    LOG.info("Staring  a connection from {}", connectionId);
+    if (!listen.compareAndSet(false, true)) {
+      CompletableFuture.failedFuture(
+          new IllegalStateException(
+              "Attempted to start an already started server listening on " + connectionId));
+    }
+    this.session.initServerConnection(transportAddress, connectionId);
+    this.session.printState();
+    return connection;
+  }
+
+  public void receivePacket(UtpPacket utpPacket, TransportAddress transportAddress) {
+    LOG.info("[Receiving Packet: " + utpPacket.toString() + "]");
     switch (utpPacket.getMessageType()) {
-      case ST_RESET, ST_SYN -> this.stop();
+      case ST_RESET -> this.stop();
+      case ST_SYN -> handleIncommingConnectionRequest(utpPacket, transportAddress);
       case ST_DATA, ST_STATE -> queuePacket(utpPacket);
       case ST_FIN -> handleFinPacket(utpPacket);
       default -> sendResetPacket();
+    }
+  }
+
+  private void handleIncommingConnectionRequest(
+      UtpPacket utpPacket, TransportAddress transportAddress) {
+    if (this.session.getState() == CLOSED
+        || (this.session.getState() == CONNECTED
+            && ((utpPacket.getConnectionId() & 0xFFFFFFFF)
+                    == this.session.getConnectionIdReceiving()
+                && transportAddress.equals(this.session.getRemoteAddress())))) {
+      try {
+        this.session.updateStateOnConnectionInitSuccess(utpPacket.getSequenceNumber());
+        session.printState();
+        UtpPacket packet =
+            buildACKMessage(
+                timeStamper.utpDifference(timeStamper.utpTimeStamp(), utpPacket.getTimestamp()),
+                UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L,
+                timeStamper.utpTimeStamp(),
+                this.session.getConnectionIdSending(),
+                this.session.getAckNumber(),
+                NO_EXTENSION);
+
+        packet.setSequenceNumber(longToUshort(this.session.getSequenceNumber()));
+        sendPacket(packet);
+        connection.complete(null);
+        this.session.printState();
+      } catch (IOException exp) {
+        // TODO:
+        this.session.syncAckFailed();
+        exp.printStackTrace();
+      }
+    } else {
+      sendResetPacket();
     }
   }
 
@@ -168,6 +222,7 @@ public class UTPClient {
       LOG.warn("An attempt to stop an already stopping/stopped UTP server");
       return;
     }
+
     this.session.close();
     this.transportLayer.close(this.session.getConnectionIdReceiving());
     this.reader.ifPresent(UTPReadingFuture::graceFullInterrupt);
@@ -181,7 +236,7 @@ public class UTPClient {
       byte firstExtension) {
     SelectiveAckHeaderExtension[] extensions = {extension};
     UtpPacket packet =
-        ACKMessage.build(
+        buildACKMessage(
             timestampDifference,
             windowSize,
             timeStamper.utpTimeStamp(),
@@ -194,7 +249,7 @@ public class UTPClient {
 
   public UtpPacket buildDataPacket() {
     UtpPacket utpPacket =
-        DataMessage.build(
+        buildDataMessage(
             timeStamper.utpTimeStamp(),
             this.session.getConnectionIdSending(),
             this.session.getAckNumber(),
@@ -209,7 +264,7 @@ public class UTPClient {
       this.session.updateAckNumber(utpPacket.getSequenceNumber());
     }
     // TODO validate that the seq number is sent!
-    return ACKMessage.build(
+    return buildACKMessage(
         timestampDifference,
         windowSize,
         this.timeStamper.utpTimeStamp(),
@@ -277,5 +332,18 @@ public class UTPClient {
   // for testing must be removed.
   public void setState(SessionState sessionState) {
     this.session.changeState(sessionState);
+  }
+
+  public void sendPacketFinPacket() {
+    try {
+      this.sendPacket(
+          buildFINMessage(
+              timeStamper.utpTimeStamp(),
+              this.session.getConnectionIdSending(),
+              this.session.getAckNumber(),
+              this.session.getSequenceNumber()));
+    } catch (Exception e) {
+      LOG.debug("Error when sending Fin Packet");
+    }
   }
 }

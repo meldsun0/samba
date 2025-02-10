@@ -4,7 +4,6 @@ import samba.utp.UTPClient;
 import samba.utp.network.udp.UDPAddress;
 import samba.utp.network.udp.UDPTransportLayer;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -35,11 +34,17 @@ public class GetContent {
         () -> {
           while (true) {
             if (utpClient.isAlive()) {
-              try {
-                utpClient.receivePacket(transportLayer.onPacketReceive());
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
+              //              try {
+              ////                utpClient.receivePacket(transportLayer.onPacketReceive(), new
+              // TransportAddress() {
+              ////                    @Override
+              ////                    public Object getAddress() {
+              ////                        return null;
+              ////                    }
+              ////                });
+              ////              } catch (IOException e) {
+              ////                throw new RuntimeException(e);
+              //              }
             }
           }
         });

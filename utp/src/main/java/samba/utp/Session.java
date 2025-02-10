@@ -45,14 +45,22 @@ public class Session {
     }
   }
 
-  public void initServerConnection(
-      TransportAddress remoteAddress, short connectionId, short sequenceNumber) {
+  public void initServerConnection(TransportAddress remoteAddress, final long connectionId) {
     lock.lock();
     try {
       this.remoteAddress = remoteAddress;
-      this.connectionIdSending = (connectionId & MASK);
       this.connectionIdReceiving = (connectionId & MASK) + 1;
+      this.connectionIdSending = (connectionId & MASK);
       this.sequenceNumber = Utils.randomSeqNumber();
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  public void updateStateOnConnectionInitSuccess(short sequenceNumber) {
+    lock.lock();
+    try {
+      this.state = CONNECTED;
       this.ackNumber = sequenceNumber & MASK;
     } finally {
       lock.unlock();
@@ -72,7 +80,7 @@ public class Session {
   public void printState() {
     String state =
         String.format(
-            "[ConnID Sending: %d] [ConnID Recv: %d] [SeqNr. %d] [AckNr: %d] [State: %s]",
+            "Session [ConnID Sending: %d] [ConnID Recv: %d] [SeqNr. %d] [AckNr: %d] [State: %s]",
             connectionIdSending,
             connectionIdReceiving,
             sequenceNumber,

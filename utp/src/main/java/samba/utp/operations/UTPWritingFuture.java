@@ -49,7 +49,6 @@ public class UTPWritingFuture {
                 LOG.debug("Graceful interrupt due to lack of acknowledgements.");
                 break;
               }
-
               resendPendingPackets();
 
               if (algorithm.isTimedOut()) {
@@ -82,20 +81,19 @@ public class UTPWritingFuture {
 
   private void finalizeTransmission(boolean successful) {
     algorithm.end(buffer.position(), successful);
-    LOG.debug("Transmission complete.");
     if (successful) {
       writerFuture.complete(null);
     } else {
       writerFuture.completeExceptionally(new RuntimeException("Something went wrong!"));
     }
+    utpClient.sendPacketFinPacket();
     utpClient.stop();
   }
 
   private void sendNextPackets() throws IOException {
     while (algorithm.canSendNextPacket() && buffer.hasRemaining()) {
       UtpPacket utpPacket = utpClient.buildDataPacket();
-      this.buildNextPacket(utpPacket);
-      utpClient.sendPacket(utpPacket);
+      utpClient.sendPacket(this.buildNextPacket(utpPacket));
     }
   }
 
@@ -130,6 +128,7 @@ public class UTPWritingFuture {
 
   private UtpPacket buildNextPacket(UtpPacket utpPacket) {
     int packetSize = Math.min(algorithm.sizeOfNextPacket(), buffer.remaining());
+    packetSize = Math.min(packetSize, 800);
     byte[] payload = new byte[packetSize];
     buffer.get(payload);
     utpPacket.setPayload(payload);
@@ -137,7 +136,6 @@ public class UTPWritingFuture {
     int leftInBuffer = (int) Math.min(buffer.remaining(), UnsignedTypesUtil.MAX_UINT & 0xFFFFFFFF);
     utpPacket.setWindowSize(leftInBuffer);
     algorithm.markPacketOnfly(utpPacket); // Mark the packet as on the fly
-
     return utpPacket;
   }
 
@@ -154,19 +152,3 @@ public class UTPWritingFuture {
     return this.writerFuture.isDone();
   }
 }
-
-/*
-*
-* on run
-* //			if (!buffer.hasRemaining() && !finSend) {
-//				UtpPacket fin = channel.getFinPacket();
-//				log.debug("Sending FIN");
-//				try {
-//					channel.finalizeConnection(fin);
-//					algorithm.markFinOnfly(fin);
-//				} catch (IOException exp) {
-//
-//				}
-//				finSend = true;
-//			}
-* */
