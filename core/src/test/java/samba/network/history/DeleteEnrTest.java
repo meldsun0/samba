@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
-import samba.services.utp.UTPService;
+import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 
 import java.lang.reflect.Field;
@@ -27,7 +27,7 @@ public class DeleteEnrTest {
   @BeforeEach
   public void setUp() {
     this.historyNetwork =
-        new HistoryNetwork(mock(Discv5Client.class), mock(HistoryDB.class), mock(UTPService.class));
+        new HistoryNetwork(mock(Discv5Client.class), mock(HistoryDB.class), mock(UTPManager.class));
   }
 
   @Test

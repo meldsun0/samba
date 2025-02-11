@@ -43,7 +43,7 @@ public class UDPTransportLayer implements TransportLayer<UDPAddress> {
   }
 
   @Override
-  public void close(long connectionId) {
+  public void close(long connectionId, UDPAddress remoteAddress) {
     this.socket.close();
   }
 

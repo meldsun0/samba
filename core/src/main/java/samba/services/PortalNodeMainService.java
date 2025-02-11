@@ -27,7 +27,7 @@ import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
 import samba.services.jsonrpc.methods.history.*;
-import samba.services.utp.UTPService;
+import samba.services.utp.UTPManager;
 import samba.storage.HistoryRocksDB;
 
 import java.nio.file.Paths;
@@ -65,7 +65,7 @@ public class PortalNodeMainService extends Service {
   private Discv5Service discoveryService;
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
-  private UTPService utpService;
+  private UTPManager utpManager;
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
 
@@ -101,13 +101,13 @@ public class PortalNodeMainService extends Service {
         .addHandler(MessageType.OFFER, new OfferHandler());
 
     final UTPNetworkIncomingRequestHandler utpNetworkIncomingRequestHandler =
-        new UTPNetworkIncomingRequestHandler(this.utpService);
+        new UTPNetworkIncomingRequestHandler(this.utpManager);
     this.incomingRequestTalkHandler.addHandlers(
         historyNetworkIncomingRequestHandler, utpNetworkIncomingRequestHandler);
   }
 
   private void initUTPService() {
-    this.utpService = new UTPService(this.discoveryService);
+    this.utpManager = new UTPManager(this.discoveryService);
   }
 
   private void initJsonRPCService() {
@@ -167,7 +167,7 @@ public class PortalNodeMainService extends Service {
         new HistoryNetwork(
             this.discoveryService,
             HistoryRocksDB.create(metricsSystem, Paths.get("samba/db")),
-            this.utpService);
+            this.utpManager);
   }
 
   private void initConnectionService() {

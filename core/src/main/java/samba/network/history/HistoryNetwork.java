@@ -18,7 +18,7 @@ import samba.network.NetworkType;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
-import samba.services.utp.UTPService;
+import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 
 import java.util.*;
@@ -42,15 +42,15 @@ public class HistoryNetwork extends BaseNetwork
   private final HistoryDB historyDB;
   final NodeRecordFactory nodeRecordFactory;
   protected RoutingTable routingTable;
-  private final UTPService utpService;
+  private final UTPManager utpManager;
 
   public HistoryNetwork(
-      final Discv5Client client, final HistoryDB historyDB, final UTPService utpService) {
+      final Discv5Client client, final HistoryDB historyDB, final UTPManager utpManager) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.ONE; // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
-    this.utpService = utpService;
+    this.utpManager = utpManager;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());
   }
 
@@ -126,7 +126,7 @@ public class HistoryNetwork extends BaseNetwork
               // TODO: Validate NodeRadius
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
-                    this.utpService
+                    this.utpManager
                         .getContent(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
@@ -280,7 +280,7 @@ public class HistoryNetwork extends BaseNetwork
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
       int connectionId = new Random().nextInt(65536);
       SafeFuture.runAsync(
-          () -> this.utpService.sendContent(nodeRecord, connectionId, content.get()));
+          () -> this.utpManager.sendContent(nodeRecord, connectionId, content.get()));
       return new Content(connectionId);
     }
     return new Content(content.get());
@@ -337,7 +337,7 @@ public class HistoryNetwork extends BaseNetwork
       Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(
           MessageType message) {
     return error -> {
-      LOG.info("Something when wrong when sending a {}", message);
+      LOG.trace("Something when wrong when sending a {} with error {}", message, error);
       return SafeFuture.completedFuture(Optional.empty());
     };
   }

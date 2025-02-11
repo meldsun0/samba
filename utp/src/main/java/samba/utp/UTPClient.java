@@ -60,7 +60,7 @@ public class UTPClient {
     checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
 
-    LOG.info("Send Connection message to {}", connectionId);
+    LOG.info("Start Client receiving from  {}", connectionId);
 
     if (!listen.compareAndSet(false, true)) {
       CompletableFuture.failedFuture(
@@ -90,7 +90,7 @@ public class UTPClient {
       int connectionId, TransportAddress transportAddress) {
     checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
-    LOG.info("Staring  a connection from {}", connectionId);
+    LOG.info("Start server sending to  {}", connectionId);
     if (!listen.compareAndSet(false, true)) {
       CompletableFuture.failedFuture(
           new IllegalStateException(
@@ -224,7 +224,8 @@ public class UTPClient {
     }
 
     this.session.close();
-    this.transportLayer.close(this.session.getConnectionIdReceiving());
+    this.transportLayer.close(
+        this.session.getConnectionIdReceiving(), this.session.getRemoteAddress());
     this.reader.ifPresent(UTPReadingFuture::graceFullInterrupt);
     this.writer.ifPresent(UTPWritingFuture::graceFullInterrupt);
   }

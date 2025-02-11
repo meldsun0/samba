@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.IncomingRequestHandler;
 import samba.network.NetworkType;
-import samba.services.utp.UTPService;
+import samba.services.utp.UTPManager;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -17,10 +17,10 @@ public class UTPNetworkIncomingRequestHandler implements IncomingRequestHandler 
 
   private static final Logger LOG = LoggerFactory.getLogger(UTPNetworkIncomingRequestHandler.class);
 
-  private UTPService utpService;
+  private UTPManager utpManager;
 
-  public UTPNetworkIncomingRequestHandler(UTPService utpService) {
-    this.utpService = utpService;
+  public UTPNetworkIncomingRequestHandler(UTPManager utpManager) {
+    this.utpManager = utpManager;
   }
 
   @Override
@@ -30,7 +30,7 @@ public class UTPNetworkIncomingRequestHandler implements IncomingRequestHandler 
         "TALKKREQ message is not from the {}",
         this.getNetworkType().getName());
     // TODO refactor
-    utpService.onUTPMessageReceive(srcNode, request);
+    utpManager.onUTPMessageReceive(srcNode, request);
 
     return CompletableFuture.completedFuture(null);
   }
