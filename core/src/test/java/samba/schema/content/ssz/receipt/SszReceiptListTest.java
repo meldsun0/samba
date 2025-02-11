@@ -40,7 +40,6 @@ public class SszReceiptListTest {
   @Test
   public void testSszDecodeEmptyList() {
     SszReceiptList sszReceiptList = new SszReceiptList(List.of());
-    System.out.println(sszReceiptList.sszSerialize());
     List<TransactionReceipt> decodedTransactionReceipts = sszReceiptList.getDecodedList();
     assertTrue(decodedTransactionReceipts.isEmpty());
   }

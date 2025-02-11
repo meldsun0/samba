@@ -4,17 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
+import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;
 import samba.domain.messages.response.Pong;
+import samba.domain.types.unsigned.UInt16;
 import samba.jsonrpc.reponse.*;
 import samba.network.history.HistoryNetwork;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.history.PortalHistoryPing;
 import samba.services.jsonrpc.methods.results.PingResult;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +51,11 @@ public class PortalHistoryPingTest {
     final JsonRpcRequestContext request =
         new JsonRpcRequestContext(
             new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_PING, new Object[] {enr}));
-    final Pong pong = new Pong(UInt64.valueOf(1), Bytes.EMPTY);
+    final ClientInfoAndCapabilities clientInfoAndCapabilities =
+        new ClientInfoAndCapabilities(
+            "clientInfo", UInt256.ONE, List.of(UInt16.ZERO, UInt16.MAX_VALUE));
+    final Pong pong =
+        new Pong(UInt64.valueOf(1), UInt16.ZERO, clientInfoAndCapabilities.getSszBytes());
 
     when(historyJsonRpc.isNodeConnected(any(NodeRecord.class))).thenReturn(true);
     when(historyJsonRpc.ping(any(NodeRecord.class)))
@@ -58,7 +65,8 @@ public class PortalHistoryPingTest {
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
-                pong.getEnrSeq().bigIntegerValue(), pong.getCustomPayload().toHexString()));
+                pong.getEnrSeq().bigIntegerValue(),
+                clientInfoAndCapabilities.getDataRadius().toHexString()));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
@@ -71,7 +79,11 @@ public class PortalHistoryPingTest {
     final JsonRpcRequestContext request =
         new JsonRpcRequestContext(
             new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_PING, new Object[] {enr}));
-    final Pong pong = new Pong(UInt64.valueOf(1), Bytes.EMPTY);
+    final ClientInfoAndCapabilities clientInfoAndCapabilities =
+        new ClientInfoAndCapabilities(
+            "clientInfo", UInt256.ONE, List.of(UInt16.ZERO, UInt16.MAX_VALUE));
+    final Pong pong =
+        new Pong(UInt64.valueOf(1), UInt16.ZERO, clientInfoAndCapabilities.getSszBytes());
 
     when(historyJsonRpc.isNodeConnected(any(NodeRecord.class))).thenReturn(false);
     when(historyJsonRpc.ping(any(NodeRecord.class)))
@@ -83,7 +95,8 @@ public class PortalHistoryPingTest {
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
-                pong.getEnrSeq().bigIntegerValue(), pong.getCustomPayload().toHexString()));
+                pong.getEnrSeq().bigIntegerValue(),
+                clientInfoAndCapabilities.getDataRadius().toHexString()));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

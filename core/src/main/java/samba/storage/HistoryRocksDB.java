@@ -1,11 +1,5 @@
 package samba.storage;
 
-import static com.google.common.base.Preconditions.*;
-
-import samba.domain.content.*;
-import samba.rocksdb.*;
-import samba.rocksdb.exceptions.StorageException;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -16,6 +10,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+
+import static com.google.common.base.Preconditions.checkArgument;
+
+import samba.domain.content.ContentBlockBody;
+import samba.domain.content.ContentBlockHeader;
+import samba.domain.content.ContentKey;
+import samba.domain.content.ContentReceipts;
+import samba.domain.content.ContentType;
+import samba.domain.content.ContentUtil;
+import samba.rocksdb.KeyValueSegment;
+import samba.rocksdb.KeyValueStorageTransaction;
+import samba.rocksdb.RocksDBConfiguration;
+import samba.rocksdb.RocksDBInstance;
+import samba.rocksdb.RocksDBMetricsFactory;
+import samba.rocksdb.Segment;
+import samba.rocksdb.exceptions.StorageException;
 
 public class HistoryRocksDB implements HistoryDB {
 

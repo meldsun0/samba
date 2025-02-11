@@ -10,6 +10,7 @@ import samba.domain.messages.response.Accept;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
+import samba.domain.types.unsigned.UInt16;
 
 import java.util.List;
 import java.util.Random;
@@ -39,28 +40,22 @@ public class PortalWireMessageDecoderTests {
 
   @Test
   public void testParsePing() {
-    Bytes pingBytes =
-        Bytes.fromHexString(
-            "0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+    Bytes pingBytes = Bytes.fromHexString("0x00010000000000000000000e0000001234");
     Ping ping = (Ping) PortalWireMessageDecoder.decode(srcNode, pingBytes);
     assertEquals(MessageType.PING, ping.getMessageType());
     assertEquals(UInt64.valueOf(1), ping.getEnrSeq());
-    assertEquals(
-        Bytes.fromHexString("0xfeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-        ping.getCustomPayload());
+    assertEquals(UInt16.ZERO, ping.getPayloadType());
+    assertEquals(Bytes.fromHexString("0x1234"), ping.getPayload());
   }
 
   @Test
   public void testParsePong() {
-    Bytes pongBytes =
-        Bytes.fromHexString(
-            "0x0101000000000000000c000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f");
+    Bytes pongBytes = Bytes.fromHexString("0x01010000000000000000000e0000001234");
     Pong pong = (Pong) PortalWireMessageDecoder.decode(srcNode, pongBytes);
     assertEquals(MessageType.PONG, pong.getMessageType());
     assertEquals(UInt64.valueOf(1), pong.getEnrSeq());
-    assertEquals(
-        Bytes.fromHexString("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"),
-        pong.getCustomPayload());
+    assertEquals(UInt16.ZERO, pong.getPayloadType());
+    assertEquals(Bytes.fromHexString("0x1234"), pong.getPayload());
   }
 
   @Test

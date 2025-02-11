@@ -11,6 +11,7 @@ import samba.domain.messages.response.Accept;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
+import samba.domain.types.unsigned.UInt16;
 
 import java.util.List;
 import java.util.Set;
@@ -23,30 +24,16 @@ public class PortalWireSerializationTests {
 
   @Test
   public void testPingSerialization() {
-    Ping ping =
-        new Ping(
-            UInt64.valueOf(1),
-            Bytes.fromHexString(
-                "0xfeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"));
+    Ping ping = new Ping(UInt64.valueOf(1), UInt16.ZERO, Bytes.fromHexString("0x1234"));
     Bytes serialized = ping.getSszBytes();
-    assertEquals(
-        Bytes.fromHexString(
-            "0x0001000000000000000c000000feffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
-        serialized);
+    assertEquals(Bytes.fromHexString("0x00010000000000000000000e0000001234"), serialized);
   }
 
   @Test
   public void testPongSerialization() {
-    Pong pong =
-        new Pong(
-            UInt64.valueOf(1),
-            Bytes.fromHexString(
-                "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"));
+    Pong pong = new Pong(UInt64.valueOf(1), UInt16.ZERO, Bytes.fromHexString("0x1234"));
     Bytes serialized = pong.getSszBytes();
-    assertEquals(
-        Bytes.fromHexString(
-            "0x0101000000000000000c000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f"),
-        serialized);
+    assertEquals(Bytes.fromHexString("0x01010000000000000000000e0000001234"), serialized);
   }
 
   @Test

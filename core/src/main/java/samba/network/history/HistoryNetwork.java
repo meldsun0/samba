@@ -5,6 +5,10 @@ import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
+import samba.domain.messages.extensions.ExtensionType;
+import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;
+import samba.domain.messages.extensions.standard.ErrorExtension;
+import samba.domain.messages.extensions.standard.ErrorType;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.requests.Offer;
@@ -44,6 +48,9 @@ public class HistoryNetwork extends BaseNetwork
   protected RoutingTable routingTable;
   private final UTPManager utpManager;
 
+  // TODO standard client version text, standard capabilities list, standard client info extension,
+  // default ping with standard arguments
+
   public HistoryNetwork(
       final Discv5Client client, final HistoryDB historyDB, final UTPManager utpManager) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
@@ -69,9 +76,44 @@ public class HistoryNetwork extends BaseNetwork
                   nodeRecord.asEnr());
               Pong pong = pongMessage.getMessage();
               if (pong.containsPayload()) {
-                this.routingTable.addOrUpdateNode(nodeRecord);
-                this.routingTable.updateRadius(
-                    nodeRecord.getNodeId(), UInt256.fromBytes(pong.getCustomPayload()));
+                ExtensionType pongExtensionType =
+                    ExtensionType.fromValue(pong.getPayloadType().getValue());
+                switch (pongExtensionType) {
+                  case CLIENT_INFO_AND_CAPABILITIES -> {
+                    try {
+                      ClientInfoAndCapabilities clientInfoAndCapabilities =
+                          ClientInfoAndCapabilities.fromSszBytes(pong.getPayload());
+                      UInt256 dataRadius = clientInfoAndCapabilities.getDataRadius();
+                      this.routingTable.addOrUpdateNode(nodeRecord);
+                      this.routingTable.updateRadius(nodeRecord.getNodeId(), dataRadius);
+                    } catch (Exception e) {
+                      LOG.trace(
+                          "Error {} when processing ClientInfoAndCapabilities {} for {}",
+                          e,
+                          pong.getPayload(),
+                          pong.getMessageType());
+                    }
+                  }
+                  case HISTORY_RADIUS -> { // TODO when history radius extension is implemented
+                  }
+                  case ERROR -> {
+                    try {
+                      ErrorExtension error = ErrorExtension.fromSszBytes(pong.getPayload());
+                      LOG.trace(
+                          "Error {} from recipient when processing Ping extension {} for {}",
+                          ErrorType.fromCode(error.getErrorCode().getValue()),
+                          ExtensionType.fromValue(message.getPayloadType().getValue()),
+                          message.getPayload());
+                    } catch (Exception e) {
+                      LOG.trace(
+                          "Error {} when processing ErrorExtension {} for {}",
+                          e,
+                          pong.getPayload(),
+                          pong.getMessageType());
+                    }
+                  }
+                  default -> {}
+                }
               } else {
                 LOG.trace("{} message without payload", message.getMessageType());
               }
@@ -107,7 +149,13 @@ public class HistoryNetwork extends BaseNetwork
                         .forEach(
                             node ->
                                 this.ping(
-                                    node, new Ping(node.getSeq(), this.nodeRadius.toBytes())));
+                                    node,
+                                    new Ping(
+                                        node.getSeq(),
+                                        ExtensionType.CLIENT_INFO_AND_CAPABILITIES
+                                            .getExtensionCode(),
+                                        new ClientInfoAndCapabilities(this.nodeRadius)
+                                            .getSszBytes())));
                   });
               return SafeFuture.completedFuture(Optional.of(nodes));
             })
@@ -208,7 +256,11 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord) {
-    Ping ping = new Ping(nodeRecord.getSeq(), this.nodeRadius.toBytes());
+    Ping ping =
+        new Ping(
+            nodeRecord.getSeq(),
+            ExtensionType.CLIENT_INFO_AND_CAPABILITIES.getExtensionCode(),
+            new ClientInfoAndCapabilities(this.nodeRadius).getSszBytes());
     return this.ping(nodeRecord, ping);
   }
 
@@ -241,10 +293,59 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handlePing(NodeRecord srcNode, Ping ping) {
-    Bytes srcNodeId = srcNode.getNodeId();
-    routingTable.addOrUpdateNode(srcNode);
-    routingTable.updateRadius(srcNodeId, UInt256.fromBytes(ping.getCustomPayload()));
-    return new Pong(getLocalEnrSeg(), this.nodeRadius.toBytes());
+    try {
+      ExtensionType pingExtensionType = ExtensionType.fromValue(ping.getPayloadType().getValue());
+      switch (pingExtensionType) {
+        case CLIENT_INFO_AND_CAPABILITIES -> {
+          try {
+            ClientInfoAndCapabilities clientInfoAndCapabilities =
+                ClientInfoAndCapabilities.fromSszBytes(ping.getPayload());
+            UInt256 dataRadius = clientInfoAndCapabilities.getDataRadius();
+            this.routingTable.addOrUpdateNode(srcNode);
+            this.routingTable.updateRadius(srcNode.getNodeId(), dataRadius);
+            return new Pong(
+                getLocalEnrSeq(),
+                ExtensionType.CLIENT_INFO_AND_CAPABILITIES.getExtensionCode(),
+                new ClientInfoAndCapabilities(this.nodeRadius).getSszBytes());
+          } catch (Exception e) {
+            LOG.trace(
+                "Error {} when processing ClientInfoAndCapabilities {} for {}",
+                e,
+                ping.getPayload(),
+                ping.getMessageType());
+            return new Pong(
+                getLocalEnrSeq(),
+                ExtensionType.ERROR.getExtensionCode(),
+                new ErrorExtension(ErrorType.FAILED_TO_DECODE.getErrorCode()).getSszBytes());
+          }
+        }
+        case HISTORY_RADIUS -> {
+          // TODO when history radius extension is implemented
+          return new Pong(
+              getLocalEnrSeq(),
+              ExtensionType.ERROR.getExtensionCode(),
+              new ErrorExtension(ErrorType.EXTENSION_NOT_SUPPORTED.getErrorCode()).getSszBytes());
+        }
+        case ERROR -> {
+          // TODO unexpected behavior, respond with error?
+          return new Pong(
+              getLocalEnrSeq(),
+              ExtensionType.ERROR.getExtensionCode(),
+              new ErrorExtension(ErrorType.SYSTEM_ERROR.getErrorCode()).getSszBytes());
+        }
+        default -> {
+          return new Pong(
+              getLocalEnrSeq(),
+              ExtensionType.ERROR.getExtensionCode(),
+              new ErrorExtension(ErrorType.EXTENSION_NOT_SUPPORTED.getErrorCode()).getSszBytes());
+        }
+      }
+    } catch (Exception e) {
+      return new Pong(
+          getLocalEnrSeq(),
+          ExtensionType.ERROR.getExtensionCode(),
+          new ErrorExtension(ErrorType.EXTENSION_NOT_SUPPORTED.getErrorCode()).getSszBytes());
+    }
   }
 
   @Override
@@ -302,7 +403,7 @@ public class HistoryNetwork extends BaseNetwork
     return accept;
   }
 
-  private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeg() {
+  private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeq() {
     return discv5Client.getEnrSeq();
   }
 
@@ -314,7 +415,11 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public CompletableFuture<Void> checkLiveness(NodeRecord nodeRecord) {
     LOG.info("checkLiveness");
-    Ping pingMessage = new Ping(nodeRecord.getSeq(), this.nodeRadius);
+    Ping pingMessage =
+        new Ping(
+            nodeRecord.getSeq(),
+            ExtensionType.CLIENT_INFO_AND_CAPABILITIES.getExtensionCode(),
+            new ClientInfoAndCapabilities(this.nodeRadius).getSszBytes());
     return CompletableFuture.supplyAsync(() -> this.ping(nodeRecord, pingMessage))
         .thenCompose((__) -> new CompletableFuture<>());
   }

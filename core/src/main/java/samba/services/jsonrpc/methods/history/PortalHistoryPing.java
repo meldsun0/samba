@@ -1,5 +1,7 @@
 package samba.services.jsonrpc.methods.history;
 
+import samba.domain.messages.extensions.ExtensionType;
+import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;
 import samba.domain.messages.response.Pong;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.*;
@@ -10,6 +12,7 @@ import samba.services.jsonrpc.methods.results.PingResult;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
@@ -55,11 +58,29 @@ public class PortalHistoryPing implements JsonRpcMethod {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
     if (pong.isPresent()) {
-      String dataRadius = pong.get().getCustomPayload().toHexString();
-      UInt64 enrSeq = pong.get().getEnrSeq();
-      return new JsonRpcSuccessResponse(
-          requestContext.getRequest().getId(),
-          new PingResult(enrSeq.bigIntegerValue(), dataRadius));
+      String dataRadius;
+      try {
+        ExtensionType extensionType =
+            ExtensionType.fromValue(pong.get().getPayloadType().getValue());
+        switch (extensionType) {
+          case CLIENT_INFO_AND_CAPABILITIES -> {
+            dataRadius =
+                ClientInfoAndCapabilities.getDataRadiusFromSszBytes(pong.get().getPayload())
+                    .toHexString();
+          }
+          case HISTORY_RADIUS -> // TODO when history radius is implemented
+              dataRadius = Bytes.EMPTY.toHexString();
+          default -> {
+            return createJsonRpcInvalidRequestResponse(requestContext);
+          }
+        }
+        UInt64 enrSeq = pong.get().getEnrSeq();
+        return new JsonRpcSuccessResponse(
+            requestContext.getRequest().getId(),
+            new PingResult(enrSeq.bigIntegerValue(), dataRadius));
+      } catch (IllegalArgumentException e) {
+        return createJsonRpcInvalidRequestResponse(requestContext);
+      }
     }
     return createJsonRpcInvalidRequestResponse(requestContext);
   }
