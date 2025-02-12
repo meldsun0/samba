@@ -81,7 +81,8 @@ public class HistoryNetwork extends BaseNetwork
                 switch (pongExtensionType) {
                   case CLIENT_INFO_AND_CAPABILITIES -> {
                     try {
-                      UInt256 dataRadius = ClientInfoAndCapabilities.getDataRadiusFromSszBytes(pong.getPayload());
+                      UInt256 dataRadius =
+                          ClientInfoAndCapabilities.getDataRadiusFromSszBytes(pong.getPayload());
                       this.routingTable.addOrUpdateNode(nodeRecord);
                       this.routingTable.updateRadius(nodeRecord.getNodeId(), dataRadius);
                     } catch (Exception e) {
@@ -296,7 +297,8 @@ public class HistoryNetwork extends BaseNetwork
       switch (pingExtensionType) {
         case CLIENT_INFO_AND_CAPABILITIES -> {
           try {
-            UInt256 dataRadius = ClientInfoAndCapabilities.getDataRadiusFromSszBytes(ping.getPayload());
+            UInt256 dataRadius =
+                ClientInfoAndCapabilities.getDataRadiusFromSszBytes(ping.getPayload());
             this.routingTable.addOrUpdateNode(srcNode);
             this.routingTable.updateRadius(srcNode.getNodeId(), dataRadius);
             return new Pong(
