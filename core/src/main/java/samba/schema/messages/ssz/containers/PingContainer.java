@@ -1,25 +1,27 @@
 package samba.schema.messages.ssz.containers;
 
 import samba.domain.messages.PortalWireMessage;
+import samba.domain.types.unsigned.UInt16;
+import samba.schema.primitives.SszUInt16;
 
 import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszByteList;
-import tech.pegasys.teku.infrastructure.ssz.containers.Container2;
-import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema2;
+import tech.pegasys.teku.infrastructure.ssz.containers.Container3;
+import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema3;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszUInt64;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
-public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteList> {
+public class PingContainer extends Container3<PingContainer, SszUInt64, SszUInt16, SszByteList> {
 
-  public PingContainer(UInt64 enrSeq, Bytes customPayload) {
+  public PingContainer(UInt64 enrSeq, UInt16 payloadType, Bytes payload) {
     super(
         PingSchema.INSTANCE,
         SszUInt64.of(enrSeq),
-        SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES)
-            .fromBytes(customPayload));
+        SszUInt16.of(payloadType),
+        SszByteListSchema.create(PortalWireMessage.MAX_EXTENSION_PAYLOAD_BYTES).fromBytes(payload));
   }
 
   public PingContainer(TreeNode backingNode) {
@@ -30,8 +32,12 @@ public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteL
     return getField0().get();
   }
 
-  public Bytes getCustomPayload() {
-    return getField1().getBytes();
+  public UInt16 getPayloadType() {
+    return getField1().get();
+  }
+
+  public Bytes getPayload() {
+    return getField2().getBytes();
   }
 
   public static PingContainer decodePacket(Bytes packet) {
@@ -40,14 +46,16 @@ public class PingContainer extends Container2<PingContainer, SszUInt64, SszByteL
     return decodedPacket;
   }
 
-  public static class PingSchema extends ContainerSchema2<PingContainer, SszUInt64, SszByteList> {
+  public static class PingSchema
+      extends ContainerSchema3<PingContainer, SszUInt64, SszUInt16, SszByteList> {
 
     public static final PingSchema INSTANCE = new PingSchema();
 
     private PingSchema() {
       super(
           SszPrimitiveSchemas.UINT64_SCHEMA,
-          SszByteListSchema.create(PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES));
+          SszUInt16.UINT16_SCHEMA,
+          SszByteListSchema.create(PortalWireMessage.MAX_EXTENSION_PAYLOAD_BYTES));
     }
 
     @Override

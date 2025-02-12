@@ -2,6 +2,10 @@ package samba.schema.primitives;
 
 import samba.domain.types.unsigned.UInt16;
 
+import java.nio.ByteOrder;
+import java.util.List;
+
+import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.json.types.DeserializableTypeDefinition;
 import tech.pegasys.teku.infrastructure.ssz.SszData;
 import tech.pegasys.teku.infrastructure.ssz.impl.AbstractSszPrimitive;
@@ -33,13 +37,39 @@ public class SszUInt16 extends AbstractSszPrimitive<UInt16> {
       new AbstractSszPrimitiveSchema<>(16) {
         @Override
         public UInt16 createFromLeafBackingNode(final LeafDataNode node, final int internalIndex) {
-          return UInt16.fromBytes(node.getData().reverse());
+          final Bytes leafNodeBytes = node.getData();
+          final Bytes elementBytes = leafNodeBytes.slice(internalIndex * 2, 2);
+          return UInt16.valueOf(elementBytes.toInt(ByteOrder.LITTLE_ENDIAN));
         }
 
         @Override
         public TreeNode updateBackingNode(
             final TreeNode srcNode, final int index, final SszData newValue) {
-          return LeafNode.create(((SszUInt16) newValue).get().toBytes().reverse());
+
+          final Bytes uintBytes =
+              Bytes.ofUnsignedShort(
+                  ((SszUInt16) newValue).get().getValue(), ByteOrder.LITTLE_ENDIAN);
+          final Bytes curVal = ((LeafNode) srcNode).getData();
+          final Bytes newBytes = updateExtending(curVal, index * 2, uintBytes);
+          return LeafNode.create(newBytes);
+        }
+
+        @Override
+        public TreeNode updatePackedNode(
+            final TreeNode srcNode, final List<PackedNodeUpdate<UInt16, SszUInt16>> updates) {
+
+          if (updates.size() == 16) { // 16 x 2 bytes = 32 bytes (full leaf node)
+            final byte[] data = new byte[32];
+            for (int i = 0; i < 16; i++) {
+              final int intValue = updates.get(i).getNewValue().getValue();
+              final int off = i * 2;
+              data[off] = (byte) intValue;
+              data[off + 1] = (byte) (intValue >> 8);
+            }
+            return LeafNode.create(Bytes.wrap(data));
+          } else {
+            return super.updatePackedNode(srcNode, updates);
+          }
         }
 
         @Override

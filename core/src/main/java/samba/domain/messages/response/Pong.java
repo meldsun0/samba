@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
+import samba.domain.types.unsigned.UInt16;
 import samba.schema.messages.ssz.containers.PongContainer;
 
 import com.google.common.base.Objects;
@@ -15,31 +16,34 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 public class Pong implements PortalWireMessage {
 
   private UInt64 enrSeq;
-  private Bytes customPayload;
+  private UInt16 payloadType;
+  private Bytes payload;
 
-  public Pong(UInt64 enrSeq, Bytes customPayload) {
+  public Pong(UInt64 enrSeq, UInt16 payloadType, Bytes payload) {
     checkArgument(
         enrSeq != null && UInt64.ZERO.compareTo(enrSeq) < 0, "enrSeq cannot be null or negative");
-    checkArgument(
-        customPayload.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Custom payload size exceeds limit");
+    checkArgument(payloadType != null, "Payload type cannot be null");
+    checkArgument(payload.size() <= MAX_EXTENSION_PAYLOAD_BYTES, "Payload size exceeds limit");
     this.enrSeq = enrSeq;
-    this.customPayload = customPayload;
+    this.payloadType = payloadType;
+    this.payload = payload;
   }
 
-  public Pong(org.apache.tuweni.units.bigints.UInt64 enrSeq, Bytes customPayload) {
-    this(UInt64.valueOf(enrSeq.toBytes().toLong()), customPayload);
+  public Pong(org.apache.tuweni.units.bigints.UInt64 enrSeq, UInt16 payloadType, Bytes payload) {
+    this(UInt64.valueOf(enrSeq.toBytes().toLong()), payloadType, payload);
   }
 
   public static Pong fromSSZBytes(Bytes sszbytes) {
     Bytes container = sszbytes.slice(1);
     PongContainer pongContainer = PongContainer.decodePacket(container);
     UInt64 enrSeq = pongContainer.getEnrSeq();
-    Bytes customPayload = pongContainer.getCustomPayload();
+    UInt16 payloadType = pongContainer.getPayloadType();
+    Bytes payload = pongContainer.getPayload();
 
-    if (customPayload.size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-      throw new IllegalArgumentException("PONG: Custom payload size exceeds limit");
+    if (payload.size() > PortalWireMessage.MAX_EXTENSION_PAYLOAD_BYTES) {
+      throw new IllegalArgumentException("PONG: Payload size exceeds limit");
     }
-    return new Pong(enrSeq, customPayload);
+    return new Pong(enrSeq, payloadType, payload);
   }
 
   @Override
@@ -47,23 +51,27 @@ public class Pong implements PortalWireMessage {
     return MessageType.PONG;
   }
 
-  public Bytes getCustomPayload() {
-    return customPayload;
-  }
-
   public UInt64 getEnrSeq() {
     return enrSeq;
   }
 
+  public UInt16 getPayloadType() {
+    return payloadType;
+  }
+
+  public Bytes getPayload() {
+    return payload;
+  }
+
   public boolean containsPayload() {
-    return !this.customPayload.isZero();
+    return !this.payload.isZero();
   }
 
   @Override
   public Bytes getSszBytes() {
     return Bytes.concatenate(
         SszByte.of(getMessageType().getByteValue()).sszSerialize(),
-        new PongContainer(enrSeq, customPayload).sszSerialize());
+        new PongContainer(enrSeq, payloadType, payload).sszSerialize());
   }
 
   @Override
@@ -80,16 +88,25 @@ public class Pong implements PortalWireMessage {
       return false;
     }
     Pong that = (Pong) o;
-    return Objects.equal(enrSeq, that.enrSeq) && Objects.equal(customPayload, that.customPayload);
+    return Objects.equal(enrSeq, that.enrSeq)
+        && Objects.equal(payloadType, that.payloadType)
+        && Objects.equal(payload, that.payload);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(enrSeq, customPayload);
+    return Objects.hashCode(enrSeq, payloadType, payload);
   }
 
   @Override
   public String toString() {
-    return "Pong{" + "enrSeq=" + enrSeq + ", customPayload=" + customPayload + '}';
+    return "Pong{"
+        + "enrSeq="
+        + enrSeq
+        + ", payloadType="
+        + payloadType
+        + ", payload="
+        + payload
+        + '}';
   }
 }

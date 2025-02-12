@@ -10,17 +10,23 @@ import static org.mockito.Mockito.when;
 import static samba.TestHelper.createNodeRecord;
 
 import samba.TestHelper;
+import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;
+import samba.domain.messages.extensions.standard.ErrorExtension;
+import samba.domain.messages.extensions.standard.ErrorType;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Pong;
+import samba.domain.types.unsigned.UInt16;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -29,50 +35,40 @@ import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class PingMessageTests {
 
-  private static final Bytes pongCustomPayload =
-      Bytes.fromHexString("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f");
-  private static final Bytes pingCustomPayload =
-      Bytes.fromHexString("0xfeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+  private static final Bytes payloadClientInfo =
+      new ClientInfoAndCapabilities(
+              "clientInfo",
+              UInt256.valueOf(12),
+              List.of(UInt16.ZERO, UInt16.valueOf(1), UInt16.MAX_VALUE))
+          .getSszBytes();
+  private static final Bytes payloadFailedToDecode =
+      new ErrorExtension(ErrorType.FAILED_TO_DECODE.getErrorCode()).getSszBytes();
+  private static final Bytes payloadExtensionNotSupported =
+      new ErrorExtension(ErrorType.EXTENSION_NOT_SUPPORTED.getErrorCode()).getSszBytes();
 
   @Test
-  public void sendOkPingMessageAndReceiveOkPongTest()
-      throws ExecutionException, InterruptedException {
+  public void
+      sendOkClientInfoAndCapabilitiesPingMessageAndReceiveOkClientInfoAndCapabilitiesPongTest()
+          throws ExecutionException, InterruptedException {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
+        .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, payloadClientInfo));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
     HistoryNetwork historyNetwork =
         new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
 
     NodeRecord nodeRecord = createNodeRecord();
-    Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
+    Optional<Pong> pong =
+        historyNetwork.ping(nodeRecord, createPingMessage(UInt16.ZERO, payloadClientInfo)).get();
 
+    ClientInfoAndCapabilities extension =
+        ClientInfoAndCapabilities.fromSszBytes(pong.get().getPayload());
     assertEquals(UInt64.valueOf(1), pong.get().getEnrSeq());
-    assertEquals(pongCustomPayload, pong.get().getCustomPayload());
+    assertEquals(payloadClientInfo, pong.get().getPayload());
     assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
     assertTrue(historyNetwork.isNodeConnected(nodeRecord));
-    assertEquals(pong.get().getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
-  }
-
-  @Test
-  public void sendOkPingMessageAndReceiveOkEmptyCustomPayloadPongTest()
-      throws ExecutionException, InterruptedException {
-    Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenAnswer(invocation -> createPongBytesResponse(Bytes.EMPTY));
-    when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
-
-    HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
-    NodeRecord nodeRecord = createNodeRecord();
-    Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
-
-    assertEquals(UInt64.valueOf(1), pong.get().getEnrSeq());
-    assertEquals(Bytes.EMPTY, pong.get().getCustomPayload());
-    assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
-    assertFalse(historyNetwork.isNodeConnected(nodeRecord));
-    assertNull(historyNetwork.getRadiusFromNode(nodeRecord));
+    assertEquals(extension.getDataRadius(), historyNetwork.getRadiusFromNode(nodeRecord));
   }
 
   @Test
@@ -86,7 +82,8 @@ public class PingMessageTests {
         new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
     NodeRecord nodeRecord = createNodeRecord();
 
-    Optional<Pong> pong = historyNetwork.ping(nodeRecord, createPingMessage()).get();
+    Optional<Pong> pong =
+        historyNetwork.ping(nodeRecord, createPingMessage(UInt16.ZERO, payloadClientInfo)).get();
 
     assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
     assertFalse(historyNetwork.isNodeConnected(nodeRecord));
@@ -95,35 +92,82 @@ public class PingMessageTests {
   }
 
   @Test
-  public void handleASuccessfulPingIncomingRequestTest()
+  public void handleASuccessfulClientInfoAndCapabilitiesPingIncomingRequestTest()
       throws ExecutionException, InterruptedException {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenAnswer(invocation -> createPongBytesResponse(pongCustomPayload));
+        .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, payloadClientInfo));
     when(discv5Client.getEnrSeq())
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
         new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
-    Ping pingMessage = createPingMessage();
+    Ping pingMessage = createPingMessage(UInt16.ZERO, payloadClientInfo);
 
-    historyNetwork.handlePing(nodeRecord, createPingMessage());
+    historyNetwork.handlePing(nodeRecord, createPingMessage(UInt16.ZERO, payloadClientInfo));
 
+    ClientInfoAndCapabilities extension =
+        ClientInfoAndCapabilities.fromSszBytes(pingMessage.getPayload());
     assertEquals(1, historyNetwork.getNumberOfConnectedPeers());
     assertTrue(historyNetwork.isNodeConnected(nodeRecord));
-    assertEquals(pingMessage.getCustomPayload(), historyNetwork.getRadiusFromNode(nodeRecord));
+    assertEquals(extension.getDataRadius(), historyNetwork.getRadiusFromNode(nodeRecord));
+  }
+
+  @Test
+  public void handleABadClientInfoAndCapabilitiesPingIncomingRequestTest() {
+    Discv5Client discv5Client = mock(Discv5Client.class);
+    when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
+    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+        .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, Bytes.EMPTY));
+    when(discv5Client.getEnrSeq())
+        .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
+
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+    NodeRecord nodeRecord = TestHelper.createNodeRecord();
+
+    Pong pong =
+        (Pong) historyNetwork.handlePing(nodeRecord, createPingMessage(UInt16.ZERO, Bytes.EMPTY));
+
+    assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
+    assertFalse(historyNetwork.isNodeConnected(nodeRecord));
+    assertEquals(payloadFailedToDecode, pong.getPayload());
+  }
+
+  @Test
+  public void handleASuccessfulUnsupportedPingIncomingRequestTest() {
+    Discv5Client discv5Client = mock(Discv5Client.class);
+    when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
+    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+        .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, Bytes.EMPTY));
+    when(discv5Client.getEnrSeq())
+        .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
+
+    HistoryNetwork historyNetwork =
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+    NodeRecord nodeRecord = TestHelper.createNodeRecord();
+
+    Pong pong =
+        (Pong)
+            historyNetwork.handlePing(
+                nodeRecord, createPingMessage(UInt16.valueOf(1234), Bytes.EMPTY));
+
+    assertEquals(0, historyNetwork.getNumberOfConnectedPeers());
+    assertFalse(historyNetwork.isNodeConnected(nodeRecord));
+    assertEquals(payloadExtensionNotSupported, pong.getPayload());
   }
 
   @NotNull
-  private static CompletableFuture<Bytes> createPongBytesResponse(Bytes pongCustomPayload) {
+  private static CompletableFuture<Bytes> createPongBytesResponse(
+      UInt16 extensionType, Bytes pongPayload) {
     return CompletableFuture.completedFuture(
-        Bytes.concatenate(Bytes.fromHexString("0x0101000000000000000c000000"), pongCustomPayload));
+        new Pong(UInt64.valueOf(1), extensionType, pongPayload).getSszBytes());
   }
 
   @NotNull
-  private static Ping createPingMessage() {
-    return new Ping(UInt64.valueOf(1), pingCustomPayload);
+  private static Ping createPingMessage(UInt16 extensionType, Bytes pingPayload) {
+    return new Ping(UInt64.valueOf(1), extensionType, pingPayload);
   }
 }
