@@ -125,7 +125,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
 
     Pong pong =
@@ -146,7 +146,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPService.class));
+        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
 
     Pong pong =
