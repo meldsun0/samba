@@ -36,7 +36,7 @@ public class SambaCommand implements Callable<Integer> {
   private final Samba.StartAction startAction;
 
   @Option(
-      names = {"--unsafe-private-key "},
+      names = {"--unsafe-private-key"},
       description = "Private Key of the local ENR.  If not specified a generated one will be used")
   private String unsafePrivateKey = null;
 
