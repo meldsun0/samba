@@ -1,4 +1,4 @@
-package samba.services.jsonrpc.methods;
+package samba.services.jsonrpc.methods.history;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,7 +10,6 @@ import samba.domain.types.unsigned.UInt16;
 import samba.jsonrpc.reponse.*;
 import samba.network.history.HistoryNetwork;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.history.PortalHistoryPing;
 import samba.services.jsonrpc.methods.results.PingResult;
 
 import java.util.List;
