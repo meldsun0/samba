@@ -1,4 +1,4 @@
-package samba.services.jsonrpc.methods;
+package samba.services.jsonrpc.methods.discv5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import samba.jsonrpc.reponse.*;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.results.NodeInfo;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
