@@ -33,7 +33,7 @@ public interface HistoryJsonRpcRequests {
 
   boolean store(Bytes contentKey, Bytes contentValue);
 
-  String getLocalContent(ContentKey contentKey);
+  Optional<String> getLocalContent(ContentKey contentKey);
 
-  SafeFuture<String> offer(NodeRecord nodeRecord, List<Bytes> content, Offer offer);
+  SafeFuture<Optional<Bytes>> offer(NodeRecord nodeRecord, List<Bytes> content, Offer offer);
 }

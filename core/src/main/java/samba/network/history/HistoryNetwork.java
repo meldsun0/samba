@@ -1,5 +1,7 @@
 package samba.network.history;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -24,12 +26,14 @@ import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
+import samba.util.Util;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -205,14 +209,49 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
-  public SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer message) {
+  public SafeFuture<Optional<Bytes>> offer(
+      NodeRecord nodeRecord, List<Bytes> content, Offer message) {
+    checkArgument(nodeRecord != null, "NodeRecord must not be null");
+    checkArgument(content != null && !content.isEmpty(), "Content must not be empty");
+    checkArgument(
+        message != null && !message.getContentKeys().isEmpty(), "Offer must not be empty");
+    checkArgument(
+        content.size() == message.getContentKeys().size(),
+        "There should be same contentItems and contentKeys");
+
     return sendMessage(nodeRecord, message)
         .thenApply(Optional::get)
         .thenCompose(
             acceptMessage -> {
               Accept accept = acceptMessage.getMessage();
-              // TODO create UTP stream using connectionId
-              return SafeFuture.completedFuture(Optional.of(accept));
+              byte[] acceptedContent = accept.getContentKeysByteArray();
+              List<Bytes> contentToOffer =
+                  IntStream.range(0, acceptedContent.length)
+                      .mapToObj(
+                          idx -> {
+                            if (acceptedContent[idx] == 0) return null;
+                            Bytes currentContent = content.get(idx);
+                            // TODO validate if is needed to go to the db.
+                            if (currentContent.isEmpty()) {
+                              Bytes contentKey = message.getContentKeys().get(idx);
+                              return historyDB
+                                  .get(ContentKey.decode(contentKey))
+                                  .orElse(currentContent);
+                            }
+                            return currentContent;
+                          })
+                      .filter(Objects::nonNull)
+                      .map(data -> Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data))
+                      .toList();
+
+              Optional.ofNullable(contentToOffer)
+                  .filter(list -> !list.isEmpty())
+                  .ifPresent(
+                      list ->
+                          utpManager.offerWrite(
+                              nodeRecord, accept.getConnectionId(), Bytes.concatenate(list)));
+
+              return SafeFuture.completedFuture(Optional.of(accept.getContentKeys()));
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
@@ -251,6 +290,11 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public boolean store(Bytes contentKey, Bytes contentValue) {
     return this.historyDB.saveContent(contentKey, contentValue);
+  }
+
+  @Override
+  public Optional<String> getLocalContent(ContentKey contentKey) {
+    return this.historyDB.get(contentKey).map(Bytes::toHexString);
   }
 
   @Override
@@ -387,18 +431,42 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
-    BitSet missingContent = new BitSet(offer.getContentKeys().size());
-    //    for (int i = 0; i < offer.getContentKeys().size(); i++) {
-    //        if (!historyDB.contains(offer.getContentKeys().get(i))) {
-    //            missingContent.set(i);
-    //        }
-    //    }
+    try {
+      if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
+      byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
+      List<Bytes> contentKeyAccepted = new ArrayList<>();
+      for (int x = 0; x < offer.getContentKeys().size(); x++) {
+        Bytes contentKey = offer.getContentKeys().get(x);
 
-    int sliceLength = (offer.getContentKeys().size() + 7) / 8;
-    Bytes contentKeysBitList = Bytes.wrap(missingContent.toByteArray()).slice(sliceLength);
-    // int connectionId = UTP.generateConnectionId();
-    Accept accept = new Accept(0, contentKeysBitList);
-    return accept;
+        //      double d = distance(cid, nodeId); // Example: implement the 'distance' method
+        //      if (d >= nodeRadius) {
+        //        log("OFFER", "Content key: " + toHexString(cid) + " is outside radius.\nd=" + d +
+        // "\nr=" + nodeRadius);
+        //        continue;
+        //      }
+        if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+          contentKeysBitArray[x] = 1;
+          contentKeyAccepted.add(contentKey);
+        }
+      }
+      if (contentKeyAccepted.isEmpty()) return new Accept(0, Bytes.of(contentKeysBitArray));
+
+      int connectionId = this.utpManager.generateConnectionId();
+      this.utpManager.acceptRead(
+          srcNode,
+          connectionId,
+          (newContent) -> {
+            if (newContent.size() == contentKeyAccepted.size()) {
+              for (int i = 0; i < newContent.size(); i++) {
+                this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
+              }
+            }
+          });
+      return new Accept(connectionId, Bytes.of(contentKeysBitArray));
+    } catch (Exception e) {
+      LOG.trace("Error when handling Offer Message");
+      return new Accept(0, Bytes.EMPTY);
+    }
   }
 
   private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeq() {
