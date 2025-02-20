@@ -156,7 +156,8 @@ public class OfferMessageTests {
     when(historyDB.get(any(ContentKey.class))).thenThrow(NullPointerException.class);
 
     List<Bytes> contentKey = List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
-    List<Bytes> content = List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
+    List<Bytes> content =
+        List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
 
     Offer offer = new Offer(contentKey);
     Optional<Bytes> contentKeysBitList =
@@ -185,7 +186,8 @@ public class OfferMessageTests {
             eq(555),
             eq(
                 Bytes.concatenate(
-                    Util.writeUnsignedLeb128(DefaultContent.value3.size()), DefaultContent.value3)));
+                    Util.writeUnsignedLeb128(DefaultContent.value3.size()),
+                    DefaultContent.value3)));
     assertEquals(contentKeysBitList.get().toHexString(), Bytes.of(1).toHexString());
   }
 

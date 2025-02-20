@@ -35,7 +35,9 @@ public class ContentItemsParameter {
         .collect(Collectors.toList());
   }
 
-  public boolean isValid() {
-    return !(this.contentItems.isEmpty() || this.contentItems.size() >= PortalWireMessage.MAX_KEYS);
+  public boolean isNotValid() {
+    return (this.contentItems.isEmpty()
+        || this.contentItems.size() >= PortalWireMessage.MAX_KEYS
+        || this.getContentKeys().size() != this.getContentValues().size());
   }
 }

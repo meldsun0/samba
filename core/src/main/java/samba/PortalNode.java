@@ -62,8 +62,7 @@ public class PortalNode implements Node {
 
     final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.getPortalRestApiConfig();
     STATUS_LOG.onStartup(
-        "1.0 "
-            + (VersionProvider.COMMIT_HASH.map(s -> "Commit: " + s).orElse("")));
+        "1.0 " + (VersionProvider.COMMIT_HASH.map(s -> "Commit: " + s).orElse("")));
     STATUS_LOG.startupConfigurations(
         StartupLogConfig.builder()
             .network("")

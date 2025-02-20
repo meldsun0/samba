@@ -26,10 +26,16 @@ public class ContentDeserializer extends StdDeserializer<List<ContentItem>> {
     final List<ContentItem> contentItems = Lists.newArrayList();
 
     for (JsonNode child : contentItemsNode) {
-      if (child.isArray() && child.size() == 2) {
+      if (child.isArray() && child.size() == 2 && hasContent(child)) {
         contentItems.add(ContentItem.build(child.get(0).textValue(), child.get(1).textValue()));
+      } else {
+        return List.of();
       }
     }
     return contentItems;
+  }
+
+  private boolean hasContent(JsonNode child) {
+    return !child.get(0).textValue().isEmpty() && !child.get(1).textValue().isEmpty();
   }
 }
