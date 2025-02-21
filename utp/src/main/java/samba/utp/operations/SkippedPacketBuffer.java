@@ -161,8 +161,7 @@ public class SkippedPacketBuffer {
   public int getFreeSize() throws IOException {
     lock.lock();
     try {
-      if (SIZE - elementCount.get() < 0) {
-      }
+      if (SIZE - elementCount.get() < 0) {}
       if (SIZE - elementCount.get() < 50) {
         return 0;
       }

@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.tuweni.bytes.Bytes;
+
 public class Offer {
 
   public static void main(String args[])
@@ -26,13 +28,13 @@ public class Offer {
         .get();
   }
 
-  private static ByteBuffer getContentToSend(String inputString) {
+  private static Bytes getContentToSend(String inputString) {
     byte[] byteArray = inputString.getBytes(StandardCharsets.UTF_8);
     ByteBuffer buffer = ByteBuffer.allocate(byteArray.length);
     buffer.put(byteArray);
     buffer.flip();
     System.out.println("Content to send:" + StandardCharsets.UTF_8.decode(buffer));
-    return buffer;
+    return Bytes.of(buffer.array());
   }
 
   public static void startListeningIncomingPackets(

@@ -178,17 +178,19 @@ public class HistoryNetwork extends BaseNetwork
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
                     this.utpManager
-                        .getContent(nodeRecord, content.getConnectionId())
+                        .findContentRead(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
                               historyDB.saveContent(message.getContentKey(), data);
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
-                            });
+                            })
+                        .exceptionallyCompose(
+                            createDefaultErrorWhenSendingMessage(message.getMessageType()));
                 case Content.CONTENT_TYPE -> {
                   // TODO validate content and key before persisting it or responding
                   // TODO Gossip new content to network -> trigger a lookup: Query X nearest  until
-                  // either content is
+
                   historyDB.saveContent(message.getContentKey(), content.getContent());
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -202,7 +204,7 @@ public class HistoryNetwork extends BaseNetwork
 
                   yield SafeFuture.completedFuture(Optional.of(new FindContentResult(enrs)));
                 }
-                default -> SafeFuture.completedFuture(Optional.of(new FindContentResult()));
+                default -> SafeFuture.completedFuture(Optional.empty());
               };
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
@@ -421,9 +423,8 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(List.of());
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-      int connectionId = new Random().nextInt(65536);
-      SafeFuture.runAsync(
-          () -> this.utpManager.sendContent(nodeRecord, connectionId, content.get()));
+      int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
+
       return new Content(connectionId);
     }
     return new Content(content.get());
@@ -451,17 +452,16 @@ public class HistoryNetwork extends BaseNetwork
       }
       if (contentKeyAccepted.isEmpty()) return new Accept(0, Bytes.of(contentKeysBitArray));
 
-      int connectionId = this.utpManager.generateConnectionId();
-      this.utpManager.acceptRead(
-          srcNode,
-          connectionId,
-          (newContent) -> {
-            if (newContent.size() == contentKeyAccepted.size()) {
-              for (int i = 0; i < newContent.size(); i++) {
-                this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
-              }
-            }
-          });
+      int connectionId =
+          this.utpManager.acceptRead(
+              srcNode,
+              (newContent) -> {
+                if (newContent.size() == contentKeyAccepted.size()) {
+                  for (int i = 0; i < newContent.size(); i++) {
+                    this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
+                  }
+                }
+              });
       return new Accept(connectionId, Bytes.of(contentKeysBitArray));
     } catch (Exception e) {
       LOG.trace("Error when handling Offer Message");

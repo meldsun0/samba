@@ -49,7 +49,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveOkContentConnectionIdTest()
       throws ExecutionException, InterruptedException {
-    when(utpManager.getContent(any(NodeRecord.class), eq(connectionId)))
+    when(utpManager.findContentRead(any(NodeRecord.class), eq(connectionId)))
         .thenReturn(SafeFuture.completedFuture(Bytes.EMPTY));
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createContentConnectionIdBytesResponse(connectionId));
