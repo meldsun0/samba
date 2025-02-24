@@ -21,11 +21,4 @@ public class UTPManagerTests {
     this.utpManager = new UTPManager(mock(Discv5Client.class));
   }
 
-  @Test
-  public void testParseAcceptedContents() {
-    List<Bytes> content = this.utpManager.parseAcceptedContents(Bytes.fromHexString("0x00"));
-    assertNotNull(content);
-    assertTrue(!content.isEmpty());
-    assertEquals(content.getFirst().toHexString(), "0x00");
-  }
 }

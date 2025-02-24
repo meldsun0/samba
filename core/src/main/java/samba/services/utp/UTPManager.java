@@ -20,6 +20,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+@SuppressWarnings("SameNameButDifferent")
 public class UTPManager implements TransportLayer<UTPAddress> {
   protected static final Logger LOG = LogManager.getLogger();
 
@@ -36,12 +37,10 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     this.runAsyncUTP(
         () -> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
-          utpClient
-              .startListening(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.read())
-              .thenAccept(
-                  newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
-              .get();
+          utpClient.startListening(connectionId, new UTPAddress(nodeRecord))
+                  .thenCompose(__ -> utpClient.read())
+                  .thenAccept(newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
+                  .get();
         },
         "acceptRead",
         nodeRecord,
@@ -143,11 +142,16 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     return enr + "-" + connectionId;
   }
 
-  private List<Bytes> parseAcceptedContents(Bytes byteData) {
+  public List<Bytes> parseAcceptedContents(Bytes byteData) {
     List<Bytes> contents = new ArrayList<>();
     int index = 0;
     while (index < byteData.size()) {
-      int sizeOfContent = Util.readUnsignedLeb128(byteData.slice(index, index + 4));
+      int sizeOfContent = Util.readUnsignedLeb128(byteData);
+      if (sizeOfContent == 0) {
+        index++;
+        contents.add(Bytes.fromHexString("0x"));
+        continue;
+      }
       index += Util.getLeb128Length(sizeOfContent);
       Bytes content = byteData.slice(index, sizeOfContent);
       contents.add(content);
