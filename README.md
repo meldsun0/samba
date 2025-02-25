@@ -118,7 +118,13 @@ View logs output and results:
 - discv5_updateNodeInfo, 
 - discv5_getEnr
 
-When running against Hive there should be 33 tests passing. 
+When running against Hive:
+```shell script
+./hive -sim portal -client samba,trin -sim.limit history
+```
+You should be getting: 
+
+![Screen Shot 2025-02-25 at 14 30 30](https://github.com/user-attachments/assets/fc726ab9-5608-459a-a7a6-f3ce9c04851a)
 
 ## Hardware Requirements
 
