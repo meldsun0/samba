@@ -107,6 +107,11 @@ View logs output and results:
 - portal_historyAddEnr
 - portal_historyGetEnr
 - portal_historyDeleteEnr
+- portal_historyFindContent
+- portal_historyFindNodes
+- portal_historyOffer
+- portal_historyLocalContent
+- portal_historyStore
 
 
 - discv5_nodeInfo, 

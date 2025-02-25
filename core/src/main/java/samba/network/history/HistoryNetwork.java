@@ -1,5 +1,7 @@
 package samba.network.history;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -24,18 +26,21 @@ import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
+import samba.util.Util;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
+import org.ethereum.beacon.discovery.util.Functions;
 import org.jetbrains.annotations.NotNull;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
@@ -54,7 +59,7 @@ public class HistoryNetwork extends BaseNetwork
   public HistoryNetwork(
       final Discv5Client client, final HistoryDB historyDB, final UTPManager utpManager) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
-    this.nodeRadius = UInt256.ONE; // TODO must come from argument
+    this.nodeRadius = UInt256.MAX_VALUE.subtract(1L); // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
     this.utpManager = utpManager;
@@ -174,17 +179,19 @@ public class HistoryNetwork extends BaseNetwork
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
                     this.utpManager
-                        .getContent(nodeRecord, content.getConnectionId())
+                        .findContentRead(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
                               historyDB.saveContent(message.getContentKey(), data);
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
-                            });
+                            })
+                        .exceptionallyCompose(
+                            createDefaultErrorWhenSendingMessage(message.getMessageType()));
                 case Content.CONTENT_TYPE -> {
                   // TODO validate content and key before persisting it or responding
                   // TODO Gossip new content to network -> trigger a lookup: Query X nearest  until
-                  // either content is
+
                   historyDB.saveContent(message.getContentKey(), content.getContent());
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -198,21 +205,62 @@ public class HistoryNetwork extends BaseNetwork
 
                   yield SafeFuture.completedFuture(Optional.of(new FindContentResult(enrs)));
                 }
-                default -> SafeFuture.completedFuture(Optional.of(new FindContentResult()));
+                default -> SafeFuture.completedFuture(Optional.empty());
               };
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
 
   @Override
-  public SafeFuture<Optional<Accept>> offer(NodeRecord nodeRecord, Offer message) {
+  public SafeFuture<Optional<Bytes>> offer(
+      NodeRecord nodeRecord, List<Bytes> content, Offer message) {
+    checkArgument(nodeRecord != null, "NodeRecord must not be null");
+    checkArgument(content != null && !content.isEmpty(), "Content must not be empty");
+    checkArgument(
+        message != null && !message.getContentKeys().isEmpty(), "Offer must not be empty");
+    checkArgument(
+        content.size() == message.getContentKeys().size(),
+        "There should be same contentItems and contentKeys");
+
+    // TODO check if this is ok?
+    //    checkArgument(
+    //        this.routingTable.findNode(nodeRecord.getNodeId()).isPresent(),
+    //        "No ENR found for {}",
+    //        nodeRecord.asEnr());
+
     return sendMessage(nodeRecord, message)
         .thenApply(Optional::get)
         .thenCompose(
             acceptMessage -> {
               Accept accept = acceptMessage.getMessage();
-              // TODO create UTP stream using connectionId
-              return SafeFuture.completedFuture(Optional.of(accept));
+              byte[] acceptedContent = accept.getContentKeysByteArray();
+              List<Bytes> contentToOffer =
+                  IntStream.range(0, acceptedContent.length)
+                      .mapToObj(
+                          idx -> {
+                            if (acceptedContent[idx] == 0) return null;
+                            Bytes currentContent = content.get(idx);
+                            // TODO validate if is needed to go to the db.
+                            if (currentContent.isEmpty()) {
+                              Bytes contentKey = message.getContentKeys().get(idx);
+                              return historyDB
+                                  .get(ContentKey.decode(contentKey))
+                                  .orElse(currentContent);
+                            }
+                            return currentContent;
+                          })
+                      .filter(Objects::nonNull)
+                      .map(data -> Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data))
+                      .toList();
+
+              Optional.ofNullable(contentToOffer)
+                  .filter(list -> !list.isEmpty())
+                  .ifPresent(
+                      list ->
+                          utpManager.offerWrite(
+                              nodeRecord, accept.getConnectionId(), Bytes.concatenate(list)));
+
+              return SafeFuture.completedFuture(Optional.of(accept.getContentKeys()));
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
   }
@@ -251,6 +299,11 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public boolean store(Bytes contentKey, Bytes contentValue) {
     return this.historyDB.saveContent(contentKey, contentValue);
+  }
+
+  @Override
+  public Optional<String> getLocalContent(ContentKey contentKey) {
+    return this.historyDB.get(contentKey).map(Bytes::toHexString);
   }
 
   @Override
@@ -377,9 +430,8 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(List.of());
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-      int connectionId = new Random().nextInt(65536);
-      SafeFuture.runAsync(
-          () -> this.utpManager.sendContent(nodeRecord, connectionId, content.get()));
+      int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
+
       return new Content(connectionId);
     }
     return new Content(content.get());
@@ -387,18 +439,41 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
-    BitSet missingContent = new BitSet(offer.getContentKeys().size());
-    //    for (int i = 0; i < offer.getContentKeys().size(); i++) {
-    //        if (!historyDB.contains(offer.getContentKeys().get(i))) {
-    //            missingContent.set(i);
-    //        }
-    //    }
+    try {
+      // TODO validate contentKeys.
+      if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
+      byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
+      List<Bytes> contentKeyAccepted = new ArrayList<>();
+      for (int x = 0; x < offer.getContentKeys().size(); x++) {
+        Bytes contentKey = offer.getContentKeys().get(x);
 
-    int sliceLength = (offer.getContentKeys().size() + 7) / 8;
-    Bytes contentKeysBitList = Bytes.wrap(missingContent.toByteArray()).slice(sliceLength);
-    // int connectionId = UTP.generateConnectionId();
-    Accept accept = new Accept(0, contentKeysBitList);
-    return accept;
+        final int distance = Functions.logDistance(contentKey, this.discv5Client.getNodeId().get());
+        if (UInt256.valueOf(distance).compareTo(this.nodeRadius) >= 0) {
+          LOG.info("ContentKey: {} is outside radius: {}", distance, this.nodeRadius);
+          continue;
+        }
+        if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+          contentKeysBitArray[x] = 1;
+          contentKeyAccepted.add(contentKey);
+        }
+      }
+      if (contentKeyAccepted.isEmpty()) return new Accept(0, Bytes.of(contentKeysBitArray));
+
+      int connectionId =
+          this.utpManager.acceptRead(
+              srcNode,
+              (newContent) -> {
+                if (newContent.size() == contentKeyAccepted.size()) {
+                  for (int i = 0; i < newContent.size(); i++) {
+                    this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
+                  }
+                }
+              });
+      return new Accept(connectionId, Bytes.of(contentKeysBitArray));
+    } catch (Exception e) {
+      LOG.trace("Error when handling Offer Message");
+      return new Accept(0, Bytes.EMPTY);
+    }
   }
 
   private org.apache.tuweni.units.bigints.UInt64 getLocalEnrSeq() {

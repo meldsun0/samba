@@ -2,15 +2,17 @@ package samba.services.utp;
 
 import samba.network.NetworkType;
 import samba.services.discovery.Discv5Client;
+import samba.util.Util;
 import samba.utp.UTPClient;
 import samba.utp.data.UtpPacket;
 import samba.utp.network.TransportLayer;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,52 +20,82 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+@SuppressWarnings("SameNameButDifferent")
 public class UTPManager implements TransportLayer<UTPAddress> {
   protected static final Logger LOG = LogManager.getLogger();
 
-  private Map<String, UTPClient> connections;
-  private Discv5Client discv5Client;
-  private NetworkType networkType = NetworkType.UTP;
+  private final Map<String, UTPClient> connections;
+  private final Discv5Client discv5Client;
 
   public UTPManager(final Discv5Client discv5Client) {
     this.discv5Client = discv5Client;
     this.connections = new ConcurrentHashMap<>();
   }
 
-  public SafeFuture<Bytes> getContent(NodeRecord nodeRecord, int connectionId) {
-    String connectionKey =
-        this.createConnectionKey(nodeRecord.asEnr(), String.valueOf(connectionId));
-    UTPClient utpClient = this.registerClient(connectionKey);
+  public int acceptRead(NodeRecord nodeRecord, Consumer<List<Bytes>> onContentReceived) {
+    int connectionId = UTPClient.generateRandomConnectionId();
+    this.runAsyncUTP(
+        () -> {
+          UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
+          utpClient
+              .startListening(connectionId, new UTPAddress(nodeRecord))
+              .thenCompose(__ -> utpClient.read())
+              .thenAccept(
+                  newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
+              .get();
+        },
+        "acceptRead",
+        nodeRecord,
+        connectionId);
+    return connectionId;
+  }
 
+  public void offerWrite(final NodeRecord nodeRecord, final int connectionId, Bytes content) {
+    this.runAsyncUTP(
+        () -> {
+          UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
+          utpClient
+              .connect(connectionId, new UTPAddress(nodeRecord))
+              .thenCompose(__ -> utpClient.write(content))
+              .get();
+        },
+        "offerWrite",
+        nodeRecord,
+        connectionId);
+  }
+
+  public int foundContentWrite(NodeRecord nodeRecord, Bytes content) {
+    int connectionId = UTPClient.generateRandomConnectionId();
+    this.runAsyncUTP(
+        () -> {
+          UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
+          utpClient
+              .startListening(connectionId, new UTPAddress(nodeRecord))
+              .thenCompose(__ -> utpClient.write(content))
+              .get();
+        },
+        "foundContentWrite",
+        nodeRecord,
+        connectionId);
+    return connectionId;
+  }
+
+  public SafeFuture<Bytes> findContentRead(NodeRecord nodeRecord, int connectionId) {
     return SafeFuture.of(
-        utpClient
-            .connect(connectionId, new UTPAddress(nodeRecord))
-            .thenCompose(__ -> utpClient.read()));
+        () -> {
+          UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
+          return utpClient
+              .connect(connectionId, new UTPAddress(nodeRecord))
+              .thenCompose(__ -> utpClient.read());
+        });
   }
 
-  public void sendContent(NodeRecord nodeRecord, int connectionId, Bytes content) {
+  @Override
+  public void close(long connectionId, UTPAddress transportAddress) {
     String connectionKey =
-        this.createConnectionKey(nodeRecord.asEnr(), String.valueOf(connectionId));
-    UTPClient utpClient = this.registerClient(connectionKey);
-    ByteBuffer buffer = ByteBuffer.allocate(content.size());
-    buffer.put(content.toArray());
-    try {
-      utpClient
-          .startListening(connectionId, new UTPAddress(nodeRecord))
-          .thenCompose(__ -> utpClient.write(buffer))
-          .get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private UTPClient registerClient(String connectionKey) {
-    UTPClient utpClient = new UTPClient(this);
-    if (!connections.containsKey(connectionKey)) {
-      this.connections.put(connectionKey, utpClient);
-      return utpClient;
-    }
-    return null;
+        this.createConnectionKey(
+            transportAddress.getAddress().asEnr(), String.valueOf(connectionId));
+    this.connections.remove(connectionKey);
   }
 
   @Override
@@ -71,9 +103,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     SafeFuture.runAsync(
         () ->
             this.discv5Client.sendDisv5Message(
-                remoteAddress.getAddress(),
-                networkType.getValue(),
-                Bytes.of(packet.toByteArray())));
+                remoteAddress.getAddress(), NetworkType.UTP.getValue(), packet.toBytes()));
   }
 
   public void onUTPMessageReceive(NodeRecord nodeRecord, Bytes response) {
@@ -84,14 +114,6 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     } else {
       LOG.trace("No UTPClient found when receiving packet: {}", utpPacket);
     }
-  }
-
-  @Override
-  public void close(long connectionId, UTPAddress transportAddress) {
-    String connectinKey =
-        this.createConnectionKey(
-            transportAddress.getAddress().asEnr(), String.valueOf(connectionId));
-    this.connections.remove(connectinKey);
   }
 
   private UTPClient getClient(String enr, int connectionId) {
@@ -105,7 +127,77 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     return client;
   }
 
+  private UTPClient registerClient(final NodeRecord nodeRecord, final int connectionId)
+      throws UTPClientRegistrationException {
+    String connectionKey =
+        this.createConnectionKey(nodeRecord.asEnr(), String.valueOf(connectionId));
+    if (!connections.containsKey(connectionKey)) {
+      UTPClient utpClient = new UTPClient(this);
+      this.connections.put(connectionKey, utpClient);
+      return utpClient;
+    }
+    throw new UTPClientRegistrationException(
+        "Client with connection key " + connectionKey + " already registered.");
+  }
+
   private String createConnectionKey(String enr, String connectionId) {
     return enr + "-" + connectionId;
+  }
+
+  public List<Bytes> parseAcceptedContents(Bytes byteData) {
+    List<Bytes> contents = new ArrayList<>();
+    int index = 0;
+    while (index < byteData.size()) {
+      int sizeOfContent = Util.readUnsignedLeb128(byteData);
+      if (sizeOfContent == 0) {
+        index++;
+        contents.add(Bytes.fromHexString("0x"));
+        continue;
+      }
+      index += Util.getLeb128Length(sizeOfContent);
+      Bytes content = byteData.slice(index, sizeOfContent);
+      contents.add(content);
+      index += sizeOfContent;
+    }
+    return contents;
+  }
+
+  private static <V> Function<Throwable, V> defaultUTPErrorLog(
+      String operationName, NodeRecord nodeRecord, int connectionId) {
+    return error -> {
+      defaultUTPErrorLog(operationName, nodeRecord, connectionId, error);
+      return null;
+    };
+  }
+
+  private static void defaultUTPErrorLog(
+      String operationName, NodeRecord nodeRecord, int connectionId, Throwable error) {
+    LOG.trace(
+        "Error {} when {} from {} on connectionId {}",
+        error.getClass().getSimpleName(),
+        operationName,
+        nodeRecord,
+        connectionId,
+        error);
+  }
+
+  private void runAsyncUTP(
+      RunnableUTP task, String operationName, NodeRecord nodeRecord, int connectionId) {
+    SafeFuture.runAsync(() -> executeWithHandling(task, operationName, nodeRecord, connectionId))
+        .exceptionally(defaultUTPErrorLog(operationName, nodeRecord, connectionId));
+  }
+
+  private void executeWithHandling(
+      RunnableUTP task, String operationName, NodeRecord nodeRecord, int connectionId) {
+    try {
+      task.run();
+    } catch (InterruptedException | ExecutionException | UTPClientRegistrationException e) {
+      defaultUTPErrorLog(operationName, nodeRecord, connectionId, e);
+    }
+  }
+
+  @FunctionalInterface
+  interface RunnableUTP {
+    void run() throws InterruptedException, ExecutionException, UTPClientRegistrationException;
   }
 }

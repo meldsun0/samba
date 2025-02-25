@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -60,7 +61,7 @@ public class UTPClient {
     checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
 
-    LOG.info("Start Client receiving from  {}", connectionId);
+    LOG.info("UTP Connecting to  {}", connectionId);
 
     if (!listen.compareAndSet(false, true)) {
       CompletableFuture.failedFuture(
@@ -75,7 +76,8 @@ public class UTPClient {
           buildSYNMessage(
               timeStamper.utpTimeStamp(),
               connectionId,
-              UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L);
+              UtpAlgConfiguration.MAX_PACKET_SIZE * 1000L,
+              this.session.getSequenceNumber());
       sendPacket(message);
       this.session.updateStateOnConnectionInitSuccess();
       startConnectionTimeOutCounter(message);
@@ -90,7 +92,7 @@ public class UTPClient {
       int connectionId, TransportAddress transportAddress) {
     checkNotNull(transportAddress, "Address");
     checkArgument(Utils.isConnectionValid(connectionId), "ConnectionId invalid number");
-    LOG.info("Start server sending to  {}", connectionId);
+    LOG.info("Listening UTP packets on  {}", connectionId);
     if (!listen.compareAndSet(false, true)) {
       CompletableFuture.failedFuture(
           new IllegalStateException(
@@ -104,12 +106,25 @@ public class UTPClient {
   public void receivePacket(UtpPacket utpPacket, TransportAddress transportAddress) {
     LOG.info("[Receiving Packet: " + utpPacket.toString() + "]");
     switch (utpPacket.getMessageType()) {
-      case ST_RESET -> this.stop();
+      case ST_RESET -> this.forceStop();
       case ST_SYN -> handleIncommingConnectionRequest(utpPacket, transportAddress);
       case ST_DATA, ST_STATE -> queuePacket(utpPacket);
       case ST_FIN -> handleFinPacket(utpPacket);
       default -> sendResetPacket();
     }
+  }
+
+  private void forceStop() {
+    if (!listen.compareAndSet(true, false)) {
+      LOG.warn("An attempt to stop an already stopping/stopped UTP server");
+      return;
+    }
+
+    this.session.forceClose();
+    this.transportLayer.close(
+        this.session.getConnectionIdReceiving(), this.session.getRemoteAddress());
+    this.reader.ifPresent(UTPReadingFuture::graceFullInterrupt);
+    this.writer.ifPresent(UTPWritingFuture::graceFullInterrupt);
   }
 
   private void handleIncommingConnectionRequest(
@@ -161,9 +176,9 @@ public class UTPClient {
   }
 
   private void handleConfirmationOfConnection(UtpPacket utpPacket) {
-    if ((utpPacket.getConnectionId() & connectionIdMASK)
-        == this.session.getConnectionIdReceiving()) {
-      this.session.connectionConfirmed(utpPacket.getSequenceNumber());
+    if ((utpPacket.getConnectionId() & connectionIdMASK) == this.session.getConnectionIdReceiving()
+        && this.session.getState() == SessionState.SYN_SENT) {
+      this.session.connectionConfirmed(utpPacket.getSequenceNumber() - 1);
       disableConnectionTimeOutCounter();
       connection.complete(null);
       this.session.printState();
@@ -194,12 +209,14 @@ public class UTPClient {
 
   private void sendResetPacket() {
     // TODO
-    LOG.debug("Sending RST packet MUST BE IMPLEMENTED");
+    LOG.info("Sending RST packet MUST BE IMPLEMENTED");
   }
 
-  public CompletableFuture<Void> write(ByteBuffer buffer) {
+  public CompletableFuture<Void> write(Bytes bytes) {
     return this.connection.thenCompose(
         v -> {
+          ByteBuffer buffer = ByteBuffer.allocate(bytes.size());
+          buffer.put(bytes.toArray());
           this.writer = Optional.of(new UTPWritingFuture(this, buffer, timeStamper));
           return writer.get().startWriting();
         });
@@ -275,7 +292,10 @@ public class UTPClient {
   }
 
   public void sendPacket(UtpPacket packet) throws IOException {
-    this.transportLayer.sendPacket(packet, this.session.getRemoteAddress());
+    if (this.session.getState() != SYN_ACKING_FAILED) {
+      LOG.info("[Sending Packet: " + packet + "]");
+      this.transportLayer.sendPacket(packet, this.session.getRemoteAddress());
+    }
   }
 
   protected void startConnectionTimeOutCounter(UtpPacket synPacket) {
@@ -346,5 +366,10 @@ public class UTPClient {
     } catch (Exception e) {
       LOG.debug("Error when sending Fin Packet");
     }
+  }
+
+  public static int generateRandomConnectionId() {
+    Random random = new Random();
+    return random.nextInt(65535) + 1;
   }
 }

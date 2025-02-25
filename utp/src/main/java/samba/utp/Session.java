@@ -40,6 +40,7 @@ public class Session {
       this.connectionIdReceiving = connectionIdReceiving;
       this.connectionIdSending = connectionIdReceiving + 1;
       this.sequenceNumber = DEF_SEQ_START;
+
     } finally {
       lock.unlock();
     }
@@ -51,7 +52,7 @@ public class Session {
       this.remoteAddress = remoteAddress;
       this.connectionIdReceiving = (connectionId & MASK) + 1;
       this.connectionIdSending = (connectionId & MASK);
-      this.sequenceNumber = Utils.randomSeqNumber();
+      this.sequenceNumber = DEF_SEQ_START;
     } finally {
       lock.unlock();
     }
@@ -80,7 +81,7 @@ public class Session {
   public void printState() {
     String state =
         String.format(
-            "Session [ConnID Sending: %d] [ConnID Recv: %d] [SeqNr. %d] [AckNr: %d] [State: %s]",
+            "Session [ConnID Sending: %d] [ConnID Recv: %d] [SeqNr: %d] [AckNr: %d] [State: %s]",
             connectionIdSending,
             connectionIdReceiving,
             sequenceNumber,
@@ -116,6 +117,16 @@ public class Session {
     lock.lock();
     try {
       this.state = CLOSED;
+      this.sequenceNumber = DEF_SEQ_START;
+    } finally {
+      lock.unlock();
+    }
+  }
+
+  public void forceClose() {
+    lock.lock();
+    try {
+      this.state = SYN_ACKING_FAILED;
       this.sequenceNumber = DEF_SEQ_START;
     } finally {
       lock.unlock();

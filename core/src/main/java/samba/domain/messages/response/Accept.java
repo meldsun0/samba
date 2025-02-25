@@ -15,7 +15,6 @@ public class Accept implements PortalWireMessage {
   private final Bytes contentKeys;
 
   public Accept(int connectionId, Bytes contentKeys) {
-
     // content_keys limit 64
     this.connectionId = connectionId;
     this.contentKeys = contentKeys;
@@ -44,6 +43,10 @@ public class Accept implements PortalWireMessage {
 
   public Bytes getContentKeys() {
     return contentKeys;
+  }
+
+  public byte[] getContentKeysByteArray() {
+    return this.contentKeys.toArray();
   }
 
   @Override

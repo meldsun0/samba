@@ -47,7 +47,8 @@ public class MessageUtil {
         .build();
   }
 
-  public static UtpPacket buildSYNMessage(int timestamp, long connectionId, long advertisedWindow) {
+  public static UtpPacket buildSYNMessage(
+      int timestamp, long connectionId, long advertisedWindow, long seqNumber) {
     return UtpPacket.builder()
         .typeVersion(SYN)
         .sequenceNumber(longToUbyte(1))

@@ -3,15 +3,9 @@ package samba.utp.operations;
 import static samba.utp.data.bytes.UnsignedTypesUtil.MAX_USHORT;
 
 import samba.utp.UtpTimestampedPacketDTO;
-import samba.utp.algo.UtpAlgConfiguration;
 import samba.utp.data.SelectiveAckHeaderExtension;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,8 +21,6 @@ public class SkippedPacketBuffer {
   private final UtpTimestampedPacketDTO[] buffer = new UtpTimestampedPacketDTO[SIZE];
   private final AtomicInteger expectedSequenceNumber = new AtomicInteger(0);
   private final AtomicInteger elementCount = new AtomicInteger(0);
-  private int debug_lastSeqNumber;
-  private int debug_lastPosition;
 
   private static final Logger log = LoggerFactory.getLogger(SkippedPacketBuffer.class);
 
@@ -45,21 +37,17 @@ public class SkippedPacketBuffer {
     try {
       int sequenceNumber = pkt.utpPacket().getSequenceNumber() & 0xFFFF;
       int position = sequenceNumber - expectedSequenceNumber.get();
-      debug_lastSeqNumber = sequenceNumber;
-
       if (position < 0) {
         position = mapOverflowPosition(sequenceNumber);
       }
 
-      debug_lastPosition = position;
       elementCount.incrementAndGet();
 
       try {
         buffer[position] = pkt;
       } catch (ArrayIndexOutOfBoundsException ioobe) {
-        log.error("seq, exp: " + sequenceNumber + " " + expectedSequenceNumber + " ");
+        log.info("seq, exp: " + sequenceNumber + " " + expectedSequenceNumber + " ");
         ioobe.printStackTrace();
-        dumpBuffer("oob: " + ioobe.getMessage());
         throw new IOException();
       }
     } finally {
@@ -173,50 +161,13 @@ public class SkippedPacketBuffer {
   public int getFreeSize() throws IOException {
     lock.lock();
     try {
-      if (SIZE - elementCount.get() < 0) {
-        dumpBuffer("freesize negative");
-      }
+      if (SIZE - elementCount.get() < 0) {}
       if (SIZE - elementCount.get() < 50) {
         return 0;
       }
       return SIZE - elementCount.get() - 1;
     } finally {
       lock.unlock();
-    }
-  }
-
-  private void dumpBuffer(String message) throws IOException {
-    if (UtpAlgConfiguration.DEBUG) {
-      log.debug("dumping buffer");
-      try (RandomAccessFile aFile = new RandomAccessFile("testData/auto/bufferdump.txt", "rw");
-          FileChannel inChannel = aFile.getChannel()) {
-
-        inChannel.truncate(0);
-        ByteBuffer bbuffer = ByteBuffer.allocate(100000);
-        bbuffer.put((new SimpleDateFormat("dd_MM_hh_mm_ss")).format(new Date()).getBytes());
-        bbuffer.put((message + "\n").getBytes());
-        bbuffer.put(("SIZE: " + SIZE + "\n").getBytes());
-        bbuffer.put(("count: " + elementCount.get() + "\n").getBytes());
-        bbuffer.put(("expect: " + expectedSequenceNumber.get() + "\n").getBytes());
-        bbuffer.put(("lastSeq: " + debug_lastSeqNumber + "\n").getBytes());
-        bbuffer.put(("lastPos: " + debug_lastPosition + "\n").getBytes());
-
-        for (int i = 0; i < SIZE; i++) {
-          String seq =
-              (buffer[i] == null)
-                  ? "_; "
-                  : (buffer[i].utpPacket().getSequenceNumber() & 0xFFFF) + "; ";
-          bbuffer.put((i + " -> " + seq).getBytes());
-          if (i % 50 == 0) {
-            bbuffer.put("\n".getBytes());
-          }
-        }
-        log.debug(bbuffer.position() + " " + bbuffer.limit());
-        bbuffer.flip();
-        while (bbuffer.hasRemaining()) {
-          inChannel.write(bbuffer);
-        }
-      }
     }
   }
 }

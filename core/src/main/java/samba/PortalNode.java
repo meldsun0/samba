@@ -6,6 +6,7 @@ import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TI
 import samba.config.PortalRestApiConfig;
 import samba.config.SambaConfiguration;
 import samba.config.StartupLogConfig;
+import samba.config.VersionProvider;
 import samba.metrics.MetricsEndpoint;
 import samba.node.Node;
 import samba.services.MainServiceConfig;
@@ -60,7 +61,8 @@ public class PortalNode implements Node {
                 metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
 
     final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.getPortalRestApiConfig();
-    STATUS_LOG.onStartup("1.0");
+    STATUS_LOG.onStartup(
+        "1.0 " + (VersionProvider.COMMIT_HASH.map(s -> "Commit: " + s).orElse("")));
     STATUS_LOG.startupConfigurations(
         StartupLogConfig.builder()
             .network("")
