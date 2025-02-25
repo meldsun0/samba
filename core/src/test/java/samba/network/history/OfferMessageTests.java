@@ -8,12 +8,14 @@ import static samba.TestHelper.createNodeRecord;
 import samba.domain.content.ContentKey;
 import samba.domain.messages.requests.Offer;
 import samba.domain.messages.response.Accept;
+import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.DefaultContent;
 import samba.util.Util;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -23,23 +25,26 @@ import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.ReflectionUtils;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class OfferMessageTests {
 
-  private HistoryJsonRpcRequests historyNetwork;
+  private HistoryNetwork historyNetwork;
   private HistoryDB historyDB;
   private Discv5Client discv5Client;
   private UTPManager utpManager;
   private NodeRecord nodeRecord;
 
   @BeforeEach
-  public void setUp() {
+  public void setUp() throws IllegalAccessException {
     this.historyDB = mock(HistoryDB.class);
     this.discv5Client = mock(Discv5Client.class);
     this.utpManager = mock(UTPManager.class);
     this.nodeRecord = createNodeRecord();
     this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
+    when(this.discv5Client.getNodeId()).thenReturn(Optional.of(createNodeRecord().getNodeId()));
+    mockRoutingTableFindNode(this.historyNetwork);
   }
 
   @Test
@@ -194,5 +199,20 @@ public class OfferMessageTests {
   private static CompletableFuture<Bytes> createAcceptResponse(
       int connectionId, Bytes contentKeys) {
     return CompletableFuture.completedFuture(new Accept(connectionId, contentKeys).getSszBytes());
+  }
+
+  private void mockRoutingTableFindNode(HistoryNetwork historyNetwork)
+      throws IllegalAccessException {
+    RoutingTable mockedRoutingTable = mock(RoutingTable.class);
+    Field field =
+        ReflectionUtils.findFields(
+                HistoryNetwork.class,
+                f -> f.getName().equals("routingTable"),
+                ReflectionUtils.HierarchyTraversalMode.TOP_DOWN)
+            .get(0);
+    field.setAccessible(true);
+    field.set(historyNetwork, mockedRoutingTable);
+
+    when(mockedRoutingTable.findNode(any(Bytes.class))).thenReturn(Optional.of(createNodeRecord()));
   }
 }

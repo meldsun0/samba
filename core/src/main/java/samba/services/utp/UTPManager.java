@@ -37,10 +37,12 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     this.runAsyncUTP(
         () -> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
-          utpClient.startListening(connectionId, new UTPAddress(nodeRecord))
-                  .thenCompose(__ -> utpClient.read())
-                  .thenAccept(newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
-                  .get();
+          utpClient
+              .startListening(connectionId, new UTPAddress(nodeRecord))
+              .thenCompose(__ -> utpClient.read())
+              .thenAccept(
+                  newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
+              .get();
         },
         "acceptRead",
         nodeRecord,

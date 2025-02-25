@@ -38,6 +38,8 @@ public class HandleOfferMessageTests {
     this.utpManager = mock(UTPManager.class);
     this.nodeRecord = createNodeRecord();
     this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
+
+    when(this.discv5Client.getNodeId()).thenReturn(Optional.of(createNodeRecord().getNodeId()));
   }
 
   @Test

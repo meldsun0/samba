@@ -40,6 +40,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
+import org.ethereum.beacon.discovery.util.Functions;
 import org.jetbrains.annotations.NotNull;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
@@ -58,7 +59,7 @@ public class HistoryNetwork extends BaseNetwork
   public HistoryNetwork(
       final Discv5Client client, final HistoryDB historyDB, final UTPManager utpManager) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
-    this.nodeRadius = UInt256.ONE; // TODO must come from argument
+    this.nodeRadius = UInt256.MAX_VALUE.subtract(1L); // TODO must come from argument
     this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
     this.historyDB = historyDB;
     this.utpManager = utpManager;
@@ -220,6 +221,12 @@ public class HistoryNetwork extends BaseNetwork
     checkArgument(
         content.size() == message.getContentKeys().size(),
         "There should be same contentItems and contentKeys");
+
+    // TODO check if this is ok?
+    //    checkArgument(
+    //        this.routingTable.findNode(nodeRecord.getNodeId()).isPresent(),
+    //        "No ENR found for {}",
+    //        nodeRecord.asEnr());
 
     return sendMessage(nodeRecord, message)
         .thenApply(Optional::get)
@@ -433,18 +440,18 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
     try {
+      // TODO validate contentKeys.
       if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
       byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
       List<Bytes> contentKeyAccepted = new ArrayList<>();
       for (int x = 0; x < offer.getContentKeys().size(); x++) {
         Bytes contentKey = offer.getContentKeys().get(x);
 
-        //      double d = distance(cid, nodeId); // Example: implement the 'distance' method
-        //      if (d >= nodeRadius) {
-        //        log("OFFER", "Content key: " + toHexString(cid) + " is outside radius.\nd=" + d +
-        // "\nr=" + nodeRadius);
-        //        continue;
-        //      }
+        final int distance = Functions.logDistance(contentKey, this.discv5Client.getNodeId().get());
+        if (UInt256.valueOf(distance).compareTo(this.nodeRadius) >= 0) {
+          LOG.info("ContentKey: {} is outside radius: {}", distance, this.nodeRadius);
+          continue;
+        }
         if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
           contentKeysBitArray[x] = 1;
           contentKeyAccepted.add(contentKey);
