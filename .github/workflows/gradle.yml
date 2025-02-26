@@ -33,6 +33,8 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   dependency-submission:
 
