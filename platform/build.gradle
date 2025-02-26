@@ -35,7 +35,6 @@ dependencies {
     api project(':core')
     api project(':server-json-rpc')
     api project(':storage-rocksdb')
-    api project(':utp')
     api project(':execution-history-network')
     api project(':execution-state-network')
   }
