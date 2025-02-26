@@ -57,6 +57,13 @@ configure(allprojects - project(':platform')) {
     maven { url "https://hyperledger.jfrog.io/artifactory/besu-maven/" }
     maven { url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/" }
     maven { url 'https://repo.eclipse.org/content/repositories/releases/' }
+    maven {
+      url = uri("https://maven.pkg.github.com/meldsun0/utp")
+      credentials {
+        username = System.getenv("GITHUB_ACTOR")
+        password = System.getenv("GITHUB_TOKEN")
+      }
+    }
   }
 
   dependencies {
