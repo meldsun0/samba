@@ -155,7 +155,7 @@ subprojects {
     options.fork = true
     options.incremental = true
     options.compilerArgs.remove('-Werror')
-    options.errorprone.disableWarningsInGeneratedCode = true
+    options.compilerArgs += ['-Xlint:-unchecked']
   }
 
 
