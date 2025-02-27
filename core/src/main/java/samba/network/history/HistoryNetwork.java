@@ -463,9 +463,10 @@ public class HistoryNetwork extends BaseNetwork
           this.utpManager.acceptRead(
               srcNode,
               (newContent) -> {
-                if (newContent.size() == contentKeyAccepted.size()) {
-                  for (int i = 0; i < newContent.size(); i++) {
-                    this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
+                List<Bytes> parsedContent = Util.parseAcceptedContents(newContent);
+                if (parsedContent.size() == contentKeyAccepted.size()) {
+                  for (int i = 0; i < parsedContent.size(); i++) {
+                    this.historyDB.saveContent(contentKeyAccepted.get(i), parsedContent.get(i));
                   }
                 }
               });

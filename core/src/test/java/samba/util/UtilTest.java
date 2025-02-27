@@ -1,6 +1,9 @@
 package samba.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
@@ -47,5 +50,45 @@ public class UtilTest {
     encoded = Util.writeUnsignedLeb128(value);
     decoded = Util.readUnsignedLeb128(encoded);
     assertEquals(value, decoded, "Decoded value should match original value for 0x7FFFFFFF");
+  }
+
+  @Test
+  public void testParseValidContent() {
+    Bytes byteData = Bytes.fromHexString("0x050102030405"); // Example with valid LEB128 encoding
+    List<Bytes> contents = Util.parseAcceptedContents(byteData);
+
+    assertEquals(1, contents.size());
+    assertEquals(Bytes.fromHexString("0x0102030405"), contents.get(0));
+  }
+
+  @Test
+  public void testParseZeroLengthContent() {
+    Bytes byteData = Bytes.fromHexString("0x00"); // Zero-length content
+    List<Bytes> contents = Util.parseAcceptedContents(byteData);
+
+    assertEquals(1, contents.size());
+    assertEquals(Bytes.fromHexString("0x"), contents.get(0));
+  }
+
+  @Test
+  public void testParseMultipleContents() {
+    Bytes byteData =
+        Bytes.concatenate(
+            Util.writeUnsignedLeb128(DefaultContent.value1.size()),
+            DefaultContent.value1,
+            Util.writeUnsignedLeb128(DefaultContent.value2.size()),
+            DefaultContent.value2);
+
+    List<Bytes> contents = Util.parseAcceptedContents(byteData);
+
+    assertEquals(2, contents.size());
+    assertEquals(DefaultContent.value1, contents.get(0));
+    assertEquals(DefaultContent.value2, contents.get(1));
+  }
+
+  @Test
+  public void testParseInvalidLeb128() {
+    Bytes byteData = Bytes.fromHexString("0xFF"); // Invalid LEB128 encoding
+    assertThrows(Exception.class, () -> Util.parseAcceptedContents(byteData));
   }
 }
