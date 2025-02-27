@@ -45,6 +45,7 @@ public class OfferMessageTests {
     this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
     when(this.discv5Client.getNodeId()).thenReturn(Optional.of(createNodeRecord().getNodeId()));
     mockRoutingTableFindNode(this.historyNetwork);
+    when(historyDB.isAvailable()).thenReturn(true);
   }
 
   @Test

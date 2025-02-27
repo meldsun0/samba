@@ -524,4 +524,9 @@ public class HistoryNetwork extends BaseNetwork
   public Optional<Bytes> getContent(ContentKey contentKey) {
     return this.historyDB.get(contentKey);
   }
+
+  @Override
+  protected boolean isStoreAvailable() {
+    return this.historyDB.isAvailable();
+  }
 }

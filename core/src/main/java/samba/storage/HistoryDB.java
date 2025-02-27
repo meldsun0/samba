@@ -19,4 +19,6 @@ public interface HistoryDB {
   Optional<ContentReceipts> getReceiptsByBlockHash(Bytes blockHash);
 
   Optional<Bytes> get(ContentKey contentKey);
+
+  boolean isAvailable();
 }

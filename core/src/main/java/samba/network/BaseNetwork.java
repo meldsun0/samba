@@ -60,9 +60,7 @@ public abstract class BaseNetwork implements Network {
         && this.discv5Client.getNodeId().get().equals(node.getNodeId());
   }
 
-  private boolean isStoreAvailable() {
-    return true; // TODO validate store availability
-  }
+  protected abstract boolean isStoreAvailable();
 
   private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
     portalWireMessage.ifPresent(

@@ -44,6 +44,7 @@ public class FindContentMessageTests {
     this.utpManager = mock(UTPManager.class);
     this.nodeRecord = createNodeRecord();
     this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
+    when(historyDB.isAvailable()).thenReturn(true);
   }
 
   @Test

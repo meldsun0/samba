@@ -29,6 +29,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
@@ -45,6 +46,13 @@ public class PingMessageTests {
       new ErrorExtension(ErrorType.FAILED_TO_DECODE.getErrorCode()).getSszBytes();
   private static final Bytes payloadExtensionNotSupported =
       new ErrorExtension(ErrorType.EXTENSION_NOT_SUPPORTED.getErrorCode()).getSszBytes();
+  private HistoryDB historyDB;
+
+  @BeforeEach
+  public void setUp() {
+    this.historyDB = mock(HistoryDB.class);
+    when(historyDB.isAvailable()).thenReturn(true);
+  }
 
   @Test
   public void
@@ -56,7 +64,7 @@ public class PingMessageTests {
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(discv5Client, this.historyDB, mock(UTPManager.class));
 
     NodeRecord nodeRecord = createNodeRecord();
     Optional<Pong> pong =
@@ -79,7 +87,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(discv5Client, this.historyDB, mock(UTPManager.class));
     NodeRecord nodeRecord = createNodeRecord();
 
     Optional<Pong> pong =
@@ -102,7 +110,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(discv5Client, this.historyDB, mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
     Ping pingMessage = createPingMessage(UInt16.ZERO, payloadClientInfo);
 
@@ -125,7 +133,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(discv5Client, this.historyDB, mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
 
     Pong pong =
@@ -146,7 +154,7 @@ public class PingMessageTests {
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
 
     HistoryNetwork historyNetwork =
-        new HistoryNetwork(discv5Client, mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(discv5Client, this.historyDB, mock(UTPManager.class));
     NodeRecord nodeRecord = TestHelper.createNodeRecord();
 
     Pong pong =
