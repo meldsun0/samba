@@ -3,7 +3,10 @@ package samba.domain.messages;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import samba.domain.messages.requests.*;
+import samba.domain.messages.requests.FindContent;
+import samba.domain.messages.requests.FindNodes;
+import samba.domain.messages.requests.Offer;
+import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Accept;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;

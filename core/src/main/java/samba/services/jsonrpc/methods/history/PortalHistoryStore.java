@@ -12,7 +12,7 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryStore implements JsonRpcMethod {
 
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryJsonRpcRequests historyJsonRpcRequests;
 
   public PortalHistoryStore(final HistoryJsonRpcRequests historyJsonRpcRequests) {
     this.historyJsonRpcRequests = historyJsonRpcRequests;

@@ -2,7 +2,10 @@ package samba.domain.dht;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static samba.domain.dht.BucketEntry.MIN_MILLIS_BETWEEN_PINGS;
 
 import samba.StubClock;

@@ -4,7 +4,7 @@ import samba.network.NetworkType;
 import samba.services.discovery.Discv5Client;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;

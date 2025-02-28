@@ -1,7 +1,15 @@
 package samba.utp;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPClientRegistrationException;
@@ -48,7 +56,7 @@ public class UTPManagerTests {
 
     ArgumentCaptor<Bytes> captor = ArgumentCaptor.forClass(Bytes.class);
     verify(contentConsumer, timeout(1000)).accept(captor.capture());
-    assertTrue(captor.getValue().equals(Bytes.of(1, 2, 3)));
+    assertEquals(captor.getValue(), Bytes.of(1, 2, 3));
   }
 
   @Test

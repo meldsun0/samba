@@ -26,7 +26,16 @@ import samba.services.jsonrpc.methods.ClientVersion;
 import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
 import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
 import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
-import samba.services.jsonrpc.methods.history.*;
+import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryDeleteEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryFindContent;
+import samba.services.jsonrpc.methods.history.PortalHistoryFindNodes;
+import samba.services.jsonrpc.methods.history.PortalHistoryGetContent;
+import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
+import samba.services.jsonrpc.methods.history.PortalHistoryLocalContent;
+import samba.services.jsonrpc.methods.history.PortalHistoryOffer;
+import samba.services.jsonrpc.methods.history.PortalHistoryPing;
+import samba.services.jsonrpc.methods.history.PortalHistoryStore;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryRocksDB;
 

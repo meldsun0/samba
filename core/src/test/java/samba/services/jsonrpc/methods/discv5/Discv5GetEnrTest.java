@@ -6,7 +6,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.jsonrpc.reponse.*;
+import samba.jsonrpc.reponse.JsonRpcErrorResponse;
+import samba.jsonrpc.reponse.JsonRpcRequest;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
+import samba.jsonrpc.reponse.RpcErrorType;
 import samba.services.discovery.Discv5Client;
 
 import java.util.Optional;
@@ -53,8 +58,6 @@ public class Discv5GetEnrTest {
 
   @Test
   public void shouldReturnInvalidResult() {
-    final String enr =
-        "enr:-LS4QOhHz1hd6Sg6dAtYL1XDsMN-8Quk0dmH_RhY50nVAGApdpEcK15YxNZhhDFIqNAACi8E3H1GIbtKgQsaM2TDVkyEZ1t3LGOqdCBjMjhjMzFmODViNTU4NDM0MWE0ZDQ0NTliODg2M2VjYThkOTRhY2Q2gmlkgnY0gmlwhKwRAAWJc2VjcDI1NmsxoQLv0EURHW2Rbcuk5hmsN7ZjorMOktgSBDB6n_kYOo-wc4N1ZHCCIzE";
     final String nodeId = "0xbb19e64f21283fe54021902822ff6ea0132568be";
     final JsonRpcRequestContext request =
         new JsonRpcRequestContext(

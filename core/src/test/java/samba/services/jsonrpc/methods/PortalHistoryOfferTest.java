@@ -3,16 +3,21 @@ package samba.services.jsonrpc.methods;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.domain.messages.requests.Offer;
-import samba.jsonrpc.reponse.*;
+import samba.jsonrpc.reponse.JsonRpcErrorResponse;
+import samba.jsonrpc.reponse.JsonRpcRequest;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
+import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
 import samba.services.jsonrpc.methods.history.PortalHistoryOffer;
 import samba.util.DefaultContent;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -55,7 +60,7 @@ public class PortalHistoryOfferTest {
                 PORTAL_HISTORY_OFFER,
                 new Object[] {enr, new String[][] {keyValue1, keyValue2}}));
 
-    when(historyJsonRpc.offer(any(NodeRecord.class), any(List.class), any(Offer.class)))
+    when(historyJsonRpc.offer(any(NodeRecord.class), anyList(), any(Offer.class)))
         .thenReturn(
             SafeFuture.completedFuture(Optional.of(Bytes.concatenate(Bytes.of(1), Bytes.of(1)))));
 
@@ -81,7 +86,7 @@ public class PortalHistoryOfferTest {
                 PORTAL_HISTORY_OFFER,
                 new Object[] {enr, new String[][] {keyValue1, keyValue2}}));
 
-    when(historyJsonRpc.offer(any(NodeRecord.class), any(List.class), any(Offer.class)))
+    when(historyJsonRpc.offer(any(NodeRecord.class), anyList(), any(Offer.class)))
         .thenReturn(
             SafeFuture.completedFuture(Optional.of(Bytes.concatenate(Bytes.of(1), Bytes.of(1)))));
 
@@ -105,7 +110,7 @@ public class PortalHistoryOfferTest {
                 PORTAL_HISTORY_OFFER,
                 new Object[] {enr, new String[][] {keyValue1, keyValue2}}));
 
-    when(historyJsonRpc.offer(any(NodeRecord.class), any(List.class), any(Offer.class)))
+    when(historyJsonRpc.offer(any(NodeRecord.class), anyList(), any(Offer.class)))
         .thenReturn(
             SafeFuture.completedFuture(Optional.of(Bytes.concatenate(Bytes.of(1), Bytes.of(1)))));
 
@@ -130,7 +135,7 @@ public class PortalHistoryOfferTest {
                 PORTAL_HISTORY_OFFER,
                 new Object[] {enr, new String[][] {keyValue1, keyValue2}}));
 
-    when(historyJsonRpc.offer(any(NodeRecord.class), any(List.class), any(Offer.class)))
+    when(historyJsonRpc.offer(any(NodeRecord.class), anyList(), any(Offer.class)))
         .thenReturn(SafeFuture.completedFuture(Optional.empty()));
 
     JsonRpcResponse actual = method.response(request);

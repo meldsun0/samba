@@ -3,7 +3,9 @@ package samba.domain.dht;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static samba.domain.dht.BucketEntry.*;
+import static samba.domain.dht.BucketEntry.MIN_MILLIS_BETWEEN_PINGS;
+import static samba.domain.dht.BucketEntry.NEVER;
+import static samba.domain.dht.BucketEntry.PING_TIMEOUT_MILLIS;
 
 import samba.TestHelper;
 

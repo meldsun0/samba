@@ -14,7 +14,8 @@
  */
 package samba.jsonrpc;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public class NetworkUtility {
 
