@@ -1,5 +1,8 @@
 package samba.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.tuweni.bytes.Bytes;
 
 public class Util {
@@ -42,5 +45,23 @@ public class Util {
       length++;
     }
     return length;
+  }
+
+  public static List<Bytes> parseAcceptedContents(Bytes byteData) {
+    List<Bytes> contents = new ArrayList<>();
+    int index = 0;
+    while (index < byteData.size()) {
+      int sizeOfContent = Util.readUnsignedLeb128(byteData.slice(index));
+      if (sizeOfContent == 0) {
+        index++;
+        contents.add(Bytes.fromHexString("0x"));
+        continue;
+      }
+      index += Util.getLeb128Length(sizeOfContent);
+      Bytes content = byteData.slice(index, sizeOfContent);
+      contents.add(content);
+      index += sizeOfContent;
+    }
+    return contents;
   }
 }

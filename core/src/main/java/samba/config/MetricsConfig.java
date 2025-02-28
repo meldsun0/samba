@@ -16,7 +16,11 @@ package samba.config;
 import samba.metrics.SambaMetricCategory;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 import org.hyperledger.besu.metrics.StandardMetricCategory;
@@ -103,13 +107,13 @@ public class MetricsConfig {
   public static final class MetricsConfigBuilder {
 
     private boolean metricsEnabled = true;
-    private int metricsPort = DEFAULT_METRICS_PORT;
+    private final int metricsPort = DEFAULT_METRICS_PORT;
     private String metricsInterface = DEFAULT_METRICS_INTERFACE;
     private Set<MetricCategory> metricsCategories = DEFAULT_METRICS_CATEGORIES;
     private List<String> metricsHostAllowlist = DEFAULT_METRICS_HOST_ALLOWLIST;
     private URL metricsPublishEndpoint = null;
-    private int metricsPublishInterval = DEFAULT_METRICS_PUBLICATION_INTERVAL;
-    private int idleTimeoutSeconds = DEFAULT_IDLE_TIMEOUT_SECONDS;
+    private final int metricsPublishInterval = DEFAULT_METRICS_PUBLICATION_INTERVAL;
+    private final int idleTimeoutSeconds = DEFAULT_IDLE_TIMEOUT_SECONDS;
 
     private MetricsConfigBuilder() {}
 

@@ -13,7 +13,7 @@
 
 package samba.services.api.endpoints.health;
 
-import static tech.pegasys.teku.infrastructure.http.HttpStatusCodes.*;
+import static tech.pegasys.teku.infrastructure.http.HttpStatusCodes.SC_OK;
 import static tech.pegasys.teku.infrastructure.http.RestApiConstants.TAG_NODE;
 
 import java.util.Optional;

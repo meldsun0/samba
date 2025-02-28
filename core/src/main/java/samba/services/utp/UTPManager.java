@@ -2,10 +2,9 @@ package samba.services.utp;
 
 import samba.network.NetworkType;
 import samba.services.discovery.Discv5Client;
-import samba.util.Util;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
@@ -32,7 +31,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     this.connections = new ConcurrentHashMap<>();
   }
 
-  public int acceptRead(NodeRecord nodeRecord, Consumer<List<Bytes>> onContentReceived) {
+  public int acceptRead(NodeRecord nodeRecord, Consumer<Bytes> onContentReceived) {
     int connectionId = UTPClient.generateRandomConnectionId();
     this.runAsyncUTP(
         () -> {
@@ -40,8 +39,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
           utpClient
               .startListening(connectionId, new UTPAddress(nodeRecord))
               .thenCompose(__ -> utpClient.read())
-              .thenAccept(
-                  newContent -> onContentReceived.accept(this.parseAcceptedContents(newContent)))
+              .thenAccept(onContentReceived)
               .get();
         },
         "acceptRead",
@@ -127,7 +125,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     return client;
   }
 
-  private UTPClient registerClient(final NodeRecord nodeRecord, final int connectionId)
+  public UTPClient registerClient(final NodeRecord nodeRecord, final int connectionId)
       throws UTPClientRegistrationException {
     String connectionKey =
         this.createConnectionKey(nodeRecord.asEnr(), String.valueOf(connectionId));
@@ -142,24 +140,6 @@ public class UTPManager implements TransportLayer<UTPAddress> {
 
   private String createConnectionKey(String enr, String connectionId) {
     return enr + "-" + connectionId;
-  }
-
-  public List<Bytes> parseAcceptedContents(Bytes byteData) {
-    List<Bytes> contents = new ArrayList<>();
-    int index = 0;
-    while (index < byteData.size()) {
-      int sizeOfContent = Util.readUnsignedLeb128(byteData);
-      if (sizeOfContent == 0) {
-        index++;
-        contents.add(Bytes.fromHexString("0x"));
-        continue;
-      }
-      index += Util.getLeb128Length(sizeOfContent);
-      Bytes content = byteData.slice(index, sizeOfContent);
-      contents.add(content);
-      index += sizeOfContent;
-    }
-    return contents;
   }
 
   private static <V> Function<Throwable, V> defaultUTPErrorLog(

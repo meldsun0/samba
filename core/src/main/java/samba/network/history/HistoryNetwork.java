@@ -28,7 +28,10 @@ import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.Util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -463,9 +466,10 @@ public class HistoryNetwork extends BaseNetwork
           this.utpManager.acceptRead(
               srcNode,
               (newContent) -> {
-                if (newContent.size() == contentKeyAccepted.size()) {
-                  for (int i = 0; i < newContent.size(); i++) {
-                    this.historyDB.saveContent(contentKeyAccepted.get(i), newContent.get(i));
+                List<Bytes> parsedContent = Util.parseAcceptedContents(newContent);
+                if (parsedContent.size() == contentKeyAccepted.size()) {
+                  for (int i = 0; i < parsedContent.size(); i++) {
+                    this.historyDB.saveContent(contentKeyAccepted.get(i), parsedContent.get(i));
                   }
                 }
               });
@@ -523,5 +527,10 @@ public class HistoryNetwork extends BaseNetwork
   // TODO THIS MUST BE REFACTORED.
   public Optional<Bytes> getContent(ContentKey contentKey) {
     return this.historyDB.get(contentKey);
+  }
+
+  @Override
+  protected boolean isStoreAvailable() {
+    return this.historyDB.isAvailable();
   }
 }

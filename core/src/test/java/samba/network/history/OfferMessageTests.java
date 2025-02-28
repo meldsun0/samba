@@ -1,8 +1,15 @@
 package samba.network.history;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static samba.TestHelper.createNodeRecord;
 
 import samba.domain.content.ContentKey;
@@ -45,6 +52,7 @@ public class OfferMessageTests {
     this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
     when(this.discv5Client.getNodeId()).thenReturn(Optional.of(createNodeRecord().getNodeId()));
     mockRoutingTableFindNode(this.historyNetwork);
+    when(historyDB.isAvailable()).thenReturn(true);
   }
 
   @Test

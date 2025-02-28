@@ -6,7 +6,9 @@ import samba.metrics.SambaMetricCategory;
 import samba.util.MultiaddrUtil;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 

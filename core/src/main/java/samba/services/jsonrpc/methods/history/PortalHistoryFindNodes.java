@@ -3,10 +3,16 @@ package samba.services.jsonrpc.methods.history;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.response.Nodes;
 import samba.jsonrpc.config.RpcMethod;
-import samba.jsonrpc.reponse.*;
+import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.reponse.JsonRpcParameter;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.HistoryJsonRpcRequests;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -16,7 +22,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 public class PortalHistoryFindNodes implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryJsonRpcRequests historyJsonRpcRequests;
 
   public PortalHistoryFindNodes(HistoryJsonRpcRequests historyJsonRpcRequests) {
     this.historyJsonRpcRequests = historyJsonRpcRequests;

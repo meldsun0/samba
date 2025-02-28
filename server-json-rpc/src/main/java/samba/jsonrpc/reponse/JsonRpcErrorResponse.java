@@ -14,7 +14,8 @@
  */
 package samba.jsonrpc.reponse;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;

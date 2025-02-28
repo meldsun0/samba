@@ -169,6 +169,11 @@ public class HistoryRocksDB implements HistoryDB {
     };
   }
 
+  @Override
+  public boolean isAvailable() {
+    return !this.rocksDBInstance.isClosed();
+  }
+
   private void save(Segment segment, Bytes key, Bytes content) {
     checkArgument(
         !key.isEmpty(), "Key should have more than 1 byte when persisting {}", segment.getName());

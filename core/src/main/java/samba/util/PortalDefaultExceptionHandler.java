@@ -2,7 +2,6 @@ package samba.util;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
-import java.nio.channels.ClosedChannelException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,13 +37,5 @@ public final class PortalDefaultExceptionHandler
 
   private void handleException(final Throwable exception, final String subscriberDescription) {
     LOG.debug("Shutting down", exception);
-  }
-
-  private boolean isExpectedNettyError(final Throwable exception) {
-    return exception instanceof ClosedChannelException;
-  }
-
-  private static boolean isSpecFailure(final Throwable exception) {
-    return exception instanceof IllegalArgumentException;
   }
 }

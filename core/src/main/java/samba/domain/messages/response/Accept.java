@@ -1,6 +1,7 @@
 package samba.domain.messages.response;
 
-import samba.domain.messages.*;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import samba.schema.messages.ssz.containers.AcceptContainer;
 
 import org.apache.tuweni.bytes.Bytes;

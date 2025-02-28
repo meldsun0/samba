@@ -7,7 +7,9 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -176,10 +178,10 @@ public class DiscoveryConfig {
 
   public static class Builder {
 
-    private int listenUDPPortIPv4 = DEFAULT_UDP_PORT_IPV4;
-    private int listenTCPPortIPv4 = DEFAULT_TCP_PORT_IPV4;
-    private int listenUDPPortIpv6 = DEFAULT_UDP_PORT_IPV6;
-    private int listenTCPPortIpv6 = DEFAULT_TCP_PORT_IPV6;
+    private final int listenUDPPortIPv4 = DEFAULT_UDP_PORT_IPV4;
+    private final int listenTCPPortIPv4 = DEFAULT_TCP_PORT_IPV4;
+    private final int listenUDPPortIpv6 = DEFAULT_UDP_PORT_IPV6;
+    private final int listenTCPPortIpv6 = DEFAULT_TCP_PORT_IPV6;
 
     private List<NodeRecord> bootnodes = List.of();
     private List<String> networkInterfaces = DEFAULT_P2P_INTERFACE;

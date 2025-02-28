@@ -2,7 +2,8 @@ package samba.domain.messages.requests;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import samba.domain.messages.*;
+import samba.domain.messages.MessageType;
+import samba.domain.messages.PortalWireMessage;
 import samba.domain.types.unsigned.UInt16;
 import samba.schema.messages.ssz.containers.PingContainer;
 

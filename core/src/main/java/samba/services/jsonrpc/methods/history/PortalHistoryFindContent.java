@@ -2,7 +2,11 @@ package samba.services.jsonrpc.methods.history;
 
 import samba.domain.messages.requests.FindContent;
 import samba.jsonrpc.config.RpcMethod;
-import samba.jsonrpc.reponse.*;
+import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.reponse.JsonRpcParameter;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.HistoryJsonRpcRequests;
 import samba.services.jsonrpc.methods.results.FindContentResult;
 
@@ -15,7 +19,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 public class PortalHistoryFindContent implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryJsonRpcRequests historyJsonRpcRequests;
 
   public PortalHistoryFindContent(HistoryJsonRpcRequests historyJsonRpcRequests) {
     this.historyJsonRpcRequests = historyJsonRpcRequests;

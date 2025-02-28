@@ -17,13 +17,19 @@ package samba.timeout;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import samba.jsonrpc.config.ContextKey;
 import samba.jsonrpc.config.TimeoutOptions;
 import samba.jsonrpc.handler.TimeoutHandler;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.ImmutableMap;

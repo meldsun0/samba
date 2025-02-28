@@ -14,12 +14,18 @@
  */
 package samba.jsonrpc.config;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import com.google.common.base.MoreObjects;
 import lombok.Getter;
 import lombok.Setter;
 
+@SuppressWarnings("SameNameButDifferent")
 public class JsonRpcConfiguration {
   public static final String DEFAULT_JSON_RPC_HOST = "127.0.0.1";
   public static final int DEFAULT_JSON_RPC_PORT = 8545;
