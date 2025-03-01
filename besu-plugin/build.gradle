@@ -1,0 +1,64 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.3'
+    id 'java'
+}
+
+group = 'samba.besu-plugin'
+version = '1.0.0'
+
+allprojects {
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://hyperledger.jfrog.io/artifactory/besu-maven/"
+            content { includeGroupByRegex('org\\.hyperledger\\.besu\\..*')}
+        }
+        mavenCentral()
+        maven {
+            url "https://artifacts.consensys.net/public/maven/maven/"
+            content { includeGroupByRegex('tech\\.pegasys($|\\..*)')}
+        }
+        maven {
+            url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/"
+            content { includeGroupByRegex('io\\.libp2p($|\\..*)') }
+        }
+        maven {
+            url "https://hyperledger.jfrog.io/artifactory/besu-maven/"
+            content { includeGroupByRegex('org\\.hyperledger\\.besu($|\\..*)') }
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+
+    dependencies {
+        // annotationProcessor generates the file META-INF/services/org.hyperledger.besu.plugin.BesuPlugin
+        annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
+        compileOnly 'com.google.auto.service:auto-service-annotations:1.0.1'
+        compileOnly 'com.google.guava:guava:31.1-jre'
+
+        implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
+        implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
+
+        implementation 'org.hyperledger.besu:plugin-api:24.12.1'
+        implementation 'info.picocli:picocli:4.7.1'
+
+
+
+        testImplementation 'org.assertj:assertj-core:3.24.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
+        testImplementation 'org.assertj:assertj-core:3.24.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.2'
+        testImplementation 'org.mockito:mockito-core:4.11.0'
+        testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
+    }
+    test {
+        useJUnitPlatform()
+    }
+}
+project(':core') {
+    dependencies {
+        implementation project(':service')
+    }
+}

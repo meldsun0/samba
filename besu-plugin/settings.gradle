@@ -1,0 +1,2 @@
+rootProject.name = 'besu-samba-plugin'
+include 'core', 'service'
