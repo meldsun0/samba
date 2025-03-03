@@ -40,6 +40,13 @@ git clone https://github.com/meldsun0/samba
 cd samba && ./gradlew
 
 ```
+Add environment variables:
+
+```shell script
+export GITHUB_ACTOR=
+export GITHUB_TOKEN=
+
+```
 
 After a successful build, distribution packages are available in `build/distributions`.
 
