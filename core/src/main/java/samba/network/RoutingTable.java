@@ -1,6 +1,7 @@
 package samba.network;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -18,6 +19,8 @@ public interface RoutingTable {
   Optional<NodeRecord> findNode(Bytes nodeId);
 
   Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey);
+
+  Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count);
 
   Stream<NodeRecord> getNodes(final int distance);
 

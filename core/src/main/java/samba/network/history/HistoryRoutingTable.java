@@ -7,7 +7,9 @@ import samba.network.RoutingTable;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -89,6 +91,17 @@ public class HistoryRoutingTable implements RoutingTable {
     return radiusMap.entrySet().stream()
         .min(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
         .flatMap(entry -> nodeTable.getNode(entry.getKey()));
+  }
+
+  @Override
+  public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count) {
+    return radiusMap.entrySet().stream()
+        .sorted(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
+        .limit(count)
+        .map(entry -> nodeTable.getNode(entry.getKey()))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(Collectors.toSet());
   }
 
   private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {

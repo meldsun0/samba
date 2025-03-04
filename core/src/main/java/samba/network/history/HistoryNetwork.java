@@ -24,6 +24,7 @@ import samba.network.NetworkType;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
+import samba.services.search.RecursiveLookupTaskFindContent;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.Util;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -524,9 +526,20 @@ public class HistoryNetwork extends BaseNetwork
     };
   }
 
-  // TODO THIS MUST BE REFACTORED.
-  public Optional<Bytes> getContent(ContentKey contentKey) {
-    return this.historyDB.get(contentKey);
+  public CompletableFuture<Optional<FindContentResult>> getContent(
+      ContentKey contentKey, int timeout) {
+    RecursiveLookupTaskFindContent task =
+        new RecursiveLookupTaskFindContent(
+            this,
+            contentKey.getSszBytes(),
+            this.discv5Client.getHomeNodeRecord().getNodeId(),
+            getFoundNodes(contentKey),
+            timeout);
+    return task.execute();
+  }
+
+  private Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
+    return this.routingTable.findClosestNodesToContentKey(contentKey.getSszBytes(), 10);
   }
 
   @Override
