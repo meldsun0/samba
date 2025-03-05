@@ -1,0 +1,19 @@
+defaultTasks 'build', 'checkLicense', 'javadoc', 'artifacts'
+
+def buildAliases = [
+        'dev': [
+                'spotlessApply',
+                'build',
+                'checkLicense'
+        ],
+        'artifacts' : [
+                'jar',
+                'distPlugin'
+        ]
+]
+
+def expandedTaskList = []
+gradle.startParameter.taskNames.each {
+  expandedTaskList << (buildAliases[it] ? buildAliases[it] : it)
+}
+gradle.startParameter.taskNames = expandedTaskList.flatten()

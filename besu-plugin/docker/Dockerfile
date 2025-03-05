@@ -1,0 +1,26 @@
+FROM hyperledger/besu:latest
+COPY --chown=besu:besu core/build/libs/*.jar  /opt/besu/plugins/
+
+EXPOSE 30303 8545 8551 8546 8547 8888 9545
+
+ENV BESU_LOGGING=INFO \
+    BESU_NETWORK=HOLESKY \
+    BESU_SYNC_MODE=FAST \
+    BESU_SYNC_MIN_PEERS=1 \
+    BESU_METRICS_ENABLED=true \
+    BESU_DATA_PATH=/opt/besu/data
+
+ENTRYPOINT ["besu", "--rpc-http-enabled", "--rpc-http-host=0.0.0.0", "--metrics-host=0.0.0.0",  "--rpc-http-api=ADMIN,ETH,SAMBA"]
+
+
+#Samba
+#    --unsafe-private-key=0x$HIVE_CLIENT_PRIVATE_KEY"
+#    --portal-subnetworks=history"
+#    --jsonrpc-port=8545 \
+#    --jsonrpc-host="${IP_ADDR}" \
+#    --p2p-ip="${IP_ADDR}" \
+#    --use-default-bootnodes=false \
+#
+
+
+

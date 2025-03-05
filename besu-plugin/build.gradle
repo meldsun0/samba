@@ -1,64 +1,59 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+
+buildscript {
+  ext {
+    besuIdentifier = "besu-${besuVersion}"
+    besuFilename = "${besuIdentifier}.tar.gz"
+    besuUrl = "${distributionBaseUrl}${besuVersion}/${besuFilename}"
+    besuPluginsIdentifier = "${distributionIdentifier}-${version}"
+    besuPluginDir = File.createTempDir("plugins")
+  }
+}
+
 plugins {
-    id 'com.gradleup.shadow' version '8.3.3'
-    id 'java'
+  id 'java-library'
+  id 'com.github.jk1.dependency-license-report' version '2.9'
 }
 
-group = 'samba.besu-plugin'
-version = '1.0.0'
+version = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : 'snapshot'
 
-allprojects {
-    repositories {
-        mavenLocal()
-        maven {
-            url "https://hyperledger.jfrog.io/artifactory/besu-maven/"
-            content { includeGroupByRegex('org\\.hyperledger\\.besu\\..*')}
-        }
-        mavenCentral()
-        maven {
-            url "https://artifacts.consensys.net/public/maven/maven/"
-            content { includeGroupByRegex('tech\\.pegasys($|\\..*)')}
-        }
-        maven {
-            url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/"
-            content { includeGroupByRegex('io\\.libp2p($|\\..*)') }
-        }
-        maven {
-            url "https://hyperledger.jfrog.io/artifactory/besu-maven/"
-            content { includeGroupByRegex('org\\.hyperledger\\.besu($|\\..*)') }
-        }
-    }
+
+licenseReport {
+  // This is for the allowed-licenses-file in checkLicense Task
+  // Accepts File, URL or String path to local or remote file
+  allowedLicensesFile = rootProject.file("gradle/allowed-licenses.json")
+
+  excludes = []
+
+  // If set to true, then all boms will be excluded from the report
+  excludeBoms = true
+
+  filters = [
+    new LicenseBundleNormalizer(bundlePath: rootProject.file("gradle/license-normalizer-bundle.json"))
+  ]
 }
 
-subprojects {
-    apply plugin: 'java-library'
-
-    dependencies {
-        // annotationProcessor generates the file META-INF/services/org.hyperledger.besu.plugin.BesuPlugin
-        annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
-        compileOnly 'com.google.auto.service:auto-service-annotations:1.0.1'
-        compileOnly 'com.google.guava:guava:31.1-jre'
-
-        implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
-        implementation 'org.apache.logging.log4j:log4j-core:2.20.0'
-
-        implementation 'org.hyperledger.besu:plugin-api:24.12.1'
-        implementation 'info.picocli:picocli:4.7.1'
-
-
-
-        testImplementation 'org.assertj:assertj-core:3.24.2'
-        testImplementation 'org.junit.jupiter:junit-jupiter:5.11.2'
-        testImplementation 'org.assertj:assertj-core:3.24.2'
-        testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.2'
-        testImplementation 'org.mockito:mockito-core:4.11.0'
-        testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
-    }
-    test {
-        useJUnitPlatform()
-    }
+build {
+  dependsOn checkLicense
 }
-project(':core') {
-    dependencies {
-        implementation project(':service')
-    }
+
+jar {
+  enabled = false
 }
+
+
+////>>
+//task createDistributionTar(type: Tar) {
+//  dependsOn ':core:jar' // Ensure the JAR is built before creating the tar
+//
+//  archiveBaseName.set("besu-samba-plugin")
+//  archiveVersion.set(rootProject.version)
+//  compression = Compression.GZIP
+//  destinationDirectory.set(rootProject.layout.buildDirectory.dir("distribution"))
+//
+//  from("${rootProject.projectDir}/core/build/libs") {
+//    include "*.jar"
+//  }
+//}
+//
+//tasks.build.dependsOn createDistributionTar

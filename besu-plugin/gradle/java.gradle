@@ -1,0 +1,38 @@
+apply plugin: 'java-library'
+
+if (!JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) {
+  throw new GradleException("Java 21 or later is required to build Besu.\n" +
+          "  Detected version ${JavaVersion.current()}")
+}
+
+sourceCompatibility = 21
+targetCompatibility = 21
+
+tasks.withType(JavaCompile) {
+  options.compilerArgs += [
+    '-Xlint:unchecked',
+    '-Xlint:cast',
+    '-Xlint:rawtypes',
+    '-Xlint:overloads',
+    '-Xlint:divzero',
+    '-Xlint:finally',
+    '-Xlint:static',
+    '-Werror',
+  ]
+
+  options.encoding = 'UTF-8'
+}
+
+ext.calculateVersion = { ->
+  String version = rootProject.version
+  if (version.endsWith("-SNAPSHOT")) {
+    version = version.replace("-SNAPSHOT", "-dev-${getCheckedOutGitCommitHash()}")
+  }
+
+  return version
+}
+
+static def getCheckedOutGitCommitHash() {
+  def hashLength = 8
+  "git rev-parse HEAD".execute().text.take(hashLength)
+}

@@ -1,0 +1,15 @@
+import java.time.LocalTime
+
+apply plugin: 'jacoco'
+
+jacoco {
+  toolVersion = '0.8.12'
+}
+
+test {
+  description = 'Runs unit tests.'
+
+  useJUnitPlatform {
+    excludeTags("AcceptanceTest")
+  }
+}
