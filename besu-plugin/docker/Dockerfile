@@ -13,14 +13,3 @@ ENV BESU_LOGGING=INFO \
 ENTRYPOINT ["besu", "--rpc-http-enabled", "--rpc-http-host=0.0.0.0", "--metrics-host=0.0.0.0",  "--rpc-http-api=ADMIN,ETH,SAMBA"]
 
 
-#Samba
-#    --unsafe-private-key=0x$HIVE_CLIENT_PRIVATE_KEY"
-#    --portal-subnetworks=history"
-#    --jsonrpc-port=8545 \
-#    --jsonrpc-host="${IP_ADDR}" \
-#    --p2p-ip="${IP_ADDR}" \
-#    --use-default-bootnodes=false \
-#
-
-
-

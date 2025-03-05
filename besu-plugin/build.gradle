@@ -41,6 +41,44 @@ jar {
   enabled = false
 }
 
+def imageName = "besu-samba-plugin:latest"
+def containerName = "besu-samba-plugin"
+
+
+
+task runBesu{
+  group = "docker"
+  description = "Builds the Docker image and runs the container"
+
+  doLast {
+    exec {
+        commandLine "docker", "build", "-t", imageName, "-f", "docker/Dockerfile", "."
+      }
+    exec {
+      commandLine "docker", "rm", "-f", containerName
+      ignoreExitValue true // Ignore errors if container doesn't exist
+    }
+    exec {
+      commandLine "docker", "run", "-d", "--name", containerName, "-p", "8545:8545", "-p", "9545:9545", imageName
+    }
+  }
+}
+
+task stopAndRemoveBesu {
+  group = "docker"
+  description = "Stops and removes the running Docker container"
+
+  doLast {
+    exec {
+      commandLine "docker", "stop", containerName
+      ignoreExitValue true
+    }
+    exec {
+      commandLine "docker", "rm", containerName
+      ignoreExitValue true
+    }
+  }
+}
 
 ////>>
 //task createDistributionTar(type: Tar) {
