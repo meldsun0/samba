@@ -1,0 +1,23 @@
+plugins {
+  id 'java-library'
+  id 'common-plugins'
+}
+
+apply from: rootProject.file("gradle/java.gradle")
+apply from: rootProject.file("gradle/dependency-management.gradle")
+apply from: rootProject.file('gradle/common-dependencies.gradle')
+apply from: rootProject.file("gradle/build-aliases.gradle")
+apply from: rootProject.file("gradle/lint.gradle")
+apply from: rootProject.file("gradle/tests.gradle")
+
+dependencies {
+  implementation 'io.tmio:tuweni-bytes'
+  implementation 'net.java.dev.jna:jna'
+}
+
+
+jar {
+  //archiveBaseName = ''
+  version = calculateVersion()
+  includeEmptyDirs = false
+}

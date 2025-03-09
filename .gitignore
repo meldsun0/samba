@@ -44,3 +44,4 @@ out/
 !gradle/wrapper/gradle-wrapper.jar
 
 db/
+.DS_Store

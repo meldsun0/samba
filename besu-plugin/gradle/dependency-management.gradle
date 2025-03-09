@@ -1,0 +1,66 @@
+repositories {
+  maven {
+    url 'https://hyperledger.jfrog.io/hyperledger/besu-maven'
+    content { includeGroupByRegex('org\\.hyperledger\\..*') }
+  }
+  maven {
+    url 'https://artifacts.consensys.net/public/maven/maven/'
+    content {
+      includeGroupByRegex('tech\\.pegasys(\\..*)?')
+    }
+  }
+  maven {
+    url "https://dl.cloudsmith.io/public/libp2p/jvm-libp2p/maven/"
+    content { includeGroupByRegex('io\\.libp2p($|\\..*)') }
+  }
+  maven {
+    url "https://hyperledger.jfrog.io/artifactory/besu-maven/"
+    content { includeGroupByRegex('org\\.hyperledger\\.besu($|\\..*)') }
+  }
+  mavenCentral()
+  mavenLocal()
+}
+
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  applyMavenExclusions = false
+  generatedPomCustomization {
+    enabled = false
+  }
+  imports {
+    mavenBom "${besuArtifactGroup}:bom:${besuVersion}"
+  }
+
+  dependencies {
+
+    dependency 'com.google.code.gson:gson:2.11.0'
+
+    // ToDo: remove when fixed in Besu, force version to avoid conflict with previous version
+    dependency 'org.apache.logging.log4j:log4j-api:2.24.1'
+    dependency 'org.apache.logging.log4j:log4j-core:2.24.1'
+
+    dependency 'org.wiremock:wiremock:3.12.0'
+  }
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+  applyMavenExclusions = false
+  generatedPomCustomization {
+    enabled = false
+  }
+  imports {
+    mavenBom "${besuArtifactGroup}:bom:${besuVersion}"
+  }
+
+  dependencies {
+    dependency 'com.google.code.gson:gson:2.11.0'
+    // ToDo: remove when fixed in Besu, force version to avoid conflict with previous version
+    dependency 'org.apache.logging.log4j:log4j-api:2.24.1'
+    dependency 'org.apache.logging.log4j:log4j-core:2.24.1'
+
+  }
+}

@@ -1,0 +1,97 @@
+import com.github.jk1.license.filter.LicenseBundleNormalizer
+
+buildscript {
+  ext {
+    besuIdentifier = "besu-${besuVersion}"
+    besuFilename = "${besuIdentifier}.tar.gz"
+    besuUrl = "${distributionBaseUrl}${besuVersion}/${besuFilename}"
+    besuPluginsIdentifier = "${distributionIdentifier}-${version}"
+    besuPluginDir = File.createTempDir("plugins")
+  }
+}
+
+plugins {
+  id 'java-library'
+  id 'com.github.jk1.dependency-license-report' version '2.9'
+}
+
+version = project.hasProperty('releaseVersion') ? project.getProperty('releaseVersion') : 'snapshot'
+
+
+licenseReport {
+  // This is for the allowed-licenses-file in checkLicense Task
+  // Accepts File, URL or String path to local or remote file
+  allowedLicensesFile = rootProject.file("gradle/allowed-licenses.json")
+
+  excludes = []
+
+  // If set to true, then all boms will be excluded from the report
+  excludeBoms = true
+
+  filters = [
+    new LicenseBundleNormalizer(bundlePath: rootProject.file("gradle/license-normalizer-bundle.json"))
+  ]
+}
+
+build {
+  dependsOn checkLicense
+}
+
+jar {
+  enabled = false
+}
+
+def imageName = "besu-samba-plugin:latest"
+def containerName = "besu-samba-plugin"
+
+
+
+task runBesu{
+  group = "docker"
+  description = "Builds the Docker image and runs the container"
+
+  doLast {
+    exec {
+        commandLine "docker", "build", "-t", imageName, "-f", "docker/Dockerfile", "."
+      }
+    exec {
+      commandLine "docker", "rm", "-f", containerName
+      ignoreExitValue true // Ignore errors if container doesn't exist
+    }
+    exec {
+      commandLine "docker", "run", "-d", "--name", containerName, "-p", "8545:8545", "-p", "9545:9545", imageName
+    }
+  }
+}
+
+task stopAndRemoveBesu {
+  group = "docker"
+  description = "Stops and removes the running Docker container"
+
+  doLast {
+    exec {
+      commandLine "docker", "stop", containerName
+      ignoreExitValue true
+    }
+    exec {
+      commandLine "docker", "rm", containerName
+      ignoreExitValue true
+    }
+  }
+}
+
+////>>
+//task createDistributionTar(type: Tar) {
+//  dependsOn ':core:jar' // Ensure the JAR is built before creating the tar
+//
+//  archiveBaseName.set("besu-samba-plugin")
+//  archiveVersion.set(rootProject.version)
+//  compression = Compression.GZIP
+//  destinationDirectory.set(rootProject.layout.buildDirectory.dir("distribution"))
+//
+//  from("${rootProject.projectDir}/core/build/libs") {
+//    include "*.jar"
+//  }
+//}
+//
+//tasks.build.dependsOn createDistributionTar
