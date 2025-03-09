@@ -39,7 +39,6 @@ import samba.services.jsonrpc.methods.history.PortalHistoryStore;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryRocksDB;
 
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -181,7 +180,8 @@ public class PortalNodeMainService extends Service {
     this.historyNetwork =
         new HistoryNetwork(
             this.discoveryService,
-            HistoryRocksDB.create(metricsSystem, Paths.get("samba/db")),
+            HistoryRocksDB.create(
+                metricsSystem, sambaConfiguration.getStorageConfig().getDataPath()),
             this.utpManager);
   }
 
