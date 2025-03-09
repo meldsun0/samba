@@ -3,12 +3,14 @@ package samba.cli;
 import samba.Samba;
 import samba.config.InvalidConfigurationException;
 import samba.config.SambaConfiguration;
+import samba.config.StorageConfig;
 import samba.network.NetworkType;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.services.discovery.Bootnodes;
 import samba.storage.DatabaseStorageException;
 
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +78,13 @@ public class SambaCommand implements Callable<Integer> {
       arity = "1")
   private String jsonRpcHost = null;
 
+  @CommandLine.Option(
+      names = {"--data-path"},
+      paramLabel = "<PATH>",
+      description = "The path to Samba data directory",
+      arity = "1")
+  final Path dataPath = StorageConfig.getDefaultSambaDataPath(this);
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -112,6 +121,12 @@ public class SambaCommand implements Callable<Integer> {
               discoveryConfig.networkInterfaces(p2pIps);
             }
           });
+      builder.storage(
+          storageConfig -> {
+            if (dataPath != null) {
+              storageConfig.dataPath(dataPath);
+            }
+          });
       builder.jsonRpc(
           jsonRpc -> {
             if (jsonRpcPort != null) {
@@ -121,6 +136,7 @@ public class SambaCommand implements Callable<Integer> {
               jsonRpc.setHost(jsonRpcHost);
             }
           });
+
       if (unsafePrivateKey != null) {
         builder.secretKey(unsafePrivateKey);
       }
