@@ -18,7 +18,8 @@ public class SambaConfiguration {
   private final MetricsConfig metricsConfig;
   private final PortalRestApiConfig portalRestApiConfig;
   private final DiscoveryConfig discoveryConfig;
-  private final JsonRpcConfiguration jsonRpcConfigurationn;
+  private final StorageConfig storageConfig;
+  private final JsonRpcConfiguration jsonRpcConfiguration;
 
   private final SECP256K1.SecretKey secretKey;
 
@@ -26,12 +27,14 @@ public class SambaConfiguration {
       final MetricsConfig metricsConfig,
       final PortalRestApiConfig portalRestApiConfig,
       final DiscoveryConfig discoveryConfig,
-      final JsonRpcConfiguration jsonRpcConfigurationn,
+      final JsonRpcConfiguration jsonRpcConfiguration,
+      final StorageConfig storageConfig,
       final SECP256K1.SecretKey secretKey) {
     this.metricsConfig = metricsConfig;
     this.portalRestApiConfig = portalRestApiConfig;
-    this.jsonRpcConfigurationn = jsonRpcConfigurationn;
     this.discoveryConfig = discoveryConfig;
+    this.jsonRpcConfiguration = jsonRpcConfiguration;
+    this.storageConfig = storageConfig;
     this.secretKey = secretKey;
   }
 
@@ -51,12 +54,16 @@ public class SambaConfiguration {
     return discoveryConfig;
   }
 
+  public StorageConfig getStorageConfig() {
+    return storageConfig;
+  }
+
   public SECP256K1.SecretKey getSecreteKey() {
     return secretKey;
   }
 
   public JsonRpcConfiguration getJsonRpcConfigurationn() {
-    return jsonRpcConfigurationn;
+    return jsonRpcConfiguration;
   }
 
   public static class Builder {
@@ -64,6 +71,7 @@ public class SambaConfiguration {
     private final PortalRestApiConfig.PortalRestApiConfigBuilder portalRestApiConfigBuilder =
         PortalRestApiConfig.builder();
     private final DiscoveryConfig.Builder discoveryConfigBuilder = DiscoveryConfig.builder();
+    private final StorageConfig.Builder storageConfigBuilder = StorageConfig.builder();
     private final JsonRpcConfiguration jsonRpcConfiguration =
         JsonRpcConfiguration
             .createDefault(); // TODO change this once JsonConfiguration is turned into a builder
@@ -82,6 +90,7 @@ public class SambaConfiguration {
           portalRestApiConfigBuilder.build(),
           discoveryConfigBuilder.build(),
           jsonRpcConfiguration, // TODO change this once JsonConfiguration is turned into a builder
+          storageConfigBuilder.build(),
           secretKey.get());
     }
 
@@ -110,6 +119,11 @@ public class SambaConfiguration {
 
     public Builder jsonRpc(final Consumer<JsonRpcConfiguration> jsonRpcConfigurationConsumer) {
       jsonRpcConfigurationConsumer.accept(jsonRpcConfiguration);
+      return this;
+    }
+
+    public Builder storage(final Consumer<StorageConfig.Builder> storageConfigConsumer) {
+      storageConfigConsumer.accept(storageConfigBuilder);
       return this;
     }
 
