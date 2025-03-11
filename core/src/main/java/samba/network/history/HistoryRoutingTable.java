@@ -7,12 +7,15 @@ import samba.network.RoutingTable;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.crypto.Hash;
 
 /**
  * KBuckets: Represent distances from the local node perspective. It's a "binary tree whose leaves
@@ -89,6 +92,11 @@ public class HistoryRoutingTable implements RoutingTable {
     return radiusMap.entrySet().stream()
         .min(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
         .flatMap(entry -> nodeTable.getNode(entry.getKey()));
+  }
+
+  @Override
+  public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count) {
+    return this.nodeTable.streamClosestNodes(Hash.sha256(contentKey)).collect(Collectors.toSet());
   }
 
   private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {

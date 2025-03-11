@@ -2,7 +2,6 @@ package samba.services.jsonrpc.methods.history;
 
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
-import samba.domain.messages.requests.FindContent;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcMethod;
@@ -20,12 +19,11 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
-import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class PortalHistoryGetContent implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
   private final HistoryNetwork historyNetwork;
+  private final int SEARCH_TIMEOUT = 60;
 
   public PortalHistoryGetContent(final HistoryNetwork historyNetwork) {
     this.historyNetwork = historyNetwork;
@@ -44,57 +42,27 @@ public class PortalHistoryGetContent implements JsonRpcMethod {
       if (contentKeyBytes.isEmpty()) return createJsonRpcInvalidRequestResponse(requestContext);
       ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyBytes.get()).get();
 
-      Optional<Bytes> content = this.historyNetwork.getContent(contentKey);
+      GetContentResult getContentResult;
+      Optional<String> content = this.historyNetwork.getLocalContent(contentKey);
 
-      Boolean utpTransfer = false;
-      if (content.isEmpty()) {
-        Optional<NodeRecord> nodeRecord =
-            historyNetwork.findClosestNodeToContentKey(contentKeyBytes.get());
-        if (nodeRecord.isEmpty()) return createJsonRpcInvalidRequestResponse(requestContext);
-
-        FindContentResult findContentResult =
-            SafeFuture.supplyAsync(
-                    () ->
-                        historyNetwork
-                            .findContent(nodeRecord.get(), new FindContent(contentKeyBytes.get()))
-                            .join()
-                            .orElseThrow(() -> new RuntimeException("Failed to find content")))
-                .join();
-        if (findContentResult.getContent() == null) {
-          // TODO Potential indefinite lookup?
-          for (String enr : findContentResult.getEnrs()) {
-            Optional<NodeRecord> node = historyNetwork.nodeRecordFromEnr(enr);
-            if (node.isPresent()) {
-              FindContentResult searchedNodeResult =
-                  SafeFuture.supplyAsync(
-                          () ->
-                              historyNetwork
-                                  .findContent(node.get(), new FindContent(contentKeyBytes.get()))
-                                  .join()
-                                  .orElseThrow(
-                                      () -> new RuntimeException("Failed to find content")))
-                      .join();
-              if (searchedNodeResult.getContent() != null) {
-                content = Optional.of(Bytes.fromHexString(searchedNodeResult.getContent()));
-                utpTransfer = searchedNodeResult.getUtpTransfer();
-                return new JsonRpcSuccessResponse(
-                    requestContext.getRequest().getId(),
-                    new GetContentResult(content.get().toHexString(), utpTransfer));
-              }
-            }
-          }
-
+      if (content.isPresent()) {
+        getContentResult = new GetContentResult(content.get(), false);
+      } else {
+        Optional<FindContentResult> findContentResult =
+            historyNetwork.getContent(contentKey, SEARCH_TIMEOUT).join();
+        if (findContentResult.isPresent() && findContentResult.get().getContent() != null) {
+          historyNetwork.store(
+              contentKey.getSszBytes(), Bytes.fromHexString(findContentResult.get().getContent()));
+          getContentResult =
+              new GetContentResult(
+                  findContentResult.get().getContent(), findContentResult.get().getUtpTransfer());
+        } else {
           return new JsonRpcErrorResponse(
               requestContext.getRequest().getId(), RpcErrorType.CONTENT_NOT_FOUND_ERROR);
-        } else {
-
-          content = Optional.of(Bytes.fromHexString(findContentResult.getContent()));
-          utpTransfer = findContentResult.getUtpTransfer();
         }
       }
-      return new JsonRpcSuccessResponse(
-          requestContext.getRequest().getId(),
-          new GetContentResult(content.get().toHexString(), utpTransfer));
+
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), getContentResult);
     } catch (Exception e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
