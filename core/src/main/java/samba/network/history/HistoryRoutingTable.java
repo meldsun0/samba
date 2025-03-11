@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.crypto.Hash;
 
 /**
  * KBuckets: Represent distances from the local node perspective. It's a "binary tree whose leaves
@@ -95,13 +96,7 @@ public class HistoryRoutingTable implements RoutingTable {
 
   @Override
   public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count) {
-    return radiusMap.entrySet().stream()
-        .sorted(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
-        .limit(count)
-        .map(entry -> nodeTable.getNode(entry.getKey()))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(Collectors.toSet());
+    return this.nodeTable.streamClosestNodes(Hash.sha256(contentKey)).collect(Collectors.toSet());
   }
 
   private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {
