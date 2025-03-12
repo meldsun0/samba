@@ -14,8 +14,6 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
 
 /** Response message to Find Content (0x04). */
-
-
 public class Content implements PortalWireMessage {
 
   public static final int UTP_CONNECTION_ID = 0;
@@ -35,7 +33,7 @@ public class Content implements PortalWireMessage {
   }
 
   public Content(Bytes content) {
-    checkArgument(content.size() <= MAX_DISCV5_PACKET_PAYLOAD_BYTES, "Content size exceeds limit");
+    checkArgument(content.size() <= MAX_CUSTOM_PAYLOAD_BYTES, "Content size exceeds limit");
     this.contentType = CONTENT_TYPE;
     this.content = content;
     this.connectionId = 0;
@@ -43,7 +41,8 @@ public class Content implements PortalWireMessage {
   }
 
   public Content(List<String> enrs) {
-    // TODO ensure that total size of all ENRs does not exceed MAX_DISCV5_PACKET_PAYLOAD_BYTES and/or trim
+    // TODO ensure that total size of all ENRs does not exceed MAX_DISCV5_PACKET_PAYLOAD_BYTES
+    // and/or trim
     checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
     checkArgument(
         enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES),

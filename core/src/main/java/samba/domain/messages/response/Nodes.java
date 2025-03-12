@@ -22,7 +22,8 @@ public class Nodes implements PortalWireMessage {
   private final List<String> enrs;
 
   public Nodes(List<String> enrs) {
-    // TODO ensure that total size of all ENRs does not exceed MAX_DISCV5_PACKET_PAYLOAD_BYTES and/or trim
+    // TODO ensure that total size of all ENRs does not exceed MAX_DISCV5_PACKET_PAYLOAD_BYTES
+    // and/or trim
     checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
     checkArgument(
         enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES),
