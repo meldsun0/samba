@@ -21,6 +21,7 @@ import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
+import samba.network.PortalGossip;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
@@ -195,8 +196,13 @@ public class HistoryNetwork extends BaseNetwork
                             createDefaultErrorWhenSendingMessage(message.getMessageType()));
                 case Content.CONTENT_TYPE -> {
                   // TODO validate content and key before persisting it or responding
-                  // TODO Gossip new content to network -> trigger a lookup: Query X nearest  until
-
+                  
+                  // Gossip new content to network
+                  ContentKey contentKey = ContentKey.decode(message.getContentKey());
+                  Set<NodeRecord> foundNodes = getFoundNodes(contentKey, PortalGossip.MAX_GOSSIP_COUNT, true);
+                  foundNodes.remove(nodeRecord);
+                  PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                  
                   historyDB.saveContent(message.getContentKey(), content.getContent());
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -431,8 +437,7 @@ public class HistoryNetwork extends BaseNetwork
         ContentUtil.createContentKeyFromSszBytes(findContent.getContentKey()).get();
     Optional<Bytes> content = historyDB.get(contentKey);
     if (content.isEmpty()) {
-      // TODO return list of ENRs that we know of that are closest to the requested content
-      return new Content(List.of());
+      return new Content(generateEnrs(contentKey, nodeRecord));
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
       int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
@@ -440,6 +445,19 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(connectionId);
     }
     return new Content(content.get());
+  }
+
+  private List<String> generateEnrs(ContentKey contentKey, NodeRecord nodeRecord) {
+    Set<NodeRecord> foundNodes = getFoundNodes(contentKey, PortalWireMessage.MAX_ENRS + 2, true);
+    foundNodes.remove(nodeRecord);
+    foundNodes.remove(this.discv5Client.getHomeNodeRecord());
+    if (foundNodes.size() > PortalWireMessage.MAX_ENRS) {
+      int excessSize = foundNodes.size() - PortalWireMessage.MAX_ENRS;
+      foundNodes.stream()
+                .limit(excessSize)
+                .forEach(node -> foundNodes.remove(node));
+    }
+    return foundNodes.stream().map(NodeRecord::asEnr).toList();
   }
 
   @Override
@@ -539,8 +557,12 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   private Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
-    return this.routingTable.findClosestNodesToContentKey(contentKey.getSszBytes(), 10);
+    return this.getFoundNodes(contentKey, 10, false);
   }
+
+  private Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
+    return this.routingTable.findClosestNodesToContentKey(contentKey.getSszBytes(), count, inRadius);
+}
 
   @Override
   protected boolean isStoreAvailable() {

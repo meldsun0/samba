@@ -90,16 +90,26 @@ public class HistoryRoutingTable implements RoutingTable {
   @Override
   public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
     return radiusMap.entrySet().stream()
-        .min(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
+        .min(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentKey)))
         .flatMap(entry -> nodeTable.getNode(entry.getKey()));
   }
 
   @Override
-  public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count) {
-    return this.nodeTable.streamClosestNodes(Hash.sha256(contentKey)).collect(Collectors.toSet());
+  public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count, boolean inRadius) {
+    Bytes contentId = Hash.sha256(contentKey);
+    if (!inRadius) return this.nodeTable.streamClosestNodes(contentId).collect(Collectors.toSet());
+    else return radiusMap.entrySet().stream()
+      .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
+      .filter(entry -> {
+          UInt256 distance = computeDistance(entry.getKey(), contentId);
+          return entry.getValue().compareTo(distance) <= 0;
+      })
+      .limit(count)
+      .flatMap(entry -> nodeTable.getNode(entry.getKey()).stream())
+      .collect(Collectors.toSet());
   }
 
-  private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {
-    return radius.xor(UInt256.fromBytes(contentKey));
+  private UInt256 computeDistance(Bytes nodeId, Bytes contentId) {
+    return UInt256.fromBytes(nodeId.xor(contentId));
   }
 }
