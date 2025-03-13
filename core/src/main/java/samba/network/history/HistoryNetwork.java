@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
@@ -266,6 +267,42 @@ public class HistoryNetwork extends BaseNetwork
               return SafeFuture.completedFuture(Optional.of(accept.getContentKeys()));
             })
         .exceptionallyCompose(createDefaultErrorWhenSendingMessage(message.getMessageType()));
+  }
+
+  @Override
+  public Optional<String> lookupEnr(final UInt256 nodeId) {
+    if (nodeId.equals(this.discv5Client.getHomeNodeRecord().getNodeId())) {
+      return Optional.of(this.discv5Client.getHomeNodeRecord().asEnr());
+    } else {
+      return this.routingTable
+          .findNode(nodeId.toBytes())
+          .flatMap(
+              nodeRecord ->
+                  Optional.ofNullable(
+                      this.findNodes(nodeRecord, new FindNodes(Set.of(0)))
+                          .thenApply(Optional::get)
+                          .thenApply(
+                              nodes ->
+                                  nodes.getEnrList().stream()
+                                      .findFirst()
+                                      .orElse(null))
+                          .thenApply(
+                              enr ->
+                                  Optional.ofNullable(enr)
+                                      .map(NodeRecordFactory.DEFAULT::fromEnr)
+                                      .orElse(null))
+                          .thenApply(
+                              enr ->
+                                  (enr != null && nodeRecord.getSeq().compareTo(enr.getSeq()) >= 0)
+                                      ? nodeRecord
+                                      : enr)
+                          .thenApply(NodeRecord::asEnr)
+                          .exceptionally(
+                              ex ->
+                                  this.discv5Client.lookupEnr(nodeId).orElseGet(nodeRecord::asEnr))
+                          .join()))
+          .or(() -> this.discv5Client.lookupEnr(nodeId));
+    }
   }
 
   @Override

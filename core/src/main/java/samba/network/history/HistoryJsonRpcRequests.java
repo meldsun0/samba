@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
@@ -36,4 +37,6 @@ public interface HistoryJsonRpcRequests {
   Optional<String> getLocalContent(ContentKey contentKey);
 
   SafeFuture<Optional<Bytes>> offer(NodeRecord nodeRecord, List<Bytes> content, Offer offer);
+
+  Optional<String> lookupEnr(final UInt256 nodeId);
 }
