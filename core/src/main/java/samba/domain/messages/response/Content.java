@@ -116,7 +116,16 @@ public class Content implements PortalWireMessage {
   }
 
   private List<Bytes> getEnrsBytes() {
-    return enrs.stream().map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr))).toList();
+    return enrs.stream()
+        .map(
+            enr -> {
+              if (enr.startsWith("enr:")) {
+                return enr.substring(4);
+              }
+              return enr;
+            })
+        .map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr)))
+        .toList();
   }
 
   private ContentContainer getContentContainer() {
