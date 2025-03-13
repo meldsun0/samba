@@ -5,6 +5,7 @@ import samba.domain.dht.NodeTable;
 import samba.network.RoutingTable;
 
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -105,7 +106,7 @@ public class HistoryRoutingTable implements RoutingTable {
           .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
           .filter(Objects::nonNull)
           .limit(count)
-          .collect(Collectors.toSet());
+          .collect(Collectors.toCollection(LinkedHashSet::new));
     else
       return radiusMap.entrySet().stream()
           .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
@@ -117,7 +118,7 @@ public class HistoryRoutingTable implements RoutingTable {
           .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
           .filter(Objects::nonNull)
           .limit(count)
-          .collect(Collectors.toSet());
+          .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
   private UInt256 computeDistance(Bytes nodeId, Bytes contentId) {
