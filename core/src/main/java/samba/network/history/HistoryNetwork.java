@@ -281,11 +281,7 @@ public class HistoryNetwork extends BaseNetwork
                   Optional.ofNullable(
                       this.findNodes(nodeRecord, new FindNodes(Set.of(0)))
                           .thenApply(Optional::get)
-                          .thenApply(
-                              nodes ->
-                                  nodes.getEnrList().stream()
-                                      .findFirst()
-                                      .orElse(null))
+                          .thenApply(nodes -> nodes.getEnrList().stream().findFirst().orElse(null))
                           .thenApply(
                               enr ->
                                   Optional.ofNullable(enr)
