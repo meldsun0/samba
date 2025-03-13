@@ -271,6 +271,38 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
+  public Optional<String> lookupEnr(final UInt256 nodeId) {
+    if (nodeId.equals(this.discv5Client.getHomeNodeRecord().getNodeId())) {
+      return Optional.of(this.discv5Client.getHomeNodeRecord().asEnr());
+    } else {
+      return this.routingTable
+          .findNode(nodeId.toBytes())
+          .flatMap(
+              nodeRecord ->
+                  Optional.ofNullable(
+                      this.findNodes(nodeRecord, new FindNodes(Set.of(0)))
+                          .thenApply(Optional::get)
+                          .thenApply(nodes -> nodes.getEnrList().stream().findFirst().orElse(null))
+                          .thenApply(
+                              enr ->
+                                  Optional.ofNullable(enr)
+                                      .map(NodeRecordFactory.DEFAULT::fromEnr)
+                                      .orElse(null))
+                          .thenApply(
+                              enr ->
+                                  (enr != null && nodeRecord.getSeq().compareTo(enr.getSeq()) >= 0)
+                                      ? nodeRecord
+                                      : enr)
+                          .thenApply(NodeRecord::asEnr)
+                          .exceptionally(
+                              ex ->
+                                  this.discv5Client.lookupEnr(nodeId).orElseGet(nodeRecord::asEnr))
+                          .join()))
+          .or(() -> this.discv5Client.lookupEnr(nodeId));
+    }
+  }
+
+  @Override
   public void addEnr(String enr) {
     final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
     this.routingTable.addOrUpdateNode(nodeRecord);

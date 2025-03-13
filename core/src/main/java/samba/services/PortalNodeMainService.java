@@ -33,6 +33,7 @@ import samba.services.jsonrpc.methods.history.PortalHistoryFindNodes;
 import samba.services.jsonrpc.methods.history.PortalHistoryGetContent;
 import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
 import samba.services.jsonrpc.methods.history.PortalHistoryLocalContent;
+import samba.services.jsonrpc.methods.history.PortalHistoryLookupEnr;
 import samba.services.jsonrpc.methods.history.PortalHistoryOffer;
 import samba.services.jsonrpc.methods.history.PortalHistoryPing;
 import samba.services.jsonrpc.methods.history.PortalHistoryStore;
@@ -164,6 +165,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName(),
           new PortalHistoryLocalContent(this.historyNetwork));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_LOOKUP_ENR.getMethodName(),
+          new PortalHistoryLookupEnr(this.historyNetwork));
 
       jsonRpcService =
           Optional.of(
