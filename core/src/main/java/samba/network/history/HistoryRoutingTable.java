@@ -6,6 +6,7 @@ import samba.network.RoutingTable;
 
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,17 +99,24 @@ public class HistoryRoutingTable implements RoutingTable {
   public Set<NodeRecord> findClosestNodesToContentKey(
       Bytes contentKey, int count, boolean inRadius) {
     Bytes contentId = Hash.sha256(contentKey);
-    if (!inRadius) return this.nodeTable.streamClosestNodes(contentId).collect(Collectors.toSet());
+    if (!inRadius)
+      return radiusMap.entrySet().stream()
+          .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
+          .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
+          .filter(Objects::nonNull)
+          .limit(count)
+          .collect(Collectors.toSet());
     else
       return radiusMap.entrySet().stream()
           .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
           .filter(
               entry -> {
                 UInt256 distance = computeDistance(entry.getKey(), contentId);
-                return entry.getValue().compareTo(distance) <= 0;
+                return entry.getValue().greaterOrEqualThan(distance);
               })
+          .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
+          .filter(Objects::nonNull)
           .limit(count)
-          .flatMap(entry -> nodeTable.getNode(entry.getKey()).stream())
           .collect(Collectors.toSet());
   }
 
