@@ -108,22 +108,22 @@ View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
 ```
-## JSON-RPC API 
-- portal_historyPing
-- portal_historyFindNodes
+## JSON-RPC API (14)
 - portal_historyAddEnr
-- portal_historyGetEnr
 - portal_historyDeleteEnr
 - portal_historyFindContent
 - portal_historyFindNodes
-- portal_historyOffer
+- portal_historyGetContent
+- portal_historyGetEnr
 - portal_historyLocalContent
+- potal_historyLookupEnr
+- portal_historyOffer
+- portal_historyPing
 - portal_historyStore
 
-
+- discv5_getEnr,
 - discv5_nodeInfo, 
-- discv5_updateNodeInfo, 
-- discv5_getEnr
+- discv5_updateNodeInfo
 
 When running against Hive:
 ```shell script
@@ -131,7 +131,7 @@ When running against Hive:
 ```
 You should be getting: 
 
-![Screen Shot 2025-02-25 at 14 30 30](https://github.com/user-attachments/assets/fc726ab9-5608-459a-a7a6-f3ce9c04851a)
+![Tests](https://github.com/user-attachments/assets/9c812ad3-cd17-4abc-9f29-70991a80a71a)
 
 ## Hardware Requirements
 
