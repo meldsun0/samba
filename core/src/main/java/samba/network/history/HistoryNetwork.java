@@ -197,7 +197,8 @@ public class HistoryNetwork extends BaseNetwork
                                     getFoundNodes(
                                         contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
                                 foundNodes.remove(nodeRecord);
-                                PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                                PortalGossip.gossip(
+                                    this, foundNodes, message.getContentKey(), data);
                               }
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
@@ -214,7 +215,8 @@ public class HistoryNetwork extends BaseNetwork
                     Set<NodeRecord> foundNodes =
                         getFoundNodes(contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
                     foundNodes.remove(nodeRecord);
-                    PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                    PortalGossip.gossip(
+                        this, foundNodes, message.getContentKey(), content.getContent());
                   }
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -599,11 +601,11 @@ public class HistoryNetwork extends BaseNetwork
     return task.execute();
   }
 
-  private Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
+  public Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
     return this.getFoundNodes(contentKey, 10, false);
   }
 
-  private Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
+  public Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
     return this.routingTable.findClosestNodesToContentKey(
         contentKey.getSszBytes(), count, inRadius);
   }

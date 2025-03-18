@@ -40,7 +40,8 @@ public enum RpcMethod {
   PORTAL_HISTORYT_RACE_GET_CONTENT("portal_historyTraceGetContent"),
 
   PORTAL_HISTORY_STORE("portal_historyStore"),
-  PORTAL_HISTORY_LOCAL_CONTENT("portal_historyLocalContent");
+  PORTAL_HISTORY_LOCAL_CONTENT("portal_historyLocalContent"),
+  PORTAL_HISTORY_PUT_CONTENT("portal_historyPutContent");
 
   private final String methodName;
 
