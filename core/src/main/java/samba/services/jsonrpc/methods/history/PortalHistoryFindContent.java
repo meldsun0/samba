@@ -12,6 +12,8 @@ import samba.services.jsonrpc.methods.results.FindContentResult;
 
 import java.util.concurrent.ExecutionException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -44,12 +46,18 @@ public class PortalHistoryFindContent implements JsonRpcMethod {
               .get()
               .get();
 
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = objectMapper.writeValueAsString(result);
+      LOG.info("FindContentResult: {}", json);
+
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
     } catch (InterruptedException
         | RuntimeException
         | JsonRpcParameter.JsonRpcParameterException
         | ExecutionException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
     }
   }
 }

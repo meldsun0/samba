@@ -39,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -465,7 +466,7 @@ public class HistoryNetwork extends BaseNetwork
     foundNodes.remove(this.discv5Client.getHomeNodeRecord());
     if (foundNodes.size() > PortalWireMessage.MAX_ENRS) {
       int excessSize = foundNodes.size() - PortalWireMessage.MAX_ENRS;
-      foundNodes.stream().limit(excessSize).forEach(node -> foundNodes.remove(node));
+      foundNodes = foundNodes.stream().skip(excessSize).collect(Collectors.toSet());
     }
     return foundNodes.stream().map(NodeRecord::asEnr).toList();
   }
