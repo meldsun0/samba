@@ -291,6 +291,7 @@ public class HistoryNetwork extends BaseNetwork
   public void addEnr(String enr) {
     final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
     this.routingTable.addOrUpdateNode(nodeRecord);
+    this.routingTable.updateRadius(nodeRecord.getNodeId(), nodeRadius.max());
   }
 
   @Override
