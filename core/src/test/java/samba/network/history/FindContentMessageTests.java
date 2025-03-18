@@ -28,7 +28,8 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class FindContentMessageTests {
 
-  private static final Bytes contentKey = Bytes.fromHexString("0x706f7274616c");
+  private static final Bytes contentKey =
+      Bytes.fromHexString("0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c");
   private static final Bytes data = Bytes.fromHexString("0x1234567890");
   private static final int connectionId = 1;
   private HistoryDB historyDB;

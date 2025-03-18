@@ -22,6 +22,8 @@ public class Nodes implements PortalWireMessage {
   private final List<String> enrs;
 
   public Nodes(List<String> enrs) {
+    // TODO ensure that total size of all ENRs does not exceed MAX_DISCV5_PACKET_PAYLOAD_BYTES
+    // and/or trim
     checkArgument(enrs.size() <= MAX_ENRS, "Number of ENRs exceeds limit");
     checkArgument(
         enrs.stream().allMatch(enr -> enr.length() <= MAX_CUSTOM_PAYLOAD_BYTES),
@@ -60,7 +62,16 @@ public class Nodes implements PortalWireMessage {
   }
 
   private List<Bytes> getEnrsBytes() {
-    return enrs.stream().map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr))).toList();
+    return enrs.stream()
+        .map(
+            enr -> {
+              if (enr.startsWith("enr:")) {
+                return enr.substring(4);
+              }
+              return enr;
+            })
+        .map(enr -> Bytes.wrap(Base64.getUrlDecoder().decode(enr)))
+        .toList();
   }
 
   @Override

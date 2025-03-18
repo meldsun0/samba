@@ -23,7 +23,7 @@ public class FindContentResult {
   public FindContentResult(final List<String> enrs) {
     this.content = null;
     this.utpTransfer = null;
-    this.enrs = enrs;
+    this.enrs = enrs.stream().map(enr -> enr.replace("=", "")).toList();
   }
 
   public FindContentResult() {}

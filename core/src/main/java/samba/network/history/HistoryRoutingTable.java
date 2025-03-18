@@ -5,7 +5,9 @@ import samba.domain.dht.NodeTable;
 import samba.network.RoutingTable;
 
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,16 +92,36 @@ public class HistoryRoutingTable implements RoutingTable {
   @Override
   public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
     return radiusMap.entrySet().stream()
-        .min(Comparator.comparing(entry -> computeDistance(entry.getValue(), contentKey)))
+        .min(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentKey)))
         .flatMap(entry -> nodeTable.getNode(entry.getKey()));
   }
 
   @Override
-  public Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count) {
-    return this.nodeTable.streamClosestNodes(Hash.sha256(contentKey)).collect(Collectors.toSet());
+  public Set<NodeRecord> findClosestNodesToContentKey(
+      Bytes contentKey, int count, boolean inRadius) {
+    Bytes contentId = Hash.sha256(contentKey);
+    if (!inRadius)
+      return radiusMap.entrySet().stream()
+          .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
+          .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
+          .filter(Objects::nonNull)
+          .limit(count)
+          .collect(Collectors.toCollection(LinkedHashSet::new));
+    else
+      return radiusMap.entrySet().stream()
+          .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))
+          .filter(
+              entry -> {
+                UInt256 distance = computeDistance(entry.getKey(), contentId);
+                return entry.getValue().greaterOrEqualThan(distance);
+              })
+          .map(entry -> nodeTable.getNode(entry.getKey()).orElse(null))
+          .filter(Objects::nonNull)
+          .limit(count)
+          .collect(Collectors.toCollection(LinkedHashSet::new));
   }
 
-  private UInt256 computeDistance(UInt256 radius, Bytes contentKey) {
-    return radius.xor(UInt256.fromBytes(contentKey));
+  private UInt256 computeDistance(Bytes nodeId, Bytes contentId) {
+    return UInt256.fromBytes(nodeId.xor(contentId));
   }
 }

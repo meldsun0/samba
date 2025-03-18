@@ -21,6 +21,7 @@ import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
+import samba.network.PortalGossip;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.FindContentResult;
@@ -38,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -180,6 +182,7 @@ public class HistoryNetwork extends BaseNetwork
         .thenCompose(
             contentMessage -> {
               Content content = contentMessage.getMessage();
+              ContentKey contentKey = ContentKey.decode(message.getContentKey());
               // TODO: Validate NodeRadius
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
@@ -187,7 +190,15 @@ public class HistoryNetwork extends BaseNetwork
                         .findContentRead(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
-                              historyDB.saveContent(message.getContentKey(), data);
+                              boolean saved = historyDB.saveContent(message.getContentKey(), data);
+                              // Gossip new content to network
+                              if (saved) {
+                                Set<NodeRecord> foundNodes =
+                                    getFoundNodes(
+                                        contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
+                                foundNodes.remove(nodeRecord);
+                                PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                              }
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
                             })
@@ -195,9 +206,16 @@ public class HistoryNetwork extends BaseNetwork
                             createDefaultErrorWhenSendingMessage(message.getMessageType()));
                 case Content.CONTENT_TYPE -> {
                   // TODO validate content and key before persisting it or responding
-                  // TODO Gossip new content to network -> trigger a lookup: Query X nearest  until
 
-                  historyDB.saveContent(message.getContentKey(), content.getContent());
+                  boolean saved =
+                      historyDB.saveContent(message.getContentKey(), content.getContent());
+                  // Gossip new content to network
+                  if (saved) {
+                    Set<NodeRecord> foundNodes =
+                        getFoundNodes(contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
+                    foundNodes.remove(nodeRecord);
+                    PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                  }
                   yield SafeFuture.completedFuture(
                       Optional.of(
                           new FindContentResult(content.getContent().toHexString(), false)));
@@ -306,6 +324,7 @@ public class HistoryNetwork extends BaseNetwork
   public void addEnr(String enr) {
     final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
     this.routingTable.addOrUpdateNode(nodeRecord);
+    this.routingTable.updateRadius(nodeRecord.getNodeId(), nodeRadius.max());
   }
 
   @Override
@@ -463,8 +482,7 @@ public class HistoryNetwork extends BaseNetwork
         ContentUtil.createContentKeyFromSszBytes(findContent.getContentKey()).get();
     Optional<Bytes> content = historyDB.get(contentKey);
     if (content.isEmpty()) {
-      // TODO return list of ENRs that we know of that are closest to the requested content
-      return new Content(List.of());
+      return new Content(generateEnrs(contentKey, nodeRecord));
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
       int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
@@ -472,6 +490,17 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(connectionId);
     }
     return new Content(content.get());
+  }
+
+  private List<String> generateEnrs(ContentKey contentKey, NodeRecord nodeRecord) {
+    Set<NodeRecord> foundNodes = getFoundNodes(contentKey, PortalWireMessage.MAX_ENRS + 2, true);
+    foundNodes.remove(nodeRecord);
+    foundNodes.remove(this.discv5Client.getHomeNodeRecord());
+    if (foundNodes.size() > PortalWireMessage.MAX_ENRS) {
+      int excessSize = foundNodes.size() - PortalWireMessage.MAX_ENRS;
+      foundNodes = foundNodes.stream().skip(excessSize).collect(Collectors.toSet());
+    }
+    return foundNodes.stream().map(NodeRecord::asEnr).toList();
   }
 
   @Override
@@ -571,7 +600,12 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   private Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
-    return this.routingTable.findClosestNodesToContentKey(contentKey.getSszBytes(), 10);
+    return this.getFoundNodes(contentKey, 10, false);
+  }
+
+  private Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
+    return this.routingTable.findClosestNodesToContentKey(
+        contentKey.getSszBytes(), count, inRadius);
   }
 
   @Override
