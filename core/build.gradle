@@ -1,0 +1,19 @@
+plugins {
+  id 'java'
+}
+
+group = 'samba'
+version = '25.3-develop-246c894'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  testImplementation platform('org.junit:junit-bom:5.10.0')
+  testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+  useJUnitPlatform()
+}

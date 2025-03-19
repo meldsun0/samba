@@ -1,5 +1,6 @@
 rootProject.name = 'samba'
 include 'standalone'
+include 'core'
 include 'execution-state-network'
 include 'execution-history-network'
 include 'server-json-rpc'
