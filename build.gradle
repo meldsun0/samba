@@ -141,7 +141,7 @@ configure(allprojects - project(':platform')) {
 
 dependencies {
   implementation 'com.google.errorprone:error_prone_core:2.7.1'  // Use the appropriate version of ErrorProne
-  implementation project(':core')
+  implementation project(':standalone')
   implementation 'org.apache.logging.log4j:log4j-api:2.17.0'        // Log4j2 API
   implementation 'org.apache.logging.log4j:log4j-core:2.17.0'       // Log4j2 Core
   implementation 'org.apache.logging.log4j:log4j-jul:2.17.0'        // JUL to Log4j2 Bridge
@@ -314,7 +314,7 @@ distributions {
       from("build/reports/license/license-dependency.html") { into "." }
       from("./docs/GettingStartedBinaries.md") { into "." }
       from("./docs/DocsArchive0.8.0.html") { into "." }
-      from("./core/src/main/scripts/samba-entry.sh") { into "./bin/" }
+      from("./standalone/src/main/scripts/samba-entry.sh") { into "./bin/" }
     }
   }
 }

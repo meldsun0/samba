@@ -1,5 +1,5 @@
 FROM hyperledger/besu:latest
-COPY --chown=besu:besu core/build/libs/*.jar  /opt/besu/plugins/
+COPY --chown=besu:besu standalone/build/libs/*.jar  /opt/besu/plugins/
 
 EXPOSE 30303 8545 8551 8546 8547 8888 9545
 

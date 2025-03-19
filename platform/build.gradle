@@ -32,7 +32,7 @@ dependencies {
   api platform('org.slf4j:slf4j-bom:2.0.16')
 
   constraints {
-    api project(':core')
+    api project(':standalone')
     api project(':server-json-rpc')
     api project(':storage-rocksdb')
     api project(':execution-history-network')

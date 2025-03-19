@@ -6,8 +6,8 @@ startScripts {
             "-XX:StartFlightRecording,settings=default.jfc",
             "-Xlog:jfr*=off"
     ]
-    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/unixStartScript.txt")
-    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/windowsStartScript.txt")
+    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/standalone/src/main/scripts/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/standalone/src/main/scripts/windowsStartScript.txt")
     doLast { tweakStartScript(startScripts) }
 }
 
@@ -18,8 +18,8 @@ tasks.register('untunedStartScripts', CreateStartScripts) {
     outputDir = startScripts.outputDir
     applicationName = 'samba-untuned'
     defaultJvmOpts = applicationDefaultJvmArgs
-    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/unixStartScript.txt")
-    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/core/src/main/scripts/windowsStartScript.txt")
+    unixStartScriptGenerator.template = resources.text.fromFile("${projectDir}/standalone/src/main/scripts/unixStartScript.txt")
+    windowsStartScriptGenerator.template = resources.text.fromFile("${projectDir}/standalone/src/main/scripts/windowsStartScript.txt")
     doLast { tweakStartScript(untunedStartScripts) }
 }
 
