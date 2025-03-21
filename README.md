@@ -82,11 +82,12 @@ All the unit tests are run as part of the build, but can be explicitly triggered
 
 ## Running Hive locally
 
-To run Hive locally against Samab you should follow these instractions: 
+To run Hive locally against Samba you should follow these instructions: 
 
 Clone Hive:
 ```shell script
 git clone https://github.com/ethereum/hive
+cd hive
 go build .
 go build ./cmd/hiveview  
 ```
@@ -97,13 +98,16 @@ Build a local Docker image from Samba:
 ./gradlew distDocker  
 ```
 
-* Copy hive/samba folder to hive/clients
-* Change /hive/samba/Dockerfile by adding the recent created image. 
+* Copy ~/samba/hive/samba folder to ~/hive/clients
+* Change ~/hive/clients/samba/Dockerfile. Replace the values for ARG `baseimage` and ARG `tag` with the values for the recently created image. 
 
 Run Hive tests:
 ```shell script
 ./hive -sim portal -client samba,trin -sim.limit history 
 ```
+If you get the following error on macOS: `can't get docker version: Get "http://unix.sock/v1.25/version": dial unix /var/run/docker.sock: connect: no such file or directory`, you 
+need to enable `Allow the default Docker socket to be used (requires password)` in `Settings` -> `Advanced`
+
 View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
