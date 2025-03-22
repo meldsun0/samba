@@ -17,9 +17,12 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PortalHistoryPutContent implements JsonRpcMethod {
 
+  private final Logger LOG = LoggerFactory.getLogger(PortalHistoryPutContent.class);
   private final HistoryNetwork historyNetwork;
 
   public PortalHistoryPutContent(final HistoryNetwork historyNetwork) {
@@ -47,6 +50,8 @@ public class PortalHistoryPutContent implements JsonRpcMethod {
 
       PutContentResult putContentResult = new PutContentResult(storedLocally, nodes.size());
 
+      LOG.info(
+          "Put content: {} stored locally: {} nodes: {}", contentKey, storedLocally, nodes.size());
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), putContentResult);
     } catch (Exception e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
