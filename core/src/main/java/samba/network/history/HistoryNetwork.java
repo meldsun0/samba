@@ -508,6 +508,8 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
     try {
+      LOG.info("Offer from {}", srcNode.asEnr());
+      LOG.info("Offer contentKeys: {}", offer.getContentKeys());
       // TODO validate contentKeys.
       if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
       byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
@@ -521,6 +523,7 @@ public class HistoryNetwork extends BaseNetwork
           continue;
         }
         if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+          LOG.info("ContentKey: {} not found in local storage", contentKey.toHexString());
           contentKeysBitArray[x] = 1;
           contentKeyAccepted.add(contentKey);
         }
