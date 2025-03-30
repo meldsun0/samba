@@ -8,7 +8,6 @@ import org.hyperledger.besu.ethereum.mainnet.MainnetBlockHeaderFunctions;
 import org.hyperledger.besu.ethereum.rlp.BytesValueRLPOutput;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
-import tech.pegasys.teku.infrastructure.ssz.SszUnion;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszByteList;
 import tech.pegasys.teku.infrastructure.ssz.containers.Container2;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema2;
@@ -16,15 +15,16 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteListSchema
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
 public class BlockHeaderWithProofContainer
-    extends Container2<BlockHeaderWithProofContainer, SszByteList, SszUnion> {
+    extends Container2<BlockHeaderWithProofContainer, SszByteList, SszByteList> {
 
   public BlockHeaderWithProofContainer(
-      final BlockHeader blockHeader, final BlockHeaderProofUnion blockHeaderProof) {
+      final BlockHeader blockHeader, final Bytes encodedBlockHeaderProof) {
     super(
         BlockHeaderWithProofContainerSchema.INSTANCE,
         SszByteListSchema.create(HistoryConstants.MAX_HEADER_LENGTH)
             .fromBytes(rlpEncodeBlockHeader(blockHeader)),
-        blockHeaderProof.getUnion());
+        SszByteListSchema.create(HistoryConstants.MAX_HEADER_PROOF_LENGTH)
+            .fromBytes(encodedBlockHeaderProof));
   }
 
   public BlockHeaderWithProofContainer(TreeNode backingNode) {
@@ -42,8 +42,8 @@ public class BlockHeaderWithProofContainer
     return BlockHeader.readFrom(input, new MainnetBlockHeaderFunctions());
   }
 
-  public BlockHeaderProofUnion getBlockHeaderProof() {
-    return new BlockHeaderProofUnion(getField1());
+  public Bytes getEncodedBlockHeaderProof() {
+    return getField1().getBytes();
   }
 
   public static BlockHeaderWithProofContainer decodeBytes(Bytes bytes) {
@@ -53,7 +53,7 @@ public class BlockHeaderWithProofContainer
   }
 
   public static class BlockHeaderWithProofContainerSchema
-      extends ContainerSchema2<BlockHeaderWithProofContainer, SszByteList, SszUnion> {
+      extends ContainerSchema2<BlockHeaderWithProofContainer, SszByteList, SszByteList> {
 
     public static final BlockHeaderWithProofContainerSchema INSTANCE =
         new BlockHeaderWithProofContainerSchema();
@@ -61,7 +61,7 @@ public class BlockHeaderWithProofContainer
     private BlockHeaderWithProofContainerSchema() {
       super(
           SszByteListSchema.create(HistoryConstants.MAX_HEADER_LENGTH),
-          BlockHeaderProofUnion.getSchema());
+          SszByteListSchema.create(HistoryConstants.MAX_HEADER_PROOF_LENGTH));
     }
 
     @Override

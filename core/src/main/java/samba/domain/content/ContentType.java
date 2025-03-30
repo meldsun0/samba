@@ -8,7 +8,8 @@ public enum ContentType {
   BLOCK_HEADER(0x00),
   BLOCK_BODY(0x01),
   RECEIPT(0x02),
-  BLOCK_HEADER_BY_NUMBER(0x03);
+  BLOCK_HEADER_BY_NUMBER(0x03),
+  EPHEMERAL_BLOCK_HEADER(0x04); // TODO unsupported
 
   private final byte value;
   private static final int BYTE_MASK = 0xFF;
