@@ -32,7 +32,7 @@ public class UTPNetworkIncomingRequestHandler implements IncomingRequestHandler 
     // TODO refactor
     utpManager.onUTPMessageReceive(srcNode, request);
 
-    return CompletableFuture.completedFuture(null);
+    return CompletableFuture.completedFuture(Bytes.of(0));
   }
 
   @Override
