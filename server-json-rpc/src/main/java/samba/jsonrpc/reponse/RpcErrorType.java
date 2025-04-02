@@ -14,8 +14,6 @@
  */
 package samba.jsonrpc.reponse;
 
-import static samba.jsonrpc.reponse.RpcMethodError.INVALID_PARAMS_ERROR_CODE;
-
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -31,7 +29,13 @@ public enum RpcErrorType implements RpcMethodError {
   TIMEOUT_ERROR(-32603, "Timeout expired"),
   EXCEEDS_RPC_MAX_BATCH_SIZE(-32005, "Number of requests exceeds max batch size"),
   INVALID_METHOD_PARAMS(INVALID_PARAMS_ERROR_CODE, "Invalid method params"),
-  CONTENT_NOT_FOUND_ERROR(-39001, "Content not found");
+  CONTENT_NOT_FOUND_ERROR(-39001, "Content not found"),
+  CONTENT_NOT_FOUND_ERROR_WITH_TRACE(-39002, "Content not found"),
+  PAYLOAD_TYPE_NOT_SUPPORTED_ERROR(-39004, "Payload type not supported"),
+  FAILED_TO_DECODE_PAYLOAD_ERROR(-39005, "Failed to decode payload"),
+  PAYLOAD_TYPE_REQUIRED_ERROR(-39006, "Payload type is required if payload is specified"),
+  UNSPECIFIED_PAYLOAD_BLOCKED_BY_CLIENT_ERROR(
+      -39007, "The client has blocked users from specifying the payload for this extension");
 
   private final int code;
   private final String message;

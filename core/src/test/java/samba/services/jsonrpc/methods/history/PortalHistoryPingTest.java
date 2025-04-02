@@ -18,6 +18,7 @@ import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
 import samba.services.discovery.Discv5Client;
 import samba.services.jsonrpc.methods.results.PingResult;
+import samba.services.jsonrpc.methods.schemas.ClientInfoAndCapabilitiesJson;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,10 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
@@ -51,7 +56,7 @@ public class PortalHistoryPingTest {
   }
 
   @Test
-  public void shouldReturnCorrectResultWhenNodeRecordIsAlreadyConnected() {
+  public void shouldReturnCorrectResultWhenNodeRecordIsAlreadyConnected() throws JsonProcessingException {
     final String enr =
         "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
     final JsonRpcRequestContext request =
@@ -66,20 +71,27 @@ public class PortalHistoryPingTest {
     when(historyJsonRpc.isNodeConnected(any(NodeRecord.class))).thenReturn(true);
     when(historyJsonRpc.ping(any(NodeRecord.class)))
         .thenReturn(SafeFuture.of(() -> Optional.of(pong)));
-
+    ObjectMapper objectMapper = new ObjectMapper();
+    ClientInfoAndCapabilitiesJson clientInfoAndCapabilitiesJson =
+        new ClientInfoAndCapabilitiesJson(
+            clientInfoAndCapabilities.getClientInfo(),
+            clientInfoAndCapabilities.getDataRadius(),
+            clientInfoAndCapabilities.getCapabilities());
+    String jsonString = objectMapper.writeValueAsString(clientInfoAndCapabilitiesJson);
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
                 pong.getEnrSeq().bigIntegerValue(),
-                clientInfoAndCapabilities.getDataRadius().toHexString()));
+                pong.getPayloadType(),
+                jsonString));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
   @Test
-  public void shouldReturnCorrectResultWhenNodeRecordIsNotConnected() {
+  public void shouldReturnCorrectResultWhenNodeRecordIsNotConnected() throws JsonProcessingException {
     final String enr =
         "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
     final JsonRpcRequestContext request =
@@ -97,12 +109,20 @@ public class PortalHistoryPingTest {
     when(discv5Client.ping(any(NodeRecord.class)))
         .thenReturn(Mockito.mock(CompletableFuture.class));
 
+    ObjectMapper objectMapper = new ObjectMapper();
+    ClientInfoAndCapabilitiesJson clientInfoAndCapabilitiesJson =
+        new ClientInfoAndCapabilitiesJson(
+            clientInfoAndCapabilities.getClientInfo(),
+            clientInfoAndCapabilities.getDataRadius(),
+            clientInfoAndCapabilities.getCapabilities());
+    String jsonString = objectMapper.writeValueAsString(clientInfoAndCapabilitiesJson);
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
                 pong.getEnrSeq().bigIntegerValue(),
-                clientInfoAndCapabilities.getDataRadius().toHexString()));
+                pong.getPayloadType(),
+                jsonString));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
