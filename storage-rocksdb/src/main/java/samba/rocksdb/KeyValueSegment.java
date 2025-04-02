@@ -7,7 +7,8 @@ public enum KeyValueSegment implements Segment {
   BLOCK_HEADER(new byte[] {14}),
   BLOCK_BODY(new byte[] {14}),
   RECEIPT(new byte[] {14}),
-  BLOCK_HASH_BY_BLOCK_NUMBER(new byte[] {14});
+  BLOCK_HASH_BY_BLOCK_NUMBER(new byte[] {14}),
+  EPHEMERAL_BLOCK_HEADER(new byte[] {14});
 
   private final byte[] id;
   private final boolean containsStaticData;

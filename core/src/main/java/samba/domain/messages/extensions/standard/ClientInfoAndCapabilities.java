@@ -34,7 +34,7 @@ public class ClientInfoAndCapabilities implements PortalExtension {
   }
 
   public ClientInfoAndCapabilities(String clientInfo, UInt256 dataRadius) {
-    this(clientInfo, dataRadius, List.of(UInt16.ZERO, UInt16.MAX_VALUE));
+    this(clientInfo, dataRadius, DEFAULT_CAPABILITIES);
   }
 
   public ClientInfoAndCapabilities(UInt256 dataRadius) {

@@ -166,6 +166,10 @@ public class HistoryRocksDB implements HistoryDB {
             .map(Bytes::wrap)
             .or(Optional::empty);
       }
+      case ContentType.EPHEMERAL_BLOCK_HEADER -> {
+        // TODO unsupported
+        yield Optional.empty();
+      }
     };
   }
 
@@ -193,6 +197,7 @@ public class HistoryRocksDB implements HistoryDB {
       case ContentType.BLOCK_BODY -> KeyValueSegment.BLOCK_BODY;
       case ContentType.RECEIPT -> KeyValueSegment.RECEIPT;
       case ContentType.BLOCK_HEADER_BY_NUMBER -> KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER;
+      case ContentType.EPHEMERAL_BLOCK_HEADER -> KeyValueSegment.EPHEMERAL_BLOCK_HEADER;
     };
   }
 

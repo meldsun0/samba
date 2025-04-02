@@ -21,7 +21,6 @@ public class SszBlockProofHistoricalHashesAccumulatorVector {
     this.BlockProofHistoricalHashesAccumulator = BlockProofHistoricalHashesAccumulator;
   }
 
-  @SuppressWarnings("unchecked")
   public SszBlockProofHistoricalHashesAccumulatorVector(
       List<Bytes32> blockProofHistoricalHashesAccumulator) {
     if (blockProofHistoricalHashesAccumulator.size()
@@ -58,6 +57,12 @@ public class SszBlockProofHistoricalHashesAccumulatorVector {
     return BlockProofHistoricalHashesAccumulator.stream()
         .map(SszBytes32::get)
         .collect(Collectors.toList());
+  }
+
+  public static List<Bytes32> decodeVector(Bytes BlockProofHistoricalHashesAccumulator) {
+    SszBlockProofHistoricalHashesAccumulatorVector vector =
+        new SszBlockProofHistoricalHashesAccumulatorVector(BlockProofHistoricalHashesAccumulator);
+    return vector.getDecodedVector();
   }
 
   public SszBytes32Vector getEncodedVector() {

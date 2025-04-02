@@ -11,5 +11,8 @@ public class HistoryConstants {
   public static final long MAX_WITHDRAWAL_COUNT = 16;
   public static final long WITHDRAWAL_LENGTH = 64;
   public static final long MAX_WITHDRAWAL_LENGTH = MAX_WITHDRAWAL_COUNT * WITHDRAWAL_LENGTH;
+  public static final long MERGE_TIMESTAMP = 1663224162;
   public static final long SHANGHAI_TIMESTAMP = 1681338455;
+  public static final long MAX_EPHEMERAL_HEADER_PAYLOAD = 256;
+  public static final long MAX_HEADER_PROOF_LENGTH = 1024;
 }

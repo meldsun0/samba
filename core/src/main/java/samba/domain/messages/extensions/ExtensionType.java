@@ -30,4 +30,8 @@ public enum ExtensionType {
     }
     throw new IllegalArgumentException("Unknown extension type: " + value);
   }
+
+  public static ExtensionType fromValue(UInt16 value) {
+    return fromValue(value.getValue());
+  }
 }

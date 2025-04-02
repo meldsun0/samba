@@ -1,7 +1,10 @@
 package samba.domain.content;
 
-import samba.schema.content.ssz.blockheader.BlockHeaderProofUnion;
+import samba.network.history.HistoryConstants;
 import samba.schema.content.ssz.blockheader.BlockHeaderWithProofContainer;
+import samba.schema.content.ssz.blockheader.BlockProofHistoricalRootsContainer;
+import samba.schema.content.ssz.blockheader.BlockProofHistoricalSummariesContainer;
+import samba.schema.content.ssz.blockheader.SszBlockProofHistoricalHashesAccumulatorVector;
 
 import java.util.List;
 
@@ -16,18 +19,18 @@ public class ContentBlockHeader {
 
   public ContentBlockHeader(BlockHeaderWithProofContainer blockHeaderWithProofContainer) {
     this.blockHeaderWithProofContainer = blockHeaderWithProofContainer;
-    this.proofType = blockHeaderWithProofContainer.getBlockHeaderProof().getProofType();
+    this.proofType = getContentProofTypeFromHeader(blockHeaderWithProofContainer.getBlockHeader());
   }
 
   public ContentBlockHeader(Bytes sszBytes) {
     this.blockHeaderWithProofContainer = BlockHeaderWithProofContainer.decodeBytes(sszBytes);
-    this.proofType = blockHeaderWithProofContainer.getBlockHeaderProof().getProofType();
+    this.proofType = getContentProofTypeFromHeader(blockHeaderWithProofContainer.getBlockHeader());
   }
 
-  public ContentBlockHeader(BlockHeader blockHeader, BlockHeaderProofUnion blockHeaderProof) {
+  public ContentBlockHeader(BlockHeader blockHeader, Bytes encodedBlockHeaderProof) {
     this.blockHeaderWithProofContainer =
-        new BlockHeaderWithProofContainer(blockHeader, blockHeaderProof);
-    this.proofType = blockHeaderProof.getProofType();
+        new BlockHeaderWithProofContainer(blockHeader, encodedBlockHeaderProof);
+    this.proofType = getContentProofTypeFromHeader(blockHeader);
   }
 
   public BlockHeaderWithProofContainer getBlockHeaderWithProofContainer() {
@@ -44,9 +47,8 @@ public class ContentBlockHeader {
 
   public List<Bytes32> getBlockProofHistoricalHashesAccumulator() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalHashesAccumulator();
+      return SszBlockProofHistoricalHashesAccumulatorVector.decodeVector(
+          blockHeaderWithProofContainer.getEncodedBlockHeaderProof());
     }
     throw new UnsupportedOperationException(
         "Block proof type is not BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR");
@@ -54,24 +56,31 @@ public class ContentBlockHeader {
 
   public List<Bytes32> getBeaconBlockProofHistoricalRoots() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalRootsContainer()
+      return BlockProofHistoricalRootsContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBeaconBlockProofHistoricalRoots();
     }
     throw new UnsupportedOperationException("Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS");
   }
 
+  public List<Bytes32> getBeaconBlockProofHistoricalSummaries() {
+    if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
+      return BlockProofHistoricalSummariesContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
+          .getBeaconBlockProofHistoricalSummaries();
+    }
+    throw new UnsupportedOperationException(
+        "Block proof type is not BLOCK_PROOF_HISTORICAL_SUMMARIES");
+  }
+
   public Bytes32 getBeaconBlockRoot() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalRootsContainer()
+      return BlockProofHistoricalRootsContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalSummariesContainer()
+      return BlockProofHistoricalSummariesContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
     }
     throw new UnsupportedOperationException(
@@ -80,14 +89,12 @@ public class ContentBlockHeader {
 
   public List<Bytes32> getExecutionBlockProof() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalRootsContainer()
+      return BlockProofHistoricalRootsContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalSummariesContainer()
+      return BlockProofHistoricalSummariesContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
     }
     throw new UnsupportedOperationException(
@@ -96,15 +103,13 @@ public class ContentBlockHeader {
 
   public long getSlot() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalRootsContainer()
+      return BlockProofHistoricalRootsContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getSlot()
           .longValue();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return blockHeaderWithProofContainer
-          .getBlockHeaderProof()
-          .getBlockProofHistoricalSummariesContainer()
+      return BlockProofHistoricalSummariesContainer.decodeBytes(
+              blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getSlot()
           .longValue();
     }
@@ -118,5 +123,14 @@ public class ContentBlockHeader {
 
   public static ContentBlockHeader decode(Bytes sszBytes) {
     return new ContentBlockHeader(sszBytes);
+  }
+
+  public static ContentProofType getContentProofTypeFromHeader(BlockHeader blockHeader) {
+    long timestamp = blockHeader.getTimestamp();
+    if (timestamp < HistoryConstants.MERGE_TIMESTAMP)
+      return ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR;
+    else if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP)
+      return ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS;
+    else return ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES;
   }
 }
