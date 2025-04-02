@@ -18,5 +18,5 @@ public interface DefaultContent {
 
   Bytes key3 =
       Bytes.fromHexString("0x0288e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6");
-  Bytes value3 = Bytes.fromHexString("0x");
+  Bytes value3 = Bytes.fromHexString("0x00");
 }

@@ -246,7 +246,17 @@ public class HistoryNetwork extends BaseNetwork
     checkArgument(
         content.size() == message.getContentKeys().size(),
         "There should be same contentItems and contentKeys");
-
+    IntStream.range(0, content.size())
+        .forEach(
+            i -> {
+              Bytes bytes = content.get(i);
+              checkArgument(bytes != null, "Content at index %s is null", i);
+              checkArgument(
+                  bytes.size() >= 1,
+                  "Content at index %s must have size >= 1, but was %s",
+                  i,
+                  bytes.size());
+            });
     // TODO check if this is ok?
     //    checkArgument(
     //        this.routingTable.findNode(nodeRecord.getNodeId()).isPresent(),
@@ -265,17 +275,19 @@ public class HistoryNetwork extends BaseNetwork
                           idx -> {
                             if (acceptedContent[idx] == 0) return null;
                             Bytes currentContent = content.get(idx);
-                            // TODO validate if is needed to go to the db.
-                            if (currentContent.isEmpty()) {
-                              Bytes contentKey = message.getContentKeys().get(idx);
-                              return historyDB
-                                  .get(ContentKey.decode(contentKey))
-                                  .orElse(currentContent);
-                            }
-                            return currentContent;
+                            //                            // TODO validate if is needed to go to the
+                            // db and save the content
+                            //                            if (currentContent.isZero()) {
+                            //                              Bytes contentKey =
+                            // message.getContentKeys().get(idx);
+                            //                              return historyDB
+                            //                                  .get(ContentKey.decode(contentKey))
+                            //                                  .orElse(currentContent);
+                            //                            }
+                            return content.get(idx);
                           })
                       .filter(Objects::nonNull)
-                      .map(data -> Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data))
+                      .map(Util::addUnsignedLeb128SizeToData)
                       .toList();
 
               Optional.ofNullable(contentToOffer)

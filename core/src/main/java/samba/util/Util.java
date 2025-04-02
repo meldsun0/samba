@@ -1,5 +1,7 @@
 package samba.util;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +9,20 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class Util {
 
+  public static Bytes addUnsignedLeb128SizeToData(Bytes data) {
+    checkArgument(data != null, "DATA must not be null");
+    checkArgument(!data.isEmpty(), "Data MUST NOT be empty");
+
+    if (data.toHexString().equals("0x00")) return Bytes.concatenate(Bytes.of(0));
+    return Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data);
+  }
+
+  /**
+   * Given an int value return unsignedLeb128 byte
+   *
+   * @param value
+   * @return
+   */
   public static Bytes writeUnsignedLeb128(int value) {
     Bytes output = Bytes.EMPTY;
     int remaining = value >>> 7;
@@ -15,9 +31,8 @@ public class Util {
       value = remaining;
       remaining >>>= 7;
     }
-    Bytes answer = Bytes.concatenate(output, (Bytes.of(value & 0x7f)));
 
-    return answer;
+    return Bytes.concatenate(output, (Bytes.of(value & 0x7f)));
   }
 
   public static int readUnsignedLeb128(Bytes input) {
