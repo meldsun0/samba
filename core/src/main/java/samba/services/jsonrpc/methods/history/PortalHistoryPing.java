@@ -26,9 +26,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class PortalHistoryPing implements JsonRpcMethod {
+  Logger LOG = LoggerFactory.getLogger(PortalHistoryPing.class);
   private final HistoryNetwork historyNetwork;
   private final Discv5Client discv5Client;
 
@@ -58,8 +61,8 @@ public class PortalHistoryPing implements JsonRpcMethod {
     try {
       if (payloadType.isPresent()) {
         parsedPayloadType = Optional.of(UInt16.valueOf(Integer.parseInt(payloadType.get())));
-        if (!PortalExtension.DEFAULT_CAPABILITIES.contains(parsedPayloadType.get())
-            && parsedPayloadType.get() != ExtensionType.ERROR.getExtensionCode()) {
+        if (!PortalExtension.DEFAULT_CAPABILITIES.contains(
+            parsedPayloadType.get())) { // TODO: disallow error type (errorprone bug)
           return new JsonRpcErrorResponse(
               requestContext.getRequest().getId(), RpcErrorType.PAYLOAD_TYPE_NOT_SUPPORTED_ERROR);
         }
@@ -138,19 +141,22 @@ public class PortalHistoryPing implements JsonRpcMethod {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
     if (pong.isPresent()) {
-      String extensionJson;
+      Object extensionJson;
       try {
         ExtensionType extensionType = ExtensionType.fromValue(pong.get().getPayloadType());
         switch (extensionType) {
           case CLIENT_INFO_AND_CAPABILITIES -> {
             ClientInfoAndCapabilities clientInfoAndCapabilities =
                 ClientInfoAndCapabilities.fromSszBytes(pong.get().getPayload());
+            LOG.info(clientInfoAndCapabilities.toString());
+            LOG.info(clientInfoAndCapabilities.getClientInfo());
+            LOG.info(clientInfoAndCapabilities.getDataRadius().toString());
+            LOG.info(clientInfoAndCapabilities.getCapabilities().toString());
             extensionJson =
-                objectMapper.writeValueAsString(
-                    new ClientInfoAndCapabilitiesJson(
-                        clientInfoAndCapabilities.getClientInfo(),
-                        clientInfoAndCapabilities.getDataRadius(),
-                        clientInfoAndCapabilities.getCapabilities()));
+                new ClientInfoAndCapabilitiesJson(
+                    clientInfoAndCapabilities.getClientInfo(),
+                    clientInfoAndCapabilities.getDataRadius(),
+                    clientInfoAndCapabilities.getCapabilities());
           }
           case HISTORY_RADIUS -> { // TODO when history radius is implemented
             return createJsonRpcInvalidRequestResponse(requestContext);
@@ -160,6 +166,10 @@ public class PortalHistoryPing implements JsonRpcMethod {
           }
         }
         UInt64 enrSeq = pong.get().getEnrSeq();
+        LOG.info(
+            objectMapper.writeValueAsString(
+                new PingResult(
+                    enrSeq.bigIntegerValue(), pong.get().getPayloadType(), extensionJson)));
         return new JsonRpcSuccessResponse(
             requestContext.getRequest().getId(),
             new PingResult(enrSeq.bigIntegerValue(), pong.get().getPayloadType(), extensionJson));

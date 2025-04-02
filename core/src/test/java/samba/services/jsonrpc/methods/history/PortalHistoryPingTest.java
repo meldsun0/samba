@@ -24,15 +24,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
@@ -56,7 +53,8 @@ public class PortalHistoryPingTest {
   }
 
   @Test
-  public void shouldReturnCorrectResultWhenNodeRecordIsAlreadyConnected() throws JsonProcessingException {
+  public void shouldReturnCorrectResultWhenNodeRecordIsAlreadyConnected()
+      throws JsonProcessingException {
     final String enr =
         "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
     final JsonRpcRequestContext request =
@@ -71,27 +69,26 @@ public class PortalHistoryPingTest {
     when(historyJsonRpc.isNodeConnected(any(NodeRecord.class))).thenReturn(true);
     when(historyJsonRpc.ping(any(NodeRecord.class)))
         .thenReturn(SafeFuture.of(() -> Optional.of(pong)));
-    ObjectMapper objectMapper = new ObjectMapper();
+
     ClientInfoAndCapabilitiesJson clientInfoAndCapabilitiesJson =
         new ClientInfoAndCapabilitiesJson(
             clientInfoAndCapabilities.getClientInfo(),
             clientInfoAndCapabilities.getDataRadius(),
             clientInfoAndCapabilities.getCapabilities());
-    String jsonString = objectMapper.writeValueAsString(clientInfoAndCapabilitiesJson);
+    Object extensionJson = clientInfoAndCapabilitiesJson;
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
-                pong.getEnrSeq().bigIntegerValue(),
-                pong.getPayloadType(),
-                jsonString));
+                pong.getEnrSeq().bigIntegerValue(), pong.getPayloadType(), extensionJson));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
   @Test
-  public void shouldReturnCorrectResultWhenNodeRecordIsNotConnected() throws JsonProcessingException {
+  public void shouldReturnCorrectResultWhenNodeRecordIsNotConnected()
+      throws JsonProcessingException {
     final String enr =
         "enr:-IS4QHkAX2KwGc0IOSsAtUK9PMLPn7dMc10BWZrGaoSr74yuCulXFaA4NQ3DjAzZ8ptrKAe9lpd8eQ6lRLU4-PROxbUBgmlkgnY0gmlwhFJuaeqJc2VjcDI1NmsxoQPdVGJ30CiieHGa9seXZI2O9EFzyeed2VnGvn98pr5vSoN1ZHCCH0A";
     final JsonRpcRequestContext request =
@@ -109,20 +106,17 @@ public class PortalHistoryPingTest {
     when(discv5Client.ping(any(NodeRecord.class)))
         .thenReturn(Mockito.mock(CompletableFuture.class));
 
-    ObjectMapper objectMapper = new ObjectMapper();
     ClientInfoAndCapabilitiesJson clientInfoAndCapabilitiesJson =
         new ClientInfoAndCapabilitiesJson(
             clientInfoAndCapabilities.getClientInfo(),
             clientInfoAndCapabilities.getDataRadius(),
             clientInfoAndCapabilities.getCapabilities());
-    String jsonString = objectMapper.writeValueAsString(clientInfoAndCapabilitiesJson);
+    Object extensionJson = clientInfoAndCapabilitiesJson;
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(
             request.getRequest().getId(),
             new PingResult(
-                pong.getEnrSeq().bigIntegerValue(),
-                pong.getPayloadType(),
-                jsonString));
+                pong.getEnrSeq().bigIntegerValue(), pong.getPayloadType(), extensionJson));
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
