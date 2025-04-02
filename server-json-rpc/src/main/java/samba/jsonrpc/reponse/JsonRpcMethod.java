@@ -17,6 +17,9 @@ package samba.jsonrpc.reponse;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public interface JsonRpcMethod {
 
   /**
@@ -53,5 +56,10 @@ public interface JsonRpcMethod {
       JsonRpcRequestContext requestContext) {
     return new JsonRpcErrorResponse(
         requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+  }
+
+  default String getJSON(Object value) throws JsonProcessingException {
+    ObjectMapper objectMapper = new ObjectMapper();
+    return objectMapper.writeValueAsString(value);
   }
 }
