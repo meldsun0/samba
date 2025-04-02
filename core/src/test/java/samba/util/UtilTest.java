@@ -67,7 +67,7 @@ public class UtilTest {
     List<Bytes> contents = Util.parseAcceptedContents(byteData);
 
     assertEquals(1, contents.size());
-    assertEquals(Bytes.fromHexString("0x"), contents.get(0));
+    assertEquals(Bytes.fromHexString("0x00"), contents.get(0));
   }
 
   @Test

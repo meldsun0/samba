@@ -68,8 +68,8 @@ public class Util {
     while (index < byteData.size()) {
       int sizeOfContent = Util.readUnsignedLeb128(byteData.slice(index));
       if (sizeOfContent == 0) {
-        index++;
-        contents.add(Bytes.fromHexString("0x"));
+        index = index + 6;
+        contents.add(Bytes.fromHexString("0x00"));
         continue;
       }
       index += Util.getLeb128Length(sizeOfContent);
