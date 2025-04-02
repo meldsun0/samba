@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
@@ -12,22 +15,24 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.HistoryNetwork;
+import samba.network.history.HistoryJsonRpcRequests;
+import samba.util.DefaultContent;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class PortalHistoryStoreTest {
   private final String JSON_RPC_VERSION = "2.0";
   private final String PORTAL_HISTORY_STORE = "portal_historyStore";
+  private HistoryJsonRpcRequests historyJsonRpcRequests;
   private PortalHistoryStore method;
-  private HistoryNetwork historyNetwork;
 
   @BeforeEach
   public void before() {
-    this.historyNetwork = mock(HistoryNetwork.class);
-    method = new PortalHistoryStore(historyNetwork);
+    this.historyJsonRpcRequests = mock(HistoryJsonRpcRequests.class);
+    method = new PortalHistoryStore(this.historyJsonRpcRequests);
   }
 
   @Test
@@ -36,104 +41,72 @@ public class PortalHistoryStoreTest {
   }
 
   @Test
-  public void shouldReturnCorrectResultSuccessfulStore() {
-    final JsonRpcRequestContext request;
-    request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(
-                JSON_RPC_VERSION,
-                PORTAL_HISTORY_STORE,
-                new Object[] {
-                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c",
-                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
-                }));
-    when(historyNetwork.store(any(), any())).thenReturn(true);
+  public void shouldReturnCorrectResult() {
+    String contentKey = DefaultContent.key1.toHexString();
+    String contentValue = DefaultContent.value1.toHexString();
+
+    final JsonRpcRequestContext request = createRequest(contentKey, contentValue);
+    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
+
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    verify(this.historyJsonRpcRequests, times(1)).store(any(Bytes.class), any(Bytes.class));
   }
 
   @Test
-  public void shouldReturnCorrectResultUnsuccessfulStore() {
-    final JsonRpcRequestContext request;
-    request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(
-                JSON_RPC_VERSION,
-                PORTAL_HISTORY_STORE,
-                new Object[] {
-                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c",
-                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
-                }));
-    when(historyNetwork.store(any(), any())).thenReturn(false);
+  public void shouldReturnFalseReponseResult() {
+    String contentKey = DefaultContent.key1.toHexString();
+    String contentValue = DefaultContent.value1.toHexString();
+
+    final JsonRpcRequestContext request = createRequest(contentKey, contentValue);
+    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(false);
+
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(request.getRequest().getId(), false);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    verify(this.historyJsonRpcRequests, times(1)).store(any(Bytes.class), any(Bytes.class));
   }
 
   @Test
-  public void shouldReturnInvalidResultAsNoParameterisSent() {
-    final JsonRpcRequestContext request;
-    request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_STORE, new Object[] {}));
-    final JsonRpcErrorResponse expected =
+  public void shouldReturnInvalidRequestAsInputsAreEmptyResult() {
+    String contentValue = DefaultContent.value1.toHexString();
+
+    JsonRpcRequestContext request = createRequest("", contentValue);
+
+    verify(this.historyJsonRpcRequests, never()).store(any(Bytes.class), any(Bytes.class));
+
+    JsonRpcResponse expected =
         new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    final JsonRpcResponse actual = method.response(request);
+    JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
+    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+
+    request = createRequest("", "");
+    actual = method.response(request);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
   @Test
-  public void shouldReturnInvalidResultAsEmptyContentKeyIsSent() {
-    final JsonRpcRequestContext request;
-    request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(
-                JSON_RPC_VERSION,
-                PORTAL_HISTORY_STORE,
-                new Object[] {
-                  null, "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
-                }));
-    final JsonRpcErrorResponse expected =
-        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    final JsonRpcResponse actual = method.response(request);
-    assertNotNull(actual);
+  public void shouldReturnOkIfContentKeyIsEmpty() {
+    String contentKey = DefaultContent.key1.toHexString();
+    JsonRpcRequestContext request = createRequest(contentKey, "");
+    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
+
+    final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
+    JsonRpcResponse actual = method.response(request);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
   }
 
-  @Test
-  public void shouldReturnInvalidResultAsEmptyContentValueIsSent() {
-    final JsonRpcRequestContext request;
-    request =
-        new JsonRpcRequestContext(
-            new JsonRpcRequest(
-                JSON_RPC_VERSION,
-                PORTAL_HISTORY_STORE,
-                new Object[] {
-                  "0x00720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c", null
-                }));
-    final JsonRpcErrorResponse expected =
-        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    final JsonRpcResponse actual = method.response(request);
-    assertNotNull(actual);
-    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-  }
-
-  @Test
-  public void shouldReturnInvalidResultAsNoContentKeyAndValueIsSent() {
-    final JsonRpcRequestContext request;
-    request =
+  @NotNull
+  private JsonRpcRequestContext createRequest(String contentKey, String contentValue) {
+    final JsonRpcRequestContext request =
         new JsonRpcRequestContext(
             new JsonRpcRequest(
-                JSON_RPC_VERSION, PORTAL_HISTORY_STORE, new Object[] {Bytes.EMPTY, Bytes.EMPTY}));
-    final JsonRpcErrorResponse expected =
-        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    final JsonRpcResponse actual = method.response(request);
-    assertNotNull(actual);
-    assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+                JSON_RPC_VERSION, PORTAL_HISTORY_STORE, new Object[] {contentKey, contentValue}));
+    return request;
   }
 }

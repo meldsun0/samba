@@ -11,7 +11,7 @@ public class GetContentResult {
   private final String content;
   private final boolean utpTransfer;
 
-  public GetContentResult(String content, boolean utpTransfer) {
+  public GetContentResult(final String content, final boolean utpTransfer) {
     this.content = content;
     this.utpTransfer = utpTransfer;
   }

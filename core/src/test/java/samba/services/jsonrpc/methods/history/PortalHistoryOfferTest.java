@@ -1,4 +1,4 @@
-package samba.services.jsonrpc.methods;
+package samba.services.jsonrpc.methods.history;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,7 +15,6 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
-import samba.services.jsonrpc.methods.history.PortalHistoryOffer;
 import samba.util.DefaultContent;
 
 import java.util.Optional;

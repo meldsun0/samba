@@ -94,6 +94,7 @@ public class JsonRpcExecutor {
         return Optional.of(RpcErrorType.METHOD_NOT_FOUND);
       }
       if (!rpcMethods.containsKey(name)) {
+        LOG.info("Failed: {} {} {}", name, params, method);
         return Optional.of(RpcErrorType.METHOD_NOT_ENABLED);
       }
     }
