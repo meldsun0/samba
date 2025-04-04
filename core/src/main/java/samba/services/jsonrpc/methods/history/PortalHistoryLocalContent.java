@@ -48,7 +48,9 @@ public class PortalHistoryLocalContent implements JsonRpcMethod {
         return new JsonRpcErrorResponse(
             requestContext.getRequest().getId(), RpcErrorType.CONTENT_NOT_FOUND_ERROR);
       }
-
+      if ("0x00".equals(result.get())) {
+        return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), "0x");
+      }
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result.get());
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {

@@ -60,6 +60,8 @@ discovery = { module = "tech.pegasys.discovery:discovery", version.ref = "discov
 oshi-core = { module = "com.github.oshi:oshi-core", version.ref = "oshi"}
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj"}
 mockito-core= { module = "org.mockito:mockito-core", version.ref = "mockito"}
+mockito-inline= { module = "org.mockito:mockito-inline", version.ref = "mockito"}
+
 projectlombok= { module = "org.projectlombok:lombok", version.ref = "lombok"}
 
 junit-jupiter-api= { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "jupiter"}

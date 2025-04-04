@@ -17,6 +17,7 @@ import samba.services.utp.UTPManager;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import meldsun0.utp.UTPClient;
@@ -49,7 +50,7 @@ public class UTPManagerTests {
     doReturn(CompletableFuture.completedFuture(null))
         .when(utpClient)
         .startListening(anyInt(), any());
-    doReturn(CompletableFuture.completedFuture(Bytes.of(1, 2, 3))).when(utpClient).read();
+    doReturn(CompletableFuture.completedFuture(Bytes.of(1, 2, 3))).when(utpClient).read(any());
 
     int connectionId = utpManager.acceptRead(nodeRecord, contentConsumer);
     assertTrue(connectionId > 0);
@@ -66,7 +67,9 @@ public class UTPManagerTests {
 
     doReturn(utpClient).when(utpManager).registerClient(any(), anyInt());
     doReturn(CompletableFuture.completedFuture(null)).when(utpClient).connect(anyInt(), any());
-    doReturn(CompletableFuture.completedFuture(null)).when(utpClient).write(content);
+    doReturn(CompletableFuture.completedFuture(null))
+        .when(utpClient)
+        .write(content, Executors.newSingleThreadExecutor());
 
     assertDoesNotThrow(() -> utpManager.offerWrite(nodeRecord, connectionId, content));
   }
@@ -79,7 +82,9 @@ public class UTPManagerTests {
     doReturn(CompletableFuture.completedFuture(null))
         .when(utpClient)
         .startListening(anyInt(), any());
-    doReturn(CompletableFuture.completedFuture(null)).when(utpClient).write(content);
+    doReturn(CompletableFuture.completedFuture(null))
+        .when(utpClient)
+        .write(content, Executors.newSingleThreadExecutor());
 
     int connectionId = utpManager.foundContentWrite(nodeRecord, content);
     assertTrue(connectionId > 0);
@@ -93,7 +98,7 @@ public class UTPManagerTests {
 
     doReturn(utpClient).when(utpManager).registerClient(any(), anyInt());
     doReturn(CompletableFuture.completedFuture(null)).when(utpClient).connect(anyInt(), any());
-    doReturn(CompletableFuture.completedFuture(expectedContent)).when(utpClient).read();
+    doReturn(CompletableFuture.completedFuture(expectedContent)).when(utpClient).read(any());
 
     Bytes content = utpManager.findContentRead(nodeRecord, connectionId).get();
     assertEquals(expectedContent, content);

@@ -148,10 +148,6 @@ public class PortalHistoryPing implements JsonRpcMethod {
           case CLIENT_INFO_AND_CAPABILITIES -> {
             ClientInfoAndCapabilities clientInfoAndCapabilities =
                 ClientInfoAndCapabilities.fromSszBytes(pong.get().getPayload());
-            LOG.info(clientInfoAndCapabilities.toString());
-            LOG.info(clientInfoAndCapabilities.getClientInfo());
-            LOG.info(clientInfoAndCapabilities.getDataRadius().toString());
-            LOG.info(clientInfoAndCapabilities.getCapabilities().toString());
             extensionJson =
                 new ClientInfoAndCapabilitiesJson(
                     clientInfoAndCapabilities.getClientInfo(),

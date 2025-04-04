@@ -197,7 +197,8 @@ public class HistoryNetwork extends BaseNetwork
                                     getFoundNodes(
                                         contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
                                 foundNodes.remove(nodeRecord);
-                                PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                                PortalGossip.gossip(
+                                    this, foundNodes, message.getContentKey(), data);
                               }
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
@@ -214,7 +215,8 @@ public class HistoryNetwork extends BaseNetwork
                     Set<NodeRecord> foundNodes =
                         getFoundNodes(contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
                     foundNodes.remove(nodeRecord);
-                    PortalGossip.gossip(this, foundNodes, message.getContentKey());
+                    PortalGossip.gossip(
+                        this, foundNodes, message.getContentKey(), content.getContent());
                   }
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -244,7 +246,17 @@ public class HistoryNetwork extends BaseNetwork
     checkArgument(
         content.size() == message.getContentKeys().size(),
         "There should be same contentItems and contentKeys");
-
+    //    IntStream.range(0, content.size())
+    //        .forEach(
+    //            i -> {
+    //              Bytes bytes = content.get(i);
+    //              checkArgument(bytes != null, "Content at index %s is null", i);
+    //              checkArgument(
+    //                  bytes.size() >= 1,
+    //                  "Content at index %s must have size >= 1, but was %s",
+    //                  i,
+    //                  bytes.size());
+    //            });
     // TODO check if this is ok?
     //    checkArgument(
     //        this.routingTable.findNode(nodeRecord.getNodeId()).isPresent(),
@@ -263,17 +275,19 @@ public class HistoryNetwork extends BaseNetwork
                           idx -> {
                             if (acceptedContent[idx] == 0) return null;
                             Bytes currentContent = content.get(idx);
-                            // TODO validate if is needed to go to the db.
-                            if (currentContent.isEmpty()) {
-                              Bytes contentKey = message.getContentKeys().get(idx);
-                              return historyDB
-                                  .get(ContentKey.decode(contentKey))
-                                  .orElse(currentContent);
-                            }
-                            return currentContent;
+                            //                            // TODO validate if is needed to go to the
+                            // db and save the content
+                            //                            if (currentContent.isZero()) {
+                            //                              Bytes contentKey =
+                            // message.getContentKeys().get(idx);
+                            //                              return historyDB
+                            //                                  .get(ContentKey.decode(contentKey))
+                            //                                  .orElse(currentContent);
+                            //                            }
+                            return content.get(idx);
                           })
                       .filter(Objects::nonNull)
-                      .map(data -> Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data))
+                      .map(Util::addUnsignedLeb128SizeToData)
                       .toList();
 
               Optional.ofNullable(contentToOffer)
@@ -506,6 +520,8 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
     try {
+      LOG.info("Offer from {}", srcNode.asEnr());
+      LOG.info("Offer contentKeys: {}", offer.getContentKeys());
       // TODO validate contentKeys.
       if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
       byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
@@ -519,6 +535,7 @@ public class HistoryNetwork extends BaseNetwork
           continue;
         }
         if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+          LOG.info("ContentKey: {} not found in local storage", contentKey.toHexString());
           contentKeysBitArray[x] = 1;
           contentKeyAccepted.add(contentKey);
         }
@@ -582,7 +599,7 @@ public class HistoryNetwork extends BaseNetwork
       Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(
           MessageType message) {
     return error -> {
-      LOG.trace("Something when wrong when sending a {} with error {}", message, error);
+      LOG.info("Something when wrong when sending a {} with error {}", message, error);
       return SafeFuture.completedFuture(Optional.empty());
     };
   }
@@ -599,11 +616,11 @@ public class HistoryNetwork extends BaseNetwork
     return task.execute();
   }
 
-  private Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
+  public Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
     return this.getFoundNodes(contentKey, 10, false);
   }
 
-  private Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
+  public Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
     return this.routingTable.findClosestNodesToContentKey(
         contentKey.getSszBytes(), count, inRadius);
   }

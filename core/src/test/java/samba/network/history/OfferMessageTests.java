@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
+import org.mockito.MockedStatic;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class OfferMessageTests {
@@ -101,10 +103,11 @@ public class OfferMessageTests {
   public void responseIsNotAAccepMessage() throws ExecutionException, InterruptedException {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(
-            CompletableFuture.completedFuture(new Offer(List.of(Bytes.EMPTY)).getSszBytes()));
+            CompletableFuture.completedFuture(
+                new Offer(List.of(DefaultContent.key1)).getSszBytes()));
 
-    List<Bytes> content = List.of(Bytes.fromHexString("0x"));
-    Offer offer = new Offer(List.of(Bytes.EMPTY));
+    List<Bytes> content = List.of(DefaultContent.value1);
+    Offer offer = new Offer(List.of(DefaultContent.key1));
     Optional<Bytes> contentKeysBitList =
         this.historyNetwork.offer(nodeRecord, content, offer).get();
     assertTrue(contentKeysBitList.isEmpty());
@@ -116,8 +119,8 @@ public class OfferMessageTests {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(CompletableFuture.completedFuture(new Accept(555, Bytes.of()).getSszBytes()));
 
-    List<Bytes> content = List.of(Bytes.fromHexString("0x"));
-    Offer offer = new Offer(List.of(Bytes.EMPTY));
+    List<Bytes> content = List.of(DefaultContent.value1);
+    Offer offer = new Offer(List.of(DefaultContent.key1));
     Optional<Bytes> contentKeysBitList =
         this.historyNetwork.offer(nodeRecord, content, offer).get();
 
@@ -133,8 +136,8 @@ public class OfferMessageTests {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(SafeFuture.failedFuture(new Throwable()));
 
-    List<Bytes> content = List.of(Bytes.fromHexString("0x"));
-    Offer offer = new Offer(List.of(Bytes.EMPTY));
+    List<Bytes> content = List.of(DefaultContent.value1);
+    Offer offer = new Offer(List.of(DefaultContent.key1));
     Optional<Bytes> contentKeysBitList =
         this.historyNetwork.offer(nodeRecord, content, offer).get();
 
@@ -149,8 +152,8 @@ public class OfferMessageTests {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {0, 0, 0, 0})));
 
-    List<Bytes> content = List.of(Bytes.fromHexString("0x"));
-    Offer offer = new Offer(List.of(Bytes.EMPTY));
+    List<Bytes> content = List.of(DefaultContent.value1);
+    Offer offer = new Offer(List.of(DefaultContent.key1));
     Optional<Bytes> contentKeysBitList =
         this.historyNetwork.offer(nodeRecord, content, offer).get();
 
@@ -165,8 +168,10 @@ public class OfferMessageTests {
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1})));
-
-    when(historyDB.get(any(ContentKey.class))).thenThrow(NullPointerException.class);
+    MockedStatic<Util> utilMocked = mockStatic(Util.class);
+    utilMocked
+        .when(() -> Util.addUnsignedLeb128SizeToData(any()))
+        .thenThrow(new NullPointerException());
 
     List<Bytes> contentKey = List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
     List<Bytes> content =
@@ -186,7 +191,7 @@ public class OfferMessageTests {
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(1)));
-    when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.EMPTY));
+    when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
 
     Offer offer = new Offer(List.of(DefaultContent.key3));
 
@@ -197,10 +202,7 @@ public class OfferMessageTests {
         .offerWrite(
             any(NodeRecord.class),
             eq(555),
-            eq(
-                Bytes.concatenate(
-                    Util.writeUnsignedLeb128(DefaultContent.value3.size()),
-                    DefaultContent.value3)));
+            eq(Util.addUnsignedLeb128SizeToData(DefaultContent.value3)));
     assertEquals(contentKeysBitList.get().toHexString(), Bytes.of(1).toHexString());
   }
 

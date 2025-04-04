@@ -7,6 +7,7 @@ import samba.domain.messages.PortalWireMessage;
 import samba.schema.messages.ssz.containers.OfferContainer;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszByte;
@@ -23,6 +24,7 @@ public class Offer implements PortalWireMessage {
     checkArgument(
         contentKeys.stream().allMatch(key -> key.size() <= MAX_CUSTOM_PAYLOAD_BYTES),
         "One or more content keys exceed maximum payload size");
+    //  checkContentKeys(contentKeys);
     this.contentKeys = contentKeys;
   }
 
@@ -62,5 +64,19 @@ public class Offer implements PortalWireMessage {
   @Override
   public Offer getMessage() {
     return this;
+  }
+
+  private static void checkContentKeys(List<Bytes> contentKeys) {
+    IntStream.range(0, contentKeys.size())
+        .forEach(
+            i -> {
+              Bytes bytes = contentKeys.get(i);
+              checkArgument(bytes != null, "ContentKey at index %s is null", i);
+              checkArgument(
+                  !bytes.isEmpty(),
+                  "ContentKey at index %s must have size >= 1, but was %s",
+                  i,
+                  bytes.size());
+            });
   }
 }
