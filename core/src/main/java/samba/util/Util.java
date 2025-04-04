@@ -11,9 +11,10 @@ public class Util {
 
   public static Bytes addUnsignedLeb128SizeToData(Bytes data) {
     checkArgument(data != null, "DATA must not be null");
-    checkArgument(!data.isEmpty(), "Data MUST NOT be empty");
-
-    if (data.toHexString().equals("0x00")) return Bytes.concatenate(Bytes.of(0));
+    // checkArgument(!data.isEmpty(), "Data MUST NOT be empty");
+    // TODO FIX
+    if (data.toHexString().equals("0x00") || data.toHexString().equals("0x") || data.isEmpty())
+      return Bytes.concatenate(Bytes.of(0));
     return Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data);
   }
 
