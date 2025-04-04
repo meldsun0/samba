@@ -53,7 +53,7 @@ public class HistoricalHashesAccumulatorContainer
     return getField0().stream().map(SszBytes32::get).collect(Collectors.toList());
   }
 
-  public List<HeaderRecordContainer> getHeaderRecords() {
+  public List<HeaderRecordContainer> getEpochRecord() {
     return getField1().stream().collect(Collectors.toList());
   }
 
