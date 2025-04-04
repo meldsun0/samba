@@ -24,7 +24,7 @@ public class PortalGossip {
   public static void gossip(
       final Network network, final Set<NodeRecord> nodes, final Bytes key, final Bytes content) {
     checkArgument(network != null, "Network must not be null");
-    checkArgument(nodes != null && !nodes.isEmpty(), "Nodes must not be null or empty");
+    // checkArgument(nodes != null && !nodes.isEmpty(), "Nodes must not be null or empty");
     checkArgument(key != null, "Key must not be null");
     checkArgument(content != null, "Content must not be null");
 
