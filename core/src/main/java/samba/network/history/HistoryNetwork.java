@@ -246,17 +246,17 @@ public class HistoryNetwork extends BaseNetwork
     checkArgument(
         content.size() == message.getContentKeys().size(),
         "There should be same contentItems and contentKeys");
-    IntStream.range(0, content.size())
-        .forEach(
-            i -> {
-              Bytes bytes = content.get(i);
-              checkArgument(bytes != null, "Content at index %s is null", i);
-              checkArgument(
-                  bytes.size() >= 1,
-                  "Content at index %s must have size >= 1, but was %s",
-                  i,
-                  bytes.size());
-            });
+    //    IntStream.range(0, content.size())
+    //        .forEach(
+    //            i -> {
+    //              Bytes bytes = content.get(i);
+    //              checkArgument(bytes != null, "Content at index %s is null", i);
+    //              checkArgument(
+    //                  bytes.size() >= 1,
+    //                  "Content at index %s must have size >= 1, but was %s",
+    //                  i,
+    //                  bytes.size());
+    //            });
     // TODO check if this is ok?
     //    checkArgument(
     //        this.routingTable.findNode(nodeRecord.getNodeId()).isPresent(),
@@ -599,7 +599,7 @@ public class HistoryNetwork extends BaseNetwork
       Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(
           MessageType message) {
     return error -> {
-      LOG.trace("Something when wrong when sending a {} with error {}", message, error);
+      LOG.info("Something when wrong when sending a {} with error {}", message, error);
       return SafeFuture.completedFuture(Optional.empty());
     };
   }

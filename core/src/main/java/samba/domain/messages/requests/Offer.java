@@ -24,7 +24,7 @@ public class Offer implements PortalWireMessage {
     checkArgument(
         contentKeys.stream().allMatch(key -> key.size() <= MAX_CUSTOM_PAYLOAD_BYTES),
         "One or more content keys exceed maximum payload size");
-    checkContentKeys(contentKeys);
+    //  checkContentKeys(contentKeys);
     this.contentKeys = contentKeys;
   }
 
