@@ -28,12 +28,11 @@ public class Util {
     Bytes output = Bytes.EMPTY;
     int remaining = value >>> 7;
     while (remaining != 0) {
-      output = Bytes.concatenate(output, (Bytes.of(((value & 0x7f) | 0x80))));
+      output = Bytes.concatenate(output, Bytes.of((byte) ((value & 0x7f) | 0x80)));
       value = remaining;
       remaining >>>= 7;
     }
-
-    return Bytes.concatenate(output, (Bytes.of(value & 0x7f)));
+    return Bytes.concatenate(output, Bytes.of((byte) (value & 0x7f)));
   }
 
   public static int readUnsignedLeb128(Bytes input) {
@@ -43,6 +42,9 @@ public class Util {
     byte currentByte;
 
     while (true) {
+      if (index >= input.size()) {
+        throw new IllegalArgumentException("Invalid LEB128 encoding: input truncated");
+      }
       currentByte = input.get(index);
       index++;
       value |= (currentByte & 0x7f) << shift;
