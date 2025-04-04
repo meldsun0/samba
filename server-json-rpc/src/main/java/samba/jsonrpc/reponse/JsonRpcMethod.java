@@ -19,8 +19,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface JsonRpcMethod {
+
+  Logger LOG = LoggerFactory.getLogger(JsonRpcMethod.class);
 
   /**
    * Standardized JSON-RPC method name.
@@ -58,8 +62,12 @@ public interface JsonRpcMethod {
         requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
   }
 
-  default String getJSON(Object value) throws JsonProcessingException {
+  default void logJSON(Object value) {
     ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper.writeValueAsString(value);
+    try {
+      LOG.info(objectMapper.writeValueAsString(value));
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
