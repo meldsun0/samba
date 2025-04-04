@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -26,6 +29,8 @@ public class UTPManager implements TransportLayer<UTPAddress> {
   private final Map<String, UTPClient> connections;
   private final Discv5Client discv5Client;
 
+  private ExecutorService utpExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
   public UTPManager(final Discv5Client discv5Client) {
     this.discv5Client = discv5Client;
     this.connections = new ConcurrentHashMap<>();
@@ -38,13 +43,14 @@ public class UTPManager implements TransportLayer<UTPAddress> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
           utpClient
               .startListening(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.read())
+              .thenCompose(__ -> utpClient.read(this.utpExecutor))
               .thenAccept(onContentReceived)
               .get();
         },
         "acceptRead",
         nodeRecord,
-        connectionId);
+        connectionId,
+        this.utpExecutor);
     return connectionId;
   }
 
@@ -54,12 +60,13 @@ public class UTPManager implements TransportLayer<UTPAddress> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
           utpClient
               .connect(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.write(content))
+              .thenCompose(__ -> utpClient.write(content, this.utpExecutor))
               .get();
         },
         "offerWrite",
         nodeRecord,
-        connectionId);
+        connectionId,
+        this.utpExecutor);
   }
 
   public int foundContentWrite(NodeRecord nodeRecord, Bytes content) {
@@ -69,12 +76,13 @@ public class UTPManager implements TransportLayer<UTPAddress> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
           utpClient
               .startListening(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.write(content))
+              .thenCompose(__ -> utpClient.write(content, this.utpExecutor))
               .get();
         },
         "foundContentWrite",
         nodeRecord,
-        connectionId);
+        connectionId,
+        this.utpExecutor);
     return connectionId;
   }
 
@@ -84,7 +92,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
           UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
           return utpClient
               .connect(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.read());
+              .thenCompose(__ -> utpClient.read(this.utpExecutor));
         });
   }
 
@@ -101,7 +109,8 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     SafeFuture.runAsync(
         () ->
             this.discv5Client.sendDisv5Message(
-                remoteAddress.getAddress(), NetworkType.UTP.getValue(), packet.toBytes()));
+                remoteAddress.getAddress(), NetworkType.UTP.getValue(), packet.toBytes()),
+        this.utpExecutor);
   }
 
   public void onUTPMessageReceive(NodeRecord nodeRecord, Bytes response) {
@@ -110,7 +119,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     if (utpClient != null) {
       utpClient.receivePacket(utpPacket, new UTPAddress(nodeRecord));
     } else {
-      LOG.trace("No UTPClient found when receiving packet: {}", utpPacket);
+      LOG.info("No UTPClient found when receiving packet: {}", utpPacket);
     }
   }
 
@@ -152,7 +161,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
 
   private static void defaultUTPErrorLog(
       String operationName, NodeRecord nodeRecord, int connectionId, Throwable error) {
-    LOG.trace(
+    LOG.info(
         "Error {} when {} from {} on connectionId {}",
         error.getClass().getSimpleName(),
         operationName,
@@ -162,8 +171,13 @@ public class UTPManager implements TransportLayer<UTPAddress> {
   }
 
   private void runAsyncUTP(
-      RunnableUTP task, String operationName, NodeRecord nodeRecord, int connectionId) {
-    SafeFuture.runAsync(() -> executeWithHandling(task, operationName, nodeRecord, connectionId))
+      RunnableUTP task,
+      String operationName,
+      NodeRecord nodeRecord,
+      int connectionId,
+      Executor executor) {
+    SafeFuture.runAsync(
+            () -> executeWithHandling(task, operationName, nodeRecord, connectionId), executor)
         .exceptionally(defaultUTPErrorLog(operationName, nodeRecord, connectionId));
   }
 
