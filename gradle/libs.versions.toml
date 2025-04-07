@@ -43,6 +43,7 @@ besu-internal-rlp = { module = "org.hyperledger.besu.internal:rlp", version.ref 
 besu-internal-plugin-api = { module = "org.hyperledger.besu:plugin-api", version.ref = "besuInternal"}
 besu-evm = { module = "org.hyperledger.besu:evm", version.ref = "besuEvm" }
 besu-internal-crypto = { module = "org.hyperledger.besu.internal:crypto", version.ref = "besuCrypto" }
+besu-datatypes = { module = "org.hyperledger.besu:besu-datatypes", version.ref = "besuCrypto" }
 
 teku-internal-infrastructure-events = { module = "tech.pegasys.teku.internal:infrastructure-events", version.ref = "tekuInternal"}
 teku-internal-async = { module = "tech.pegasys.teku.internal:async", version.ref = "tekuInternal"}

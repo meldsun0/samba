@@ -11,7 +11,7 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
-import samba.services.jsonrpc.methods.results.FindContentResult;
+import samba.services.FindContentResult;
 import samba.services.jsonrpc.methods.results.GetContentResult;
 
 import java.util.Optional;

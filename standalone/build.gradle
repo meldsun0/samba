@@ -55,8 +55,12 @@ dependencies {
   implementation libs.jackson.datatype.jdk8
   implementation libs.jvm.libp2p
 
-  implementation project(':storage-rocksdb')
+  implementation libs.oshi.core
+
+
+  implementation project(':execution-history-network')
   implementation project(':server-json-rpc')
+  implementation project(':core')
   implementation 'org.meldsun.utp:utp-core:1.0-SNAPSHOT'
 
   compileOnly libs.projectlombok

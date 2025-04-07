@@ -8,7 +8,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.HistoryJsonRpcRequests;
-import samba.services.jsonrpc.methods.results.FindContentResult;
+import samba.services.*;
 
 import java.util.concurrent.ExecutionException;
 

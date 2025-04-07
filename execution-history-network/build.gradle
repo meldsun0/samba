@@ -1,3 +1,26 @@
 plugins {
-  id 'samba.java-common-conventions'
+  id 'samba.java-library-conventions'
+}
+
+group = 'samba.history'
+version = '1.0.0'
+
+dependencies {
+  implementation("org.apache.commons:commons-lang3:3.12.0")
+  implementation 'org.slf4j:slf4j-api:2.0.9'
+  implementation libs.oshi.core
+  implementation libs.picocli
+  implementation libs.teku.internal.serviceutils
+  implementation libs.teku.internal.async
+
+  implementation libs.besu.internal.metrics.core
+  implementation libs.besu.internal.plugin.api
+  implementation libs.besu.internal.metrics.core
+  implementation libs.discovery
+  implementation libs.tuweni.ssz
+  implementation project(':core')
+
+  runtimeOnly 'org.apache.logging.log4j:log4j-slf4j2-impl:2.20.0'
+  runtimeOnly 'org.apache.logging.log4j:log4j-core:2.20.0'
+  runtimeOnly 'org.apache.logging.log4j:log4j-api:2.20.0'
 }

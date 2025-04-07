@@ -1,13 +1,11 @@
 package samba.services.api;
 
 import samba.config.PortalRestApiConfig;
-import samba.config.VersionProvider;
 import samba.services.api.endpoints.health.GetHealth;
 
 import javax.naming.ServiceUnavailableException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.lang3.StringUtils;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
@@ -54,8 +52,8 @@ public class PortalAPI implements PortalRestAPI {
             .openApiInfo(
                 openApi ->
                     openApi
-                        .title(StringUtils.capitalize(VersionProvider.CLIENT_IDENTITY))
-                        .version(VersionProvider.IMPLEMENTATION_VERSION)
+                        // .title(StringUtils.capitalize(VersionProvider.CLIENT_IDENTITY))
+                        // .version(VersionProvider.IMPLEMENTATION_VERSION)
                         .description("A minimal API specification for the Portal node, which ...")
                         .license("Apache 2.0", "https://www.apache.org/licenses/LICENSE-2.0.html"))
             .openApiDocsEnabled(config.isRestApiDocsEnabled())

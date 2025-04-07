@@ -1,19 +1,52 @@
 plugins {
-  id 'java'
+  id 'samba.java-library-conventions'
 }
 
-group = 'samba'
-version = '25.3-develop-246c894'
-
-repositories {
-  mavenCentral()
-}
+group = 'samba.core'
+version = '1.0.0'
 
 dependencies {
-  testImplementation platform('org.junit:junit-bom:5.10.0')
-  testImplementation 'org.junit.jupiter:junit-jupiter'
-}
+  implementation libs.apache.logging.log4j.api
+  implementation libs.apache.logging.log4j.core
 
-test {
-  useJUnitPlatform()
+  //  implementation libs.prometheus.simpleclient
+
+  implementation libs.tuweni.ssz
+
+  implementation libs.besu.internal.core
+  implementation libs.besu.datatypes
+  implementation libs.besu.evm
+  implementation libs.besu.internal.plugin.api //TODO need to be removed
+  implementation libs.besu.internal.rlp
+  implementation libs.besu.internal.crypto
+
+
+
+  implementation libs.teku.internal.ssz
+  implementation libs.teku.internal.unsigned
+  implementation libs.teku.internal.async
+  implementation libs.teku.internal.infrastructure.events
+  implementation libs.teku.internal.io
+
+  implementation libs.teku.internal.serviceutils
+
+  implementation libs.jvm.libp2p
+  implementation libs.tuweni.crypto
+  implementation 'org.meldsun.utp:utp-core:1.0-SNAPSHOT'
+  implementation libs.oshi.core
+  implementation libs.google.guava
+  implementation libs.discovery
+  implementation libs.assertj.core
+  implementation libs.mockito.core
+
+
+  implementation project(':storage-rocksdb')
+
+  compileOnly libs.projectlombok
+  annotationProcessor libs.projectlombok
+  testCompileOnly libs.projectlombok
+  testAnnotationProcessor libs.projectlombok
+  testImplementation libs.junit.jupiter.api
+  testImplementation libs.assertj.core
+  testRuntimeOnly libs.junit.jupiter.engine
 }
