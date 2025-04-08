@@ -26,7 +26,7 @@ dependencies {
   implementation "${besuArtifactGroup}:plugin-api"
   implementation "${besuArtifactGroup}.internal:api"
   implementation "${besuArtifactGroup}.internal:core"
-  implementation "org.hyperledger.besu.internal:core:besuInternal"
+//  implementation "org.hyperledger.besu.internal:core:besuInternal"
 
   implementation 'com.google.code.gson:gson'
 
