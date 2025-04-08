@@ -1,15 +1,12 @@
 package samba.services;
 
-import static samba.logging.StatusLogger.STATUS_LOG;
 import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TIME_PROVIDER;
 
 import samba.Samba;
 import samba.SambaInitializer;
-import samba.config.MainServiceConfig;
+import samba.config.PortalNodeConfig;
 import samba.config.MetricsConfig;
 import samba.config.PortalRestApiConfig;
-import samba.config.SambaConfig;
-import samba.config.StartupLogConfig;
 import samba.exceptions.PortalDefaultExceptionHandler;
 import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.jsonrpc.config.RpcMethod;
@@ -53,11 +50,9 @@ public class PortalNode {
   private final EventChannels eventChannels;
   private final MetricsEndpoint metricsEndpoint;
 
-  private final MainServiceConfig mainServiceConfig;
+  private final PortalNodeConfig mainServiceConfig;
   private final PortalRestApiConfig portalRestApiConfig;
   private final JsonRpcConfiguration jsonRpcConfiguration;
-
-  private volatile SambaConfig sambaConfig;
 
   protected volatile Optional<PortalRestAPI> portalRestAPI = Optional.empty();
   protected volatile Optional<JsonRpcService> jsonRpcService = Optional.empty();
@@ -70,16 +65,8 @@ public class PortalNode {
     this.portalRestApiConfig = PortalRestApiConfig.builder().build();
     this.jsonRpcConfiguration = JsonRpcConfiguration.createDefault();
     this.mainServiceConfig =
-        new MainServiceConfig(
+        new PortalNodeConfig(
             SYSTEM_TIME_PROVIDER, eventChannels, metricsEndpoint.getMetricsSystem());
-
-    STATUS_LOG.startupConfigurations(
-        StartupLogConfig.builder()
-            .portalNodeRestApiEnabled(portalRestApiConfig.isRestApiDocsEnabled())
-            .portalNodeRestApiInterface(portalRestApiConfig.getRestApiInterface())
-            .portalNodeRestApiPort(portalRestApiConfig.getRestApiPort())
-            .portalNodeRestApiAllowList(portalRestApiConfig.getRestApiHostAllowlist())
-            .build());
 
     initHistoryNetwork(args);
     initRestAPI();
@@ -161,6 +148,6 @@ public class PortalNode {
     DefaultAsyncRunnerFactory asyncRunnerFactory =
         AsyncRunnerFactory.createDefault(
             new MetricTrackingExecutorFactory(new NoOpMetricsSystem(), new OccurrenceCounter(120)));
-    return asyncRunnerFactory.create("rest-api, 10", 10, AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE);
+    return asyncRunnerFactory.create("rest", 10, AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE);
   }
 }
