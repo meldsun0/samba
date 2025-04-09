@@ -4,8 +4,8 @@ import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TI
 
 import samba.Samba;
 import samba.SambaInitializer;
-import samba.config.PortalNodeConfig;
 import samba.config.MetricsConfig;
+import samba.config.PortalNodeConfig;
 import samba.config.PortalRestApiConfig;
 import samba.exceptions.PortalDefaultExceptionHandler;
 import samba.jsonrpc.config.JsonRpcConfiguration;
