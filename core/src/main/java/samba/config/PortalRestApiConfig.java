@@ -2,10 +2,12 @@ package samba.config;
 
 import java.util.List;
 
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
+@Getter
 public class PortalRestApiConfig {
 
   private static final Logger LOG = LogManager.getLogger();
@@ -38,30 +40,6 @@ public class PortalRestApiConfig {
     this.maxUrlLength = maxUrlLength;
     this.restApiCorsAllowedOrigins = restApiCorsAllowedOrigins;
     this.restApiHostAllowlist = restApiHostAllowlist;
-  }
-
-  public int getRestApiPort() {
-    return restApiPort;
-  }
-
-  public boolean isRestApiDocsEnabled() {
-    return restApiDocsEnabled;
-  }
-
-  public String getRestApiInterface() {
-    return restApiInterface;
-  }
-
-  public int getMaxUrlLength() {
-    return maxUrlLength;
-  }
-
-  public List<String> getRestApiCorsAllowedOrigins() {
-    return restApiCorsAllowedOrigins;
-  }
-
-  public List<String> getRestApiHostAllowlist() {
-    return restApiHostAllowlist;
   }
 
   public static PortalRestApiConfigBuilder builder() {

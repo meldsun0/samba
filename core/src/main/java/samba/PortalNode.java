@@ -82,9 +82,6 @@ public class PortalNode implements Node {
             rejectedExecutionCounter::getTotalCount);
     this.portalNodeMainController =
         new PortalNodeMainController(mainServiceConfig, sambaConfiguration, vertx);
-
-    // final String network =
-    // tekuConfig.eth2NetworkConfiguration().getEth2Network().map(Eth2Network::configName).orElse("empty");
   }
 
   @Override

@@ -1,17 +1,3 @@
-/*
- * Copyright ConsenSys AG.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
 package samba.jsonrpc.config;
 
 import java.util.ArrayList;
@@ -36,14 +22,14 @@ public class JsonRpcConfiguration {
   public static final boolean DEFAULT_PRETTY_JSON_ENABLED = false;
   public static final List<String> DEFAULT_RPC_APIS = Arrays.asList("DISCV5", "PORTAL_HISTORY");
 
-  @Setter private boolean enabled;
-  @Setter private int port;
-  @Setter private String host;
+  @Getter @Setter private boolean enabled;
+  @Getter @Setter private int port;
+  @Getter @Setter private String host;
   private List<String> corsAllowedDomains = Collections.emptyList();
   @Getter @Setter private List<String> rpcApis;
   @Setter private List<String> hostsAllowlist = Arrays.asList("localhost", "127.0.0.1");
-  @Setter private long httpTimeoutSec = TimeoutOptions.defaultOptions().getTimeoutSeconds();
-  @Setter private int maxActiveConnections;
+  @Getter @Setter private long httpTimeoutSec = TimeoutOptions.defaultOptions().getTimeoutSeconds();
+  @Getter @Setter private int maxActiveConnections;
   @Getter @Setter private int maxBatchSize;
   @Getter @Setter private long maxRequestContentLength;
   @Setter @Getter private boolean prettyJsonEnabled;
@@ -64,18 +50,6 @@ public class JsonRpcConfiguration {
 
   private JsonRpcConfiguration() {}
 
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public int getPort() {
-    return port;
-  }
-
-  public String getHost() {
-    return host;
-  }
-
   public Collection<String> getCorsAllowedDomains() {
     return corsAllowedDomains;
   }
@@ -93,10 +67,6 @@ public class JsonRpcConfiguration {
 
   public Collection<String> getHostsAllowlist() {
     return Collections.unmodifiableCollection(this.hostsAllowlist);
-  }
-
-  public long getHttpTimeoutSec() {
-    return httpTimeoutSec;
   }
 
   @Override
@@ -136,9 +106,5 @@ public class JsonRpcConfiguration {
   public int hashCode() {
     return Objects.hash(
         enabled, port, host, corsAllowedDomains, rpcApis, hostsAllowlist, maxBatchSize);
-  }
-
-  public int getMaxActiveConnections() {
-    return maxActiveConnections;
   }
 }
