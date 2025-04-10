@@ -14,6 +14,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Samba {
 
   public static void main(String[] args) {
+    init(args);
+  }
+
+  public static void init(String[] args) {
     System.out.println("Received arguments: " + Arrays.toString(args));
     Thread.setDefaultUncaughtExceptionHandler(new SambaDefaultExceptionHandler());
     try {
