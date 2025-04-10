@@ -8,8 +8,8 @@ import samba.config.SambaConfiguration;
 import samba.config.StartupLogConfig;
 import samba.config.VersionProvider;
 import samba.metrics.MetricsEndpoint;
-import samba.services.Node;
 import samba.services.MainServiceConfig;
+import samba.services.Node;
 import samba.services.PortalNodeMainController;
 import samba.util.PortalDefaultExceptionHandler;
 

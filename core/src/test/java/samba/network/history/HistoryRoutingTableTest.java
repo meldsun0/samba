@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import samba.TestHelper;
 import samba.domain.dht.LivenessChecker;
+import samba.network.history.routingtable.HistoryRoutingTable;
 import samba.network.history.routingtable.RoutingTable;
 
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import samba.network.history.routingtable.HistoryRoutingTable;
 
 public class HistoryRoutingTableTest {
 

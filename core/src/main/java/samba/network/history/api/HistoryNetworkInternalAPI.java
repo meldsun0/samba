@@ -11,6 +11,7 @@ import samba.domain.messages.response.Pong;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -39,4 +40,10 @@ public interface HistoryNetworkInternalAPI {
   SafeFuture<Optional<Bytes>> offer(NodeRecord nodeRecord, List<Bytes> content, Offer offer);
 
   Optional<String> lookupEnr(final UInt256 nodeId);
+
+  Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius);
+
+  void gossip(final Set<NodeRecord> nodes, final Bytes key, final Bytes content);
+
+  int getMaxGossipCount();
 }

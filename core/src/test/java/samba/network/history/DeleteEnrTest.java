@@ -5,8 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.network.history.routingtable.RoutingTable;
 import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;

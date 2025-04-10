@@ -18,6 +18,8 @@ import samba.api.jsonrpc.PortalHistoryOffer;
 import samba.api.jsonrpc.PortalHistoryPing;
 import samba.api.jsonrpc.PortalHistoryPutContent;
 import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.libary.HistoryLibraryAPI;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.config.SambaConfiguration;
 import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.domain.messages.MessageType;
@@ -76,6 +78,8 @@ public class PortalNodeMainService extends Service {
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
   private UTPManager utpManager;
+  private HistoryLibraryAPI historyLibraryAPI;
+
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
 
@@ -96,6 +100,7 @@ public class PortalNodeMainService extends Service {
     initHistoryNetwork();
     initIncomingRequestTalkHandlers();
     initConnectionService();
+    initLibrary();
     initRestAPI();
     initJsonRPCService();
   }
@@ -118,6 +123,10 @@ public class PortalNodeMainService extends Service {
 
   private void initUTPService() {
     this.utpManager = new UTPManager(this.discoveryService);
+  }
+
+  private void initLibrary() {
+    this.historyLibraryAPI = new HistoryLibraryAPIImpl(this.historyNetwork);
   }
 
   private void initJsonRPCService() {
@@ -171,7 +180,7 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryLookupEnr(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PUT_CONTENT.getMethodName(),
-          new PortalHistoryPutContent(this.historyNetwork));
+          new PortalHistoryPutContent(this.historyLibraryAPI));
 
       jsonRpcService =
           Optional.of(
