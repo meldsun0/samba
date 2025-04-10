@@ -2,6 +2,7 @@ package samba.network.history;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -24,7 +25,6 @@ import samba.network.NetworkType;
 import samba.network.PortalGossip;
 import samba.network.RoutingTable;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.search.RecursiveLookupTaskFindContent;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;

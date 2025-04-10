@@ -9,6 +9,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import samba.TestHelper;
+import samba.api.jsonrpc.PortalHistoryPutContent;
+import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -18,7 +20,6 @@ import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.PortalGossip;
 import samba.network.history.HistoryNetwork;
-import samba.services.jsonrpc.methods.results.PutContentResult;
 import samba.util.DefaultContent;
 
 import java.util.HashSet;

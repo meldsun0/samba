@@ -7,11 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static samba.TestHelper.createNodeRecord;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.response.Content;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 

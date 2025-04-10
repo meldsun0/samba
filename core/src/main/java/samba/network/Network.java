@@ -1,11 +1,11 @@
 package samba.network;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.requests.Offer;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
-import samba.services.jsonrpc.methods.results.FindContentResult;
 
 import java.util.List;
 import java.util.Optional;

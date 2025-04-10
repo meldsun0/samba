@@ -2,7 +2,7 @@ package samba.services.api;
 
 import samba.config.PortalRestApiConfig;
 import samba.config.VersionProvider;
-import samba.services.api.endpoints.health.GetHealth;
+import samba.api.rest.GetHealth;
 
 import javax.naming.ServiceUnavailableException;
 

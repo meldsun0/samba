@@ -4,9 +4,9 @@
 
 package samba.services.search;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.messages.requests.FindContent;
 import samba.network.history.HistoryNetwork;
-import samba.services.jsonrpc.methods.results.FindContentResult;
 
 import java.util.HashSet;
 import java.util.List;
