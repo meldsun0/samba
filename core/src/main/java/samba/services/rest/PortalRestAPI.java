@@ -1,4 +1,4 @@
-package samba.services.api;
+package samba.services.rest;
 
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 

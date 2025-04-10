@@ -1,8 +1,8 @@
-package samba.services.api;
+package samba.services.rest;
 
+import samba.api.rest.GetHealth;
 import samba.config.PortalRestApiConfig;
 import samba.config.VersionProvider;
-import samba.api.rest.GetHealth;
 
 import javax.naming.ServiceUnavailableException;
 
