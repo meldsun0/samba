@@ -16,7 +16,7 @@ import static samba.TestHelper.createNodeRecord;
 import samba.domain.content.ContentKey;
 import samba.domain.messages.requests.Offer;
 import samba.domain.messages.response.Accept;
-import samba.network.RoutingTable;
+import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;

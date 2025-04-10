@@ -1,8 +1,7 @@
-package samba.network.history;
+package samba.network.history.routingtable;
 
 import samba.domain.dht.LivenessChecker;
 import samba.domain.dht.NodeTable;
-import samba.network.RoutingTable;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;

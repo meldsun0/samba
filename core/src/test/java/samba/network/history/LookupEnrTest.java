@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import samba.TestHelper;
 import samba.domain.messages.response.Nodes;
-import samba.network.RoutingTable;
+import samba.network.history.routingtable.RoutingTable;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;

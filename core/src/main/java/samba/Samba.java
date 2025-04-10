@@ -2,7 +2,7 @@ package samba;
 
 import samba.cli.SambaCommand;
 import samba.config.SambaConfiguration;
-import samba.node.Node;
+import samba.services.Node;
 import samba.samba.SambaDefaultExceptionHandler;
 
 import java.io.PrintWriter;

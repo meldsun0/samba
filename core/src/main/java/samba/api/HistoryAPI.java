@@ -1,3 +1,8 @@
 package samba.api;
 
-public class HistoryAPI {}
+public interface HistoryAPI {
+
+
+
+
+}

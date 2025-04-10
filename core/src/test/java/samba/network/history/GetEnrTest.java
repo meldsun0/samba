@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static samba.TestHelper.createNodeRecord;
 
-import samba.network.RoutingTable;
+import samba.network.history.routingtable.RoutingTable;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;

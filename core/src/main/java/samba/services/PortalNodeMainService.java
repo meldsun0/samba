@@ -33,11 +33,11 @@ import samba.jsonrpc.health.HealthService;
 import samba.jsonrpc.health.LivenessCheck;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.network.history.HistoryNetwork;
-import samba.services.rest.PortalAPI;
-import samba.services.rest.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Discv5Service;
 import samba.services.jsonrpc.JsonRpcService;
+import samba.services.rest.PortalAPI;
+import samba.services.rest.PortalRestAPI;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryRocksDB;
 

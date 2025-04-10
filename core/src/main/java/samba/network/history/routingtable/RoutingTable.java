@@ -1,4 +1,4 @@
-package samba.network;
+package samba.network.history.routingtable;
 
 import java.util.Optional;
 import java.util.Set;

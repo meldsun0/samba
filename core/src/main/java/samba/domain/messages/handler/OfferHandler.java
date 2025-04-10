@@ -14,7 +14,7 @@ public class OfferHandler implements PortalWireMessageHandler<Offer> {
 
   @Override
   public PortalWireMessage handle(
-          HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, Offer offer) {
+      HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, Offer offer) {
     LOG.info("{} message received", offer.getMessageType());
     PortalWireMessage accept = network.handleOffer(srcNode, offer);
     return accept;

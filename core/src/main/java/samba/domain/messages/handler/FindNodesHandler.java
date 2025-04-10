@@ -14,7 +14,7 @@ public class FindNodesHandler implements PortalWireMessageHandler<FindNodes> {
 
   @Override
   public PortalWireMessage handle(
-          HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, FindNodes findNodes) {
+      HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, FindNodes findNodes) {
     LOG.info("{} message received", findNodes.getMessageType());
     return network.handleFindNodes(srcNode, findNodes);
   }

@@ -14,7 +14,7 @@ public class FindContentHandler implements PortalWireMessageHandler<FindContent>
 
   @Override
   public PortalWireMessage handle(
-          HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, FindContent findContent) {
+      HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, FindContent findContent) {
     LOG.info("{} message received", findContent.getMessageType());
     PortalWireMessage content = network.handleFindContent(srcNode, findContent);
     return content;
