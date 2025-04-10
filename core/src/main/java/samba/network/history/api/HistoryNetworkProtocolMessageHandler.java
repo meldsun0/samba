@@ -1,4 +1,4 @@
-package samba.network.history;
+package samba.network.history.api;
 
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
@@ -9,7 +9,7 @@ import samba.network.NetworkType;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-public interface HistoryNetworkIncomingRequests {
+public interface HistoryNetworkProtocolMessageHandler {
 
   PortalWireMessage handlePing(NodeRecord srcNode, Ping ping);
 

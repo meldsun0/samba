@@ -7,7 +7,7 @@ import samba.domain.messages.MessageType;
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
 import samba.network.NetworkType;
-import samba.network.history.HistoryNetworkIncomingRequests;
+import samba.network.history.api.HistoryNetworkProtocolMessageHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +24,9 @@ public class HistoryNetworkIncomingRequestHandler implements IncomingRequestHand
       LoggerFactory.getLogger(HistoryNetworkIncomingRequestHandler.class);
   private final Map<MessageType, PortalWireMessageHandler> historyMessageHandlers = new HashMap<>();
 
-  private HistoryNetworkIncomingRequests network;
+  private HistoryNetworkProtocolMessageHandler network;
 
-  public HistoryNetworkIncomingRequestHandler(final HistoryNetworkIncomingRequests network) {
+  public HistoryNetworkIncomingRequestHandler(final HistoryNetworkProtocolMessageHandler network) {
     this.network = network;
   }
 

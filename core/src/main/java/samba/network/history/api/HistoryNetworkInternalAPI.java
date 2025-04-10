@@ -1,4 +1,4 @@
-package samba.network.history;
+package samba.network.history.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.content.ContentKey;
@@ -17,7 +17,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
-public interface HistoryJsonRpcRequests {
+public interface HistoryNetworkInternalAPI {
 
   SafeFuture<Optional<Pong>> ping(NodeRecord nodeRecord, Ping message);
 

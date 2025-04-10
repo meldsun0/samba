@@ -8,7 +8,7 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.concurrent.ExecutionException;
 
@@ -21,10 +21,10 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 public class PortalHistoryFindContent implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryFindContent(HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryFindContent(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -39,7 +39,7 @@ public class PortalHistoryFindContent implements JsonRpcMethod {
       String contentKey = requestContext.getRequiredParameter(1, String.class);
 
       FindContentResult result =
-          this.historyJsonRpcRequests
+          this.historyNetworkInternalAPI
               .findContent(
                   NodeRecordFactory.DEFAULT.fromEnr(enr),
                   new FindContent(Bytes.fromHexString(contentKey)))

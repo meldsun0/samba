@@ -6,14 +6,14 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 public class PortalHistoryAddEnr implements JsonRpcMethod {
 
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryAddEnr(HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryAddEnr(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -32,7 +32,7 @@ public class PortalHistoryAddEnr implements JsonRpcMethod {
     //    if (!InputsValidations.isEnrValid(enr))
     //      return createJsonRpcInvalidRequestResponse(requestContext);
 
-    historyJsonRpcRequests.addEnr(enr);
+    historyNetworkInternalAPI.addEnr(enr);
 
     return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), true);
   }

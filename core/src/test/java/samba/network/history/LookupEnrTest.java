@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import samba.TestHelper;
 import samba.domain.messages.response.Nodes;
 import samba.network.RoutingTable;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
@@ -32,7 +33,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
 
 public class LookupEnrTest {
 
-  private HistoryJsonRpcRequests historyNetwork;
+  private HistoryNetworkInternalAPI historyNetwork;
   private NodeRecord nodeRecord;
   private RoutingTable routingTable;
   private Discv5Client discv5Client;

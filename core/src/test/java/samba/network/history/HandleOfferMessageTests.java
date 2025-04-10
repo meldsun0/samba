@@ -12,6 +12,7 @@ import static samba.TestHelper.createNodeRecord;
 import samba.domain.content.ContentKey;
 import samba.domain.messages.requests.Offer;
 import samba.domain.messages.response.Accept;
+import samba.network.history.api.HistoryNetworkProtocolMessageHandler;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
@@ -28,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 public class HandleOfferMessageTests {
 
-  private HistoryNetworkIncomingRequests historyNetwork;
+  private HistoryNetworkProtocolMessageHandler historyNetwork;
   private HistoryDB historyDB;
   private Discv5Client discv5Client;
   private UTPManager utpManager;

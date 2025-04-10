@@ -8,7 +8,7 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -22,10 +22,10 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 public class PortalHistoryFindNodes implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryFindNodes(HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryFindNodes(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -49,7 +49,7 @@ public class PortalHistoryFindNodes implements JsonRpcMethod {
     Optional<Nodes> nodes;
     try {
       nodes =
-          this.historyJsonRpcRequests
+          this.historyNetworkInternalAPI
               .findNodes(NodeRecordFactory.DEFAULT.fromEnr(enr), new FindNodes(distances))
               .get();
 

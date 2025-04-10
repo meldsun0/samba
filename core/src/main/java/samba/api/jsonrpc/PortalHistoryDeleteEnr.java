@@ -7,14 +7,14 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 public class PortalHistoryDeleteEnr implements JsonRpcMethod {
 
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryDeleteEnr(HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryDeleteEnr(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -33,7 +33,7 @@ public class PortalHistoryDeleteEnr implements JsonRpcMethod {
     if (!InputsValidations.isNodeIdValid(nodeId)) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    boolean wasRemoved = this.historyJsonRpcRequests.deleteEnr(nodeId);
+    boolean wasRemoved = this.historyNetworkInternalAPI.deleteEnr(nodeId);
 
     return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), wasRemoved);
   }

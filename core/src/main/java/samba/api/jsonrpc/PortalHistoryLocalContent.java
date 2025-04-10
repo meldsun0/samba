@@ -9,7 +9,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
 
@@ -21,10 +21,10 @@ public class PortalHistoryLocalContent implements JsonRpcMethod {
 
   protected static final Logger LOG = LogManager.getLogger();
 
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryLocalContent(final HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryLocalContent(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -42,7 +42,7 @@ public class PortalHistoryLocalContent implements JsonRpcMethod {
       }
 
       Optional<String> result =
-          this.historyJsonRpcRequests.getLocalContent(ContentKey.decode(contentKey));
+          this.historyNetworkInternalAPI.getLocalContent(ContentKey.decode(contentKey));
 
       if (result.isEmpty()) {
         return new JsonRpcErrorResponse(

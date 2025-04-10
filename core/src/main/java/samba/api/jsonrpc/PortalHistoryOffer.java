@@ -8,7 +8,7 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +20,10 @@ import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 
 public class PortalHistoryOffer implements JsonRpcMethod {
 
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryOffer(final HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryOffer(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -46,7 +46,7 @@ public class PortalHistoryOffer implements JsonRpcMethod {
       final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
 
       Optional<Bytes> contentKeysBitList =
-          this.historyJsonRpcRequests.offer(nodeRecord, content, new Offer(contentKeys)).get();
+          this.historyNetworkInternalAPI.offer(nodeRecord, content, new Offer(contentKeys)).get();
 
       if (contentKeysBitList.isEmpty()) {
         return createJsonRpcInvalidRequestResponse(requestContext);

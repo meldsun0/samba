@@ -7,16 +7,16 @@ import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
 
 public class PortalHistoryGetEnr implements JsonRpcMethod {
 
-  private final HistoryJsonRpcRequests historyJsonRpcRequests;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public PortalHistoryGetEnr(HistoryJsonRpcRequests historyJsonRpcRequests) {
-    this.historyJsonRpcRequests = historyJsonRpcRequests;
+  public PortalHistoryGetEnr(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
@@ -35,7 +35,7 @@ public class PortalHistoryGetEnr implements JsonRpcMethod {
     if (!InputsValidations.isNodeIdValid(nodeId)) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    Optional<String> enr = this.historyJsonRpcRequests.getEnr(nodeId);
+    Optional<String> enr = this.historyNetworkInternalAPI.getEnr(nodeId);
 
     if (enr.isPresent()) {
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), enr.get());

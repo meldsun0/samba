@@ -24,6 +24,8 @@ import samba.network.BaseNetwork;
 import samba.network.NetworkType;
 import samba.network.PortalGossip;
 import samba.network.RoutingTable;
+import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.api.HistoryNetworkProtocolMessageHandler;
 import samba.services.discovery.Discv5Client;
 import samba.services.search.RecursiveLookupTaskFindContent;
 import samba.services.utp.UTPManager;
@@ -52,7 +54,7 @@ import org.jetbrains.annotations.NotNull;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class HistoryNetwork extends BaseNetwork
-    implements HistoryJsonRpcRequests, HistoryNetworkIncomingRequests, LivenessChecker {
+    implements HistoryNetworkInternalAPI, HistoryNetworkProtocolMessageHandler, LivenessChecker {
 
   private UInt256 nodeRadius;
   private final HistoryDB historyDB;
