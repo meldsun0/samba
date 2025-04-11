@@ -2,6 +2,24 @@ package samba.services;
 
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
+import samba.api.jsonrpc.ClientVersion;
+import samba.api.jsonrpc.Discv5GetEnr;
+import samba.api.jsonrpc.Discv5NodeInfo;
+import samba.api.jsonrpc.Discv5UpdateNodeInfo;
+import samba.api.jsonrpc.PortalHistoryAddEnr;
+import samba.api.jsonrpc.PortalHistoryDeleteEnr;
+import samba.api.jsonrpc.PortalHistoryFindContent;
+import samba.api.jsonrpc.PortalHistoryFindNodes;
+import samba.api.jsonrpc.PortalHistoryGetContent;
+import samba.api.jsonrpc.PortalHistoryGetEnr;
+import samba.api.jsonrpc.PortalHistoryLocalContent;
+import samba.api.jsonrpc.PortalHistoryLookupEnr;
+import samba.api.jsonrpc.PortalHistoryOffer;
+import samba.api.jsonrpc.PortalHistoryPing;
+import samba.api.jsonrpc.PortalHistoryPutContent;
+import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.libary.HistoryLibraryAPI;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.config.SambaConfiguration;
 import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.domain.messages.MessageType;
@@ -17,27 +35,11 @@ import samba.jsonrpc.health.HealthService;
 import samba.jsonrpc.health.LivenessCheck;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.network.history.HistoryNetwork;
-import samba.services.api.PortalAPI;
-import samba.services.api.PortalRestAPI;
 import samba.services.connecton.ConnectionService;
 import samba.services.discovery.Discv5Service;
 import samba.services.jsonrpc.JsonRpcService;
-import samba.services.jsonrpc.methods.ClientVersion;
-import samba.services.jsonrpc.methods.discv5.Discv5GetEnr;
-import samba.services.jsonrpc.methods.discv5.Discv5NodeInfo;
-import samba.services.jsonrpc.methods.discv5.Discv5UpdateNodeInfo;
-import samba.services.jsonrpc.methods.history.PortalHistoryAddEnr;
-import samba.services.jsonrpc.methods.history.PortalHistoryDeleteEnr;
-import samba.services.jsonrpc.methods.history.PortalHistoryFindContent;
-import samba.services.jsonrpc.methods.history.PortalHistoryFindNodes;
-import samba.services.jsonrpc.methods.history.PortalHistoryGetContent;
-import samba.services.jsonrpc.methods.history.PortalHistoryGetEnr;
-import samba.services.jsonrpc.methods.history.PortalHistoryLocalContent;
-import samba.services.jsonrpc.methods.history.PortalHistoryLookupEnr;
-import samba.services.jsonrpc.methods.history.PortalHistoryOffer;
-import samba.services.jsonrpc.methods.history.PortalHistoryPing;
-import samba.services.jsonrpc.methods.history.PortalHistoryPutContent;
-import samba.services.jsonrpc.methods.history.PortalHistoryStore;
+import samba.services.rest.PortalAPI;
+import samba.services.rest.PortalRestAPI;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryRocksDB;
 
@@ -76,6 +78,8 @@ public class PortalNodeMainService extends Service {
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
   private UTPManager utpManager;
+  private HistoryLibraryAPI historyLibraryAPI;
+
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
 
@@ -96,6 +100,7 @@ public class PortalNodeMainService extends Service {
     initHistoryNetwork();
     initIncomingRequestTalkHandlers();
     initConnectionService();
+    initLibrary();
     initRestAPI();
     initJsonRPCService();
   }
@@ -118,6 +123,10 @@ public class PortalNodeMainService extends Service {
 
   private void initUTPService() {
     this.utpManager = new UTPManager(this.discoveryService);
+  }
+
+  private void initLibrary() {
+    this.historyLibraryAPI = new HistoryLibraryAPIImpl(this.historyNetwork);
   }
 
   private void initJsonRPCService() {
@@ -171,7 +180,7 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryLookupEnr(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PUT_CONTENT.getMethodName(),
-          new PortalHistoryPutContent(this.historyNetwork));
+          new PortalHistoryPutContent(this.historyLibraryAPI));
 
       jsonRpcService =
           Optional.of(

@@ -2,7 +2,7 @@ package samba.domain.messages.handler;
 
 import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.requests.FindContent;
-import samba.network.history.HistoryNetworkIncomingRequests;
+import samba.network.history.api.HistoryNetworkProtocolMessageHandler;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ public class FindContentHandler implements PortalWireMessageHandler<FindContent>
 
   @Override
   public PortalWireMessage handle(
-      HistoryNetworkIncomingRequests network, NodeRecord srcNode, FindContent findContent) {
+      HistoryNetworkProtocolMessageHandler network, NodeRecord srcNode, FindContent findContent) {
     LOG.info("{} message received", findContent.getMessageType());
     PortalWireMessage content = network.handleFindContent(srcNode, findContent);
     return content;

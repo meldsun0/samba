@@ -6,6 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.jsonrpc.PortalHistoryPing;
+import samba.api.jsonrpc.results.PingResult;
+import samba.api.jsonrpc.schemas.ClientInfoAndCapabilitiesJson;
 import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;
 import samba.domain.messages.response.Pong;
 import samba.domain.types.unsigned.UInt16;
@@ -17,8 +20,6 @@ import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.results.PingResult;
-import samba.services.jsonrpc.methods.schemas.ClientInfoAndCapabilitiesJson;
 
 import java.util.List;
 import java.util.Optional;

@@ -9,13 +9,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import samba.api.jsonrpc.PortalHistoryStore;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.util.DefaultContent;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -26,13 +27,13 @@ import org.junit.jupiter.api.Test;
 public class PortalHistoryStoreTest {
   private final String JSON_RPC_VERSION = "2.0";
   private final String PORTAL_HISTORY_STORE = "portal_historyStore";
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private HistoryNetworkInternalAPI historyNetworkInternalAPI;
   private PortalHistoryStore method;
 
   @BeforeEach
   public void before() {
-    this.historyJsonRpcRequests = mock(HistoryJsonRpcRequests.class);
-    method = new PortalHistoryStore(this.historyJsonRpcRequests);
+    this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
+    method = new PortalHistoryStore(this.historyNetworkInternalAPI);
   }
 
   @Test
@@ -46,13 +47,13 @@ public class PortalHistoryStoreTest {
     String contentValue = DefaultContent.value1.toHexString();
 
     final JsonRpcRequestContext request = createRequest(contentKey, contentValue);
-    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
+    when(historyNetworkInternalAPI.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
 
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    verify(this.historyJsonRpcRequests, times(1)).store(any(Bytes.class), any(Bytes.class));
+    verify(this.historyNetworkInternalAPI, times(1)).store(any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -61,14 +62,14 @@ public class PortalHistoryStoreTest {
     String contentValue = DefaultContent.value1.toHexString();
 
     final JsonRpcRequestContext request = createRequest(contentKey, contentValue);
-    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(false);
+    when(historyNetworkInternalAPI.store(any(Bytes.class), any(Bytes.class))).thenReturn(false);
 
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(request.getRequest().getId(), false);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    verify(this.historyJsonRpcRequests, times(1)).store(any(Bytes.class), any(Bytes.class));
+    verify(this.historyNetworkInternalAPI, times(1)).store(any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -77,7 +78,7 @@ public class PortalHistoryStoreTest {
 
     JsonRpcRequestContext request = createRequest("", contentValue);
 
-    verify(this.historyJsonRpcRequests, never()).store(any(Bytes.class), any(Bytes.class));
+    verify(this.historyNetworkInternalAPI, never()).store(any(Bytes.class), any(Bytes.class));
 
     JsonRpcResponse expected =
         new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
@@ -94,7 +95,7 @@ public class PortalHistoryStoreTest {
   public void shouldReturnOkIfContentKeyIsEmpty() {
     String contentKey = DefaultContent.key1.toHexString();
     JsonRpcRequestContext request = createRequest(contentKey, "");
-    when(historyJsonRpcRequests.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
+    when(historyNetworkInternalAPI.store(any(Bytes.class), any(Bytes.class))).thenReturn(true);
 
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
     JsonRpcResponse actual = method.response(request);

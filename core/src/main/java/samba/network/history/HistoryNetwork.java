@@ -2,6 +2,7 @@ package samba.network.history;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -21,10 +22,11 @@ import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
 import samba.network.BaseNetwork;
 import samba.network.NetworkType;
-import samba.network.PortalGossip;
-import samba.network.RoutingTable;
+import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.api.HistoryNetworkProtocolMessageHandler;
+import samba.network.history.routingtable.HistoryRoutingTable;
+import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
-import samba.services.jsonrpc.methods.results.FindContentResult;
 import samba.services.search.RecursiveLookupTaskFindContent;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
@@ -37,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,13 +56,17 @@ import org.jetbrains.annotations.NotNull;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class HistoryNetwork extends BaseNetwork
-    implements HistoryJsonRpcRequests, HistoryNetworkIncomingRequests, LivenessChecker {
+    implements HistoryNetworkInternalAPI, HistoryNetworkProtocolMessageHandler, LivenessChecker {
 
   private UInt256 nodeRadius;
   private final HistoryDB historyDB;
   final NodeRecordFactory nodeRecordFactory;
   protected RoutingTable routingTable;
   private final UTPManager utpManager;
+
+  public static final int MAX_GOSSIP_COUNT = 4;
+  private static final ExecutorService EXECUTOR_GOSSIP =
+      Executors.newVirtualThreadPerTaskExecutor();
 
   // TODO standard client version text, standard capabilities list, standard client info extension,
   // default ping with standard arguments
@@ -194,11 +202,9 @@ public class HistoryNetwork extends BaseNetwork
                               // Gossip new content to network
                               if (saved) {
                                 Set<NodeRecord> foundNodes =
-                                    getFoundNodes(
-                                        contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
+                                    getFoundNodes(contentKey, MAX_GOSSIP_COUNT + 1, true);
                                 foundNodes.remove(nodeRecord);
-                                PortalGossip.gossip(
-                                    this, foundNodes, message.getContentKey(), data);
+                                this.gossip(foundNodes, message.getContentKey(), data);
                               }
                               return SafeFuture.completedFuture(
                                   Optional.of(new FindContentResult(data.toHexString(), true)));
@@ -213,10 +219,9 @@ public class HistoryNetwork extends BaseNetwork
                   // Gossip new content to network
                   if (saved) {
                     Set<NodeRecord> foundNodes =
-                        getFoundNodes(contentKey, PortalGossip.MAX_GOSSIP_COUNT + 1, true);
+                        getFoundNodes(contentKey, MAX_GOSSIP_COUNT + 1, true);
                     foundNodes.remove(nodeRecord);
-                    PortalGossip.gossip(
-                        this, foundNodes, message.getContentKey(), content.getContent());
+                    this.gossip(foundNodes, message.getContentKey(), content.getContent());
                   }
                   yield SafeFuture.completedFuture(
                       Optional.of(
@@ -620,9 +625,38 @@ public class HistoryNetwork extends BaseNetwork
     return this.getFoundNodes(contentKey, 10, false);
   }
 
+  @Override
   public Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
     return this.routingTable.findClosestNodesToContentKey(
         contentKey.getSszBytes(), count, inRadius);
+  }
+
+  @Override
+  public void gossip(Set<NodeRecord> nodes, Bytes key, Bytes content) {
+    // checkArgument(nodes != null && !nodes.isEmpty(), "Nodes must not be null or empty");
+    checkArgument(key != null, "Key must not be null");
+    checkArgument(content != null, "Content must not be null");
+
+    final List<Bytes> keyList = List.of(key);
+    final List<Bytes> contentList = List.of(content);
+    final Offer offer = new Offer(keyList);
+
+    nodes.forEach(
+        node ->
+            SafeFuture.runAsync(
+                () -> {
+                  try {
+                    this.offer(node, contentList, offer);
+                  } catch (Exception e) {
+                    LOG.error("Failed to gossip to node {}: {}", node, e.getMessage(), e);
+                  }
+                },
+                EXECUTOR_GOSSIP));
+  }
+
+  @Override
+  public int getMaxGossipCount() {
+    return MAX_GOSSIP_COUNT;
   }
 
   @Override

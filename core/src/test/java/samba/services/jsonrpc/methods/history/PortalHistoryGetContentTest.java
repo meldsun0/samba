@@ -7,6 +7,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.jsonrpc.PortalHistoryGetContent;
+import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.GetContentResult;
 import samba.domain.content.ContentKey;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -15,8 +18,6 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
-import samba.services.jsonrpc.methods.results.FindContentResult;
-import samba.services.jsonrpc.methods.results.GetContentResult;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

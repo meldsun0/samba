@@ -6,13 +6,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.jsonrpc.PortalHistoryGetEnr;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
 
@@ -22,13 +23,13 @@ import org.junit.jupiter.api.Test;
 public class PortalHistoryGetEnrTest {
   private final String JSON_RPC_VERSION = "2.0";
   private final String PORTAL_HISTORY_GET_ENR = "portal_historyGetEnr";
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private HistoryNetworkInternalAPI historyNetworkInternalAPI;
   private PortalHistoryGetEnr method;
 
   @BeforeEach
   public void before() {
-    this.historyJsonRpcRequests = mock(HistoryJsonRpcRequests.class);
-    method = new PortalHistoryGetEnr(this.historyJsonRpcRequests);
+    this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
+    method = new PortalHistoryGetEnr(this.historyNetworkInternalAPI);
   }
 
   @Test
@@ -49,7 +50,7 @@ public class PortalHistoryGetEnrTest {
                   "0xbb19e64f21d50187b61f4c68b2090db0a3283fe54021902822ff6ea0132568be"
                 }));
 
-    when(historyJsonRpcRequests.getEnr(any(String.class))).thenReturn(Optional.of(enr));
+    when(historyNetworkInternalAPI.getEnr(any(String.class))).thenReturn(Optional.of(enr));
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), enr);
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
@@ -83,7 +84,7 @@ public class PortalHistoryGetEnrTest {
 
   @Test
   public void shouldReturnInvalidResultAsNoLookUpENRIsEmpty() {
-    when(historyJsonRpcRequests.getEnr(any(String.class))).thenReturn(Optional.empty());
+    when(historyNetworkInternalAPI.getEnr(any(String.class))).thenReturn(Optional.empty());
     final JsonRpcRequestContext request =
         new JsonRpcRequestContext(
             new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_GET_ENR, new Object[] {}));

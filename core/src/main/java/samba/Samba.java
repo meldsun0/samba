@@ -2,8 +2,8 @@ package samba;
 
 import samba.cli.SambaCommand;
 import samba.config.SambaConfiguration;
-import samba.node.Node;
 import samba.samba.SambaDefaultExceptionHandler;
+import samba.services.Node;
 
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -14,6 +14,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public final class Samba {
 
   public static void main(String[] args) {
+    init(args);
+  }
+
+  public static void init(String[] args) {
     System.out.println("Received arguments: " + Arrays.toString(args));
     Thread.setDefaultUncaughtExceptionHandler(new SambaDefaultExceptionHandler());
     try {

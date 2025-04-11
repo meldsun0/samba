@@ -1,0 +1,28 @@
+package samba.api.jsonrpc.results;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonPropertyOrder({"content", "utpTransfer"})
+public class GetContentResult {
+
+  private final String content;
+  private final boolean utpTransfer;
+
+  public GetContentResult(final String content, final boolean utpTransfer) {
+    this.content = content;
+    this.utpTransfer = utpTransfer;
+  }
+
+  @JsonGetter(value = "content")
+  public String getContent() {
+    return content;
+  }
+
+  @JsonGetter(value = "utpTransfer")
+  public boolean getUtpTransfer() {
+    return utpTransfer;
+  }
+}

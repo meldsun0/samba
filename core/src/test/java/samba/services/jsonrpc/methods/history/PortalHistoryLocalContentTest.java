@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import samba.api.jsonrpc.PortalHistoryLocalContent;
 import samba.domain.content.ContentKey;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -16,7 +17,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.HistoryJsonRpcRequests;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.util.DefaultContent;
 
 import java.util.Optional;
@@ -28,13 +29,13 @@ import org.junit.jupiter.api.Test;
 public class PortalHistoryLocalContentTest {
   private final String JSON_RPC_VERSION = "2.0";
   private final String PORTAL_HISTORY_LOCAL_CONTENT = "portal_historyLocalContent";
-  private HistoryJsonRpcRequests historyJsonRpcRequests;
+  private HistoryNetworkInternalAPI historyNetworkInternalAPI;
   private PortalHistoryLocalContent method;
 
   @BeforeEach
   public void before() {
-    this.historyJsonRpcRequests = mock(HistoryJsonRpcRequests.class);
-    method = new PortalHistoryLocalContent(this.historyJsonRpcRequests);
+    this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
+    method = new PortalHistoryLocalContent(this.historyNetworkInternalAPI);
   }
 
   @Test
@@ -47,7 +48,7 @@ public class PortalHistoryLocalContentTest {
     String content = DefaultContent.value1.toHexString();
 
     final JsonRpcRequestContext request = createRequest(DefaultContent.key1.toHexString());
-    when(historyJsonRpcRequests.getLocalContent(any(ContentKey.class)))
+    when(historyNetworkInternalAPI.getLocalContent(any(ContentKey.class)))
         .thenReturn(Optional.of(content));
 
     final JsonRpcResponse expected =
@@ -55,7 +56,7 @@ public class PortalHistoryLocalContentTest {
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    verify(this.historyJsonRpcRequests, times(1)).getLocalContent(any(ContentKey.class));
+    verify(this.historyNetworkInternalAPI, times(1)).getLocalContent(any(ContentKey.class));
   }
 
   @Test
@@ -66,13 +67,13 @@ public class PortalHistoryLocalContentTest {
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    verify(this.historyJsonRpcRequests, never()).getLocalContent(any(ContentKey.class));
+    verify(this.historyNetworkInternalAPI, never()).getLocalContent(any(ContentKey.class));
   }
 
   @Test
   public void shouldReturnContentNotFoundResultIfContentIsNotFound() {
     final JsonRpcRequestContext request = createRequest(DefaultContent.key1.toHexString());
-    when(historyJsonRpcRequests.getLocalContent(any(ContentKey.class)))
+    when(historyNetworkInternalAPI.getLocalContent(any(ContentKey.class)))
         .thenReturn(Optional.empty());
 
     final JsonRpcResponse expected =
@@ -81,7 +82,7 @@ public class PortalHistoryLocalContentTest {
     final JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
-    verify(this.historyJsonRpcRequests, times(1)).getLocalContent(any(ContentKey.class));
+    verify(this.historyNetworkInternalAPI, times(1)).getLocalContent(any(ContentKey.class));
   }
 
   @NotNull

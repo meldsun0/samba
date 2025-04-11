@@ -85,6 +85,13 @@ public class SambaCommand implements Callable<Integer> {
       arity = "1")
   final Path dataPath = StorageConfig.getDefaultSambaDataPath(this);
 
+  @Option(
+      names = "--disable-json-rpc-server",
+      description = "Disables JSON-RPC Server (set to true if flag is present)",
+      defaultValue = "false",
+      fallbackValue = "true")
+  private boolean disableJsonRpcServer;
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -135,6 +142,7 @@ public class SambaCommand implements Callable<Integer> {
             if (jsonRpcHost != null) {
               jsonRpc.setHost(jsonRpcHost);
             }
+            jsonRpc.setEnabled(!disableJsonRpcServer);
           });
 
       if (unsafePrivateKey != null) {

@@ -1,0 +1,66 @@
+package samba.api.jsonrpc;
+
+import samba.domain.messages.requests.FindNodes;
+import samba.domain.messages.response.Nodes;
+import samba.jsonrpc.config.RpcMethod;
+import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.jsonrpc.reponse.JsonRpcParameter;
+import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
+import samba.network.history.api.HistoryNetworkInternalAPI;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
+
+public class PortalHistoryFindNodes implements JsonRpcMethod {
+  protected static final Logger LOG = LogManager.getLogger();
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+
+  public PortalHistoryFindNodes(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  }
+
+  @Override
+  public String getName() {
+    return RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName();
+  }
+
+  @Override
+  public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
+    String enr;
+    Set<Integer> distances;
+    try {
+      enr = requestContext.getRequiredParameter(0, String.class);
+      distances =
+          Arrays.stream(requestContext.getRequiredParameter(1, Integer[].class))
+              .collect(Collectors.toSet());
+    } catch (JsonRpcParameter.JsonRpcParameterException e) {
+      return createJsonRpcInvalidRequestResponse(requestContext);
+    }
+
+    Optional<Nodes> nodes;
+    try {
+      nodes =
+          this.historyNetworkInternalAPI
+              .findNodes(NodeRecordFactory.DEFAULT.fromEnr(enr), new FindNodes(distances))
+              .get();
+
+    } catch (InterruptedException | ExecutionException e) {
+      return createJsonRpcInvalidRequestResponse(requestContext);
+    }
+
+    if (nodes.isPresent()) {
+      return new JsonRpcSuccessResponse(
+          requestContext.getRequest().getId(), nodes.get().getEnrsWithENRPerItem());
+    }
+    return createJsonRpcInvalidRequestResponse(requestContext);
+  }
+}

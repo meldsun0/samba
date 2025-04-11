@@ -8,8 +8,8 @@ import samba.config.SambaConfiguration;
 import samba.config.StartupLogConfig;
 import samba.config.VersionProvider;
 import samba.metrics.MetricsEndpoint;
-import samba.node.Node;
 import samba.services.MainServiceConfig;
+import samba.services.Node;
 import samba.services.PortalNodeMainController;
 import samba.util.PortalDefaultExceptionHandler;
 
@@ -82,9 +82,6 @@ public class PortalNode implements Node {
             rejectedExecutionCounter::getTotalCount);
     this.portalNodeMainController =
         new PortalNodeMainController(mainServiceConfig, sambaConfiguration, vertx);
-
-    // final String network =
-    // tekuConfig.eth2NetworkConfiguration().getEth2Network().map(Eth2Network::configName).orElse("empty");
   }
 
   @Override

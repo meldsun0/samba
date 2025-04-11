@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import samba.TestHelper;
 import samba.domain.dht.LivenessChecker;
-import samba.network.RoutingTable;
+import samba.network.history.routingtable.HistoryRoutingTable;
+import samba.network.history.routingtable.RoutingTable;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,7 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static samba.TestHelper.createNodeRecord;
 
-import samba.network.RoutingTable;
+import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
@@ -25,7 +26,7 @@ import org.junit.platform.commons.util.ReflectionUtils;
 public class GetEnrTest {
 
   private HistoryDB historyDB;
-  private HistoryJsonRpcRequests historyNetwork;
+  private HistoryNetworkInternalAPI historyNetwork;
   private Discv5Client discv5Client;
   private final String nodeId =
       "0xbb19e64f21d50187b61f4c68b2090db0a3283fe54021902822ff6ea0132568be";
