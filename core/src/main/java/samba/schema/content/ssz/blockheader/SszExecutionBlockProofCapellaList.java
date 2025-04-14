@@ -23,6 +23,10 @@ public class SszExecutionBlockProofCapellaList {
   private final SszList<SszBytes32> ExecutionBlockProof;
 
   public SszExecutionBlockProofCapellaList(SszList<SszBytes32> ExecutionBlockProof) {
+    if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_LIMIT) {
+      throw new IllegalArgumentException(
+          "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_LIMIT);
+    }
     this.ExecutionBlockProof = ExecutionBlockProof;
   }
 
