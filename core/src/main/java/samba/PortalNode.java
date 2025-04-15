@@ -52,7 +52,7 @@ public class PortalNode implements Node {
   // private final MetricsPublisherManager metricsPublisher;
 
   public PortalNode(final SambaConfiguration sambaConfiguration) {
-    this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig(), vertx);
+    this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig());
     this.eventChannels =
         new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
     this.asyncRunnerFactory =
