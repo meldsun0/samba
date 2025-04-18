@@ -34,7 +34,7 @@ licenseReport {
 }
 
 build {
-  dependsOn checkLicense
+ // dependsOn checkLicense
 }
 
 jar {

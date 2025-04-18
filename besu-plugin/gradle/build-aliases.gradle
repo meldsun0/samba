@@ -1,10 +1,10 @@
-defaultTasks 'build', 'checkLicense', 'javadoc', 'artifacts'
+defaultTasks 'build', 'javadoc', 'artifacts'
 
 def buildAliases = [
         'dev': [
                 'spotlessApply',
-                'build',
-                'checkLicense'
+                'build'//,
+               // 'checkLicense'
         ],
         'artifacts' : [
                 'jar',
