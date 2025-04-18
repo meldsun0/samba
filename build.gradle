@@ -9,6 +9,7 @@ plugins {
   id 'net.ltgt.errorprone' version '4.0.1'
   id 'jacoco'
   id 'jacoco-report-aggregation'
+  id 'maven-publish'
 }
 
 
@@ -209,12 +210,13 @@ apply from: 'buildscripts/startScripts.gradle'
 
 installDist { dependsOn untunedStartScripts }
 
-ext.archiveBuildVersion =  archiveBuildVersion
+ext.archiveBuildVersion = archiveBuildVersion
 
 apply from: 'buildscripts/buildTar.gradle'
 
 apply from: 'buildscripts/buildZip.gradle'
 
+apply from: 'buildscripts/buildFatJar.gradle'
 
 jacocoTestReport {
   reports {
@@ -331,7 +333,6 @@ def buildTime() {
 }
 
 
-
 def getGitCommitDetails(length = 8) {
   try {
     def gitFolder = "$projectDir/.git/"
@@ -386,6 +387,7 @@ class BouncyCastleCapability implements ComponentMetadataRule {
     }
   }
 }
+
 @Memoized
 def calculateVersion() {
   // Regex pattern for basic calendar versioning, with provision to omit patch rev
