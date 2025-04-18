@@ -2,6 +2,7 @@ package samba.config;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.net.InetAddresses.isInetAddress;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.web3j.utils.Strings;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
@@ -42,21 +44,38 @@ public class DiscoveryConfig {
   private final String clientValue = "a";
   private final String clientKey = "c";
 
+  // advertised
+  private final List<String> advertisedIps;
+  private final int advertisedTCPPortIpv4;
+  private final int advertisedUDPPortIpv4;
+
+  private final int advertisedTCPPortIpv6;
+  private final int advertisedUDPPortIpv6;
+
   private DiscoveryConfig(
       final int listenUDPPortIpv4,
       final int listenTCPPortIpv4,
       final int listenUDPPortIpv6,
       final int listenTCPPortIpv6,
       final List<NodeRecord> bootnodes,
-      final List<String> networkInterfaces) {
+      final List<String> networkInterfaces,
+      final int advertisedTCPPortIpv4,
+      final int advertisedUDPPortIpv4,
+      final int advertisedTCPPortIpv6,
+      final int advertisedUDPPortIpv6,
+      final List<String> advertisedIps) {
 
     this.listenUDPPortIpv4 = listenUDPPortIpv4;
     this.listenTCPPortIpv4 = listenTCPPortIpv4;
     this.listenUDPPortIpv6 = listenUDPPortIpv6;
     this.listenTCPPortIpv6 = listenTCPPortIpv6;
-
     this.bootnodes = bootnodes;
     this.networkInterfaces = networkInterfaces;
+    this.advertisedTCPPortIpv4 = advertisedTCPPortIpv4;
+    this.advertisedUDPPortIpv4 = advertisedUDPPortIpv4;
+    this.advertisedTCPPortIpv6 = advertisedTCPPortIpv6;
+    this.advertisedUDPPortIpv6 = advertisedUDPPortIpv6;
+    this.advertisedIps = advertisedIps;
   }
 
   public static Builder builder() {
@@ -176,6 +195,30 @@ public class DiscoveryConfig {
     return (firstByte == 0xfc || firstByte == 0xfd);
   }
 
+  public List<String> getAdvertisedIps() {
+    return advertisedIps;
+  }
+
+  public int getAdvertisedTCPPortIpv4() {
+    return advertisedTCPPortIpv4;
+  }
+
+  public int getAdvertisedTCPPortIpv6() {
+    return advertisedTCPPortIpv6;
+  }
+
+  public int getAdvertisedUDPPortIpv4() {
+    return advertisedUDPPortIpv4;
+  }
+
+  public int getAdvertisedUDPPortIpv6() {
+    return advertisedUDPPortIpv6;
+  }
+
+  public boolean hasUserExplicitlySetAdvertisedIps() {
+    return !advertisedIps.isEmpty();
+  }
+
   public static class Builder {
 
     private final int listenUDPPortIPv4 = DEFAULT_UDP_PORT_IPV4;
@@ -186,6 +229,12 @@ public class DiscoveryConfig {
     private List<NodeRecord> bootnodes = List.of();
     private List<String> networkInterfaces = DEFAULT_P2P_INTERFACE;
 
+    private List<String> advertisedIps = DEFAULT_P2P_INTERFACE;
+    private final int advertisedUDPPortIpv4 = DEFAULT_UDP_PORT_IPV4;
+    private final int advertisedTCPPortIpv4 = DEFAULT_TCP_PORT_IPV4;
+    private final int advertisedUDPPortIpv6 = DEFAULT_TCP_PORT_IPV6;
+    private final int advertisedTCPPortIpv6 = DEFAULT_TCP_PORT_IPV4;
+
     private Builder() {}
 
     public DiscoveryConfig build() {
@@ -195,13 +244,25 @@ public class DiscoveryConfig {
           listenTCPPortIPv4,
           listenTCPPortIpv6,
           bootnodes,
-          networkInterfaces);
+          networkInterfaces,
+          advertisedTCPPortIpv4,
+          advertisedTCPPortIpv6,
+          advertisedUDPPortIpv4,
+          advertisedUDPPortIpv6,
+          advertisedIps);
     }
 
     public Builder networkInterfaces(final List<String> networkInterfaces) {
       checkNotNull(networkInterfaces);
       validateAddresses(networkInterfaces, "--p2p-ip, --p2p-ip-ips");
       this.networkInterfaces = networkInterfaces;
+      return this;
+    }
+
+    public Builder advertisedIps(final List<String> advertisedIps) {
+      checkNotNull(advertisedIps);
+      validateAddresses(advertisedIps, "--p2p-advertised-ip --p2p-advertised-ips");
+      this.advertisedIps = advertisedIps;
       return this;
     }
 
@@ -233,6 +294,16 @@ public class DiscoveryConfig {
                   cliOption, ipVersions));
         }
       }
+      addresses.forEach(
+          ip -> {
+            if (Strings.isBlank(ip)) {
+              throw new InvalidConfigurationException("Advertised ip is blank");
+            }
+            if (!isInetAddress(ip)) {
+              throw new InvalidConfigurationException(
+                  String.format("Advertised ip (%s) is set incorrectly", ip));
+            }
+          });
     }
   }
 }

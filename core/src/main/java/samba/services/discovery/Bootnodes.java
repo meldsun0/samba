@@ -22,7 +22,7 @@ public class Bootnodes {
 
     try (InputStream inputStream = Bootnodes.class.getResourceAsStream("/bootnodes.json")) {
       if (inputStream == null) {
-        LOG.warn("bootnodes.json not found on classpath");
+        LOG.info("bootnodes.json not found on classpath");
         return bootnodes;
       }
 
@@ -34,10 +34,9 @@ public class Bootnodes {
         bootnodesNode.forEach(
             node -> {
               try {
-                LOG.info("Adding {}", node.get("enr").asText());
                 bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64(node.get("enr").asText()));
               } catch (Exception e) {
-                LOG.error("Error reading bootnode entry", e);
+                LOG.info("Error reading bootnode entry", e);
               }
             });
       } else {
