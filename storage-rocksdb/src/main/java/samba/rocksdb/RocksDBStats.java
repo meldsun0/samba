@@ -120,7 +120,7 @@ public class RocksDBStats {
     TickerType.NUMBER_SUPERVERSION_CLEANUPS,
     TickerType.NUMBER_BLOCK_COMPRESSED,
     TickerType.NUMBER_BLOCK_DECOMPRESSED,
-    TickerType.NUMBER_BLOCK_NOT_COMPRESSED,
+    //    TickerType.NUMBER_BLOCK_NOT_COMPRESSED,
     TickerType.MERGE_OPERATION_TOTAL_TIME,
     TickerType.FILTER_OPERATION_TOTAL_TIME,
     TickerType.ROW_CACHE_HIT,
@@ -156,8 +156,8 @@ public class RocksDBStats {
     HistogramType.BYTES_PER_READ,
     HistogramType.BYTES_PER_WRITE,
     HistogramType.BYTES_PER_MULTIGET,
-    HistogramType.BYTES_COMPRESSED,
-    HistogramType.BYTES_DECOMPRESSED,
+    //  HistogramType.BYTES_COMPRESSED,
+    //    HistogramType.BYTES_DECOMPRESSED,
     HistogramType.COMPRESSION_TIMES_NANOS,
     HistogramType.DECOMPRESSION_TIMES_NANOS,
     HistogramType.READ_NUM_MERGE_OPERANDS,
@@ -189,9 +189,9 @@ public class RocksDBStats {
           () -> stats.getTickerCount(ticker));
     }
 
-    for (final HistogramType histogram : HISTOGRAMS) {
-      metricsSystem.addCollector(category, () -> histogramToCollector(stats, histogram));
-    }
+    //    for (final HistogramType histogram : HISTOGRAMS) {
+    //      metricsSystem.addCollector(category, () -> histogramToCollector(stats, histogram));
+    //    }
   }
 
   private static Collector histogramToCollector(

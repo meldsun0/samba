@@ -17,20 +17,18 @@ import samba.metrics.SambaMetricCategory;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-import org.hyperledger.besu.metrics.StandardMetricCategory;
 import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
 
 public class MetricsConfig {
 
   public static final ImmutableSet<MetricCategory> DEFAULT_METRICS_CATEGORIES =
       ImmutableSet.<MetricCategory>builder()
-          .addAll(EnumSet.allOf(StandardMetricCategory.class))
+          // .addAll(EnumSet.allOf(StandardMetricCategory.class))
           .addAll(SambaMetricCategory.defaultCategories())
           .build();
   public static final int DEFAULT_METRICS_PORT = 8008;

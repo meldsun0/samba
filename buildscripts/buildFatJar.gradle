@@ -1,0 +1,47 @@
+task fatJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    zip64 = true
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    exclude "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifact(fatJar) {
+                    classifier = null
+                }
+
+                groupId = "${sambaGroupId}"
+                artifactId = "${sambaArtifactId}"
+                version = "${releaseVersion}"
+
+                pom {
+                    name.set("Samba")
+                    description.set("Samba is an Ethereum Portal client")
+                    url.set("https://github.com/meldsun0/samba")
+
+                    licenses {
+                        license {
+                            name.set("Apache License 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                            distribution.set("repo")
+                        }
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = "localRepo"
+                url = uri("${System.properties['user.home']}/.m2/repository")
+            }
+        }
+    }
+}

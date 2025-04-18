@@ -80,7 +80,7 @@ jar {
   dependsOn unTarBesu
   archiveBaseName = distributionIdentifier
   version = calculateVersion()
-
+  zip64 = true
   manifest {
     attributes(
         'Specification-Title': archiveBaseName.get(),

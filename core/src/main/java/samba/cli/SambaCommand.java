@@ -92,6 +92,15 @@ public class SambaCommand implements Callable<Integer> {
       fallbackValue = "true")
   private boolean disableJsonRpcServer;
 
+  @Option(
+      names = {"--p2p-advertised-ip", "--p2p-advertised-ips"},
+      paramLabel = "<NETWORK>",
+      description =
+          "P2P advertised IP address(es). You can define up to 2 addresses, with one being IPv4 and the other IPv6. (Default: 127.0.0.1)",
+      split = ",",
+      arity = "1..2")
+  private List<String> p2pAdvertisedIps;
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -126,6 +135,9 @@ public class SambaCommand implements Callable<Integer> {
             }
             if (p2pIps != null) {
               discoveryConfig.networkInterfaces(p2pIps);
+            }
+            if (p2pAdvertisedIps != null) {
+              discoveryConfig.advertisedIps(p2pAdvertisedIps);
             }
           });
       builder.storage(

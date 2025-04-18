@@ -18,7 +18,6 @@ import samba.config.MetricsConfig;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import io.vertx.core.Vertx;
 import org.hyperledger.besu.metrics.MetricsService;
 import org.hyperledger.besu.metrics.prometheus.MetricsConfiguration;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
@@ -30,11 +29,11 @@ public class MetricsEndpoint {
   private final PrometheusMetricsSystem metricsSystem;
   private final MetricsConfig config;
 
-  public MetricsEndpoint(final MetricsConfig config, final Vertx vertx) {
+  public MetricsEndpoint(final MetricsConfig config) {
     final MetricsConfiguration metricsConfig = createMetricsConfiguration(config);
     metricsSystem = new PrometheusMetricsSystem(config.getMetricsCategories(), true);
     metricsSystem.init();
-    metricsService = MetricsService.create(vertx, metricsConfig, metricsSystem);
+    metricsService = MetricsService.create(metricsConfig, metricsSystem);
     this.config = config;
   }
 

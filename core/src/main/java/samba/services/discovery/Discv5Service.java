@@ -27,6 +27,7 @@ import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
 import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
+import org.ethereum.beacon.discovery.storage.NewAddressHandler;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
@@ -56,13 +57,6 @@ public class Discv5Service extends Service implements Discv5Client {
     final DiscoverySystemBuilder discoverySystemBuilder = new DiscoverySystemBuilder();
     final List<String> networkInterfaces = discoveryConfig.getNetworkInterfaces();
 
-    final UInt64 seqNo = UInt64.ZERO.add(1);
-    final NodeRecordBuilder nodeRecordBuilder =
-        new NodeRecordBuilder()
-            .secretKey(secretKey)
-            .seq(seqNo)
-            .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
-
     Preconditions.checkState(
         networkInterfaces.size() == 1 || networkInterfaces.size() == 2,
         "The configured network interfaces must be either 1 or 2");
@@ -72,24 +66,51 @@ public class Discv5Service extends Service implements Discv5Client {
       discoverySystemBuilder.listen(listenAddress, discoveryConfig.getListenUDPPortIpv4());
       this.supportsIpv6 =
           IPVersionResolver.resolve(listenAddress) == IPVersionResolver.IPVersion.IP_V6;
-      nodeRecordBuilder.address(
-          listenAddress,
-          discoveryConfig.getListenUDPPortIpv4(),
-          discoveryConfig.getListenTCPPortIpv4());
     } else {
       final InetSocketAddress[] listenAddresses =
           getDualStackNetworkInterfaces(discoverySystemBuilder, networkInterfaces, discoveryConfig);
       discoverySystemBuilder.listen(listenAddresses);
-      discoveryConfig
-          .getIps()
-          .forEach(
-              ip -> {
-                final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
-                final int advertisedUdpPort = discoveryConfig.getUDPPort(ipVersion);
-                final int advertisedTcpPort = discoveryConfig.getTCPPort(ipVersion);
-                nodeRecordBuilder.address(ip, advertisedUdpPort, advertisedTcpPort);
-              });
       this.supportsIpv6 = true;
+    }
+
+    final UInt64 seqNo = UInt64.ZERO.add(1);
+    final NodeRecordBuilder nodeRecordBuilder =
+        new NodeRecordBuilder()
+            .secretKey(secretKey)
+            .seq(seqNo)
+            .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
+
+    final NewAddressHandler maybeUpdateNodeRecordHandler =
+        maybeUpdateNodeRecord(discoveryConfig, secretKey);
+
+    if (discoveryConfig.hasUserExplicitlySetAdvertisedIps()) {
+      final List<String> advertisedIps = discoveryConfig.getAdvertisedIps();
+      Preconditions.checkState(
+          advertisedIps.size() == 1 || advertisedIps.size() == 2,
+          "The configured advertised IPs must be either 1 or 2");
+      if (advertisedIps.size() == 1) {
+        nodeRecordBuilder.address(
+            advertisedIps.get(0),
+            discoveryConfig.getAdvertisedUDPPortIpv4(),
+            discoveryConfig.getAdvertisedTCPPortIpv4());
+      } else {
+        // IPv4 and IPv6 (dual-stack)
+        advertisedIps.forEach(
+            advertisedIp -> {
+              final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(advertisedIp);
+              final int advertisedUdpPort =
+                  switch (ipVersion) {
+                    case IP_V4 -> discoveryConfig.getAdvertisedUDPPortIpv4();
+                    case IP_V6 -> discoveryConfig.getAdvertisedUDPPortIpv6();
+                  };
+              final int advertisedTcpPort =
+                  switch (ipVersion) {
+                    case IP_V4 -> discoveryConfig.getAdvertisedTCPPortIpv4();
+                    case IP_V6 -> discoveryConfig.getAdvertisedTCPPortIpv6();
+                  };
+              nodeRecordBuilder.address(advertisedIp, advertisedUdpPort, advertisedTcpPort);
+            });
+      }
     }
 
     this.discoverySystem =
@@ -97,6 +118,7 @@ public class Discv5Service extends Service implements Discv5Client {
             .secretKey(secretKey)
             .bootnodes(discoveryConfig.getBootnodes())
             .localNodeRecord(nodeRecordBuilder.build())
+            .newAddressHandler(maybeUpdateNodeRecordHandler)
             .localNodeRecordListener(this::createLocalNodeRecordListener)
             .talkHandler(incomingRequestTalkHandler)
             .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
@@ -124,7 +146,7 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   private CompletionStage<Bytes> handleError(Throwable error) {
-    LOG.trace("Something when wrong when sending a Discv5 message");
+    LOG.warn("Something when wrong when sending a Discv5 message");
     return SafeFuture.failedFuture(error);
   }
 
@@ -225,5 +247,28 @@ public class Discv5Service extends Service implements Discv5Client {
               return new InetSocketAddress(networkInterface, listenUdpPort);
             })
         .toArray(InetSocketAddress[]::new);
+  }
+
+  private NewAddressHandler maybeUpdateNodeRecord(
+      final DiscoveryConfig discoveryConfig, SECP256K1.SecretKey secretKey) {
+    if (discoveryConfig.hasUserExplicitlySetAdvertisedIps()) {
+      return (oldRecord, newAddress) -> Optional.of(oldRecord);
+    } else {
+      return (oldRecord, newAddress) -> {
+        final int newTcpPort;
+        if (discoveryConfig.getNetworkInterfaces().size() == 1) {
+          newTcpPort = discoveryConfig.getAdvertisedTCPPortIpv4();
+        } else {
+          // IPv4 and IPv6 (dual-stack)
+          newTcpPort =
+              switch (IPVersionResolver.resolve(newAddress)) {
+                case IP_V4 -> discoveryConfig.getAdvertisedTCPPortIpv4();
+                case IP_V6 -> discoveryConfig.getAdvertisedTCPPortIpv6();
+              };
+        }
+        return Optional.of(
+            oldRecord.withNewAddress(newAddress, Optional.of(newTcpPort), secretKey));
+      };
+    }
   }
 }

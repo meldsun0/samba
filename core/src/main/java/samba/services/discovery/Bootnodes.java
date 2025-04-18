@@ -14,31 +14,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Bootnodes {
-  private static final Logger logger = LoggerFactory.getLogger(Bootnodes.class);
+
+  private static final Logger LOG = LoggerFactory.getLogger(Bootnodes.class);
 
   public static List<NodeRecord> loadBootnodes(final NetworkType networkType) {
-    InputStream inputStream =
-        Thread.currentThread().getContextClassLoader().getResourceAsStream("bootnodes.json");
     List<NodeRecord> bootnodes = new ArrayList<>();
-    if (inputStream != null) {
-      ObjectMapper objectMapper = new ObjectMapper();
-      try {
-        JsonNode rootNode = objectMapper.readTree(inputStream);
-        JsonNode bootnodesNode = rootNode.get(networkType.getName());
-        if (bootnodesNode.isArray()) {
-          bootnodesNode.forEach(
-              node -> {
-                try {
-                  bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64(node.get("enr").asText()));
-                } catch (Exception e) {
-                  logger.error("Error reading bootnode", e);
-                }
-              });
-        }
 
-      } catch (Exception e) {
-        logger.error("Error reading bootnodes.json", e);
+    try (InputStream inputStream = Bootnodes.class.getResourceAsStream("/bootnodes.json")) {
+      if (inputStream == null) {
+        LOG.info("bootnodes.json not found on classpath");
+        return bootnodes;
       }
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode rootNode = objectMapper.readTree(inputStream);
+      JsonNode bootnodesNode = rootNode.get(networkType.getName());
+
+      if (bootnodesNode != null && bootnodesNode.isArray()) {
+        bootnodesNode.forEach(
+            node -> {
+              try {
+                bootnodes.add(NodeRecordFactory.DEFAULT.fromBase64(node.get("enr").asText()));
+              } catch (Exception e) {
+                LOG.info("Error reading bootnode entry", e);
+              }
+            });
+      } else {
+        LOG.warn("No array found for network: {}", networkType.getName());
+      }
+    } catch (Exception e) {
+      LOG.error("Error loading bootnodes.json", e);
     }
     return bootnodes;
   }

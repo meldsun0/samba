@@ -6,12 +6,12 @@ import java.util.Set;
 import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
 
 public enum SambaMetricCategory implements MetricCategory {
-  DISCOVERY("discovery"),
-  EVENTBUS("eventbus"),
-  EXECUTOR("executor"),
-  LIBP2P("libp2p"),
-  NETWORK("network"),
-  STORAGE("storage");
+  DISCOVERY("samba_discovery"),
+  EVENTBUS("samba_eventbus"),
+  EXECUTOR("samba_executor"),
+  LIBP2P("samba_libp2p"),
+  NETWORK("samba_network"),
+  STORAGE("samba_storage");
 
   private final String name;
 
