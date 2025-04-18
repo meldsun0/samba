@@ -23,7 +23,7 @@ USER ${SAMBA_USER}
 WORKDIR /opt/samba
 
 COPY --chown=samba:samba samba /opt/samba/
-
+RUN mkdir -p  /opt/samba/build/data
 #JSON-RPC Metrics, Rest API,Discv5
 EXPOSE 8545 8008 5051 9000/udp
 
