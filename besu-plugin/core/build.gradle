@@ -26,7 +26,8 @@ dependencies {
   implementation "${besuArtifactGroup}:plugin-api"
   implementation "${besuArtifactGroup}.internal:api"
   implementation "${besuArtifactGroup}.internal:core"
-//  implementation "org.hyperledger.besu.internal:core:besuInternal"
+  implementation "${besuArtifactGroup}.internal:metrics-core"
+  //  implementation "org.hyperledger.besu.internal:core:besuInternal"
 
   implementation 'com.google.code.gson:gson'
 
@@ -35,10 +36,8 @@ dependencies {
   implementation 'io.tmio:tuweni-toml'
 
   implementation 'info.picocli:picocli'
+  implementation 'org.meldsunlabs:samba:1.0-SNAPSHOT'
 
-  //    testImplementation "${besuArtifactGroup}.internal:besu"
-  //    testImplementation group: "${besuArtifactGroup}.internal", name: "core", classifier: "test-support"
-  //    testImplementation 'org.awaitility:awaitility'
 }
 
 test {
@@ -46,15 +45,3 @@ test {
 }
 
 apply from: rootProject.file("gradle/dist.gradle")
-
-////>>
-//jar {
-//  archiveBaseName.set("besu-samba-plugin")
-//  archiveVersion.set(rootProject.version)
-//
-//  from {
-//    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//  }
-//  from sourceSets.main.output // Include compiled classes from core
-//  from project(':service').sourceSets.main.output // Include compiled classes from service
-//}
