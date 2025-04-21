@@ -6,7 +6,7 @@ import samba.api.jsonrpc.ClientVersion;
 import samba.api.jsonrpc.Discv5GetEnr;
 import samba.api.jsonrpc.Discv5NodeInfo;
 import samba.api.jsonrpc.Discv5UpdateNodeInfo;
-import samba.api.jsonrpc.PortalHistoryAddEnr;
+import samba.api.jsonrpc.done.PortalHistoryAddEnr;
 import samba.api.jsonrpc.done.PortalHistoryDeleteEnr;
 import samba.api.jsonrpc.PortalHistoryFindContent;
 import samba.api.jsonrpc.PortalHistoryFindNodes;
@@ -147,7 +147,7 @@ public class PortalNodeMainService extends Service {
           RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discoveryService));
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
-          new PortalHistoryAddEnr(this.historyNetwork));
+          new PortalHistoryAddEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName(),
           new PortalHistoryGetEnr(this.historyLibraryAPI));

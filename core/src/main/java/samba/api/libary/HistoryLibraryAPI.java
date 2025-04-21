@@ -16,4 +16,6 @@ public interface HistoryLibraryAPI {
   Optional<String> getEnr(String nodeId);
 
   boolean deleteEnr(String nodeId);
+
+  boolean addEnr(String enr);
 }
