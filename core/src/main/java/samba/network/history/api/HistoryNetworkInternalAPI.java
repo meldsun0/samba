@@ -33,7 +33,7 @@ public interface HistoryNetworkInternalAPI {
 
   boolean deleteEnr(String nodeId);
 
-  boolean store(Bytes contentKey, Bytes contentValue);
+
 
   Optional<String> getLocalContent(ContentKey contentKey);
 
@@ -46,4 +46,7 @@ public interface HistoryNetworkInternalAPI {
   void gossip(final Set<NodeRecord> nodes, final Bytes key, final Bytes content);
 
   int getMaxGossipCount();
+
+
+  boolean store(Bytes contentKey, Bytes contentValue);
 }

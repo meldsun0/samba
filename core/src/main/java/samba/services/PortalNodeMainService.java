@@ -16,7 +16,7 @@ import samba.api.jsonrpc.PortalHistoryLocalContent;
 import samba.api.jsonrpc.PortalHistoryLookupEnr;
 import samba.api.jsonrpc.PortalHistoryOffer;
 import samba.api.jsonrpc.PortalHistoryPing;
-import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.jsonrpc.done.PortalHistoryStore;
 import samba.api.jsonrpc.done.PortalHistoryPutContent;
 import samba.api.libary.HistoryLibraryAPI;
 import samba.api.libary.HistoryLibraryAPIImpl;
