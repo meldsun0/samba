@@ -14,4 +14,6 @@ public interface HistoryLibraryAPI {
   boolean store(final Bytes contentKey, final Bytes contentValue);
 
   Optional<String> getEnr(String nodeId);
+
+  boolean deleteEnr(String nodeId);
 }

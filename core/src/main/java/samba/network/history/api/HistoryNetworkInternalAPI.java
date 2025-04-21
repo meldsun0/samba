@@ -34,7 +34,7 @@ public interface HistoryNetworkInternalAPI {
    * */
   Optional<String> getEnr(String nodeId);
 
-  boolean deleteEnr(String nodeId);
+
 
   Optional<String> getLocalContent(ContentKey contentKey);
 
@@ -49,4 +49,6 @@ public interface HistoryNetworkInternalAPI {
   int getMaxGossipCount();
 
   boolean store(Bytes contentKey, Bytes contentValue);
+
+  boolean deleteEnr(String nodeId);
 }

@@ -3,6 +3,7 @@ package samba.api.libary;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.api.methods.DeleteEnr;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
@@ -32,5 +33,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<String> getEnr(String nodeId) {
     return GetEnr.execute(this.historyNetworkInternalAPI, nodeId);
+  }
+
+  @Override
+  public boolean deleteEnr(String nodeId) {
+    return DeleteEnr.execute(this.historyNetworkInternalAPI, nodeId);
   }
 }
