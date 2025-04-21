@@ -1,10 +1,12 @@
 package samba.api.libary;
 
+import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
+import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
@@ -44,5 +46,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
     @Override
     public boolean addEnr(String enr) {
         return AddEnr.execute(this.historyNetworkInternalAPI, enr);
+    }
+
+    @Override
+    public Optional<FindContentResult> findContent(String enr, Bytes contentKey) {
+        return FindContent.execute(this.historyNetworkInternalAPI, enr, contentKey);
     }
 }

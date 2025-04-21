@@ -26,7 +26,7 @@ public class PortalHistoryAddEnr implements JsonRpcMethod {
     @Override
     public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
         try {
-            String enr = requestContext.getRequiredParameter(0, String.class);
+            String enr = ParametersUtil.getEnr(requestContext, 0);
             boolean result = this.historyLibraryAPI.addEnr(enr);
 
             return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
