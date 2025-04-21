@@ -8,4 +8,6 @@ import org.apache.tuweni.bytes.Bytes;
 public interface HistoryLibraryAPI {
 
   PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue);
+
+  boolean store(final Bytes contentKey, final Bytes contentValue);
 }

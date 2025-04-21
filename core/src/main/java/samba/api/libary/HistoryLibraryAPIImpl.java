@@ -4,6 +4,7 @@ import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.PutContent;
+import samba.network.history.api.methods.Store;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -17,6 +18,11 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
 
   @Override
   public PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue) {
-    return PutContent.execute(historyNetworkInternalAPI, contentKey, contentValue);
+    return PutContent.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
+  }
+
+  @Override
+  public boolean store(Bytes contentKey, Bytes contentValue) {
+    return Store.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
   }
 }

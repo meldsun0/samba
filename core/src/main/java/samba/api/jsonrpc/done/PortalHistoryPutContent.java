@@ -1,4 +1,4 @@
-package samba.api.jsonrpc;
+package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.api.libary.HistoryLibraryAPI;

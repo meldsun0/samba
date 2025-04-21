@@ -1,21 +1,21 @@
 package samba.api.jsonrpc;
 
+import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryStore implements JsonRpcMethod {
 
-  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private final HistoryLibraryAPI historyLibraryAPI;
 
-  public PortalHistoryStore(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
-    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  public PortalHistoryStore(final HistoryLibraryAPI historyLibraryAPI) {
+    this.historyLibraryAPI = historyLibraryAPI;
   }
 
   @Override
@@ -33,7 +33,7 @@ public class PortalHistoryStore implements JsonRpcMethod {
         return createJsonRpcInvalidRequestResponse(requestContext);
       }
 
-      boolean result = this.historyNetworkInternalAPI.store(contentKey, contentValue);
+      boolean result = this.historyLibraryAPI.store(contentKey, contentValue);
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {

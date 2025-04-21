@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -33,7 +34,7 @@ public class PortalHistoryStoreTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method = new PortalHistoryStore(this.historyNetworkInternalAPI);
+    method = new PortalHistoryStore(new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI));
   }
 
   @Test

@@ -20,7 +20,7 @@ public class PutContent {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
-  public PutContentResult execute(final ContentKey contentKey, final Bytes contentValue) {
+  private PutContentResult execute(final ContentKey contentKey, final Bytes contentValue) {
     boolean storedLocally =
         this.historyNetworkInternalAPI.store(contentKey.getSszBytes(), contentValue);
     Set<NodeRecord> nodes =
