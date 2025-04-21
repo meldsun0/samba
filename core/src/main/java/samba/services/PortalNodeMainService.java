@@ -11,13 +11,13 @@ import samba.api.jsonrpc.PortalHistoryDeleteEnr;
 import samba.api.jsonrpc.PortalHistoryFindContent;
 import samba.api.jsonrpc.PortalHistoryFindNodes;
 import samba.api.jsonrpc.PortalHistoryGetContent;
-import samba.api.jsonrpc.PortalHistoryGetEnr;
 import samba.api.jsonrpc.PortalHistoryLocalContent;
 import samba.api.jsonrpc.PortalHistoryLookupEnr;
 import samba.api.jsonrpc.PortalHistoryOffer;
 import samba.api.jsonrpc.PortalHistoryPing;
-import samba.api.jsonrpc.done.PortalHistoryStore;
+import samba.api.jsonrpc.done.PortalHistoryGetEnr;
 import samba.api.jsonrpc.done.PortalHistoryPutContent;
+import samba.api.jsonrpc.done.PortalHistoryStore;
 import samba.api.libary.HistoryLibraryAPI;
 import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.config.SambaConfiguration;
@@ -150,7 +150,7 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryAddEnr(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName(),
-          new PortalHistoryGetEnr(this.historyNetwork));
+          new PortalHistoryGetEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PING.getMethodName(),
           new PortalHistoryPing(this.historyNetwork, this.discoveryService));

@@ -62,6 +62,11 @@ public interface JsonRpcMethod {
         requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
   }
 
+  default JsonRpcResponse createSuccessResponse(
+      JsonRpcRequestContext requestContext, final Object result) {
+    return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+  }
+
   default void logJSON(Object value) {
     ObjectMapper objectMapper = new ObjectMapper();
     try {

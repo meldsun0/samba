@@ -6,7 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.PortalHistoryGetEnr;
+import samba.api.jsonrpc.done.PortalHistoryGetEnr;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -29,7 +30,7 @@ public class PortalHistoryGetEnrTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method = new PortalHistoryGetEnr(this.historyNetworkInternalAPI);
+    method = new PortalHistoryGetEnr(new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI));
   }
 
   @Test

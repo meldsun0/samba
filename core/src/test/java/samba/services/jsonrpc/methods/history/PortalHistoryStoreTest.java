@@ -11,12 +11,10 @@ import static org.mockito.Mockito.when;
 
 import samba.api.jsonrpc.done.PortalHistoryStore;
 import samba.api.libary.HistoryLibraryAPIImpl;
-import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.util.DefaultContent;
 
@@ -81,7 +79,8 @@ public class PortalHistoryStoreTest {
 
     verify(this.historyNetworkInternalAPI, never()).store(any(Bytes.class), any(Bytes.class));
 
-    final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), false);
+    final JsonRpcResponse expected =
+        new JsonRpcSuccessResponse(request.getRequest().getId(), false);
     JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

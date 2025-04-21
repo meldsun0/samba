@@ -29,7 +29,7 @@ public class PortalHistoryLookupEnr implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      String nodeId = ParametersUtil.parseNodeId(requestContext, 0);
+      String nodeId = ParametersUtil.getNodeId(requestContext, 0);
       Optional<String> enr = historyNetworkInternalAPI.lookupEnr(UInt256.fromHexString(nodeId));
       if (enr.isPresent()) {
         return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), enr.get());

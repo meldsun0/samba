@@ -3,8 +3,11 @@ package samba.api.libary;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
+
+import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -24,5 +27,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public boolean store(Bytes contentKey, Bytes contentValue) {
     return Store.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
+  }
+
+  @Override
+  public Optional<String> getEnr(String nodeId) {
+    return GetEnr.execute(this.historyNetworkInternalAPI, nodeId);
   }
 }
