@@ -6,7 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.TestHelper;
-import samba.api.jsonrpc.PortalHistoryLookupEnr;
+import samba.api.jsonrpc.done.PortalHistoryLookupEnr;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -32,7 +33,7 @@ public class PortalHistoryLookupEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    this.method = new PortalHistoryLookupEnr(historyJsonRpc);
+    this.method = new PortalHistoryLookupEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
     this.nodeRecord = TestHelper.createNodeRecord();
   }
 

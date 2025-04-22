@@ -2,10 +2,12 @@ package samba.services.jsonrpc.methods.history;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.PortalHistoryAddEnr;
+import samba.api.jsonrpc.done.PortalHistoryAddEnr;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -26,7 +28,7 @@ public class PortalHistoryAddEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryAddEnr(historyJsonRpc);
+    method = new PortalHistoryAddEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
   }
 
   @Test
@@ -42,7 +44,7 @@ public class PortalHistoryAddEnrTest {
         new JsonRpcRequestContext(
             new JsonRpcRequest(JSON_RPC_VERSION, PORTAL_HISTORY_ADD_ENR, new Object[] {enr}));
 
-    doNothing().when(historyJsonRpc).addEnr(enr);
+    when(historyJsonRpc.addEnr(anyString())).thenReturn(true);
 
     final JsonRpcResponse expected = new JsonRpcSuccessResponse(request.getRequest().getId(), true);
     final JsonRpcResponse actual = method.response(request);

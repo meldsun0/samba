@@ -58,8 +58,17 @@ public interface JsonRpcMethod {
 
   default JsonRpcErrorResponse createJsonRpcInvalidRequestResponse(
       JsonRpcRequestContext requestContext) {
-    return new JsonRpcErrorResponse(
-        requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+    return createJsonRpcInvalidRequestResponse(requestContext, RpcErrorType.INVALID_REQUEST);
+  }
+
+  default JsonRpcErrorResponse createJsonRpcInvalidRequestResponse(
+      JsonRpcRequestContext requestContext, RpcErrorType errorType) {
+    return new JsonRpcErrorResponse(requestContext.getRequest().getId(), errorType);
+  }
+
+  default JsonRpcResponse createSuccessResponse(
+      JsonRpcRequestContext requestContext, final Object result) {
+    return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
   }
 
   default void logJSON(Object value) {

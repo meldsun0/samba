@@ -340,10 +340,16 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
-  public void addEnr(String enr) {
-    final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
-    this.routingTable.addOrUpdateNode(nodeRecord);
-    this.routingTable.updateRadius(nodeRecord.getNodeId(), nodeRadius.max());
+  public boolean addEnr(String enr) {
+    try {
+      final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
+      this.routingTable.addOrUpdateNode(nodeRecord);
+      this.routingTable.updateRadius(nodeRecord.getNodeId(), nodeRadius.max());
+      return true;
+    } catch (Exception e) {
+      LOG.debug("Error when adding enr");
+      return false;
+    }
   }
 
   @Override

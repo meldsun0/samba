@@ -6,18 +6,18 @@ import samba.api.jsonrpc.ClientVersion;
 import samba.api.jsonrpc.Discv5GetEnr;
 import samba.api.jsonrpc.Discv5NodeInfo;
 import samba.api.jsonrpc.Discv5UpdateNodeInfo;
-import samba.api.jsonrpc.PortalHistoryAddEnr;
-import samba.api.jsonrpc.PortalHistoryDeleteEnr;
-import samba.api.jsonrpc.PortalHistoryFindContent;
-import samba.api.jsonrpc.PortalHistoryFindNodes;
 import samba.api.jsonrpc.PortalHistoryGetContent;
-import samba.api.jsonrpc.PortalHistoryGetEnr;
-import samba.api.jsonrpc.PortalHistoryLocalContent;
-import samba.api.jsonrpc.PortalHistoryLookupEnr;
 import samba.api.jsonrpc.PortalHistoryOffer;
 import samba.api.jsonrpc.PortalHistoryPing;
-import samba.api.jsonrpc.PortalHistoryPutContent;
-import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.jsonrpc.done.PortalHistoryAddEnr;
+import samba.api.jsonrpc.done.PortalHistoryDeleteEnr;
+import samba.api.jsonrpc.done.PortalHistoryFindContent;
+import samba.api.jsonrpc.done.PortalHistoryFindNodes;
+import samba.api.jsonrpc.done.PortalHistoryGetEnr;
+import samba.api.jsonrpc.done.PortalHistoryLocalContent;
+import samba.api.jsonrpc.done.PortalHistoryLookupEnr;
+import samba.api.jsonrpc.done.PortalHistoryPutContent;
+import samba.api.jsonrpc.done.PortalHistoryStore;
 import samba.api.libary.HistoryLibraryAPI;
 import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.config.SambaConfiguration;
@@ -147,25 +147,25 @@ public class PortalNodeMainService extends Service {
           RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discoveryService));
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
-          new PortalHistoryAddEnr(this.historyNetwork));
+          new PortalHistoryAddEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName(),
-          new PortalHistoryGetEnr(this.historyNetwork));
+          new PortalHistoryGetEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PING.getMethodName(),
           new PortalHistoryPing(this.historyNetwork, this.discoveryService));
       methods.put(
           RpcMethod.PORTAL_HISTORY_DELETE_ENR.getMethodName(),
-          new PortalHistoryDeleteEnr(this.historyNetwork));
+          new PortalHistoryDeleteEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName(),
-          new PortalHistoryFindNodes(this.historyNetwork));
+          new PortalHistoryFindNodes(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_STORE.getMethodName(),
-          new PortalHistoryStore(this.historyNetwork));
+          new PortalHistoryStore(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_CONTENT.getMethodName(),
-          new PortalHistoryFindContent(this.historyNetwork));
+          new PortalHistoryFindContent(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_CONTENT.getMethodName(),
           new PortalHistoryGetContent(this.historyNetwork));
@@ -174,10 +174,10 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryOffer(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName(),
-          new PortalHistoryLocalContent(this.historyNetwork));
+          new PortalHistoryLocalContent(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOOKUP_ENR.getMethodName(),
-          new PortalHistoryLookupEnr(this.historyNetwork));
+          new PortalHistoryLookupEnr(this.historyLibraryAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PUT_CONTENT.getMethodName(),
           new PortalHistoryPutContent(this.historyLibraryAPI));

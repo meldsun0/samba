@@ -27,14 +27,6 @@ public interface HistoryNetworkInternalAPI {
   SafeFuture<Optional<FindContentResult>> findContent(
       NodeRecord nodeRecord, FindContent findContent);
 
-  void addEnr(String enr);
-
-  Optional<String> getEnr(String nodeId);
-
-  boolean deleteEnr(String nodeId);
-
-  boolean store(Bytes contentKey, Bytes contentValue);
-
   Optional<String> getLocalContent(ContentKey contentKey);
 
   SafeFuture<Optional<Bytes>> offer(NodeRecord nodeRecord, List<Bytes> content, Offer offer);
@@ -46,4 +38,12 @@ public interface HistoryNetworkInternalAPI {
   void gossip(final Set<NodeRecord> nodes, final Bytes key, final Bytes content);
 
   int getMaxGossipCount();
+
+  boolean store(Bytes contentKey, Bytes contentValue);
+
+  boolean addEnr(String enr);
+
+  boolean deleteEnr(String nodeId);
+
+  Optional<String> getEnr(String nodeId);
 }

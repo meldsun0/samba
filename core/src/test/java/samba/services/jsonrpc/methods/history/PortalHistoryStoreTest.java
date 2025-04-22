@@ -9,13 +9,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.PortalHistoryStore;
-import samba.jsonrpc.reponse.JsonRpcErrorResponse;
+import samba.api.jsonrpc.done.PortalHistoryStore;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.util.DefaultContent;
 
@@ -33,7 +32,7 @@ public class PortalHistoryStoreTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method = new PortalHistoryStore(this.historyNetworkInternalAPI);
+    method = new PortalHistoryStore(new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI));
   }
 
   @Test
@@ -80,8 +79,8 @@ public class PortalHistoryStoreTest {
 
     verify(this.historyNetworkInternalAPI, never()).store(any(Bytes.class), any(Bytes.class));
 
-    JsonRpcResponse expected =
-        new JsonRpcErrorResponse(request.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
+    final JsonRpcResponse expected =
+        new JsonRpcSuccessResponse(request.getRequest().getId(), false);
     JsonRpcResponse actual = method.response(request);
     assertNotNull(actual);
     assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

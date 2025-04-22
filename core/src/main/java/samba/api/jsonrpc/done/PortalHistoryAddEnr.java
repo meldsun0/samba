@@ -1,19 +1,20 @@
-package samba.api.jsonrpc;
+package samba.api.jsonrpc.done;
 
+import samba.api.jsonrpc.parameters.ParametersUtil;
+import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.api.HistoryNetworkInternalAPI;
 
 public class PortalHistoryAddEnr implements JsonRpcMethod {
 
-  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private final HistoryLibraryAPI historyLibraryAPI;
 
-  public PortalHistoryAddEnr(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
-    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  public PortalHistoryAddEnr(HistoryLibraryAPI historyLibraryAPI) {
+    this.historyLibraryAPI = historyLibraryAPI;
   }
 
   @Override
@@ -23,17 +24,14 @@ public class PortalHistoryAddEnr implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    String enr;
     try {
-      enr = requestContext.getRequiredParameter(0, String.class);
+      String enr = ParametersUtil.getEnr(requestContext, 0);
+      boolean result = this.historyLibraryAPI.addEnr(enr);
+
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }
-    //    if (!InputsValidations.isEnrValid(enr))
-    //      return createJsonRpcInvalidRequestResponse(requestContext);
-
-    historyNetworkInternalAPI.addEnr(enr);
-
-    return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), true);
   }
 }

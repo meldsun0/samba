@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.net.InetAddresses.isInetAddress;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -114,7 +115,8 @@ public class DiscoveryConfig {
     return networkInterfaces.stream().map(this::resolveAnyLocalAddress).toList();
   }
 
-  public int getUDPPort(IPVersionResolver.IPVersion ipVersion) {
+  public int getListenUDPPort(String ip) {
+    final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
     return switch (ipVersion) {
       case IP_V4 -> this.listenUDPPortIpv4;
       case IP_V6 -> this.listenUDPPortIpv6;
@@ -122,11 +124,28 @@ public class DiscoveryConfig {
     };
   }
 
-  public int getTCPPort(IPVersionResolver.IPVersion ipVersion) {
+  public int getListenTCPPort(String ip) {
+    final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
     return switch (ipVersion) {
       case IP_V4 -> this.listenTCPPortIpv4;
       case IP_V6 -> this.listenTCPPortIpv6;
       default -> throw new IllegalArgumentException("Unsupported IP version for TCP port");
+    };
+  }
+
+  public int getAdvertisedUDPPort(String ip) {
+    final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
+    return switch (ipVersion) {
+      case IP_V4 -> this.advertisedUDPPortIpv4;
+      case IP_V6 -> this.advertisedUDPPortIpv6;
+    };
+  }
+
+  public int getAdvertisedTCPPort(String ip) {
+    final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(ip);
+    return switch (ipVersion) {
+      case IP_V4 -> this.advertisedTCPPortIpv4;
+      case IP_V6 -> this.advertisedTCPPortIpv6;
     };
   }
 
@@ -219,6 +238,20 @@ public class DiscoveryConfig {
     return !advertisedIps.isEmpty();
   }
 
+  public InetSocketAddress[] getDualStackListenNetworkInterfaces(List<String> networkInterfaces) {
+    return networkInterfaces.stream()
+        .map(
+            networkInterface -> {
+              final int listenUdpPort =
+                  switch (IPVersionResolver.resolve(networkInterface)) {
+                    case IP_V4 -> listenUDPPortIpv4;
+                    case IP_V6 -> listenUDPPortIpv6;
+                  };
+              return new InetSocketAddress(networkInterface, listenUdpPort);
+            })
+        .toArray(InetSocketAddress[]::new);
+  }
+
   public static class Builder {
 
     private final int listenUDPPortIPv4 = DEFAULT_UDP_PORT_IPV4;
@@ -229,7 +262,7 @@ public class DiscoveryConfig {
     private List<NodeRecord> bootnodes = List.of();
     private List<String> networkInterfaces = DEFAULT_P2P_INTERFACE;
 
-    private List<String> advertisedIps = DEFAULT_P2P_INTERFACE;
+    private List<String> advertisedIps = List.of();
     private final int advertisedUDPPortIpv4 = DEFAULT_UDP_PORT_IPV4;
     private final int advertisedTCPPortIpv4 = DEFAULT_TCP_PORT_IPV4;
     private final int advertisedUDPPortIpv6 = DEFAULT_TCP_PORT_IPV6;

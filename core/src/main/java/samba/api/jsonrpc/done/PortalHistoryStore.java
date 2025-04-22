@@ -1,21 +1,22 @@
-package samba.api.jsonrpc;
+package samba.api.jsonrpc.done;
 
+import samba.api.jsonrpc.parameters.ParametersUtil;
+import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryStore implements JsonRpcMethod {
 
-  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private final HistoryLibraryAPI historyLibraryAPI;
 
-  public PortalHistoryStore(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
-    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  public PortalHistoryStore(final HistoryLibraryAPI historyLibraryAPI) {
+    this.historyLibraryAPI = historyLibraryAPI;
   }
 
   @Override
@@ -26,14 +27,10 @@ public class PortalHistoryStore implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      Bytes contentKey = Bytes.fromHexString(requestContext.getRequiredParameter(0, String.class));
-      Bytes contentValue =
-          Bytes.fromHexString(requestContext.getRequiredParameter(1, String.class));
-      if (contentKey.isEmpty()) {
-        return createJsonRpcInvalidRequestResponse(requestContext);
-      }
+      Bytes contentKey = ParametersUtil.getBytesFromHexString(requestContext, 0);
+      Bytes contentValue = ParametersUtil.getBytesFromHexString(requestContext, 1);
 
-      boolean result = this.historyNetworkInternalAPI.store(contentKey, contentValue);
+      boolean result = this.historyLibraryAPI.store(contentKey, contentValue);
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {

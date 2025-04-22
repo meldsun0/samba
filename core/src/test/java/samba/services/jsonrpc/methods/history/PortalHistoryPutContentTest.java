@@ -9,7 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.TestHelper;
-import samba.api.jsonrpc.PortalHistoryPutContent;
+import samba.api.jsonrpc.done.PortalHistoryPutContent;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.domain.content.ContentKey;
