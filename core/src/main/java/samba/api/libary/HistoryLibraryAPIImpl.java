@@ -7,11 +7,14 @@ import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
 import samba.network.history.api.methods.FindContent;
+import samba.network.history.api.methods.FindNodes;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -51,5 +54,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<FindContentResult> findContent(String enr, Bytes contentKey) {
     return FindContent.execute(this.historyNetworkInternalAPI, enr, contentKey);
+  }
+
+  @Override
+  public List<String> findNodes(String enr, Set<Integer> distances) {
+    return FindNodes.execute(this.historyNetworkInternalAPI, enr, distances);
   }
 }

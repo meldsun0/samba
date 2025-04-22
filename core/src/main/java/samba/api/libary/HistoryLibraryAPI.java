@@ -4,7 +4,9 @@ import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
@@ -21,4 +23,6 @@ public interface HistoryLibraryAPI {
   boolean addEnr(final String enr);
 
   Optional<FindContentResult> findContent(final String enr, final Bytes contentKey);
+
+  List<String> findNodes(final String enr, final Set<Integer> distances);
 }

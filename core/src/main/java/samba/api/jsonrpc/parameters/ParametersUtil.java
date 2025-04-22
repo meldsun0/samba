@@ -3,6 +3,10 @@ package samba.api.jsonrpc.parameters;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.apache.tuweni.bytes.Bytes;
 
 public class ParametersUtil {
@@ -22,8 +26,14 @@ public class ParametersUtil {
     return Bytes.fromHexString(requestContext.getRequiredParameter(index, String.class));
   }
 
-  public static String getEnr(JsonRpcRequestContext requestContext, int i)
+  public static String getEnr(JsonRpcRequestContext requestContext, int index)
       throws JsonRpcParameter.JsonRpcParameterException {
-    return requestContext.getRequiredParameter(0, String.class);
+    return requestContext.getRequiredParameter(index, String.class);
+  }
+
+  public static Set<Integer> getDistances(JsonRpcRequestContext requestContext, int index)
+      throws JsonRpcParameter.JsonRpcParameterException {
+    return Arrays.stream(requestContext.getRequiredParameter(index, Integer[].class))
+        .collect(Collectors.toSet());
   }
 }
