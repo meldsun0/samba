@@ -1,24 +1,21 @@
-package samba.api.jsonrpc;
+package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.parameters.ParametersUtil;
+import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
 
-import org.apache.tuweni.units.bigints.UInt256;
-
 public class PortalHistoryLookupEnr implements JsonRpcMethod {
 
-  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private final HistoryLibraryAPI historyLibraryAPI;
 
-  public PortalHistoryLookupEnr(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
-    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  public PortalHistoryLookupEnr(HistoryLibraryAPI historyLibraryAPI) {
+    this.historyLibraryAPI = historyLibraryAPI;
   }
 
   @Override
@@ -30,11 +27,10 @@ public class PortalHistoryLookupEnr implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      Optional<String> enr = historyNetworkInternalAPI.lookupEnr(UInt256.fromHexString(nodeId));
-      if (enr.isPresent()) {
-        return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), enr.get());
-      }
-      return createJsonRpcInvalidRequestResponse(requestContext);
+      Optional<String> result = historyLibraryAPI.lookupEnr(nodeId);
+      return result
+          .map(enr -> createSuccessResponse(requestContext, enr))
+          .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);

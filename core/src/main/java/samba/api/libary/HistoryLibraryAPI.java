@@ -27,4 +27,6 @@ public interface HistoryLibraryAPI {
   List<String> findNodes(final String enr, final Set<Integer> distances);
 
   Optional<String> getLocalContent(final Bytes contentKey);
+
+  Optional<String> lookupEnr(final String nodeId);
 }

@@ -10,6 +10,7 @@ import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.FindNodes;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.GetLocalContent;
+import samba.network.history.api.methods.LookupEnr;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
 
@@ -65,5 +66,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<String> getLocalContent(Bytes contentKey) {
     return GetLocalContent.execute(this.historyNetworkInternalAPI, contentKey);
+  }
+
+  @Override
+  public Optional<String> lookupEnr(String nodeId) {
+    return LookupEnr.execute(this.historyNetworkInternalAPI, nodeId);
   }
 }
