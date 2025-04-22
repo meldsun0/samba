@@ -25,4 +25,6 @@ public interface HistoryLibraryAPI {
   Optional<FindContentResult> findContent(final String enr, final Bytes contentKey);
 
   List<String> findNodes(final String enr, final Set<Integer> distances);
+
+  Optional<String> getLocalContent(final Bytes contentKey);
 }
