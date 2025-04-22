@@ -39,7 +39,6 @@ public interface HistoryNetworkInternalAPI {
 
   int getMaxGossipCount();
 
-
   boolean store(Bytes contentKey, Bytes contentValue);
 
   boolean addEnr(String enr);

@@ -1,6 +1,5 @@
 package samba.api.libary;
 
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
@@ -8,8 +7,6 @@ import samba.domain.content.ContentKey;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
-import samba.domain.messages.requests.FindContent;
-import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface HistoryLibraryAPI {
 

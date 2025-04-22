@@ -3,7 +3,6 @@ package samba.services.jsonrpc.methods.history;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +28,7 @@ public class PortalHistoryAddEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryAddEnr(new HistoryLibraryAPIImpl(historyJsonRpc ));
+    method = new PortalHistoryAddEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
   }
 
   @Test

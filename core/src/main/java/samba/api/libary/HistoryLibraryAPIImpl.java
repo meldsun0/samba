@@ -17,39 +17,39 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
 
-    private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-    public HistoryLibraryAPIImpl(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
-        this.historyNetworkInternalAPI = historyNetworkInternalAPI;
-    }
+  public HistoryLibraryAPIImpl(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+    this.historyNetworkInternalAPI = historyNetworkInternalAPI;
+  }
 
-    @Override
-    public PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue) {
-        return PutContent.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
-    }
+  @Override
+  public PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue) {
+    return PutContent.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
+  }
 
-    @Override
-    public boolean store(Bytes contentKey, Bytes contentValue) {
-        return Store.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
-    }
+  @Override
+  public boolean store(Bytes contentKey, Bytes contentValue) {
+    return Store.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
+  }
 
-    @Override
-    public Optional<String> getEnr(String nodeId) {
-        return GetEnr.execute(this.historyNetworkInternalAPI, nodeId);
-    }
+  @Override
+  public Optional<String> getEnr(String nodeId) {
+    return GetEnr.execute(this.historyNetworkInternalAPI, nodeId);
+  }
 
-    @Override
-    public boolean deleteEnr(String nodeId) {
-        return DeleteEnr.execute(this.historyNetworkInternalAPI, nodeId);
-    }
+  @Override
+  public boolean deleteEnr(String nodeId) {
+    return DeleteEnr.execute(this.historyNetworkInternalAPI, nodeId);
+  }
 
-    @Override
-    public boolean addEnr(String enr) {
-        return AddEnr.execute(this.historyNetworkInternalAPI, enr);
-    }
+  @Override
+  public boolean addEnr(String enr) {
+    return AddEnr.execute(this.historyNetworkInternalAPI, enr);
+  }
 
-    @Override
-    public Optional<FindContentResult> findContent(String enr, Bytes contentKey) {
-        return FindContent.execute(this.historyNetworkInternalAPI, enr, contentKey);
-    }
+  @Override
+  public Optional<FindContentResult> findContent(String enr, Bytes contentKey) {
+    return FindContent.execute(this.historyNetworkInternalAPI, enr, contentKey);
+  }
 }

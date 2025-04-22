@@ -22,7 +22,8 @@ public class ParametersUtil {
     return Bytes.fromHexString(requestContext.getRequiredParameter(index, String.class));
   }
 
-  public static String getEnr(JsonRpcRequestContext requestContext, int i) throws JsonRpcParameter.JsonRpcParameterException {
+  public static String getEnr(JsonRpcRequestContext requestContext, int i)
+      throws JsonRpcParameter.JsonRpcParameterException {
     return requestContext.getRequiredParameter(0, String.class);
   }
 }

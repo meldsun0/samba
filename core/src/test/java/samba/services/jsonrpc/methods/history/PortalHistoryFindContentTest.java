@@ -35,7 +35,7 @@ public class PortalHistoryFindContentTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryFindContent( new HistoryLibraryAPIImpl(historyJsonRpc));
+    method = new PortalHistoryFindContent(new HistoryLibraryAPIImpl(historyJsonRpc));
   }
 
   @Test
