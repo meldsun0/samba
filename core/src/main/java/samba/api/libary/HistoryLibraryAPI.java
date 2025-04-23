@@ -29,4 +29,7 @@ public interface HistoryLibraryAPI {
   Optional<String> getLocalContent(final Bytes contentKey);
 
   Optional<String> lookupEnr(final String nodeId);
+
+  Optional<Bytes> offer(
+      final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
 }
