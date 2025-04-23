@@ -19,6 +19,7 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.services.discovery.Discv5Client;
 import samba.util.DefaultContent;
 
 import java.util.Optional;
@@ -37,7 +38,8 @@ public class PortalHistoryLocalContentTest {
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
     method =
-        new PortalHistoryLocalContent(new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI));
+        new PortalHistoryLocalContent(
+            new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI, mock(Discv5Client.class)));
   }
 
   @Test

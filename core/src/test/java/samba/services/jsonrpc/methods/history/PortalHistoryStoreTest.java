@@ -16,6 +16,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.api.HistoryNetworkInternalAPI;
+import samba.services.discovery.Discv5Client;
 import samba.util.DefaultContent;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -32,7 +33,9 @@ public class PortalHistoryStoreTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method = new PortalHistoryStore(new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI));
+    method =
+        new PortalHistoryStore(
+            new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI, mock(Discv5Client.class)));
   }
 
   @Test

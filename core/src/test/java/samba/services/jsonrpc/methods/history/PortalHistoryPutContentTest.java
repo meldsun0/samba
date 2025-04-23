@@ -20,6 +20,7 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
+import samba.services.discovery.Discv5Client;
 import samba.util.DefaultContent;
 
 import java.util.HashSet;
@@ -40,7 +41,9 @@ public class PortalHistoryPutContentTest {
   @BeforeEach
   public void before() {
     this.historyNetwork = mock(HistoryNetwork.class);
-    method = new PortalHistoryPutContent(new HistoryLibraryAPIImpl(historyNetwork));
+    method =
+        new PortalHistoryPutContent(
+            new HistoryLibraryAPIImpl(historyNetwork, mock(Discv5Client.class)));
   }
 
   @Test

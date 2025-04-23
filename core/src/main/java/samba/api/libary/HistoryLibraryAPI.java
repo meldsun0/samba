@@ -32,4 +32,6 @@ public interface HistoryLibraryAPI {
 
   Optional<Bytes> offer(
       final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
+
+  Optional<String> discv5GetEnr(final String nodeId);
 }

@@ -15,6 +15,7 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
+import samba.services.discovery.Discv5Client;
 
 import java.util.Optional;
 
@@ -33,7 +34,9 @@ public class PortalHistoryLookupEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    this.method = new PortalHistoryLookupEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
+    this.method =
+        new PortalHistoryLookupEnr(
+            new HistoryLibraryAPIImpl(historyJsonRpc, mock(Discv5Client.class)));
     this.nodeRecord = TestHelper.createNodeRecord();
   }
 

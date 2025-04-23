@@ -15,6 +15,7 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
+import samba.services.discovery.Discv5Client;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,9 @@ public class PortalHistoryAddEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryAddEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
+    method =
+        new PortalHistoryAddEnr(
+            new HistoryLibraryAPIImpl(historyJsonRpc, mock(Discv5Client.class)));
   }
 
   @Test
