@@ -1,12 +1,14 @@
 package samba.api.libary;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
 import samba.network.history.api.methods.Discv5GetEnr;
+import samba.network.history.api.methods.Discv5NodeInfo;
 import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.FindNodes;
 import samba.network.history.api.methods.GetEnr;
@@ -87,5 +89,10 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<String> discv5GetEnr(String nodeId) {
     return Discv5GetEnr.execute(this.discv5Client, nodeId);
+  }
+
+  @Override
+  public Optional<NodeInfo> discv5GetNodeInfo() {
+    return Discv5NodeInfo.execute(this.discv5Client);
   }
 }

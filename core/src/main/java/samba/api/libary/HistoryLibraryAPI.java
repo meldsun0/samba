@@ -1,6 +1,7 @@
 package samba.api.libary;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
 
@@ -34,4 +35,6 @@ public interface HistoryLibraryAPI {
       final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
 
   Optional<String> discv5GetEnr(final String nodeId);
+
+  Optional<NodeInfo> discv5GetNodeInfo();
 }

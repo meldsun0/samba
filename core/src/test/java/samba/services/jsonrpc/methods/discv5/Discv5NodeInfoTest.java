@@ -5,14 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.Discv5NodeInfo;
+import samba.api.jsonrpc.done.Discv5NodeInfo;
 import samba.api.jsonrpc.results.NodeInfo;
+import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
+import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 
 import org.ethereum.beacon.discovery.schema.NodeRecord;
@@ -32,7 +34,9 @@ public class Discv5NodeInfoTest {
   @BeforeEach
   public void before() {
     this.discv5Client = mock(Discv5Client.class);
-    method = new Discv5NodeInfo(discv5Client);
+    method =
+        new Discv5NodeInfo(
+            new HistoryLibraryAPIImpl(mock(HistoryNetworkInternalAPI.class), discv5Client));
   }
 
   @Test

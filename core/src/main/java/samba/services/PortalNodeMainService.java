@@ -3,11 +3,11 @@ package samba.services;
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
 import samba.api.jsonrpc.ClientVersion;
-import samba.api.jsonrpc.Discv5NodeInfo;
 import samba.api.jsonrpc.Discv5UpdateNodeInfo;
 import samba.api.jsonrpc.PortalHistoryGetContent;
 import samba.api.jsonrpc.PortalHistoryPing;
 import samba.api.jsonrpc.done.Discv5GetEnr;
+import samba.api.jsonrpc.done.Discv5NodeInfo;
 import samba.api.jsonrpc.done.PortalHistoryAddEnr;
 import samba.api.jsonrpc.done.PortalHistoryDeleteEnr;
 import samba.api.jsonrpc.done.PortalHistoryFindContent;
@@ -136,7 +136,7 @@ public class PortalNodeMainService extends Service {
 
       methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));
       methods.put(
-          RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.discoveryService));
+          RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.historyLibraryAPI));
       methods.put(
           RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(),
           new Discv5UpdateNodeInfo(this.discoveryService));
