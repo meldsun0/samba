@@ -1,4 +1,4 @@
-package samba.api.jsonrpc;
+package samba.api.jsonrpc.pending;
 
 import samba.api.jsonrpc.results.PingResult;
 import samba.api.jsonrpc.schemas.ClientInfoAndCapabilitiesJson;

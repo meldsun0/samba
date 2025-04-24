@@ -615,6 +615,7 @@ public class HistoryNetwork extends BaseNetwork
     };
   }
 
+  @Override
   public CompletableFuture<Optional<FindContentResult>> getContent(
       ContentKey contentKey, int timeout) {
     RecursiveLookupTaskFindContent task =

@@ -2,6 +2,7 @@ package samba.network.history.api.methods;
 
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
+import samba.domain.content.ContentUtil;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Set;
@@ -20,9 +21,9 @@ public class PutContent {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
-  private PutContentResult execute(final ContentKey contentKey, final Bytes contentValue) {
-    boolean storedLocally =
-        this.historyNetworkInternalAPI.store(contentKey.getSszBytes(), contentValue);
+  private PutContentResult execute(final Bytes contentKeyInBytes, final Bytes contentValue) {
+    ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyInBytes).get();
+    boolean storedLocally = this.historyNetworkInternalAPI.store(contentKey.getSszBytes(), contentValue);
     Set<NodeRecord> nodes =
         this.historyNetworkInternalAPI.getFoundNodes(
             contentKey, this.historyNetworkInternalAPI.getMaxGossipCount(), true);
@@ -32,7 +33,7 @@ public class PutContent {
 
   public static PutContentResult execute(
       final HistoryNetworkInternalAPI historyNetworkInternalAPI,
-      final ContentKey contentKey,
+      final Bytes contentKey,
       final Bytes contentValue) {
     LOG.debug(
         "Executing PutContent with parameters contentKey:{} contentValue:{}",

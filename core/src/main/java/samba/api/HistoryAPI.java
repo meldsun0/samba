@@ -1,6 +1,7 @@
 package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
@@ -17,7 +18,7 @@ import org.apache.tuweni.bytes.Bytes;
  */
 public interface HistoryAPI {
 
-  PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue);
+  PutContentResult putContent(final Bytes contentKey, final Bytes contentValue);
 
   boolean store(final Bytes contentKey, final Bytes contentValue);
 
@@ -35,7 +36,8 @@ public interface HistoryAPI {
 
   Optional<String> lookupEnr(final String nodeId);
 
-  Optional<Bytes> offer(
-      final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
+  Optional<Bytes> offer(final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
+
+  Optional<GetContentResult> getContent(final Bytes contentKey);
 
 }

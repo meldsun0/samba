@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.PortalHistoryPing;
+import samba.api.jsonrpc.pending.PortalHistoryPing;
 import samba.api.jsonrpc.results.PingResult;
 import samba.api.jsonrpc.schemas.ClientInfoAndCapabilitiesJson;
 import samba.domain.messages.extensions.standard.ClientInfoAndCapabilities;

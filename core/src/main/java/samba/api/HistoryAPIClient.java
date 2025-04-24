@@ -1,6 +1,7 @@
 package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.domain.content.ContentKey;
@@ -12,6 +13,7 @@ import samba.network.history.api.methods.Discv5NodeInfo;
 import samba.network.history.api.methods.Discv5UpdateNodeInfo;
 import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.FindNodes;
+import samba.network.history.api.methods.GetContent;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.GetLocalContent;
 import samba.network.history.api.methods.LookupEnr;
@@ -38,7 +40,7 @@ public class HistoryAPIClient implements HistoryAPI {
   }
 
   @Override
-  public PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue) {
+  public PutContentResult putContent(final Bytes contentKey, final Bytes contentValue) {
     return PutContent.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
   }
 
@@ -85,5 +87,10 @@ public class HistoryAPIClient implements HistoryAPI {
   @Override
   public Optional<Bytes> offer(String enr, List<Bytes> contents, List<Bytes> contentKeys) {
     return Offer.execute(this.historyNetworkInternalAPI, enr, contents, contentKeys);
+  }
+
+  @Override
+  public Optional<GetContentResult> getContent(Bytes contentKey) {
+    return GetContent.execute(this.historyNetworkInternalAPI, contentKey);
   }
 }

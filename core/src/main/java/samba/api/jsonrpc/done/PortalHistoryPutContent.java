@@ -1,5 +1,6 @@
 package samba.api.jsonrpc.done;
 
+import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.api.HistoryAPI;
 import samba.domain.content.ContentKey;
@@ -34,47 +35,14 @@ public class PortalHistoryPutContent implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      Optional<Bytes> contentKeyBytes = getBytesContentKeyFromParameter(requestContext);
-      Optional<Bytes> contentBytes = getBytesContentFromParameter(requestContext);
+      Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
+      Bytes contentBytes = ParametersUtil.getContentBytesFromHexString(requestContext, 1);
 
-      if (contentKeyBytes.isEmpty() || contentBytes.isEmpty())
-        return createJsonRpcInvalidRequestResponse(requestContext);
-
-      ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyBytes.get()).get();
-
-      PutContentResult putContentResult =
-          this.historyAPI.putContent(contentKey, contentBytes.get());
+      PutContentResult putContentResult = this.historyAPI.putContent(contentKey, contentBytes);
 
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), putContentResult);
     } catch (Exception e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
-    }
-  }
-
-  private Optional<Bytes> getBytesContentFromParameter(JsonRpcRequestContext requestContext) {
-    try {
-      String bytesHex = requestContext.getRequiredParameter(1, String.class);
-      if (bytesHex == null || bytesHex.isEmpty()) {
-        return Optional.empty();
-      }
-      if ("0x".equals(bytesHex)) {
-        return Optional.of(Bytes.of(0));
-      }
-      return Optional.of(Bytes.fromHexString(bytesHex));
-    } catch (JsonRpcParameter.JsonRpcParameterException e) {
-      return Optional.empty();
-    }
-  }
-
-  private Optional<Bytes> getBytesContentKeyFromParameter(JsonRpcRequestContext requestContext) {
-    try {
-      String bytesHex = requestContext.getRequiredParameter(0, String.class);
-      if (bytesHex == null || "0x".equals(bytesHex) || bytesHex.isEmpty()) {
-        return Optional.empty();
-      }
-      return Optional.of(Bytes.fromHexString(bytesHex));
-    } catch (JsonRpcParameter.JsonRpcParameterException e) {
-      return Optional.empty();
     }
   }
 }

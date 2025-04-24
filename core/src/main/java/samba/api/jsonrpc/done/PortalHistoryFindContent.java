@@ -32,7 +32,7 @@ public class PortalHistoryFindContent implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String enr = ParametersUtil.getEnr(requestContext, 0);
-      Bytes contentKey = ParametersUtil.getBytesFromHexString(requestContext, 1);
+      Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 1);
 
       Optional<FindContentResult> findContentResult =
           this.historyAPI.findContent(enr, contentKey);

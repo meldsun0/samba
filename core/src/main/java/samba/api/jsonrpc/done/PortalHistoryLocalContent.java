@@ -17,38 +17,34 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryLocalContent implements JsonRpcMethod {
 
-  protected static final Logger LOG = LogManager.getLogger();
+    protected static final Logger LOG = LogManager.getLogger();
 
-  private final HistoryAPI historyAPI;
+    private final HistoryAPI historyAPI;
 
-  public PortalHistoryLocalContent(final HistoryAPI historyAPI) {
-    this.historyAPI = historyAPI;
-  }
-
-  @Override
-  public String getName() {
-    return RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName();
-  }
-
-  @Override
-  public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    try {
-      Bytes contentKey = ParametersUtil.getBytesFromHexString(requestContext, 0);
-
-      if (contentKey.isEmpty()) {
-        return createJsonRpcInvalidRequestResponse(requestContext);
-      }
-      Optional<String> result = this.historyAPI.getLocalContent(contentKey);
-
-      return result
-          .map(content -> createSuccessResponse(requestContext, content))
-          .orElseGet(
-              () ->
-                  createJsonRpcInvalidRequestResponse(
-                      requestContext, RpcErrorType.CONTENT_NOT_FOUND_ERROR));
-
-    } catch (JsonRpcParameter.JsonRpcParameterException e) {
-      return createJsonRpcInvalidRequestResponse(requestContext);
+    public PortalHistoryLocalContent(final HistoryAPI historyAPI) {
+        this.historyAPI = historyAPI;
     }
-  }
+
+    @Override
+    public String getName() {
+        return RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName();
+    }
+
+    @Override
+    public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
+        try {
+            Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
+            Optional<String> result = this.historyAPI.getLocalContent(contentKey);
+
+            return result
+                    .map(content -> createSuccessResponse(requestContext, content))
+                    .orElseGet(
+                            () ->
+                                    createJsonRpcInvalidRequestResponse(
+                                            requestContext, RpcErrorType.CONTENT_NOT_FOUND_ERROR));
+
+        } catch (JsonRpcParameter.JsonRpcParameterException e) {
+            return createJsonRpcInvalidRequestResponse(requestContext);
+        }
+    }
 }

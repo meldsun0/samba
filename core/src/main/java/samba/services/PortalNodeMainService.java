@@ -5,8 +5,8 @@ import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_
 import samba.api.Discv5API;
 import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.ClientVersion;
-import samba.api.jsonrpc.PortalHistoryGetContent;
-import samba.api.jsonrpc.PortalHistoryPing;
+import samba.api.jsonrpc.done.PortalHistoryGetContent;
+import samba.api.jsonrpc.pending.PortalHistoryPing;
 import samba.api.jsonrpc.done.Discv5GetEnr;
 import samba.api.jsonrpc.done.Discv5NodeInfo;
 import samba.api.jsonrpc.done.Discv5UpdateNodeInfo;
@@ -170,7 +170,7 @@ public class PortalNodeMainService extends Service {
           new PortalHistoryFindContent(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_CONTENT.getMethodName(),
-          new PortalHistoryGetContent(this.historyNetwork));
+          new PortalHistoryGetContent(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_OFFER.getMethodName(),
           new PortalHistoryOffer(this.historyAPI));
