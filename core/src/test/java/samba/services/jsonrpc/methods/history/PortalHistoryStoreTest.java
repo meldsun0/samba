@@ -9,14 +9,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryStore;
 import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryStore;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.network.history.api.HistoryNetworkInternalAPI;
-import samba.services.discovery.Discv5Client;
 import samba.util.DefaultContent;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -33,9 +32,7 @@ public class PortalHistoryStoreTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method =
-        new PortalHistoryStore(
-            new HistoryAPIClient(this.historyNetworkInternalAPI));
+    method = new PortalHistoryStore(new HistoryAPIClient(this.historyNetworkInternalAPI));
   }
 
   @Test

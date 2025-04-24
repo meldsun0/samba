@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryFindNodes;
 import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryFindNodes;
 import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.response.Nodes;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
@@ -17,7 +17,6 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
-import samba.services.discovery.Discv5Client;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,9 +35,7 @@ public class PortalHistoryFindNodesTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method =
-        new PortalHistoryFindNodes(
-                new HistoryAPIClient(historyJsonRpc));
+    method = new PortalHistoryFindNodes(new HistoryAPIClient(historyJsonRpc));
   }
 
   @Test

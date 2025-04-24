@@ -1,18 +1,13 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
+import samba.api.HistoryAPI;
 import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.api.HistoryAPI;
-import samba.domain.content.ContentKey;
-import samba.domain.content.ContentUtil;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
-import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
-
-import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.slf4j.Logger;

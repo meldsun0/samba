@@ -2,15 +2,10 @@ package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
-import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
-import samba.network.history.api.methods.Discv5GetEnr;
-import samba.network.history.api.methods.Discv5NodeInfo;
-import samba.network.history.api.methods.Discv5UpdateNodeInfo;
 import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.FindNodes;
 import samba.network.history.api.methods.GetContent;
@@ -20,9 +15,7 @@ import samba.network.history.api.methods.LookupEnr;
 import samba.network.history.api.methods.Offer;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
-import samba.services.discovery.Discv5Client;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,10 +26,8 @@ public class HistoryAPIClient implements HistoryAPI {
 
   private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-
   public HistoryAPIClient(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
-
   }
 
   @Override

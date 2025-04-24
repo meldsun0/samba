@@ -23,7 +23,8 @@ public class PutContent {
 
   private PutContentResult execute(final Bytes contentKeyInBytes, final Bytes contentValue) {
     ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyInBytes).get();
-    boolean storedLocally = this.historyNetworkInternalAPI.store(contentKey.getSszBytes(), contentValue);
+    boolean storedLocally =
+        this.historyNetworkInternalAPI.store(contentKey.getSszBytes(), contentValue);
     Set<NodeRecord> nodes =
         this.historyNetworkInternalAPI.getFoundNodes(
             contentKey, this.historyNetworkInternalAPI.getMaxGossipCount(), true);

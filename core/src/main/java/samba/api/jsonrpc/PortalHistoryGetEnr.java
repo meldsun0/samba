@@ -1,8 +1,7 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
-import samba.api.Discv5API;
-import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.HistoryAPI;
+import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -11,28 +10,28 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 
 import java.util.Optional;
 
-public class Discv5GetEnr implements JsonRpcMethod {
+public class PortalHistoryGetEnr implements JsonRpcMethod {
 
-  private final Discv5API discv5API;
+  private final HistoryAPI historyAPI;
 
-  public Discv5GetEnr(final Discv5API discv5API) {
-    this.discv5API = discv5API;
+  public PortalHistoryGetEnr(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.DISCV5_GET_ENR.getMethodName();
+    return RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      Optional<String> result = this.discv5API.getEnr(nodeId);
+      Optional<String> enr = this.historyAPI.getEnr(nodeId);
 
-      return result
-          .map(enr -> createSuccessResponse(requestContext, enr))
-          .orElse(createJsonRpcInvalidRequestResponse(requestContext));
+      return enr.map(value -> createSuccessResponse(requestContext, enr.get()))
+          .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));
+
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }

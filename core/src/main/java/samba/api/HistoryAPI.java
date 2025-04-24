@@ -2,11 +2,8 @@ package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
-import samba.api.jsonrpc.results.NodeInfo;
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.domain.content.ContentKey;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,8 +33,8 @@ public interface HistoryAPI {
 
   Optional<String> lookupEnr(final String nodeId);
 
-  Optional<Bytes> offer(final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
+  Optional<Bytes> offer(
+      final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
 
   Optional<GetContentResult> getContent(final Bytes contentKey);
-
 }

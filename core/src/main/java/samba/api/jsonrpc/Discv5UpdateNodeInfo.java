@@ -1,9 +1,8 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
 import samba.api.Discv5API;
 import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.NodeInfo;
-import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcMethod;

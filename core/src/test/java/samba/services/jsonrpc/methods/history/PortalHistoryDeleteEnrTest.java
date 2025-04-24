@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryDeleteEnr;
 import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryDeleteEnr;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -15,7 +15,6 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
-import samba.services.discovery.Discv5Client;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +28,7 @@ public class PortalHistoryDeleteEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method =
-        new PortalHistoryDeleteEnr(
-                new HistoryAPIClient(historyJsonRpc));
+    method = new PortalHistoryDeleteEnr(new HistoryAPIClient(historyJsonRpc));
   }
 
   @Test

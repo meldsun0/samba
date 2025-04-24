@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.api.HistoryAPIClient;
-import samba.api.jsonrpc.done.PortalHistoryGetContent;
+import samba.api.jsonrpc.PortalHistoryGetContent;
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
 import samba.domain.content.ContentKey;

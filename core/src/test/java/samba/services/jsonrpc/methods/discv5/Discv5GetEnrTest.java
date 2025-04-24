@@ -7,15 +7,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.api.Discv5APIClient;
-import samba.api.jsonrpc.done.Discv5GetEnr;
-import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.Discv5GetEnr;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 
 import java.util.Optional;
@@ -33,9 +31,7 @@ public class Discv5GetEnrTest {
   @BeforeEach
   public void before() {
     this.discv5Client = mock(Discv5Client.class);
-    method =
-        new Discv5GetEnr(
-            new Discv5APIClient(discv5Client));
+    method = new Discv5GetEnr(new Discv5APIClient(discv5Client));
   }
 
   @Test

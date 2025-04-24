@@ -9,8 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryLocalContent;
 import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryLocalContent;
 import samba.domain.content.ContentKey;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -19,7 +19,6 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.api.HistoryNetworkInternalAPI;
-import samba.services.discovery.Discv5Client;
 import samba.util.DefaultContent;
 
 import java.util.Optional;
@@ -37,9 +36,7 @@ public class PortalHistoryLocalContentTest {
   @BeforeEach
   public void before() {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
-    method =
-        new PortalHistoryLocalContent(
-                new HistoryAPIClient(this.historyNetworkInternalAPI));
+    method = new PortalHistoryLocalContent(new HistoryAPIClient(this.historyNetworkInternalAPI));
   }
 
   @Test

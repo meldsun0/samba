@@ -5,7 +5,6 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,9 @@ public class ParametersUtil {
     return Bytes.fromHexString(requestContext.getRequiredParameter(index, String.class));
   }
 
-  public static Bytes getContentBytesFromHexString(final JsonRpcRequestContext requestContext, int index) throws JsonRpcParameter.JsonRpcParameterException {
+  public static Bytes getContentBytesFromHexString(
+      final JsonRpcRequestContext requestContext, int index)
+      throws JsonRpcParameter.JsonRpcParameterException {
     String bytesHex = requestContext.getRequiredParameter(index, String.class);
     if ("0x".equals(bytesHex)) {
       return Bytes.of(0);
@@ -36,10 +37,13 @@ public class ParametersUtil {
     return getBytesFromHexString(requestContext, index);
   }
 
-  public static Bytes getContentKeyBytesFromHexString(final JsonRpcRequestContext requestContext, int index) throws JsonRpcParameter.JsonRpcParameterException {
+  public static Bytes getContentKeyBytesFromHexString(
+      final JsonRpcRequestContext requestContext, int index)
+      throws JsonRpcParameter.JsonRpcParameterException {
     String bytesHex = requestContext.getRequiredParameter(index, String.class);
     if ("0x".equals(bytesHex) || bytesHex.isEmpty()) {
-      throw new JsonRpcParameter.JsonRpcParameterException(String.format("Invalid contentKey parameter at index %d", index));
+      throw new JsonRpcParameter.JsonRpcParameterException(
+          String.format("Invalid contentKey parameter at index %d", index));
     }
     return getBytesFromHexString(requestContext, index);
   }
@@ -55,7 +59,8 @@ public class ParametersUtil {
         .collect(Collectors.toSet());
   }
 
-  public static InetSocketAddress getSocketAddress(JsonRpcRequestContext requestContext, int index) {
+  public static InetSocketAddress getSocketAddress(
+      JsonRpcRequestContext requestContext, int index) {
     return null;
   }
 }

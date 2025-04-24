@@ -1,39 +1,35 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
-import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.HistoryAPI;
+import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
+import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
-import java.util.List;
-import java.util.Set;
+public class PortalHistoryAddEnr implements JsonRpcMethod {
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class PortalHistoryFindNodes implements JsonRpcMethod {
-  protected static final Logger LOG = LogManager.getLogger();
   private final HistoryAPI historyAPI;
 
-  public PortalHistoryFindNodes(HistoryAPI historyAPI) {
+  public PortalHistoryAddEnr(HistoryAPI historyAPI) {
     this.historyAPI = historyAPI;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName();
+    return RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String enr = ParametersUtil.getEnr(requestContext, 0);
-      Set<Integer> distances = ParametersUtil.getDistances(requestContext, 1);
-      List<String> result = this.historyAPI.findNodes(enr, distances);
-      return createSuccessResponse(requestContext, result);
+      boolean result = this.historyAPI.addEnr(enr);
+
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);
     }

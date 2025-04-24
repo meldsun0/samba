@@ -1,34 +1,36 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
-import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.HistoryAPI;
+import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
-public class PortalHistoryAddEnr implements JsonRpcMethod {
+import java.util.Optional;
+
+public class PortalHistoryLookupEnr implements JsonRpcMethod {
 
   private final HistoryAPI historyAPI;
 
-  public PortalHistoryAddEnr(HistoryAPI historyAPI) {
+  public PortalHistoryLookupEnr(HistoryAPI historyAPI) {
     this.historyAPI = historyAPI;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName();
+    return RpcMethod.PORTAL_HISTORY_LOOKUP_ENR.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      String enr = ParametersUtil.getEnr(requestContext, 0);
-      boolean result = this.historyAPI.addEnr(enr);
-
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+      String nodeId = ParametersUtil.getNodeId(requestContext, 0);
+      Optional<String> result = historyAPI.lookupEnr(nodeId);
+      return result
+          .map(enr -> createSuccessResponse(requestContext, enr))
+          .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);

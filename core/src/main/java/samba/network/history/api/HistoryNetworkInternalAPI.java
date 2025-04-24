@@ -48,6 +48,6 @@ public interface HistoryNetworkInternalAPI {
 
   Optional<String> getEnr(String nodeId);
 
-  //TODO RENAME
+  // TODO RENAME
   CompletableFuture<Optional<FindContentResult>> getContent(ContentKey contentKey, int timeout);
 }

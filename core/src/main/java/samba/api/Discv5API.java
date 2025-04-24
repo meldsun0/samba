@@ -10,9 +10,9 @@ import java.util.Optional;
  */
 public interface Discv5API {
 
-    Optional<String> getEnr(final String nodeId);
+  Optional<String> getEnr(final String nodeId);
 
-    Optional<NodeInfo> getNodeInfo();
+  Optional<NodeInfo> getNodeInfo();
 
-    Optional<NodeInfo> updateNodeInfo(InetSocketAddress socketAddress, boolean isTCP);
+  Optional<NodeInfo> updateNodeInfo(InetSocketAddress socketAddress, boolean isTCP);
 }
