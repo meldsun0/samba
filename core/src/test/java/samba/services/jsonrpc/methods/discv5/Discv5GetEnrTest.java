@@ -6,8 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.done.Discv5GetEnr;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -34,7 +35,7 @@ public class Discv5GetEnrTest {
     this.discv5Client = mock(Discv5Client.class);
     method =
         new Discv5GetEnr(
-            new HistoryLibraryAPIImpl(mock(HistoryNetworkInternalAPI.class), discv5Client));
+            new Discv5APIClient(discv5Client));
   }
 
   @Test

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.api.jsonrpc.done.PortalHistoryDeleteEnr;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -31,7 +31,7 @@ public class PortalHistoryDeleteEnrTest {
     this.historyJsonRpc = mock(HistoryNetwork.class);
     method =
         new PortalHistoryDeleteEnr(
-            new HistoryLibraryAPIImpl(historyJsonRpc, mock(Discv5Client.class)));
+                new HistoryAPIClient(historyJsonRpc));
   }
 
   @Test

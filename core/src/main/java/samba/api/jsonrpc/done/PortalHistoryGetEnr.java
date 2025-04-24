@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public class PortalHistoryGetEnr implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryGetEnr(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryGetEnr(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -27,7 +27,7 @@ public class PortalHistoryGetEnr implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      Optional<String> enr = this.historyLibraryAPI.getEnr(nodeId);
+      Optional<String> enr = this.historyAPI.getEnr(nodeId);
 
       return enr.map(value -> createSuccessResponse(requestContext, enr.get()))
           .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));

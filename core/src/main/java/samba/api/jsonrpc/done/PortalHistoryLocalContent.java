@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -19,10 +19,10 @@ public class PortalHistoryLocalContent implements JsonRpcMethod {
 
   protected static final Logger LOG = LogManager.getLogger();
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryLocalContent(final HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryLocalContent(final HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -38,7 +38,7 @@ public class PortalHistoryLocalContent implements JsonRpcMethod {
       if (contentKey.isEmpty()) {
         return createJsonRpcInvalidRequestResponse(requestContext);
       }
-      Optional<String> result = this.historyLibraryAPI.getLocalContent(contentKey);
+      Optional<String> result = this.historyAPI.getLocalContent(contentKey);
 
       return result
           .map(content -> createSuccessResponse(requestContext, content))

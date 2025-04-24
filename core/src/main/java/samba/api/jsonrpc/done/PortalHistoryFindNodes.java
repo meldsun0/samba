@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -16,10 +16,10 @@ import org.apache.logging.log4j.Logger;
 
 public class PortalHistoryFindNodes implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryFindNodes(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryFindNodes(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -32,7 +32,7 @@ public class PortalHistoryFindNodes implements JsonRpcMethod {
     try {
       String enr = ParametersUtil.getEnr(requestContext, 0);
       Set<Integer> distances = ParametersUtil.getDistances(requestContext, 1);
-      List<String> result = this.historyLibraryAPI.findNodes(enr, distances);
+      List<String> result = this.historyAPI.findNodes(enr, distances);
       return createSuccessResponse(requestContext, result);
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);

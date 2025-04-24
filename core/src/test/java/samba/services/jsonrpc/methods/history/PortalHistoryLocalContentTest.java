@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import samba.api.jsonrpc.done.PortalHistoryLocalContent;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.domain.content.ContentKey;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -39,7 +39,7 @@ public class PortalHistoryLocalContentTest {
     this.historyNetworkInternalAPI = mock(HistoryNetworkInternalAPI.class);
     method =
         new PortalHistoryLocalContent(
-            new HistoryLibraryAPIImpl(this.historyNetworkInternalAPI, mock(Discv5Client.class)));
+                new HistoryAPIClient(this.historyNetworkInternalAPI));
   }
 
   @Test

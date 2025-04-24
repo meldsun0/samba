@@ -8,7 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import samba.api.jsonrpc.done.PortalHistoryOffer;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.domain.messages.requests.Offer;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -42,7 +42,7 @@ public class PortalHistoryOfferTest {
     this.historyJsonRpc = mock(HistoryNetwork.class);
     method =
         new PortalHistoryOffer(
-            new HistoryLibraryAPIImpl(this.historyJsonRpc, mock(Discv5Client.class)));
+            new HistoryAPIClient(this.historyJsonRpc));
   }
 
   @Test

@@ -2,6 +2,8 @@ package samba.services;
 
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
+import samba.api.Discv5API;
+import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.ClientVersion;
 import samba.api.jsonrpc.PortalHistoryGetContent;
 import samba.api.jsonrpc.PortalHistoryPing;
@@ -18,8 +20,8 @@ import samba.api.jsonrpc.done.PortalHistoryLookupEnr;
 import samba.api.jsonrpc.done.PortalHistoryOffer;
 import samba.api.jsonrpc.done.PortalHistoryPutContent;
 import samba.api.jsonrpc.done.PortalHistoryStore;
-import samba.api.libary.HistoryLibraryAPI;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPI;
+import samba.api.HistoryAPIClient;
 import samba.config.SambaConfiguration;
 import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.domain.messages.MessageType;
@@ -78,7 +80,8 @@ public class PortalNodeMainService extends Service {
   private ConnectionService connectionService;
   private HistoryNetwork historyNetwork;
   private UTPManager utpManager;
-  private HistoryLibraryAPI historyLibraryAPI;
+  private HistoryAPI historyAPI;
+  private Discv5API discv5API;
 
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
@@ -100,7 +103,7 @@ public class PortalNodeMainService extends Service {
     initHistoryNetwork();
     initIncomingRequestTalkHandlers();
     initConnectionService();
-    initLibrary();
+    initAPIs();
     initRestAPI();
     initJsonRPCService();
   }
@@ -125,8 +128,10 @@ public class PortalNodeMainService extends Service {
     this.utpManager = new UTPManager(this.discoveryService);
   }
 
-  private void initLibrary() {
-    this.historyLibraryAPI = new HistoryLibraryAPIImpl(this.historyNetwork, this.discoveryService);
+  private void initAPIs() {
+    this.historyAPI = new HistoryAPIClient(this.historyNetwork);
+    this.discv5API = new Discv5APIClient(this.discoveryService);
+
   }
 
   private void initJsonRPCService() {
@@ -136,48 +141,48 @@ public class PortalNodeMainService extends Service {
 
       methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));
       methods.put(
-          RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.historyLibraryAPI));
+          RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.discv5API));
       methods.put(
           RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(),
-          new Discv5UpdateNodeInfo(this.historyLibraryAPI));
+          new Discv5UpdateNodeInfo(this.discv5API));
       methods.put(
-          RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.historyLibraryAPI));
+          RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discv5API));
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
-          new PortalHistoryAddEnr(this.historyLibraryAPI));
+          new PortalHistoryAddEnr(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName(),
-          new PortalHistoryGetEnr(this.historyLibraryAPI));
+          new PortalHistoryGetEnr(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PING.getMethodName(),
           new PortalHistoryPing(this.historyNetwork, this.discoveryService));
       methods.put(
           RpcMethod.PORTAL_HISTORY_DELETE_ENR.getMethodName(),
-          new PortalHistoryDeleteEnr(this.historyLibraryAPI));
+          new PortalHistoryDeleteEnr(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_NODES.getMethodName(),
-          new PortalHistoryFindNodes(this.historyLibraryAPI));
+          new PortalHistoryFindNodes(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_STORE.getMethodName(),
-          new PortalHistoryStore(this.historyLibraryAPI));
+          new PortalHistoryStore(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_FIND_CONTENT.getMethodName(),
-          new PortalHistoryFindContent(this.historyLibraryAPI));
+          new PortalHistoryFindContent(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_GET_CONTENT.getMethodName(),
           new PortalHistoryGetContent(this.historyNetwork));
       methods.put(
           RpcMethod.PORTAL_HISTORY_OFFER.getMethodName(),
-          new PortalHistoryOffer(this.historyLibraryAPI));
+          new PortalHistoryOffer(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName(),
-          new PortalHistoryLocalContent(this.historyLibraryAPI));
+          new PortalHistoryLocalContent(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOOKUP_ENR.getMethodName(),
-          new PortalHistoryLookupEnr(this.historyLibraryAPI));
+          new PortalHistoryLookupEnr(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_PUT_CONTENT.getMethodName(),
-          new PortalHistoryPutContent(this.historyLibraryAPI));
+          new PortalHistoryPutContent(this.historyAPI));
 
       jsonRpcService =
           Optional.of(

@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.jsonrpc.config.RpcMethod;
@@ -20,10 +20,10 @@ import org.slf4j.LoggerFactory;
 public class PortalHistoryPutContent implements JsonRpcMethod {
 
   private final Logger LOG = LoggerFactory.getLogger(PortalHistoryPutContent.class);
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryPutContent(final HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryPutContent(final HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -43,7 +43,7 @@ public class PortalHistoryPutContent implements JsonRpcMethod {
       ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyBytes.get()).get();
 
       PutContentResult putContentResult =
-          this.historyLibraryAPI.putContent(contentKey, contentBytes.get());
+          this.historyAPI.putContent(contentKey, contentBytes.get());
 
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), putContentResult);
     } catch (Exception e) {

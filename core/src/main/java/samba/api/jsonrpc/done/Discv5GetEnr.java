@@ -1,7 +1,8 @@
 package samba.api.jsonrpc.done;
 
+import samba.api.Discv5API;
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -12,10 +13,10 @@ import java.util.Optional;
 
 public class Discv5GetEnr implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final Discv5API discv5API;
 
-  public Discv5GetEnr(final HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public Discv5GetEnr(final Discv5API discv5API) {
+    this.discv5API = discv5API;
   }
 
   @Override
@@ -27,7 +28,7 @@ public class Discv5GetEnr implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      Optional<String> result = this.historyLibraryAPI.discv5GetEnr(nodeId);
+      Optional<String> result = this.discv5API.getEnr(nodeId);
 
       return result
           .map(enr -> createSuccessResponse(requestContext, enr))

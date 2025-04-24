@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.done;
 
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -11,10 +11,10 @@ import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
 public class PortalHistoryDeleteEnr implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryDeleteEnr(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryDeleteEnr(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -26,7 +26,7 @@ public class PortalHistoryDeleteEnr implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      boolean result = this.historyLibraryAPI.deleteEnr(nodeId);
+      boolean result = this.historyAPI.deleteEnr(nodeId);
 
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
 

@@ -5,9 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.done.Discv5NodeInfo;
 import samba.api.jsonrpc.results.NodeInfo;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -36,7 +37,7 @@ public class Discv5NodeInfoTest {
     this.discv5Client = mock(Discv5Client.class);
     method =
         new Discv5NodeInfo(
-            new HistoryLibraryAPIImpl(mock(HistoryNetworkInternalAPI.class), discv5Client));
+                new Discv5APIClient(discv5Client));
   }
 
   @Test

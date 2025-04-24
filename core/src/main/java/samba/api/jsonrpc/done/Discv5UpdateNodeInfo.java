@@ -1,8 +1,9 @@
 package samba.api.jsonrpc.done;
 
+import samba.api.Discv5API;
 import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.NodeInfo;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcMethod;
@@ -16,10 +17,10 @@ import java.util.Optional;
 
 public class Discv5UpdateNodeInfo implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final Discv5API discv5API;
 
-  public Discv5UpdateNodeInfo(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public Discv5UpdateNodeInfo(final Discv5API discv5API) {
+    this.discv5API = discv5API;
   }
 
   @Override
@@ -34,7 +35,7 @@ public class Discv5UpdateNodeInfo implements JsonRpcMethod {
 
       final boolean isTCP = requestContext.getRequiredParameter(1, Boolean.class);
 
-      Optional<NodeInfo> result = this.historyLibraryAPI.discv5UpdateNodeInfo(socketAddr, isTCP);
+      Optional<NodeInfo> result = this.discv5API.updateNodeInfo(socketAddr, isTCP);
       return result
           .map(nodeIndo -> createSuccessResponse(requestContext, nodeIndo))
           .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));

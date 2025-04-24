@@ -1,4 +1,4 @@
-package samba.api.libary;
+package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.NodeInfo;
@@ -27,15 +27,14 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
-public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
+public class HistoryAPIClient implements HistoryAPI {
 
   private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
-  private final Discv5Client discv5Client;
 
-  public HistoryLibraryAPIImpl(
-      final HistoryNetworkInternalAPI historyNetworkInternalAPI, final Discv5Client discv5Client) {
+
+  public HistoryAPIClient(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
-    this.discv5Client = discv5Client;
+
   }
 
   @Override
@@ -86,20 +85,5 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<Bytes> offer(String enr, List<Bytes> contents, List<Bytes> contentKeys) {
     return Offer.execute(this.historyNetworkInternalAPI, enr, contents, contentKeys);
-  }
-
-  @Override
-  public Optional<String> discv5GetEnr(String nodeId) {
-    return Discv5GetEnr.execute(this.discv5Client, nodeId);
-  }
-
-  @Override
-  public Optional<NodeInfo> discv5GetNodeInfo() {
-    return Discv5NodeInfo.execute(this.discv5Client);
-  }
-
-  @Override
-  public Optional<NodeInfo> discv5UpdateNodeInfo(InetSocketAddress socketAddress, boolean isTCP) {
-    return Discv5UpdateNodeInfo.execute(this.discv5Client, socketAddress, isTCP);
   }
 }

@@ -4,9 +4,10 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.done.Discv5UpdateNodeInfo;
 import samba.api.jsonrpc.results.NodeInfo;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -17,7 +18,6 @@ import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.services.discovery.Discv5Client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -37,7 +37,7 @@ public class Discv5UpdateNodeInfoTest {
     @BeforeEach
     public void before() {
         this.discv5Client = mock(Discv5Client.class);
-        method = new Discv5UpdateNodeInfo(new HistoryLibraryAPIImpl(mock(HistoryNetworkInternalAPI.class), discv5Client));
+        method = new Discv5UpdateNodeInfo(new Discv5APIClient(discv5Client));
     }
 
     @Test

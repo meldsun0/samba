@@ -1,7 +1,8 @@
 package samba.api.jsonrpc.done;
 
+import samba.api.Discv5API;
 import samba.api.jsonrpc.results.NodeInfo;
-import samba.api.libary.HistoryLibraryAPI;
+import samba.api.HistoryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -12,10 +13,10 @@ import java.util.Optional;
 
 public class Discv5NodeInfo implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final Discv5API discv5API;
 
-  public Discv5NodeInfo(final HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public Discv5NodeInfo(final Discv5API discv5API) {
+    this.discv5API = discv5API;
   }
 
   @Override
@@ -25,7 +26,7 @@ public class Discv5NodeInfo implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    Optional<NodeInfo> result = this.historyLibraryAPI.discv5GetNodeInfo();
+    Optional<NodeInfo> result = this.discv5API.getNodeInfo();
     return result
         .map(nodeInfo -> createSuccessResponse(requestContext, nodeInfo))
         .orElseGet(

@@ -1,4 +1,4 @@
-package samba.api.libary;
+package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.NodeInfo;
@@ -15,7 +15,7 @@ import org.apache.tuweni.bytes.Bytes;
 /**
  * CAUTION: this API is unstable and might be changed in any version in backward incompatible way
  */
-public interface HistoryLibraryAPI {
+public interface HistoryAPI {
 
   PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue);
 
@@ -38,9 +38,4 @@ public interface HistoryLibraryAPI {
   Optional<Bytes> offer(
       final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
 
-  Optional<String> discv5GetEnr(final String nodeId);
-
-  Optional<NodeInfo> discv5GetNodeInfo();
-
-  Optional<NodeInfo> discv5UpdateNodeInfo(InetSocketAddress socketAddress, boolean isTCP);
 }
