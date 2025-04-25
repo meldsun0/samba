@@ -1,5 +1,7 @@
 package samba.api.jsonrpc;
 
+import samba.api.Discv5API;
+import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.NodeInfo;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
@@ -7,23 +9,17 @@ import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.services.discovery.Discv5Client;
 
+import java.net.InetSocketAddress;
 import java.util.Optional;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.libp2p.core.multiformats.Multiaddr;
-import org.ethereum.beacon.discovery.schema.NodeRecord;
 
 public class Discv5UpdateNodeInfo implements JsonRpcMethod {
 
-  private final Discv5Client discv5Client;
+  private final Discv5API discv5API;
 
-  public Discv5UpdateNodeInfo(Discv5Client discv5Client) {
-    this.discv5Client = discv5Client;
+  public Discv5UpdateNodeInfo(final Discv5API discv5API) {
+    this.discv5API = discv5API;
   }
 
   @Override
@@ -31,34 +27,21 @@ public class Discv5UpdateNodeInfo implements JsonRpcMethod {
     return RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName();
   }
 
-  // TODO validate if the socketAddres is multiaddr .
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      final SocketAddr socketAddr = requestContext.getRequiredParameter(0, SocketAddr.class);
-      final Optional<IsTcpParam> isTCP = requestContext.getOptionalParameter(1, IsTcpParam.class);
+      final InetSocketAddress socketAddr = ParametersUtil.getSocketAddress(requestContext, 0);
 
-      Multiaddr multiaddr = Multiaddr.fromString(socketAddr.socketAddr());
-      NodeRecord nodeRecord = this.discv5Client.updateNodeRecordSocket(multiaddr);
-      NodeInfo nodeInfo = new NodeInfo(nodeRecord.asEnr(), nodeRecord.getNodeId().toHexString());
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), nodeInfo);
+      final boolean isTCP = requestContext.getRequiredParameter(1, Boolean.class);
+
+      Optional<NodeInfo> result = this.discv5API.updateNodeInfo(socketAddr, isTCP);
+      return result
+          .map(nodeIndo -> createSuccessResponse(requestContext, nodeIndo))
+          .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));
+
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return new JsonRpcErrorResponse(
           requestContext.getRequest().getId(), RpcErrorType.INVALID_REQUEST);
-    }
-  }
-
-  record SocketAddr(String socketAddr) {
-    @JsonCreator
-    public SocketAddr(@JsonProperty final String socketAddr) {
-      this.socketAddr = socketAddr;
-    }
-  }
-
-  record IsTcpParam(Boolean isTcp) {
-    @JsonCreator
-    public IsTcpParam(@JsonProperty final Boolean isTcp) {
-      this.isTcp = isTcp;
     }
   }
 }

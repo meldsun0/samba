@@ -6,8 +6,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryAddEnr;
-import samba.api.libary.HistoryLibraryAPIImpl;
+import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryAddEnr;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
@@ -28,7 +28,7 @@ public class PortalHistoryAddEnrTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryAddEnr(new HistoryLibraryAPIImpl(historyJsonRpc));
+    method = new PortalHistoryAddEnr(new HistoryAPIClient(historyJsonRpc));
   }
 
   @Test

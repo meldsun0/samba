@@ -1,8 +1,8 @@
-package samba.api.libary;
+package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.domain.content.ContentKey;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +10,12 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
-public interface HistoryLibraryAPI {
+/**
+ * CAUTION: this API is unstable and might be changed in any version in backward incompatible way
+ */
+public interface HistoryAPI {
 
-  PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue);
+  PutContentResult putContent(final Bytes contentKey, final Bytes contentValue);
 
   boolean store(final Bytes contentKey, final Bytes contentValue);
 
@@ -29,4 +32,9 @@ public interface HistoryLibraryAPI {
   Optional<String> getLocalContent(final Bytes contentKey);
 
   Optional<String> lookupEnr(final String nodeId);
+
+  Optional<Bytes> offer(
+      final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
+
+  Optional<GetContentResult> getContent(final Bytes contentKey);
 }

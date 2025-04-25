@@ -1,7 +1,7 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
+import samba.api.HistoryAPI;
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -13,10 +13,10 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryStore implements JsonRpcMethod {
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryStore(final HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryStore(final HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -27,14 +27,14 @@ public class PortalHistoryStore implements JsonRpcMethod {
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
-      Bytes contentKey = ParametersUtil.getBytesFromHexString(requestContext, 0);
+      Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
       Bytes contentValue = ParametersUtil.getBytesFromHexString(requestContext, 1);
 
-      boolean result = this.historyLibraryAPI.store(contentKey, contentValue);
+      boolean result = this.historyAPI.store(contentKey, contentValue);
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
-      return createJsonRpcInvalidRequestResponse(requestContext);
+      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), false);
     }
   }
 }

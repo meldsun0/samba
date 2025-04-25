@@ -3,7 +3,6 @@ package samba.services.discovery;
 import samba.config.DiscoveryConfig;
 import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.metrics.SambaMetricCategory;
-import samba.util.MultiaddrUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -13,8 +12,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import com.google.common.base.Preconditions;
-import io.libp2p.core.multiformats.Multiaddr;
-import io.libp2p.core.multiformats.Protocol;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -62,10 +59,7 @@ public class Discv5Service extends Service implements Discv5Client {
 
     final UInt64 seqNo = UInt64.ZERO.add(1);
     final NodeRecordBuilder nodeRecordBuilder =
-        new NodeRecordBuilder()
-            .secretKey(secretKey)
-            .seq(seqNo)
-            .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
+        this.createNodeRecordBuilder(discoveryConfig, secretKey, seqNo);
 
     if (networkInterfaces.size() == 1) {
       final String listenAddress = networkInterfaces.getFirst();
@@ -118,14 +112,12 @@ public class Discv5Service extends Service implements Discv5Client {
     }
 
     this.discoverySystem =
-        discoverySystemBuilder
-            .secretKey(secretKey)
-            .bootnodes(discoveryConfig.getBootnodes())
-            .localNodeRecord(nodeRecordBuilder.build())
-            .localNodeRecordListener(this::createLocalNodeRecordListener)
-            .talkHandler(incomingRequestTalkHandler)
-            .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
-            .build();
+        createDiscoverySystem(
+            discoveryConfig,
+            secretKey,
+            incomingRequestTalkHandler,
+            discoverySystemBuilder,
+            nodeRecordBuilder);
 
     metricsSystem.createIntegerGauge(
         SambaMetricCategory.DISCOVERY,
@@ -136,8 +128,33 @@ public class Discv5Service extends Service implements Discv5Client {
     LOG.info("ENR :{}", this.getHomeNodeRecord());
   }
 
+  private DiscoverySystem createDiscoverySystem(
+      DiscoveryConfig discoveryConfig,
+      SECP256K1.SecretKey secretKey,
+      IncomingRequestTalkHandler incomingRequestTalkHandler,
+      DiscoverySystemBuilder discoverySystemBuilder,
+      NodeRecordBuilder nodeRecordBuilder) {
+    return discoverySystemBuilder
+        .secretKey(secretKey)
+        .bootnodes(discoveryConfig.getBootnodes())
+        .localNodeRecord(nodeRecordBuilder.build())
+        .localNodeRecordListener(this::createLocalNodeRecordListener)
+        .talkHandler(incomingRequestTalkHandler)
+        .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
+        .build();
+  }
+
+  private NodeRecordBuilder createNodeRecordBuilder(
+      DiscoveryConfig discoveryConfig, SECP256K1.SecretKey secretKey, UInt64 seqNo) {
+    return new NodeRecordBuilder()
+        .secretKey(secretKey)
+        .seq(seqNo)
+        .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
+  }
+
   private void createLocalNodeRecordListener(NodeRecord oldRecord, NodeRecord newRecord) {
     local_enr_seqno = newRecord.getSeq().toBytes();
+    LOG.info("LocalNodeRecord updated : {}", newRecord);
   }
 
   @Override
@@ -217,21 +234,34 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
-  public NodeRecord updateNodeRecordSocket(Multiaddr multiaddr) {
-    final boolean isIpV6 = multiaddr.has(Protocol.IP6);
-    final Bytes address =
-        MultiaddrUtil.getMultiAddrValue(multiaddr, isIpV6 ? Protocol.IP6 : Protocol.IP4);
-    this.updateCustomENRField(isIpV6 ? EnrField.IP_V6 : EnrField.IP_V4, address);
-    if (multiaddr.has(Protocol.UDP)) {
-      this.updateCustomENRField(
-          isIpV6 ? EnrField.UDP_V6 : EnrField.UDP,
-          MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.UDP));
+  public boolean updateEnrSocket(InetSocketAddress socketAddress, boolean isTCP) {
+    final Bytes address = Bytes.wrap(socketAddress.getAddress().getAddress());
+    final Bytes port = Bytes.ofUnsignedInt(socketAddress.getPort());
+    final IPVersionResolver.IPVersion ipVersion = IPVersionResolver.resolve(socketAddress);
+
+    String ipField;
+    String portField;
+
+    switch (ipVersion) {
+      case IP_V4 -> {
+        ipField = EnrField.IP_V4;
+        portField = isTCP ? EnrField.TCP : EnrField.UDP;
+      }
+      case IP_V6 -> {
+        ipField = EnrField.IP_V6;
+        portField = isTCP ? EnrField.TCP_V6 : EnrField.UDP_V6;
+      }
+      default -> throw new IllegalArgumentException("Unsupported IP version: " + ipVersion);
     }
-    if (multiaddr.has(Protocol.TCP)) {
-      this.updateCustomENRField(
-          isIpV6 ? EnrField.TCP_V6 : EnrField.TCP,
-          MultiaddrUtil.getMultiAddrValue(multiaddr, Protocol.TCP));
-    }
-    return this.getHomeNodeRecord();
+
+    this.updateCustomENRField(ipField, address);
+    this.updateCustomENRField(portField, port);
+
+    NodeRecord nodeRecord = this.getHomeNodeRecord();
+
+    Bytes updatedIp = (Bytes) nodeRecord.get(ipField);
+    Bytes updatedPort = (Bytes) nodeRecord.get(portField);
+
+    return address.equals(updatedIp) && port.equals(updatedPort);
   }
 }

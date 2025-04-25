@@ -1,8 +1,8 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
+import samba.api.HistoryAPI;
 import samba.api.jsonrpc.parameters.ParametersUtil;
 import samba.api.jsonrpc.results.FindContentResult;
-import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
@@ -17,10 +17,10 @@ import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryFindContent implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
-  private final HistoryLibraryAPI historyLibraryAPI;
+  private final HistoryAPI historyAPI;
 
-  public PortalHistoryFindContent(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  public PortalHistoryFindContent(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
@@ -32,10 +32,9 @@ public class PortalHistoryFindContent implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String enr = ParametersUtil.getEnr(requestContext, 0);
-      Bytes contentKey = ParametersUtil.getBytesFromHexString(requestContext, 1);
+      Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 1);
 
-      Optional<FindContentResult> findContentResult =
-          this.historyLibraryAPI.findContent(enr, contentKey);
+      Optional<FindContentResult> findContentResult = this.historyAPI.findContent(enr, contentKey);
 
       return findContentResult
           .map(value -> createSuccessResponse(requestContext, findContentResult.get()))

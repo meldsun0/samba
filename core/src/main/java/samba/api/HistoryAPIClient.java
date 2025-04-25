@@ -1,16 +1,18 @@
-package samba.api.libary;
+package samba.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
-import samba.domain.content.ContentKey;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
 import samba.network.history.api.methods.FindContent;
 import samba.network.history.api.methods.FindNodes;
+import samba.network.history.api.methods.GetContent;
 import samba.network.history.api.methods.GetEnr;
 import samba.network.history.api.methods.GetLocalContent;
 import samba.network.history.api.methods.LookupEnr;
+import samba.network.history.api.methods.Offer;
 import samba.network.history.api.methods.PutContent;
 import samba.network.history.api.methods.Store;
 
@@ -20,16 +22,16 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
-public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
+public class HistoryAPIClient implements HistoryAPI {
 
   private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
-  public HistoryLibraryAPIImpl(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
+  public HistoryAPIClient(final HistoryNetworkInternalAPI historyNetworkInternalAPI) {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
   }
 
   @Override
-  public PutContentResult putContent(final ContentKey contentKey, final Bytes contentValue) {
+  public PutContentResult putContent(final Bytes contentKey, final Bytes contentValue) {
     return PutContent.execute(this.historyNetworkInternalAPI, contentKey, contentValue);
   }
 
@@ -71,5 +73,15 @@ public class HistoryLibraryAPIImpl implements HistoryLibraryAPI {
   @Override
   public Optional<String> lookupEnr(String nodeId) {
     return LookupEnr.execute(this.historyNetworkInternalAPI, nodeId);
+  }
+
+  @Override
+  public Optional<Bytes> offer(String enr, List<Bytes> contents, List<Bytes> contentKeys) {
+    return Offer.execute(this.historyNetworkInternalAPI, enr, contents, contentKeys);
+  }
+
+  @Override
+  public Optional<GetContentResult> getContent(Bytes contentKey) {
+    return GetContent.execute(this.historyNetworkInternalAPI, contentKey);
   }
 }

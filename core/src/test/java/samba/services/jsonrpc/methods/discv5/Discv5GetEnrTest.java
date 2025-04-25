@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.Discv5GetEnr;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -30,7 +31,7 @@ public class Discv5GetEnrTest {
   @BeforeEach
   public void before() {
     this.discv5Client = mock(Discv5Client.class);
-    method = new Discv5GetEnr(discv5Client);
+    method = new Discv5GetEnr(new Discv5APIClient(discv5Client));
   }
 
   @Test

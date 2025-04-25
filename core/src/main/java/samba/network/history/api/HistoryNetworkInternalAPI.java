@@ -12,6 +12,7 @@ import samba.domain.messages.response.Pong;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -46,4 +47,7 @@ public interface HistoryNetworkInternalAPI {
   boolean deleteEnr(String nodeId);
 
   Optional<String> getEnr(String nodeId);
+
+  // TODO RENAME
+  CompletableFuture<Optional<FindContentResult>> getContent(ContentKey contentKey, int timeout);
 }

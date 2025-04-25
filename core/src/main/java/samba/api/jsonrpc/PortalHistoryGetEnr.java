@@ -1,34 +1,36 @@
-package samba.api.jsonrpc.done;
+package samba.api.jsonrpc;
 
+import samba.api.HistoryAPI;
 import samba.api.jsonrpc.parameters.ParametersUtil;
-import samba.api.libary.HistoryLibraryAPI;
 import samba.jsonrpc.config.RpcMethod;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
-public class PortalHistoryDeleteEnr implements JsonRpcMethod {
+import java.util.Optional;
 
-  private final HistoryLibraryAPI historyLibraryAPI;
+public class PortalHistoryGetEnr implements JsonRpcMethod {
 
-  public PortalHistoryDeleteEnr(HistoryLibraryAPI historyLibraryAPI) {
-    this.historyLibraryAPI = historyLibraryAPI;
+  private final HistoryAPI historyAPI;
+
+  public PortalHistoryGetEnr(HistoryAPI historyAPI) {
+    this.historyAPI = historyAPI;
   }
 
   @Override
   public String getName() {
-    return RpcMethod.PORTAL_HISTORY_DELETE_ENR.getMethodName();
+    return RpcMethod.PORTAL_HISTORY_GET_ENR.getMethodName();
   }
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       String nodeId = ParametersUtil.getNodeId(requestContext, 0);
-      boolean result = this.historyLibraryAPI.deleteEnr(nodeId);
+      Optional<String> enr = this.historyAPI.getEnr(nodeId);
 
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);
+      return enr.map(value -> createSuccessResponse(requestContext, enr.get()))
+          .orElseGet(() -> createJsonRpcInvalidRequestResponse(requestContext));
 
     } catch (JsonRpcParameter.JsonRpcParameterException e) {
       return createJsonRpcInvalidRequestResponse(requestContext);

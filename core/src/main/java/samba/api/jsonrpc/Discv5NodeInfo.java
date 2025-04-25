@@ -1,23 +1,21 @@
 package samba.api.jsonrpc;
 
+import samba.api.Discv5API;
 import samba.api.jsonrpc.results.NodeInfo;
 import samba.jsonrpc.config.RpcMethod;
-import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcMethod;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
-import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
-import samba.services.discovery.Discv5Client;
 
-import org.ethereum.beacon.discovery.schema.NodeRecord;
+import java.util.Optional;
 
 public class Discv5NodeInfo implements JsonRpcMethod {
 
-  private final Discv5Client discv5Client;
+  private final Discv5API discv5API;
 
-  public Discv5NodeInfo(Discv5Client discv5Client) {
-    this.discv5Client = discv5Client;
+  public Discv5NodeInfo(final Discv5API discv5API) {
+    this.discv5API = discv5API;
   }
 
   @Override
@@ -27,13 +25,10 @@ public class Discv5NodeInfo implements JsonRpcMethod {
 
   @Override
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
-    NodeRecord nodeRecord = this.discv5Client.getHomeNodeRecord();
-    if (nodeRecord != null) {
-      NodeInfo nodeInfo = new NodeInfo(nodeRecord.asEnr(), nodeRecord.getNodeId().toHexString());
-      return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), nodeInfo);
-    } else {
-      return new JsonRpcErrorResponse(
-          requestContext.getRequest().getId(), RpcErrorType.INTERNAL_ERROR);
-    }
+    Optional<NodeInfo> result = this.discv5API.getNodeInfo();
+    return result
+        .map(nodeInfo -> createSuccessResponse(requestContext, nodeInfo))
+        .orElseGet(
+            () -> createJsonRpcInvalidRequestResponse(requestContext, RpcErrorType.INTERNAL_ERROR));
   }
 }

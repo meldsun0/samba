@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import samba.api.jsonrpc.done.PortalHistoryFindContent;
+import samba.api.HistoryAPIClient;
+import samba.api.jsonrpc.PortalHistoryFindContent;
 import samba.api.jsonrpc.results.FindContentResult;
-import samba.api.libary.HistoryLibraryAPIImpl;
 import samba.domain.messages.requests.FindContent;
 import samba.jsonrpc.reponse.JsonRpcErrorResponse;
 import samba.jsonrpc.reponse.JsonRpcRequest;
@@ -35,7 +35,7 @@ public class PortalHistoryFindContentTest {
   @BeforeEach
   public void before() {
     this.historyJsonRpc = mock(HistoryNetwork.class);
-    method = new PortalHistoryFindContent(new HistoryLibraryAPIImpl(historyJsonRpc));
+    method = new PortalHistoryFindContent(new HistoryAPIClient(historyJsonRpc));
   }
 
   @Test
