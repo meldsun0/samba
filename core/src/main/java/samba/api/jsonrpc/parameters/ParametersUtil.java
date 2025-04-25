@@ -2,6 +2,7 @@ package samba.api.jsonrpc.parameters;
 
 import samba.jsonrpc.reponse.JsonRpcParameter;
 import samba.jsonrpc.reponse.JsonRpcRequestContext;
+import samba.util.NetworkUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -59,8 +60,14 @@ public class ParametersUtil {
         .collect(Collectors.toSet());
   }
 
-  public static InetSocketAddress getSocketAddress(
-      JsonRpcRequestContext requestContext, int index) {
-    return null;
+  public static InetSocketAddress getSocketAddress(JsonRpcRequestContext requestContext, int index)
+      throws JsonRpcParameter.JsonRpcParameterException {
+    try {
+      String socketAddress = requestContext.getRequiredParameter(index, String.class);
+      return NetworkUtil.convertToInetSocketAddress(socketAddress);
+    } catch (Exception e) {
+      throw new JsonRpcParameter.JsonRpcParameterException(
+          String.format("Invalid socketAddress parameter at index %d", index));
+    }
   }
 }
