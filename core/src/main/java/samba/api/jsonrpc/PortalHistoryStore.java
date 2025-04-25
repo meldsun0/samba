@@ -28,7 +28,7 @@ public class PortalHistoryStore implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
-      Bytes contentValue = ParametersUtil.getContentBytesFromHexString(requestContext, 1);
+      Bytes contentValue = ParametersUtil.getBytesFromHexString(requestContext, 1);
 
       boolean result = this.historyAPI.store(contentKey, contentValue);
       return new JsonRpcSuccessResponse(requestContext.getRequest().getId(), result);

@@ -31,7 +31,7 @@ public class ParametersUtil {
       final JsonRpcRequestContext requestContext, int index)
       throws JsonRpcParameter.JsonRpcParameterException {
     String bytesHex = requestContext.getRequiredParameter(index, String.class);
-    if ("0x".equals(bytesHex)) {
+    if ("0x".equals(bytesHex) || bytesHex.isEmpty()) {
       return Bytes.of(0);
     }
     return getBytesFromHexString(requestContext, index);

@@ -31,7 +31,7 @@ public class PortalHistoryPutContent implements JsonRpcMethod {
   public JsonRpcResponse response(JsonRpcRequestContext requestContext) {
     try {
       Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
-      Bytes contentBytes = ParametersUtil.getContentBytesFromHexString(requestContext, 1);
+      Bytes contentBytes = ParametersUtil.getBytesFromHexString(requestContext, 1);
 
       PutContentResult putContentResult = this.historyAPI.putContent(contentKey, contentBytes);
 
