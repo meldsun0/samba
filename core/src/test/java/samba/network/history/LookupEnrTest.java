@@ -145,7 +145,7 @@ public class LookupEnrTest {
 
     when(this.discv5Client.getHomeNodeRecord()).thenReturn(TestHelper.createNodeRecord());
     when(this.routingTable.findNode(any(Bytes.class))).thenReturn(Optional.of(this.nodeRecord));
-    when(this.discv5Client.sendDisv5Message(
+    when(this.discv5Client.sendDiscv5Message(
             any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> CompletableFuture.failedFuture(new RuntimeException()));
 
@@ -158,7 +158,7 @@ public class LookupEnrTest {
   }
 
   private void whenFindNodes(List<String> enrs) {
-    when(this.discv5Client.sendDisv5Message(
+    when(this.discv5Client.sendDiscv5Message(
             any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(
             invocation -> CompletableFuture.completedFuture((new Nodes(enrs)).getSszBytes()));

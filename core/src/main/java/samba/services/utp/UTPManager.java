@@ -108,7 +108,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
   public void sendPacket(UtpPacket packet, UTPAddress remoteAddress) throws IOException {
     SafeFuture.runAsync(
         () ->
-            this.discv5Client.sendDisv5Message(
+            this.discv5Client.sendDiscv5Message(
                 remoteAddress.getAddress(), NetworkType.UTP.getValue(), packet.toBytes()),
         this.utpExecutor);
   }
