@@ -158,7 +158,7 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
-  public CompletableFuture<Bytes> sendDisv5Message(
+  public CompletableFuture<Bytes> sendDiscv5Message(
       NodeRecord nodeRecord, Bytes protocol, Bytes request) {
     return this.discoverySystem
         .talk(nodeRecord, protocol, request)
@@ -188,6 +188,12 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
+  public CompletableFuture<Collection<NodeRecord>> findNodes(
+      NodeRecord nodeRecord, List<Integer> distances) {
+    return this.discoverySystem.findNodes(nodeRecord, distances);
+  }
+
+  @Override
   public Optional<Bytes> getNodeId() {
     return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
   }
@@ -205,12 +211,6 @@ public class Discv5Service extends Service implements Discv5Client {
   @Override
   public UInt64 getEnrSeq() {
     return discoverySystem.getLocalNodeRecord().getSeq();
-  }
-
-  @Override
-  public CompletableFuture<Collection<NodeRecord>> sendDiscv5FindNodes(
-      NodeRecord nodeRecord, List<Integer> distances) {
-    return discoverySystem.findNodes(nodeRecord, distances);
   }
 
   @Override

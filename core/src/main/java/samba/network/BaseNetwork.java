@@ -45,7 +45,7 @@ public abstract class BaseNetwork implements Network {
     // TODO FIX chain order
     return SafeFuture.of(
             discv5Client
-                .sendDisv5Message(
+                .sendDiscv5Message(
                     destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
                 .thenApply(
                     (sszbytes) ->

@@ -6,21 +6,7 @@ import samba.api.Discv5API;
 import samba.api.Discv5APIClient;
 import samba.api.HistoryAPI;
 import samba.api.HistoryAPIClient;
-import samba.api.jsonrpc.ClientVersion;
-import samba.api.jsonrpc.Discv5GetEnr;
-import samba.api.jsonrpc.Discv5NodeInfo;
-import samba.api.jsonrpc.Discv5UpdateNodeInfo;
-import samba.api.jsonrpc.PortalHistoryAddEnr;
-import samba.api.jsonrpc.PortalHistoryDeleteEnr;
-import samba.api.jsonrpc.PortalHistoryFindContent;
-import samba.api.jsonrpc.PortalHistoryFindNodes;
-import samba.api.jsonrpc.PortalHistoryGetContent;
-import samba.api.jsonrpc.PortalHistoryGetEnr;
-import samba.api.jsonrpc.PortalHistoryLocalContent;
-import samba.api.jsonrpc.PortalHistoryLookupEnr;
-import samba.api.jsonrpc.PortalHistoryOffer;
-import samba.api.jsonrpc.PortalHistoryPutContent;
-import samba.api.jsonrpc.PortalHistoryStore;
+import samba.api.jsonrpc.*;
 import samba.api.jsonrpc.pending.PortalHistoryPing;
 import samba.config.SambaConfiguration;
 import samba.domain.messages.IncomingRequestTalkHandler;
@@ -144,6 +130,7 @@ public class PortalNodeMainService extends Service {
           RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(),
           new Discv5UpdateNodeInfo(this.discv5API));
       methods.put(RpcMethod.DISCV5_GET_ENR.getMethodName(), new Discv5GetEnr(this.discv5API));
+      methods.put(RpcMethod.DISCV5_FIND_NODE.getMethodName(), new Discv5FindNode(this.discv5API));
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
           new PortalHistoryAddEnr(this.historyAPI));

@@ -101,7 +101,7 @@ public class OfferMessageTests {
 
   @Test
   public void responseIsNotAAccepMessage() throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(
             CompletableFuture.completedFuture(
                 new Offer(List.of(DefaultContent.key1)).getSszBytes()));
@@ -116,7 +116,7 @@ public class OfferMessageTests {
   @Test
   public void getAndEmptyBitListIfAcceptResponseHasAnEmptyBitlist()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(CompletableFuture.completedFuture(new Accept(555, Bytes.of()).getSszBytes()));
 
     List<Bytes> content = List.of(DefaultContent.value1);
@@ -133,7 +133,7 @@ public class OfferMessageTests {
   @Test
   public void getAndEmptyBitListIfSendDiscv5MessageFail()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(SafeFuture.failedFuture(new Throwable()));
 
     List<Bytes> content = List.of(DefaultContent.value1);
@@ -149,7 +149,7 @@ public class OfferMessageTests {
 
   @Test
   public void getBitListOfAll0() throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {0, 0, 0, 0})));
 
     List<Bytes> content = List.of(DefaultContent.value1);
@@ -166,7 +166,7 @@ public class OfferMessageTests {
   @Test
   public void getEmptyResponseIfFailsWhenContentIsBeingConcatenated()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1})));
     MockedStatic<Util> utilMocked = mockStatic(Util.class);
     utilMocked
@@ -189,7 +189,7 @@ public class OfferMessageTests {
   @Test
   public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponse()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(1)));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
 

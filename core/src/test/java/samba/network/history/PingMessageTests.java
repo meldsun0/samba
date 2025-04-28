@@ -59,7 +59,7 @@ public class PingMessageTests {
       sendOkClientInfoAndCapabilitiesPingMessageAndReceiveOkClientInfoAndCapabilitiesPongTest()
           throws ExecutionException, InterruptedException {
     Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, payloadClientInfo));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
 
@@ -83,7 +83,7 @@ public class PingMessageTests {
   public void handleErrorWhenSendingaPingTest() throws ExecutionException, InterruptedException {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> SafeFuture.failedFuture(new NullPointerException()));
 
     HistoryNetwork historyNetwork =
@@ -104,7 +104,7 @@ public class PingMessageTests {
       throws ExecutionException, InterruptedException {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, payloadClientInfo));
     when(discv5Client.getEnrSeq())
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
@@ -127,7 +127,7 @@ public class PingMessageTests {
   public void handleABadClientInfoAndCapabilitiesPingIncomingRequestTest() {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, Bytes.EMPTY));
     when(discv5Client.getEnrSeq())
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));
@@ -148,7 +148,7 @@ public class PingMessageTests {
   public void handleASuccessfulUnsupportedPingIncomingRequestTest() {
     Discv5Client discv5Client = mock(Discv5Client.class);
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createPongBytesResponse(UInt16.ZERO, Bytes.EMPTY));
     when(discv5Client.getEnrSeq())
         .thenAnswer(invocation -> org.apache.tuweni.units.bigints.UInt64.valueOf(1));

@@ -14,7 +14,7 @@ import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public interface Discv5Client {
 
-  CompletableFuture<Bytes> sendDisv5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
+  CompletableFuture<Bytes> sendDiscv5Message(NodeRecord nodeRecord, Bytes protocol, Bytes request);
 
   SafeFuture<Collection<NodeRecord>> streamLiveNodes();
 
@@ -26,9 +26,6 @@ public interface Discv5Client {
 
   UInt64 getEnrSeq();
 
-  CompletableFuture<Collection<NodeRecord>> sendDiscv5FindNodes(
-      NodeRecord nodeRecord, List<Integer> distances);
-
   void updateCustomENRField(final String fieldName, final Bytes value);
 
   boolean updateEnrSocket(InetSocketAddress socketAddress, boolean isTCP);
@@ -36,4 +33,7 @@ public interface Discv5Client {
   Optional<String> lookupEnr(final UInt256 nodeId);
 
   CompletableFuture<Void> ping(NodeRecord nodeRecord);
+
+  CompletableFuture<Collection<NodeRecord>> findNodes(
+      final NodeRecord nodeRecord, final List<Integer> distances);
 }

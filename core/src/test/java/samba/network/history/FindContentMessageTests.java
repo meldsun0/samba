@@ -53,7 +53,7 @@ public class FindContentMessageTests {
       throws ExecutionException, InterruptedException {
     when(utpManager.findContentRead(any(NodeRecord.class), eq(connectionId)))
         .thenReturn(SafeFuture.completedFuture(Bytes.EMPTY));
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createContentConnectionIdBytesResponse(connectionId));
 
     Optional<FindContentResult> content =
@@ -67,7 +67,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveOkContentContentTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createContentContentBytesResponse(data));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -80,7 +80,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveOkContentEnrTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createContentEnrBytesResponse(List.of("-LI=", "-LI=", "-LI=")));
     when(discv5Client.getEnr()).thenReturn(Optional.of("enr"));
 
@@ -95,7 +95,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveEmptyContentConnectionIdTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -105,7 +105,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveEmptyContentContentTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0501")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -115,7 +115,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveEmptyContentEnrTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -125,7 +125,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveBadContentPacketTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x05FFFFFFFF")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -135,7 +135,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveBadContentConnectionIdTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0500FFFFFFFF")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -149,7 +149,7 @@ public class FindContentMessageTests {
     for (int i = 0; i < PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES + 1; i++) {
       largeContent[i] = (byte) 0xFF;
     }
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.wrap(largeContent)));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();
@@ -159,7 +159,7 @@ public class FindContentMessageTests {
   @Test
   public void sendOkFindContentMessageAndRecieveBadContentEnrTest()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createBadContentBytesResponse(Bytes.fromHexString("0x0502FFFFFFFF")));
     Optional<FindContentResult> content =
         historyNetwork.findContent(nodeRecord, createFindContentMessage(contentKey)).get();

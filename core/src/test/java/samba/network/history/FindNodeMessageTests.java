@@ -67,7 +67,7 @@ public class FindNodeMessageTests {
 
     assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
     verify(discv5Client, times(3))
-        .sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+        .sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -88,7 +88,7 @@ public class FindNodeMessageTests {
 
     assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
     verify(discv5Client, times(1))
-        .sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+        .sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -112,7 +112,7 @@ public class FindNodeMessageTests {
 
     assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
     verify(discv5Client, times(1))
-        .sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+        .sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -137,7 +137,7 @@ public class FindNodeMessageTests {
 
     assertTrue(ForkJoinPool.commonPool().awaitQuiescence(5, TimeUnit.SECONDS));
     verify(discv5Client, times(2))
-        .sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
+        .sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class));
   }
 
   @Test
@@ -159,7 +159,7 @@ public class FindNodeMessageTests {
   @NotNull
   private static Discv5Client mockDiscv5Client(NodeRecord homeNodeRecord, List<String> enrs) {
     Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createNodeBytesResponse((new Nodes(enrs)).getSszBytes()));
     when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
     return discv5Client;
@@ -168,7 +168,7 @@ public class FindNodeMessageTests {
   @NotNull
   private static Discv5Client mockDiscv5Client(NodeRecord homeNodeRecord, Bytes nodesPayload) {
     Discv5Client discv5Client = mock(Discv5Client.class);
-    when(discv5Client.sendDisv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenAnswer(invocation -> createNodeBytesResponse(nodesPayload));
     when(discv5Client.getHomeNodeRecord()).thenReturn(homeNodeRecord);
     return discv5Client;
