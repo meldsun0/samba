@@ -194,6 +194,11 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
+  public CompletableFuture<Bytes> talk(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
+    return this.discoverySystem.talk(nodeRecord, protocol, request);
+  }
+
+  @Override
   public Optional<Bytes> getNodeId() {
     return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
   }

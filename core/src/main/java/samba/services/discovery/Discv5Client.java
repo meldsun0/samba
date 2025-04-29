@@ -36,4 +36,6 @@ public interface Discv5Client {
 
   CompletableFuture<Collection<NodeRecord>> findNodes(
       final NodeRecord nodeRecord, final List<Integer> distances);
+
+  CompletableFuture<Bytes> talk(NodeRecord nodeRecord, Bytes protocol, Bytes request);
 }
