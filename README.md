@@ -105,6 +105,11 @@ Run Hive tests:
 ```shell script
 ./hive -sim portal -client samba,trin -sim.limit history 
 ```
+
+```shell script
+./hive  --sim devp2p --sim.limit discv5 --client samba --docker.output 
+```
+
 If you get the following error on macOS: `can't get docker version: Get "http://unix.sock/v1.25/version": dial unix /var/run/docker.sock: connect: no such file or directory`, you 
 need to enable `Allow the default Docker socket to be used (requires password)` in `Settings` -> `Advanced`
 
@@ -112,7 +117,9 @@ View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
 ```
-## JSON-RPC API (14)
+## JSON-RPC API (17)
+
+#### History
 - portal_historyAddEnr
 - portal_historyDeleteEnr
 - portal_historyFindContent
@@ -124,10 +131,14 @@ View logs output and results:
 - portal_historyOffer
 - portal_historyPing
 - portal_historyStore
+- portal_historyPutContent
 
+#### Discv5
 - discv5_getEnr,
 - discv5_nodeInfo, 
 - discv5_updateNodeInfo
+- discv5_talkReq
+- discv5_findNode
 
 When running against Hive:
 ```shell script
