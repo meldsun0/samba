@@ -4,6 +4,7 @@ import samba.api.jsonrpc.results.NodeInfo;
 import samba.network.history.api.methods.Discv5FindNode;
 import samba.network.history.api.methods.Discv5GetEnr;
 import samba.network.history.api.methods.Discv5NodeInfo;
+import samba.network.history.api.methods.Discv5TalkReq;
 import samba.network.history.api.methods.Discv5UpdateNodeInfo;
 import samba.services.discovery.Discv5Client;
 
@@ -38,5 +39,11 @@ public class Discv5APIClient implements Discv5API {
   @Override
   public Optional<List<String>> findNodes(String enr, Set<Integer> distances) {
     return Discv5FindNode.execute(this.discv5Client, enr, distances);
+  }
+
+  @Override
+  public Optional<String> talk(
+      final String enr, final String protocolId, final String talkReqPayload) {
+    return Discv5TalkReq.execute(this.discv5Client, enr, protocolId, talkReqPayload);
   }
 }

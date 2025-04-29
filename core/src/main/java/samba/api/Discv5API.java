@@ -19,4 +19,6 @@ public interface Discv5API {
   Optional<NodeInfo> updateNodeInfo(InetSocketAddress socketAddress, boolean isTCP);
 
   Optional<List<String>> findNodes(String enr, Set<Integer> distances);
+
+  Optional<String> talk(final String enr, final String protocolId, final String talkReqPayload);
 }
