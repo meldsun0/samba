@@ -81,7 +81,7 @@ public class PortalNodeMainService extends Service {
     this.metricsSystem = mainServiceConfig.getMetricsSystem();
     this.asyncRunner =
         mainServiceConfig.createAsyncRunner(
-            "p2p", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
+            "samba_discovery_service", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
     this.sambaConfiguration = sambaConfiguration;
     this.vertx = vertx;
     initDiscoveryService();
