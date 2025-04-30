@@ -32,7 +32,7 @@ public abstract class BaseNetwork implements Network {
 
   protected SafeFuture<Optional<PortalWireMessage>> sendMessage(
       NodeRecord destinationNode, PortalWireMessage messageRequest) {
-    LOG.info(
+    LOG.debug(
         "Send Portal {} message to {}",
         messageRequest.getMessageType(),
         destinationNode.getNodeId());

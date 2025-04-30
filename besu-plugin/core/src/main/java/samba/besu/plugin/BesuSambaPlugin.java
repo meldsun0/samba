@@ -89,8 +89,8 @@ public class BesuSambaPlugin implements BesuPlugin {
         this.serviceManager
                 .getService(MetricsSystem.class)
                 .ifPresentOrElse(this::startMetrics, () -> LOG.error("Could not obtain MetricsSystem"));
-
-    Samba.init(new String[]{"--portal-subnetworks=history-network", "--p2p-advertised-ip="+host});
+    String[] options = {"--portal-subnetworks=history-network", "--p2p-advertised-ip="+host};
+    Samba.init(options);
     }
 
     private void startMetrics(MetricsSystem metricsSystem) {
