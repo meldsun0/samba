@@ -40,8 +40,9 @@ build {
 jar {
   enabled = false
 }
-
-def imageName = "besu-samba-plugin:latest"
+def dockerOrgName = project.hasProperty('dockerOrgName') ? project.getProperty("dockerOrgName") : "meldsun"
+def dockerArtifactName = project.hasProperty("dockerArtifactName") ? project.getProperty("dockerArtifactName") : "besu-samba-plugin:latest"
+def imageName =  "${dockerOrgName}/${dockerArtifactName}"
 def containerName = "besu-samba-plugin"
 
 
@@ -49,7 +50,7 @@ def containerName = "besu-samba-plugin"
 task runBesu{
   group = "docker"
   description = "Builds the Docker image and runs the container"
-
+  def publicIp = ['sh', '-c', 'curl -s ifconfig.me'].execute().text.trim()
   doLast {
     exec {
         commandLine "docker", "build", "-t", imageName, "-f", "docker/Dockerfile", "."
@@ -59,7 +60,7 @@ task runBesu{
       ignoreExitValue true // Ignore errors if container doesn't exist
     }
     exec {
-      commandLine "docker", "run", "-d", "--name", containerName, "-p", "8545:8545", "-p", "9545:9545", imageName
+      commandLine "docker", "run", "-d", "-e", "HOST_IP=${publicIp}", "--name", containerName, "-p", "8545:8545", "-p", "9545:9545", "-p", "9000:9000/udp", imageName
     }
   }
 }
