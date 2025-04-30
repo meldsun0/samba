@@ -18,9 +18,9 @@ public interface RoutingTable {
 
   Optional<NodeRecord> findNode(Bytes nodeId);
 
-  Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey);
+  Optional<NodeRecord> findClosestNodeToKey(Bytes key);
 
-  Set<NodeRecord> findClosestNodesToContentKey(Bytes contentKey, int count, boolean inRadius);
+  Set<NodeRecord> findClosestNodesToKey(Bytes key, int count, boolean inRadius);
 
   Stream<NodeRecord> getNodes(final int distance);
 

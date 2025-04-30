@@ -3,6 +3,7 @@ package samba.api;
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
+import samba.api.jsonrpc.results.RecursiveFindNodesResult;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
@@ -14,6 +15,7 @@ import samba.network.history.api.methods.GetLocalContent;
 import samba.network.history.api.methods.LookupEnr;
 import samba.network.history.api.methods.Offer;
 import samba.network.history.api.methods.PutContent;
+import samba.network.history.api.methods.RecursiveFindNodes;
 import samba.network.history.api.methods.Store;
 
 import java.util.List;
@@ -83,5 +85,10 @@ public class HistoryAPIClient implements HistoryAPI {
   @Override
   public Optional<GetContentResult> getContent(Bytes contentKey) {
     return GetContent.execute(this.historyNetworkInternalAPI, contentKey);
+  }
+
+  @Override
+  public Optional<RecursiveFindNodesResult> recursiveFindNodes(String nodeId) {
+    return RecursiveFindNodes.execute(this.historyNetworkInternalAPI, nodeId);
   }
 }

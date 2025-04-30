@@ -89,16 +89,15 @@ public class HistoryRoutingTable implements RoutingTable {
   }
 
   @Override
-  public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
+  public Optional<NodeRecord> findClosestNodeToKey(Bytes key) {
     return radiusMap.entrySet().stream()
-        .min(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentKey)))
+        .min(Comparator.comparing(entry -> computeDistance(entry.getKey(), key)))
         .flatMap(entry -> nodeTable.getNode(entry.getKey()));
   }
 
   @Override
-  public Set<NodeRecord> findClosestNodesToContentKey(
-      Bytes contentKey, int count, boolean inRadius) {
-    Bytes contentId = Hash.sha256(contentKey);
+  public Set<NodeRecord> findClosestNodesToKey(Bytes key, int count, boolean inRadius) {
+    Bytes contentId = Hash.sha256(key);
     if (!inRadius)
       return radiusMap.entrySet().stream()
           .sorted(Comparator.comparing(entry -> computeDistance(entry.getKey(), contentId)))

@@ -166,6 +166,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.PORTAL_HISTORY_PUT_CONTENT.getMethodName(),
           new PortalHistoryPutContent(this.historyAPI));
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_RECURSIVE_FIND_NODES.getMethodName(),
+          new PortalHistoryRecursiveFindNodes(this.historyAPI));
 
       jsonRpcService =
           Optional.of(
