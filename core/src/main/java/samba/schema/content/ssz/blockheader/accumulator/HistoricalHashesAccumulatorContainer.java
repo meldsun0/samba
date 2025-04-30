@@ -45,6 +45,16 @@ public class HistoricalHashesAccumulatorContainer
     super(HistoricalHashesAccumulatorContainerSchema.INSTANCE, backingNode);
   }
 
+  public HistoricalHashesAccumulatorContainer() {
+    super(
+        HistoricalHashesAccumulatorContainerSchema.INSTANCE,
+        SszListSchema.create(
+                SszPrimitiveSchemas.BYTES32_SCHEMA,
+                HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS)
+            .createFromElements(createSszBytes32List(List.of())),
+        EpochRecordList.createList(List.of()));
+  }
+
   private static List<SszBytes32> createSszBytes32List(List<Bytes32> historicalEpochs) {
     return historicalEpochs.stream().map(SszBytes32::of).collect(Collectors.toList());
   }

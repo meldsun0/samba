@@ -15,8 +15,9 @@ public class HistoricalHashesAccumulator {
   public static final int EPOCH_SIZE = 8192;
   public static final int MAX_HISTORICAL_EPOCHS = 2048;
 
-  public static void updateAccumulator(
+  public static HistoricalHashesAccumulatorContainer updateAccumulator(
       HistoricalHashesAccumulatorContainer accumulator, BlockHeader newBlockHeader) {
+    UInt256 newTotalDifficulty;
     UInt256 lastTotalDifficulty;
     List<HeaderRecordContainer> currentEpoch = new ArrayList<>(accumulator.getEpochRecord());
     List<Bytes32> historicalEpochs = new ArrayList<>(accumulator.getHistoricalEpochs());
@@ -30,6 +31,10 @@ public class HistoricalHashesAccumulator {
               .getTotalDifficulty();
     }
 
+    newTotalDifficulty =
+          lastTotalDifficulty.add(
+              UInt256.valueOf(newBlockHeader.getDifficulty().getAsBigInteger()));
+
     if (accumulator.getEpochRecord().size() == HistoricalHashesAccumulator.EPOCH_SIZE) {
       EpochRecordList fullEpoch =
           new EpochRecordList(new ArrayList<>(accumulator.getEpochRecord()));
@@ -38,12 +43,15 @@ public class HistoricalHashesAccumulator {
       currentEpoch = new ArrayList<>();
     }
 
-    UInt256 newTotalDifficulty =
-        lastTotalDifficulty.add(UInt256.valueOf(newBlockHeader.getDifficulty().getAsBigInteger()));
     HeaderRecordContainer newRecord =
         new HeaderRecordContainer(newBlockHeader.getHash(), newTotalDifficulty);
     currentEpoch.add(newRecord);
 
-    accumulator.getEpochRecord().add(newRecord);
+    return new HistoricalHashesAccumulatorContainer(
+        historicalEpochs, new EpochRecordList(currentEpoch));
+  }
+
+  public static boolean validate() {
+    return true;
   }
 }

@@ -22,7 +22,8 @@ public class EpochRecordList {
   public EpochRecordList(SszList<HeaderRecordContainer> headerRecordList) {
     if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is not equal to " + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to "
+              + HistoricalHashesAccumulator.EPOCH_SIZE);
     }
     this.headerRecordList = headerRecordList;
   }
@@ -30,7 +31,8 @@ public class EpochRecordList {
   public EpochRecordList(List<HeaderRecordContainer> headerRecordList) {
     if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is not equal to " + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to "
+              + HistoricalHashesAccumulator.EPOCH_SIZE);
     }
     this.headerRecordList = schema.createFromElements(headerRecordList);
   }
@@ -47,7 +49,8 @@ public class EpochRecordList {
       List<HeaderRecordContainer> headerRecordList) {
     if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is not equal to " + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to "
+              + HistoricalHashesAccumulator.EPOCH_SIZE);
     }
     return schema.createFromElements(headerRecordList);
   }
@@ -56,7 +59,8 @@ public class EpochRecordList {
       SszList<HeaderRecordContainer> headerRecordList) {
     if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is not equal to " + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to "
+              + HistoricalHashesAccumulator.EPOCH_SIZE);
     }
     return headerRecordList.stream().collect(Collectors.toList());
   }
