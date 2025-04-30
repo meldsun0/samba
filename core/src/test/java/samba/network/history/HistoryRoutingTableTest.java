@@ -42,14 +42,14 @@ public class HistoryRoutingTableTest {
   @Test
   public void testFindClosestNodeToContentKey() {
     NodeRecord closestNode = this.nodes.get(0);
-    NodeRecord node = this.routingTable.findClosestNodeToContentKey(closestNode.getNodeId()).get();
+    NodeRecord node = this.routingTable.findClosestNodeToKey(closestNode.getNodeId()).get();
     assertEquals(closestNode, node);
   }
 
   @Test
   public void testFindClosestNodeToContentKeyWithEmptyNodes() {
     Set<NodeRecord> foundNode =
-        this.routingTable.findClosestNodesToContentKey(Bytes.fromHexString("0x1234"), 1, false);
+        this.routingTable.findClosestNodesToKey(Bytes.fromHexString("0x1234"), 1, false);
     assertEquals(1, foundNode.size());
   }
 
@@ -63,7 +63,7 @@ public class HistoryRoutingTableTest {
     exaggeratedTable.addOrUpdateNode(this.nodes.get(1));
     exaggeratedTable.updateRadius(this.nodes.get(1).getNodeId(), UInt256.valueOf(1));
     Set<NodeRecord> foundNodes =
-        exaggeratedTable.findClosestNodesToContentKey(Bytes.fromHexString("0x1234"), 10, true);
+        exaggeratedTable.findClosestNodesToKey(Bytes.fromHexString("0x1234"), 10, true);
     assertEquals(2, foundNodes.size());
     assertEquals(Set.of(this.nodes.get(0), this.nodes.get(2)), foundNodes);
   }

@@ -34,7 +34,7 @@ public class GetContent {
       return Optional.of(new GetContentResult(content.get(), false));
     } else {
       Optional<FindContentResult> findContentResult =
-          this.historyNetworkInternalAPI.getContent(contentKey, SEARCH_TIMEOUT).join();
+          this.historyNetworkInternalAPI.getContent(contentKey, SEARCH_TIMEOUT);
       if (findContentResult.isPresent() && findContentResult.get().getContent() != null) {
         this.historyNetworkInternalAPI.store(
             contentKey.getSszBytes(), Bytes.fromHexString(findContentResult.get().getContent()));

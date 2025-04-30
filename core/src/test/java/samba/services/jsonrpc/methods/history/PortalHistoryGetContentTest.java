@@ -21,7 +21,6 @@ import samba.jsonrpc.reponse.RpcErrorType;
 import samba.network.history.HistoryNetwork;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,9 +75,7 @@ public class PortalHistoryGetContentTest {
                 }));
     final String foundData = "0x1234";
     when(historyJsonRpc.getContent(any(ContentKey.class), anyInt()))
-        .thenReturn(
-            CompletableFuture.completedFuture(
-                Optional.of(new FindContentResult(foundData, false))));
+        .thenReturn(Optional.of(new FindContentResult(foundData, false)));
 
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(
@@ -98,8 +95,7 @@ public class PortalHistoryGetContentTest {
                 new Object[] {
                   "0x01720704f3aa11c53cf344ea069db95cecb81ad7453c8f276b2a1062979611f09c"
                 }));
-    when(historyJsonRpc.getContent(any(ContentKey.class), anyInt()))
-        .thenReturn(CompletableFuture.completedFuture(Optional.empty()));
+    when(historyJsonRpc.getContent(any(ContentKey.class), anyInt())).thenReturn(Optional.empty());
 
     final JsonRpcResponse expected =
         new JsonRpcErrorResponse(

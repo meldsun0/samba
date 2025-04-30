@@ -3,6 +3,7 @@ package samba.network.history;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.RecursiveFindNodesResult;
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -28,6 +29,7 @@ import samba.network.history.routingtable.HistoryRoutingTable;
 import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.search.RecursiveLookupTaskFindContent;
+import samba.services.search.RecursiveLookupTaskFindNodes;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.Util;
@@ -413,7 +415,7 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   public Optional<NodeRecord> findClosestNodeToContentKey(Bytes contentKey) {
-    return this.routingTable.findClosestNodeToContentKey(contentKey);
+    return this.routingTable.findClosestNodeToKey(contentKey);
   }
 
   public Optional<NodeRecord> nodeRecordFromEnr(String enr) {
@@ -616,8 +618,7 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
-  public CompletableFuture<Optional<FindContentResult>> getContent(
-      ContentKey contentKey, int timeout) {
+  public Optional<FindContentResult> getContent(ContentKey contentKey, int timeout) {
     RecursiveLookupTaskFindContent task =
         new RecursiveLookupTaskFindContent(
             this,
@@ -625,7 +626,35 @@ public class HistoryNetwork extends BaseNetwork
             this.discv5Client.getHomeNodeRecord().getNodeId(),
             getFoundNodes(contentKey),
             timeout);
-    return task.execute();
+    CompletableFuture<Optional<FindContentResult>> future = task.execute();
+    try {
+      Optional<FindContentResult> result = future.join();
+      return result;
+    } catch (Exception e) {
+      LOG.error("Error when executing getContent", e);
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  public Optional<RecursiveFindNodesResult> recursiveFindNodes(
+      final String nodeId, final int timeout) {
+    Bytes nodeIdBytes = Bytes.fromHexString(nodeId);
+    RecursiveLookupTaskFindNodes task =
+        new RecursiveLookupTaskFindNodes(
+            this,
+            nodeIdBytes,
+            this.discv5Client.getHomeNodeRecord().getNodeId(),
+            this.routingTable.findClosestNodesToKey(nodeIdBytes, 10, false),
+            timeout);
+    CompletableFuture<Optional<RecursiveFindNodesResult>> future = task.execute();
+    try {
+      Optional<RecursiveFindNodesResult> result = future.join();
+      return result;
+    } catch (Exception e) {
+      LOG.error("Error when executing recursiveFindNodes", e);
+      return Optional.empty();
+    }
   }
 
   public Set<NodeRecord> getFoundNodes(ContentKey contentKey) {
@@ -634,8 +663,7 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius) {
-    return this.routingTable.findClosestNodesToContentKey(
-        contentKey.getSszBytes(), count, inRadius);
+    return this.routingTable.findClosestNodesToKey(contentKey.getSszBytes(), count, inRadius);
   }
 
   @Override

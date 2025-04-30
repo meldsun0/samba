@@ -1,6 +1,7 @@
 package samba.network.history.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.RecursiveFindNodesResult;
 import samba.domain.content.ContentKey;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.requests.FindNodes;
@@ -12,7 +13,6 @@ import samba.domain.messages.response.Pong;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -49,5 +49,7 @@ public interface HistoryNetworkInternalAPI {
   Optional<String> getEnr(String nodeId);
 
   // TODO RENAME
-  CompletableFuture<Optional<FindContentResult>> getContent(ContentKey contentKey, int timeout);
+  Optional<FindContentResult> getContent(ContentKey contentKey, int timeout);
+
+  Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId, final int timeout);
 }
