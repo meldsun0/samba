@@ -38,4 +38,7 @@ public interface Discv5Client {
       final NodeRecord nodeRecord, final List<Integer> distances);
 
   CompletableFuture<Bytes> talk(NodeRecord nodeRecord, Bytes protocol, Bytes request);
+
+  /** Live nodes are at the start of the list with not yet confirmed nodes at the end. */
+  List<List<NodeRecord>> getRoutingTable();
 }

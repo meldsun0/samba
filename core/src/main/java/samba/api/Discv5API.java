@@ -21,4 +21,6 @@ public interface Discv5API {
   Optional<List<String>> findNodes(String enr, Set<Integer> distances);
 
   Optional<String> talk(final String enr, final String protocolId, final String talkReqPayload);
+
+  Optional<List<List<String>>> getRoutingTable();
 }

@@ -19,8 +19,8 @@ import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.AddressAccessPolicy;
-import org.ethereum.beacon.discovery.DiscoverySystem;
 import org.ethereum.beacon.discovery.DiscoverySystemBuilder;
+import org.ethereum.beacon.discovery.MutableDiscoverySystem;
 import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
@@ -34,7 +34,7 @@ import tech.pegasys.teku.service.serviceutils.Service;
 public class Discv5Service extends Service implements Discv5Client {
 
   private static final Logger LOG = LogManager.getLogger();
-  private final DiscoverySystem discoverySystem;
+  private final MutableDiscoverySystem discoverySystem;
   private final AsyncRunner asyncRunner;
   private volatile Cancellable bootnodeRefreshTask;
 
@@ -128,7 +128,7 @@ public class Discv5Service extends Service implements Discv5Client {
     LOG.info("ENR :{}", this.getHomeNodeRecord());
   }
 
-  private DiscoverySystem createDiscoverySystem(
+  private MutableDiscoverySystem createDiscoverySystem(
       DiscoveryConfig discoveryConfig,
       SECP256K1.SecretKey secretKey,
       IncomingRequestTalkHandler incomingRequestTalkHandler,
@@ -141,7 +141,7 @@ public class Discv5Service extends Service implements Discv5Client {
         .localNodeRecordListener(this::createLocalNodeRecordListener)
         .talkHandler(incomingRequestTalkHandler)
         .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
-        .build();
+        .buildMutable();
   }
 
   private NodeRecordBuilder createNodeRecordBuilder(
@@ -196,6 +196,11 @@ public class Discv5Service extends Service implements Discv5Client {
   @Override
   public CompletableFuture<Bytes> talk(NodeRecord nodeRecord, Bytes protocol, Bytes request) {
     return this.discoverySystem.talk(nodeRecord, protocol, request);
+  }
+
+  @Override
+  public List<List<NodeRecord>> getRoutingTable() {
+    return this.discoverySystem.getNodeRecordBuckets();
   }
 
   @Override

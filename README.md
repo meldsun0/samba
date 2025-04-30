@@ -117,7 +117,7 @@ View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
 ```
-## JSON-RPC API (17)
+## JSON-RPC API (18)
 
 #### History
 - portal_historyAddEnr
@@ -139,6 +139,7 @@ View logs output and results:
 - discv5_updateNodeInfo
 - discv5_talkReq
 - discv5_findNode
+- discv5_routingTableInfo
 
 When running against Hive:
 ```shell script
