@@ -1,7 +1,7 @@
 package samba.api.jsonrpc.results;
 
-import samba.api.jsonrpc.schemas.UInt16JsonDeserializer;
-import samba.api.jsonrpc.schemas.UInt16JsonSerializer;
+import samba.api.jsonrpc.schemas.serialization.UInt16JsonDeserializer;
+import samba.api.jsonrpc.schemas.serialization.UInt16JsonSerializer;
 import samba.domain.types.unsigned.UInt16;
 
 import java.math.BigInteger;
