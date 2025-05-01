@@ -43,4 +43,6 @@ public interface Discv5Client {
   List<List<NodeRecord>> getRoutingTable();
 
   boolean addEnr(String enr);
+
+  boolean deleteEnr(String nodeId);
 }

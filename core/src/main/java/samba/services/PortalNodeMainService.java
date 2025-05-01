@@ -137,6 +137,7 @@ public class PortalNodeMainService extends Service {
           RpcMethod.DISCV5_ROUTING_TABLE_INFO.getMethodName(),
           new Discv5RoutingTableInfo(this.discv5API));
       methods.put(RpcMethod.DISCV5_ADD_ENR.getMethodName(), new Discv5AddEnr(this.discv5API));
+      methods.put(RpcMethod.DISCV5_DELETE_ENR.getMethodName(), new Discv5DeleteEnr(this.discv5API));
 
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),

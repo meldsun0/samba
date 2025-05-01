@@ -25,4 +25,6 @@ public interface Discv5API {
   Optional<List<List<String>>> getRoutingTable();
 
   boolean addEnr(String enr);
+
+  boolean deleteEnr(String nodeId);
 }

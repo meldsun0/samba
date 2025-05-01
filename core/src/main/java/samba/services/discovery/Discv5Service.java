@@ -219,6 +219,19 @@ public class Discv5Service extends Service implements Discv5Client {
   }
 
   @Override
+  public boolean deleteEnr(String nodeId) {
+    try {
+      Bytes nodeIdInBytes = Bytes.fromHexString(nodeId);
+      this.discoverySystem.deleteNodeRecord(nodeIdInBytes);
+      final Optional<NodeRecord> maybeNodeRecord = discoverySystem.lookupNode(nodeIdInBytes);
+      return maybeNodeRecord.isEmpty();
+    } catch (Exception e) {
+      LOG.debug("Error when deleting discv5 Enr");
+      return false;
+    }
+  }
+
+  @Override
   public Optional<Bytes> getNodeId() {
     return Optional.of(discoverySystem.getLocalNodeRecord().getNodeId());
   }
