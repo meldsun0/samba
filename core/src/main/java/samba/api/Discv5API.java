@@ -23,4 +23,8 @@ public interface Discv5API {
   Optional<String> talk(final String enr, final String protocolId, final String talkReqPayload);
 
   Optional<List<List<String>>> getRoutingTable();
+
+  boolean addEnr(String enr);
+
+  boolean deleteEnr(String nodeId);
 }

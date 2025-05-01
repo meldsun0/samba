@@ -117,7 +117,7 @@ View logs output and results:
 ```shell script
 ./hiveview --serve --logdir ./workspace/logs
 ```
-## JSON-RPC API (18)
+## [JSON-RPC API (20)](https://samba-portal-node.postman.co/workspace/Samba-Portal-Node-Workspace~8bf54719-5e6d-4476-8b33-6434dc57d833/request/33150235-eb63c4bf-82ff-477e-a17d-616657e9cdbc?action=share&creator=33150235&ctx=documentation&active-environment=33150235-5c222146-bd60-431b-bb15-f3f9dc8fc9cc)
 
 #### History
 - portal_historyAddEnr
@@ -127,7 +127,7 @@ View logs output and results:
 - portal_historyGetContent
 - portal_historyGetEnr
 - portal_historyLocalContent
-- potal_historyLookupEnr
+- portal_historyLookupEnr
 - portal_historyOffer
 - portal_historyPing
 - portal_historyStore
@@ -140,6 +140,8 @@ View logs output and results:
 - discv5_talkReq
 - discv5_findNode
 - discv5_routingTableInfo
+- discv5_addEnr
+- discv5_deleteEnr
 
 When running against Hive:
 ```shell script

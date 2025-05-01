@@ -125,6 +125,7 @@ public class PortalNodeMainService extends Service {
       final Map<String, JsonRpcMethod> methods = new HashMap<>();
 
       methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));
+
       methods.put(RpcMethod.DISCV5_NODE_INFO.getMethodName(), new Discv5NodeInfo(this.discv5API));
       methods.put(
           RpcMethod.DISCV5_UPDATE_NODE_INFO.getMethodName(),
@@ -135,6 +136,9 @@ public class PortalNodeMainService extends Service {
       methods.put(
           RpcMethod.DISCV5_ROUTING_TABLE_INFO.getMethodName(),
           new Discv5RoutingTableInfo(this.discv5API));
+      methods.put(RpcMethod.DISCV5_ADD_ENR.getMethodName(), new Discv5AddEnr(this.discv5API));
+      methods.put(RpcMethod.DISCV5_DELETE_ENR.getMethodName(), new Discv5DeleteEnr(this.discv5API));
+
       methods.put(
           RpcMethod.PORTAL_HISTORY_ADD_ENR.getMethodName(),
           new PortalHistoryAddEnr(this.historyAPI));
