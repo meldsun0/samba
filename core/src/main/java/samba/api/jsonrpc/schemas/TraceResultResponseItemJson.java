@@ -14,11 +14,11 @@ import org.apache.tuweni.units.bigints.UInt256;
 @JsonPropertyOrder({"durationMs", "respondedWith"})
 public class TraceResultResponseItemJson {
 
-  private final int durationMs;
+  private int durationMs;
 
-  @JsonDeserialize(using = UInt256JsonDeserializer.class)
-  @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final List<UInt256> respondedWith;
+  @JsonDeserialize(contentUsing = UInt256JsonDeserializer.class)
+  @JsonSerialize(contentUsing = UInt256JsonSerializer.class)
+  private List<UInt256> respondedWith;
 
   public TraceResultResponseItemJson(final int durationMs, final List<UInt256> respondedWith) {
     if (durationMs < 0) {
@@ -27,6 +27,8 @@ public class TraceResultResponseItemJson {
     this.durationMs = durationMs;
     this.respondedWith = respondedWith;
   }
+
+  public TraceResultResponseItemJson() {}
 
   @JsonGetter(value = "durationMs")
   public int getDurationMs() {

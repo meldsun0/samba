@@ -1,6 +1,7 @@
 package samba.api.jsonrpc.schemas;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import samba.domain.types.unsigned.UInt16;
 
@@ -25,7 +26,7 @@ public class ClientInfoAndCapabilitiesJsonTest {
     try {
       jsonString = objectMapper.writeValueAsString(clientInfo);
     } catch (Exception e) {
-      e.printStackTrace();
+      fail("Serialization failed: " + e.getMessage());
     }
 
     ClientInfoAndCapabilitiesJson deserializedClientInfo = null;
@@ -33,7 +34,7 @@ public class ClientInfoAndCapabilitiesJsonTest {
       deserializedClientInfo =
           objectMapper.readValue(jsonString, ClientInfoAndCapabilitiesJson.class);
     } catch (Exception e) {
-      e.printStackTrace();
+      fail("Deserialization failed: " + e.getMessage());
     }
     assertEquals(clientInfo.getClientInfo(), deserializedClientInfo.getClientInfo());
     assertEquals(clientInfo.getDataRadius(), deserializedClientInfo.getDataRadius());

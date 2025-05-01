@@ -21,25 +21,25 @@ public class TraceResultObjectJson {
 
   @JsonDeserialize(using = UInt256JsonDeserializer.class)
   @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final UInt256 origin;
+  private UInt256 origin;
 
   @JsonDeserialize(using = UInt256JsonDeserializer.class)
   @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final UInt256 targetId;
-
-  @JsonDeserialize(using = UInt256JsonDeserializer.class)
-  @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final Map<UInt256, TraceResultResponseItemJson> responses;
+  private UInt256 targetId;
 
   @JsonDeserialize(keyUsing = UInt256JsonKeyDeserializer.class)
   @JsonSerialize(keyUsing = UInt256JsonKeySerializer.class)
-  private final Map<UInt256, TraceResultMetadataObjectJson> metadata;
+  private Map<UInt256, TraceResultResponseItemJson> responses;
 
-  private final int startedAtMs;
+  @JsonDeserialize(keyUsing = UInt256JsonKeyDeserializer.class)
+  @JsonSerialize(keyUsing = UInt256JsonKeySerializer.class)
+  private Map<UInt256, TraceResultMetadataObjectJson> metadata;
 
-  @JsonDeserialize(using = UInt256JsonDeserializer.class)
-  @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final List<UInt256> cancelled;
+  private int startedAtMs;
+
+  @JsonDeserialize(contentUsing = UInt256JsonDeserializer.class)
+  @JsonSerialize(contentUsing = UInt256JsonSerializer.class)
+  private List<UInt256> cancelled;
 
   public TraceResultObjectJson(
       final UInt256 origin,
@@ -64,6 +64,8 @@ public class TraceResultObjectJson {
       final int startedAtMs) {
     this(origin, targetId, responses, metadata, startedAtMs, null);
   }
+
+  public TraceResultObjectJson() {}
 
   @JsonGetter(value = "origin")
   public UInt256 getOrigin() {

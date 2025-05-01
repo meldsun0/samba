@@ -12,16 +12,18 @@ import org.apache.tuweni.units.bigints.UInt256;
 @JsonPropertyOrder({"enr", "distance"})
 public class TraceResultMetadataObjectJson {
 
-  private final String enr;
+  private String enr;
 
   @JsonDeserialize(using = UInt256JsonDeserializer.class)
   @JsonSerialize(using = UInt256JsonSerializer.class)
-  private final UInt256 distance;
+  private UInt256 distance;
 
   public TraceResultMetadataObjectJson(final String enr, final UInt256 distance) {
     this.enr = enr;
     this.distance = distance;
   }
+
+  public TraceResultMetadataObjectJson() {}
 
   @JsonGetter(value = "enr")
   public String getEnr() {

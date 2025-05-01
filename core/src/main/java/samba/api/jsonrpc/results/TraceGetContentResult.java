@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({"content", "utpTransfer", "trace"})
 public class TraceGetContentResult {
 
-  private final String content;
-  private final boolean utpTransfer;
-  private final TraceResultObjectJson trace;
+  private String content;
+  private boolean utpTransfer;
+  private TraceResultObjectJson trace;
 
   public TraceGetContentResult(
       final String content, final boolean utpTransfer, final TraceResultObjectJson trace) {
@@ -19,13 +19,15 @@ public class TraceGetContentResult {
     this.trace = trace;
   }
 
+  public TraceGetContentResult() {}
+
   @JsonGetter(value = "content")
   public String getContent() {
     return content;
   }
 
   @JsonGetter(value = "utpTransfer")
-  public boolean isUtpTransfer() {
+  public boolean getUtpTransfer() {
     return utpTransfer;
   }
 
