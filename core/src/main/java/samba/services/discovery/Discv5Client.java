@@ -41,4 +41,6 @@ public interface Discv5Client {
 
   /** Live nodes are at the start of the list with not yet confirmed nodes at the end. */
   List<List<NodeRecord>> getRoutingTable();
+
+  boolean addEnr(String enr);
 }

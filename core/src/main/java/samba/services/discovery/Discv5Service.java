@@ -24,6 +24,7 @@ import org.ethereum.beacon.discovery.MutableDiscoverySystem;
 import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
+import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
@@ -201,6 +202,20 @@ public class Discv5Service extends Service implements Discv5Client {
   @Override
   public List<List<NodeRecord>> getRoutingTable() {
     return this.discoverySystem.getNodeRecordBuckets();
+  }
+
+  @Override
+  public boolean addEnr(String enr) {
+    try {
+      final NodeRecord nodeRecord = NodeRecordFactory.DEFAULT.fromEnr(enr);
+      this.discoverySystem.addNodeRecord(nodeRecord);
+      final Optional<NodeRecord> maybeNodeRecord =
+          discoverySystem.lookupNode(nodeRecord.getNodeId());
+      return maybeNodeRecord.isPresent();
+    } catch (Exception e) {
+      LOG.debug("Error when adding discv5 Enr");
+      return false;
+    }
   }
 
   @Override

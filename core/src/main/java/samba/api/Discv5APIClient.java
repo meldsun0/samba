@@ -1,6 +1,7 @@
 package samba.api;
 
 import samba.api.jsonrpc.results.NodeInfo;
+import samba.network.history.api.methods.Discv5AddEnr;
 import samba.network.history.api.methods.Discv5FindNode;
 import samba.network.history.api.methods.Discv5GetEnr;
 import samba.network.history.api.methods.Discv5GetRoutingTable;
@@ -51,5 +52,10 @@ public class Discv5APIClient implements Discv5API {
   @Override
   public Optional<List<List<String>>> getRoutingTable() {
     return Discv5GetRoutingTable.execute(this.discv5Client);
+  }
+
+  @Override
+  public boolean addEnr(String enr) {
+    return Discv5AddEnr.execute(this.discv5Client, enr);
   }
 }
