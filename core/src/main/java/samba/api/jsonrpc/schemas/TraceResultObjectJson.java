@@ -27,6 +27,10 @@ public class TraceResultObjectJson {
   @JsonSerialize(using = UInt256JsonSerializer.class)
   private UInt256 targetId;
 
+  @JsonDeserialize(using = UInt256JsonDeserializer.class)
+  @JsonSerialize(using = UInt256JsonSerializer.class)
+  private UInt256 recievedFrom;
+
   @JsonDeserialize(keyUsing = UInt256JsonKeyDeserializer.class)
   @JsonSerialize(keyUsing = UInt256JsonKeySerializer.class)
   private Map<UInt256, TraceResultResponseItemJson> responses;
@@ -35,7 +39,7 @@ public class TraceResultObjectJson {
   @JsonSerialize(keyUsing = UInt256JsonKeySerializer.class)
   private Map<UInt256, TraceResultMetadataObjectJson> metadata;
 
-  private int startedAtMs;
+  private long startedAtMs;
 
   @JsonDeserialize(contentUsing = UInt256JsonDeserializer.class)
   @JsonSerialize(contentUsing = UInt256JsonSerializer.class)
@@ -44,9 +48,10 @@ public class TraceResultObjectJson {
   public TraceResultObjectJson(
       final UInt256 origin,
       final UInt256 targetId,
+      final UInt256 recievedFrom,
       final Map<UInt256, TraceResultResponseItemJson> responses,
       final Map<UInt256, TraceResultMetadataObjectJson> metadata,
-      final int startedAtMs,
+      final long startedAtMs,
       final List<UInt256> cancelled) {
     this.origin = origin;
     this.targetId = targetId;
@@ -61,8 +66,12 @@ public class TraceResultObjectJson {
       final UInt256 targetId,
       final Map<UInt256, TraceResultResponseItemJson> responses,
       final Map<UInt256, TraceResultMetadataObjectJson> metadata,
-      final int startedAtMs) {
-    this(origin, targetId, responses, metadata, startedAtMs, null);
+      final long startedAtMs) {
+    this.origin = origin;
+    this.targetId = targetId;
+    this.responses = responses;
+    this.metadata = metadata;
+    this.startedAtMs = startedAtMs;
   }
 
   public TraceResultObjectJson() {}
@@ -77,6 +86,11 @@ public class TraceResultObjectJson {
     return targetId;
   }
 
+  @JsonGetter(value = "recievedFrom")
+  public UInt256 getRecievedFrom() {
+    return recievedFrom;
+  }
+
   @JsonGetter(value = "responses")
   public Map<UInt256, TraceResultResponseItemJson> getResponses() {
     return responses;
@@ -88,7 +102,7 @@ public class TraceResultObjectJson {
   }
 
   @JsonGetter(value = "startedAtMs")
-  public int getStartedAtMs() {
+  public long getStartedAtMs() {
     return startedAtMs;
   }
 

@@ -27,7 +27,13 @@ public class TraceResultObjectJsonTest {
     metadata.put(UInt256.ZERO, traceResultMetadataObjectJson);
     TraceResultObjectJson original =
         new TraceResultObjectJson(
-            UInt256.ZERO, UInt256.ZERO, responses, metadata, 0, List.of(UInt256.ZERO));
+            UInt256.ZERO,
+            UInt256.ZERO,
+            UInt256.ZERO,
+            responses,
+            metadata,
+            0,
+            List.of(UInt256.ZERO));
     String jsonString = null;
     try {
       jsonString = objectMapper.writeValueAsString(original);
@@ -43,6 +49,7 @@ public class TraceResultObjectJsonTest {
     }
     assertEquals(original.getOrigin(), deserialized.getOrigin());
     assertEquals(original.getTargetId(), deserialized.getTargetId());
+    assertEquals(original.getRecievedFrom(), deserialized.getRecievedFrom());
     assertEquals(original.getStartedAtMs(), deserialized.getStartedAtMs());
     assertEquals(original.getCancelled(), deserialized.getCancelled());
 

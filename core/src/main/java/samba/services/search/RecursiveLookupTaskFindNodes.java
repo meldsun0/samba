@@ -129,6 +129,9 @@ public class RecursiveLookupTaskFindNodes {
         .thenAccept(
             result -> {
               synchronized (this) {
+                if (future.isDone()) {
+                  return;
+                }
                 availableQuerySlots++;
                 if (result.isEmpty()) {
                   LOG.debug("Node {} returned empty result", peer.getNodeId());

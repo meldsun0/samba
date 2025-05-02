@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static samba.jsonrpc.config.RpcMethod.DISCV5_TALK_REQ;
 
 import samba.api.Discv5APIClient;
 import samba.api.jsonrpc.Discv5TalkReq;

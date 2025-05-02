@@ -28,7 +28,13 @@ public class TraceGetContentResultTest {
     metadata.put(UInt256.ZERO, traceResultMetadataObjectJson);
     TraceResultObjectJson object =
         new TraceResultObjectJson(
-            UInt256.ZERO, UInt256.ZERO, responses, metadata, 0, List.of(UInt256.ZERO));
+            UInt256.ZERO,
+            UInt256.ZERO,
+            UInt256.ZERO,
+            responses,
+            metadata,
+            0,
+            List.of(UInt256.ZERO));
     TraceGetContentResult original = new TraceGetContentResult("0x1234", false, object);
     String jsonString = null;
     try {

@@ -156,6 +156,9 @@ public class PortalNodeMainService extends Service {
           RpcMethod.PORTAL_HISTORY_GET_CONTENT.getMethodName(),
           new PortalHistoryGetContent(this.historyAPI));
       methods.put(
+          RpcMethod.PORTAL_HISTORY_TRACE_GET_CONTENT.getMethodName(),
+          new PortalHistoryTraceGetContent(this.historyAPI));
+      methods.put(
           RpcMethod.PORTAL_HISTORY_OFFER.getMethodName(), new PortalHistoryOffer(this.historyAPI));
       methods.put(
           RpcMethod.PORTAL_HISTORY_LOCAL_CONTENT.getMethodName(),

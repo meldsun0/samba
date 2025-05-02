@@ -14,13 +14,13 @@ import org.apache.tuweni.units.bigints.UInt256;
 @JsonPropertyOrder({"durationMs", "respondedWith"})
 public class TraceResultResponseItemJson {
 
-  private int durationMs;
+  private long durationMs;
 
   @JsonDeserialize(contentUsing = UInt256JsonDeserializer.class)
   @JsonSerialize(contentUsing = UInt256JsonSerializer.class)
   private List<UInt256> respondedWith;
 
-  public TraceResultResponseItemJson(final int durationMs, final List<UInt256> respondedWith) {
+  public TraceResultResponseItemJson(final long durationMs, final List<UInt256> respondedWith) {
     if (durationMs < 0) {
       throw new IllegalArgumentException("durationMs must be non-negative");
     }
@@ -31,7 +31,7 @@ public class TraceResultResponseItemJson {
   public TraceResultResponseItemJson() {}
 
   @JsonGetter(value = "durationMs")
-  public int getDurationMs() {
+  public long getDurationMs() {
     return durationMs;
   }
 

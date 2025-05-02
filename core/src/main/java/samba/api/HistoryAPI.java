@@ -4,6 +4,7 @@ import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.api.jsonrpc.results.RecursiveFindNodesResult;
+import samba.api.jsonrpc.results.TraceGetContentResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,8 @@ public interface HistoryAPI {
       final String enr, final List<Bytes> contents, final List<Bytes> contentKeys);
 
   Optional<GetContentResult> getContent(final Bytes contentKey);
+
+  Optional<TraceGetContentResult> traceGetContent(final Bytes contentKey);
 
   Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId);
 }

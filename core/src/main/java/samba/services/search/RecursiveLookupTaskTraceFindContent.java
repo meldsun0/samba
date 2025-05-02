@@ -5,11 +5,18 @@
 package samba.services.search;
 
 import samba.api.jsonrpc.results.FindContentResult;
+import samba.api.jsonrpc.results.TraceGetContentResult;
+import samba.api.jsonrpc.schemas.TraceResultMetadataObjectJson;
+import samba.api.jsonrpc.schemas.TraceResultObjectJson;
+import samba.api.jsonrpc.schemas.TraceResultResponseItemJson;
 import samba.domain.messages.requests.FindContent;
 import samba.network.history.HistoryNetwork;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -18,34 +25,48 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 
-public class RecursiveLookupTaskFindContent {
+public class RecursiveLookupTaskTraceFindContent {
   private static final Logger LOG = LogManager.getLogger();
   private static final int MAX_CONCURRENT_QUERIES = 3;
   private final HistoryNetwork historyNetwork;
   private final Bytes contentKey;
   private final Set<Bytes> queriedNodeIds = new HashSet<>();
   private int availableQuerySlots = MAX_CONCURRENT_QUERIES;
-  private final CompletableFuture<Optional<FindContentResult>> future = new CompletableFuture<>();
+  private final CompletableFuture<Optional<TraceGetContentResult>> future =
+      new CompletableFuture<>();
   private final Set<NodeRecord> foundNodes = new HashSet<>();
-  private Optional<FindContentResult> content = Optional.empty();
+  private Optional<TraceGetContentResult> content = Optional.empty();
   private final int timeout;
 
-  public RecursiveLookupTaskFindContent(
+  private final UInt256 origin; // Done
+  private final UInt256 targetId; // Done
+  private UInt256 receivedFrom; // Done
+  private final long startedAtMs; // Done
+  private final Map<UInt256, TraceResultResponseItemJson> responses = new HashMap<>(); // Done
+  private final Map<UInt256, TraceResultMetadataObjectJson> metadata = new HashMap<>();
+  private final List<UInt256> cancelled = new ArrayList<>(); // Done
+
+  public RecursiveLookupTaskTraceFindContent(
       final HistoryNetwork historyNetwork,
       final Bytes contentKey,
       final Bytes homeNodeId,
       final Set<NodeRecord> foundNodes,
-      final int timeout) {
+      final int timeout,
+      final long startTime) {
     this.historyNetwork = historyNetwork;
     this.contentKey = contentKey;
     this.queriedNodeIds.add(homeNodeId);
     this.foundNodes.addAll(foundNodes);
     this.timeout = timeout;
+    this.startedAtMs = startTime;
+    this.origin = historyNetwork.getLocalNodeId();
+    this.targetId = UInt256.fromBytes(contentKey);
   }
 
-  public CompletableFuture<Optional<FindContentResult>> execute() {
+  public CompletableFuture<Optional<TraceGetContentResult>> execute() {
     sendRequests();
     return future.completeOnTimeout(
         Optional.empty(), timeout, java.util.concurrent.TimeUnit.SECONDS);
@@ -85,8 +106,15 @@ public class RecursiveLookupTaskFindContent {
         .findContent(peer, new FindContent(contentKey))
         .thenAccept(
             result -> {
+              long durationMs = System.currentTimeMillis() - startedAtMs;
+              List<UInt256> respondedWith = new ArrayList<>();
+              String enr = peer.asEnr();
+              UInt256 distance = UInt256.fromBytes(peer.getNodeId().xor(targetId));
+              UInt256 peerNodeId = UInt256.fromBytes(peer.getNodeId());
+              metadata.put(peerNodeId, new TraceResultMetadataObjectJson(enr, distance));
               synchronized (this) {
                 if (future.isDone()) {
+                  cancelled.add(UInt256.fromBytes(peer.getNodeId()));
                   return;
                 }
                 availableQuerySlots++;
@@ -95,11 +123,35 @@ public class RecursiveLookupTaskFindContent {
                 } else {
                   FindContentResult contentResult = result.get();
                   if (contentResult.getContent() != null) {
-                    content = Optional.of(contentResult);
+                    receivedFrom = peerNodeId;
+                    responses.put(
+                        peerNodeId, new TraceResultResponseItemJson(durationMs, respondedWith));
+                    TraceResultObjectJson traceResult =
+                        new TraceResultObjectJson(
+                            origin,
+                            targetId,
+                            receivedFrom,
+                            responses,
+                            metadata,
+                            startedAtMs,
+                            cancelled);
+                    content =
+                        Optional.of(
+                            new TraceGetContentResult(
+                                contentResult.getContent(),
+                                contentResult.getUtpTransfer(),
+                                traceResult));
                     future.complete(content);
                     return;
                   }
                   // Add nodes to foundNodes and continue searching
+                  respondedWith.addAll(
+                      contentResult.getEnrs().stream()
+                          .map(historyNetwork::nodeRecordFromEnr)
+                          .flatMap(Optional::stream)
+                          .map(NodeRecord::getNodeId)
+                          .map(UInt256::fromBytes)
+                          .collect(Collectors.toList()));
                   foundNodes.addAll(
                       contentResult.getEnrs().stream()
                           .map(historyNetwork::nodeRecordFromEnr)
@@ -107,6 +159,8 @@ public class RecursiveLookupTaskFindContent {
                           .filter(node -> !queriedNodeIds.contains(node.getNodeId()))
                           .collect(Collectors.toSet()));
                 }
+                responses.put(
+                    peerNodeId, new TraceResultResponseItemJson(durationMs, respondedWith));
                 sendRequests();
               }
             })
