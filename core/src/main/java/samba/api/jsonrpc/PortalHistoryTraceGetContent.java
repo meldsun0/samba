@@ -11,14 +11,18 @@ import samba.jsonrpc.reponse.RpcErrorType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
+import tech.pegasys.teku.infrastructure.time.TimeProvider;
 
 public class PortalHistoryTraceGetContent implements JsonRpcMethod {
   protected static final Logger LOG = LogManager.getLogger();
 
   private final HistoryAPI historyAPI;
+  private final TimeProvider timeProvider;
 
-  public PortalHistoryTraceGetContent(final HistoryAPI historyAPI) {
+  public PortalHistoryTraceGetContent(
+      final HistoryAPI historyAPI, final TimeProvider timeProvider) {
     this.historyAPI = historyAPI;
+    this.timeProvider = timeProvider;
   }
 
   @Override
@@ -31,7 +35,7 @@ public class PortalHistoryTraceGetContent implements JsonRpcMethod {
     try {
       Bytes contentKey = ParametersUtil.getContentKeyBytesFromHexString(requestContext, 0);
       return this.historyAPI
-          .traceGetContent(contentKey)
+          .traceGetContent(contentKey, timeProvider.getTimeInMillis().longValue())
           .map(content -> createSuccessResponse(requestContext, content))
           .orElseGet(
               () ->

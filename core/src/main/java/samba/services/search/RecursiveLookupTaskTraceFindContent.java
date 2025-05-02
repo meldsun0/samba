@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.crypto.Hash;
 
 public class RecursiveLookupTaskTraceFindContent {
   private static final Logger LOG = LogManager.getLogger();
@@ -63,7 +64,7 @@ public class RecursiveLookupTaskTraceFindContent {
     this.timeout = timeout;
     this.startedAtMs = startTime;
     this.origin = historyNetwork.getLocalNodeId();
-    this.targetId = UInt256.fromBytes(contentKey);
+    this.targetId = UInt256.fromBytes(Hash.sha256(contentKey));
   }
 
   public CompletableFuture<Optional<TraceGetContentResult>> execute() {
@@ -109,12 +110,12 @@ public class RecursiveLookupTaskTraceFindContent {
               long durationMs = System.currentTimeMillis() - startedAtMs;
               List<UInt256> respondedWith = new ArrayList<>();
               String enr = peer.asEnr();
-              UInt256 distance = UInt256.fromBytes(peer.getNodeId().xor(targetId));
               UInt256 peerNodeId = UInt256.fromBytes(peer.getNodeId());
+              UInt256 distance = UInt256.fromBytes(peerNodeId.xor(targetId));
               metadata.put(peerNodeId, new TraceResultMetadataObjectJson(enr, distance));
               synchronized (this) {
                 if (future.isDone()) {
-                  cancelled.add(UInt256.fromBytes(peer.getNodeId()));
+                  cancelled.add(peerNodeId);
                   return;
                 }
                 availableQuerySlots++;

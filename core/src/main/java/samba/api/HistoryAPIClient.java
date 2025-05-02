@@ -89,9 +89,9 @@ public class HistoryAPIClient implements HistoryAPI {
   }
 
   @Override
-  public Optional<TraceGetContentResult> traceGetContent(Bytes contentKey) {
+  public Optional<TraceGetContentResult> traceGetContent(Bytes contentKey, long startTime) {
     return samba.network.history.api.methods.TraceGetContent.execute(
-        this.historyNetworkInternalAPI, contentKey);
+        this.historyNetworkInternalAPI, startTime, contentKey);
   }
 
   @Override

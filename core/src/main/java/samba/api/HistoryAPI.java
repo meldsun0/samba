@@ -40,7 +40,7 @@ public interface HistoryAPI {
 
   Optional<GetContentResult> getContent(final Bytes contentKey);
 
-  Optional<TraceGetContentResult> traceGetContent(final Bytes contentKey);
+  Optional<TraceGetContentResult> traceGetContent(final Bytes contentKey, final long startTime);
 
   Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId);
 }
