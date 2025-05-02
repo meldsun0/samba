@@ -32,8 +32,7 @@ public class HistoricalHashesAccumulator {
     }
 
     newTotalDifficulty =
-          lastTotalDifficulty.add(
-              UInt256.valueOf(newBlockHeader.getDifficulty().getAsBigInteger()));
+        lastTotalDifficulty.add(UInt256.valueOf(newBlockHeader.getDifficulty().getAsBigInteger()));
 
     if (accumulator.getEpochRecord().size() == HistoricalHashesAccumulator.EPOCH_SIZE) {
       EpochRecordList fullEpoch =
