@@ -1,5 +1,9 @@
 package samba.api.jsonrpc.schemas;
 
+import samba.api.jsonrpc.schemas.serialization.UInt16JsonDeserializer;
+import samba.api.jsonrpc.schemas.serialization.UInt16JsonSerializer;
+import samba.api.jsonrpc.schemas.serialization.UInt256JsonDeserializer;
+import samba.api.jsonrpc.schemas.serialization.UInt256JsonSerializer;
 import samba.domain.types.unsigned.UInt16;
 
 import java.util.List;

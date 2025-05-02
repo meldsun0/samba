@@ -2,6 +2,7 @@ package samba.network.history.api;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.RecursiveFindNodesResult;
+import samba.api.jsonrpc.results.TraceGetContentResult;
 import samba.domain.content.ContentKey;
 import samba.domain.messages.requests.FindContent;
 import samba.domain.messages.requests.FindNodes;
@@ -52,4 +53,9 @@ public interface HistoryNetworkInternalAPI {
   Optional<FindContentResult> getContent(ContentKey contentKey, int timeout);
 
   Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId, final int timeout);
+
+  UInt256 getLocalNodeId();
+
+  Optional<TraceGetContentResult> traceGetContent(
+      ContentKey contentKey, int timeout, long startTime);
 }

@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.RecursiveFindNodesResult;
+import samba.api.jsonrpc.results.TraceGetContentResult;
 import samba.domain.content.ContentKey;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
@@ -30,6 +31,7 @@ import samba.network.history.routingtable.RoutingTable;
 import samba.services.discovery.Discv5Client;
 import samba.services.search.RecursiveLookupTaskFindContent;
 import samba.services.search.RecursiveLookupTaskFindNodes;
+import samba.services.search.RecursiveLookupTaskTraceFindContent;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.Util;
@@ -637,6 +639,27 @@ public class HistoryNetwork extends BaseNetwork
   }
 
   @Override
+  public Optional<TraceGetContentResult> traceGetContent(
+      ContentKey contentKey, int timeout, long startTime) {
+    RecursiveLookupTaskTraceFindContent task =
+        new RecursiveLookupTaskTraceFindContent(
+            this,
+            contentKey.getSszBytes(),
+            this.discv5Client.getHomeNodeRecord().getNodeId(),
+            getFoundNodes(contentKey),
+            timeout,
+            startTime);
+    CompletableFuture<Optional<TraceGetContentResult>> future = task.execute();
+    try {
+      Optional<TraceGetContentResult> result = future.join();
+      return result;
+    } catch (Exception e) {
+      LOG.error("Error when executing traceGetContent", e);
+      return Optional.empty();
+    }
+  }
+
+  @Override
   public Optional<RecursiveFindNodesResult> recursiveFindNodes(
       final String nodeId, final int timeout) {
     Bytes nodeIdBytes = Bytes.fromHexString(nodeId);
@@ -655,6 +678,11 @@ public class HistoryNetwork extends BaseNetwork
       LOG.error("Error when executing recursiveFindNodes", e);
       return Optional.empty();
     }
+  }
+
+  @Override
+  public UInt256 getLocalNodeId() {
+    return UInt256.fromBytes(this.discv5Client.getHomeNodeRecord().getNodeId());
   }
 
   public Set<NodeRecord> getFoundNodes(ContentKey contentKey) {

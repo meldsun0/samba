@@ -1,4 +1,4 @@
-package samba.api.jsonrpc.schemas;
+package samba.api.jsonrpc.schemas.serialization;
 
 import samba.domain.types.unsigned.UInt16;
 

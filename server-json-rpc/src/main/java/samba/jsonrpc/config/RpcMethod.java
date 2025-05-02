@@ -35,7 +35,7 @@ public enum RpcMethod {
   PORTAL_HISTORY_RECURSIVE_FIND_NODES("portal_historyRecursiveFindNodes"),
 
   PORTAL_HISTORY_GET_CONTENT("portal_historyGetContent"),
-  PORTAL_HISTORYT_RACE_GET_CONTENT("portal_historyTraceGetContent"),
+  PORTAL_HISTORY_TRACE_GET_CONTENT("portal_historyTraceGetContent"),
 
   PORTAL_HISTORY_STORE("portal_historyStore"),
   PORTAL_HISTORY_LOCAL_CONTENT("portal_historyLocalContent"),

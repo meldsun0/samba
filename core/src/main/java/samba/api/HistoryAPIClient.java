@@ -4,6 +4,7 @@ import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.GetContentResult;
 import samba.api.jsonrpc.results.PutContentResult;
 import samba.api.jsonrpc.results.RecursiveFindNodesResult;
+import samba.api.jsonrpc.results.TraceGetContentResult;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 import samba.network.history.api.methods.AddEnr;
 import samba.network.history.api.methods.DeleteEnr;
@@ -85,6 +86,12 @@ public class HistoryAPIClient implements HistoryAPI {
   @Override
   public Optional<GetContentResult> getContent(Bytes contentKey) {
     return GetContent.execute(this.historyNetworkInternalAPI, contentKey);
+  }
+
+  @Override
+  public Optional<TraceGetContentResult> traceGetContent(Bytes contentKey, long startTime) {
+    return samba.network.history.api.methods.TraceGetContent.execute(
+        this.historyNetworkInternalAPI, startTime, contentKey);
   }
 
   @Override
