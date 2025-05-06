@@ -1,3 +1,7 @@
 package api;
 
-public interface PortalSambaService {}
+public interface PortalSambaService {
+
+
+
+}

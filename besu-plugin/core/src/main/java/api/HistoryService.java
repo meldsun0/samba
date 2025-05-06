@@ -8,7 +8,7 @@ import org.hyperledger.besu.plugin.Unstable;
 import org.hyperledger.besu.plugin.services.BesuService;
 
 @Unstable
-public interface HistoryService extends BesuService {
+public interface HistoryService extends PortalSambaService {
 
   BlockHeader getBlockHeaderByBlockHash(Hash blockHash);
 
