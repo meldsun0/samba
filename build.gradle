@@ -47,6 +47,14 @@ configure(allprojects - project(':platform')) {
   sourceCompatibility = 21
   targetCompatibility = 21
 
+  sourceSets {
+    test {
+      resources {
+        srcDirs = ['src/test/resources']
+      }
+    }
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()

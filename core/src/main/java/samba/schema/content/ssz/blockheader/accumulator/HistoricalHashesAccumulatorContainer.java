@@ -8,37 +8,23 @@ import java.util.stream.Collectors;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import tech.pegasys.teku.infrastructure.ssz.SszList;
-import tech.pegasys.teku.infrastructure.ssz.containers.Container2;
-import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema2;
+import tech.pegasys.teku.infrastructure.ssz.containers.Container1;
+import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema1;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszListSchema;
 import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
 public class HistoricalHashesAccumulatorContainer
-    extends Container2<
-        HistoricalHashesAccumulatorContainer, SszList<SszBytes32>, SszList<HeaderRecordContainer>> {
+    extends Container1<HistoricalHashesAccumulatorContainer, SszList<SszBytes32>> {
 
-  public HistoricalHashesAccumulatorContainer(
-      List<Bytes32> historicalEpochs, List<HeaderRecordContainer> headerRecords) {
+  public HistoricalHashesAccumulatorContainer(List<Bytes32> historicalEpochs) {
     super(
         HistoricalHashesAccumulatorContainerSchema.INSTANCE,
         SszListSchema.create(
                 SszPrimitiveSchemas.BYTES32_SCHEMA,
                 HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS)
-            .createFromElements(createSszBytes32List(historicalEpochs)),
-        EpochRecordList.createList(headerRecords));
-  }
-
-  public HistoricalHashesAccumulatorContainer(
-      List<Bytes32> historicalEpochs, EpochRecordList headerRecords) {
-    super(
-        HistoricalHashesAccumulatorContainerSchema.INSTANCE,
-        SszListSchema.create(
-                SszPrimitiveSchemas.BYTES32_SCHEMA,
-                HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS)
-            .createFromElements(createSszBytes32List(historicalEpochs)),
-        headerRecords.getEncodedList());
+            .createFromElements(createSszBytes32List(historicalEpochs)));
   }
 
   public HistoricalHashesAccumulatorContainer(TreeNode backingNode) {
@@ -51,8 +37,7 @@ public class HistoricalHashesAccumulatorContainer
         SszListSchema.create(
                 SszPrimitiveSchemas.BYTES32_SCHEMA,
                 HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS)
-            .createFromElements(createSszBytes32List(List.of())),
-        EpochRecordList.createList(List.of()));
+            .createFromElements(createSszBytes32List(List.of())));
   }
 
   private static List<SszBytes32> createSszBytes32List(List<Bytes32> historicalEpochs) {
@@ -63,8 +48,8 @@ public class HistoricalHashesAccumulatorContainer
     return getField0().stream().map(SszBytes32::get).collect(Collectors.toList());
   }
 
-  public List<HeaderRecordContainer> getEpochRecord() {
-    return getField1().stream().collect(Collectors.toList());
+  public SszList<SszBytes32> getHistoricalEpochsSsz() {
+    return getField0();
   }
 
   public static HistoricalHashesAccumulatorContainer decodeBytes(Bytes sszBytes) {
@@ -72,10 +57,7 @@ public class HistoricalHashesAccumulatorContainer
   }
 
   public static class HistoricalHashesAccumulatorContainerSchema
-      extends ContainerSchema2<
-          HistoricalHashesAccumulatorContainer,
-          SszList<SszBytes32>,
-          SszList<HeaderRecordContainer>> {
+      extends ContainerSchema1<HistoricalHashesAccumulatorContainer, SszList<SszBytes32>> {
     public static final HistoricalHashesAccumulatorContainerSchema INSTANCE =
         new HistoricalHashesAccumulatorContainerSchema();
 
@@ -84,8 +66,7 @@ public class HistoricalHashesAccumulatorContainer
           (SszListSchema<SszBytes32, SszList<SszBytes32>>)
               SszListSchema.create(
                   SszPrimitiveSchemas.BYTES32_SCHEMA,
-                  HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS),
-          EpochRecordList.getSchema());
+                  HistoricalHashesAccumulator.MAX_HISTORICAL_EPOCHS));
     }
 
     @Override
