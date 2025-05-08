@@ -42,6 +42,6 @@ out/
 !**/src/test/**/out/
 
 !gradle/wrapper/gradle-wrapper.jar
-
+core/bin/
 db/
 .DS_Store
