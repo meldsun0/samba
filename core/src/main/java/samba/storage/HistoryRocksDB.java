@@ -64,16 +64,15 @@ public class HistoryRocksDB implements HistoryDB {
       switch (contentKey.getContentType()) {
         case ContentType.BLOCK_HEADER -> {
           Bytes blockHashKeySSZ = contentKey.getBlockHashSsz();
-          // TODO validate BLOCK_HEADER
           Optional<ContentBlockHeader> blockHeader =
               ContentUtil.createBlockHeaderfromSszBytes(sszValue);
-          if (blockHeader.isEmpty()) {
+          if (blockHeader.isPresent() && ContentUtil.isBlockHeaderValid(blockHeader.get())) {
+            Bytes blockNumberKeySSZ = ContentUtil.createBlockNumberInSSZ(blockHeader.get());
+            save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
+            save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
+          } else {
             LOG.debug("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
-            break;
           }
-          Bytes blockNumberKeySSZ = ContentUtil.createBlockNumberInSSZ(blockHeader.get());
-          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
         }
         case ContentType.BLOCK_BODY -> {
           Bytes blockHashSSZ = contentKey.getBlockHashSsz();
@@ -87,13 +86,15 @@ public class HistoryRocksDB implements HistoryDB {
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {
           Bytes blockNumberKeySSZ = contentKey.getBlockNumberSsz();
-          // TODO validate BLOCK_HEADER_BY_NUMBER
           Optional<ContentBlockHeader> blockHeader =
               ContentUtil.createBlockHeaderfromSszBytes(sszValue);
-          Bytes blockHashKeySSZ = ContentUtil.createBlockHashKey(blockHeader.get());
-
-          save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
-          save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);
+          if (blockHeader.isPresent() && ContentUtil.isBlockHeaderValid(blockHeader.get())) {
+            Bytes blockHashKeySSZ = ContentUtil.createBlockHashKey(blockHeader.get());
+            save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
+            save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);
+          } else {
+            LOG.debug("BlockHeader for blockNumberKey: {} is invalid", blockNumberKeySSZ);
+          }
         }
         default ->
             throw new IllegalArgumentException(

@@ -5,6 +5,9 @@ import samba.network.history.HistoryConstants;
 import samba.schema.content.ssz.blockheader.accumulator.HistoricalHashesAccumulatorContainer;
 import samba.validation.util.ValidationUtil;
 
+import java.io.InputStream;
+
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 
 public class HistoricalHashesAccumulator {
@@ -13,10 +16,32 @@ public class HistoricalHashesAccumulator {
   public static final long HISTORICAL_EPOCHS_GINDEX = 3L;
   public static final int TREE_DEPTH = 15;
 
+  private HistoricalHashesAccumulatorContainer historicalHashesAccumulatorContainer;
+
+  public HistoricalHashesAccumulator() {
+    try {
+      InputStream file = getClass().getClassLoader().getResourceAsStream("premergeacc.bin");
+      Bytes accumulatorBytes = Bytes.wrap(file.readAllBytes());
+      historicalHashesAccumulatorContainer =
+          HistoricalHashesAccumulatorContainer.decodeBytes(accumulatorBytes);
+    } catch (Exception e) {
+      this.historicalHashesAccumulatorContainer = null;
+      throw new RuntimeException(e);
+    }
+  }
+
+  public boolean validate(final ContentBlockHeader blockHeaderWithProof) {
+    if (historicalHashesAccumulatorContainer == null) {
+      System.out.println("Historical hashes accumulator is not initialized.");
+      throw new IllegalStateException("Historical hashes accumulator is not initialized.");
+    }
+    return validate(blockHeaderWithProof, historicalHashesAccumulatorContainer);
+  }
+
   public static boolean validate(
       final ContentBlockHeader blockHeaderWithProof,
       final HistoricalHashesAccumulatorContainer accumulator) {
-    if (blockHeaderWithProof.getBlockHeader().getNumber() >= HistoryConstants.MERGE_TIMESTAMP) {
+    if (blockHeaderWithProof.getBlockHeader().getTimestamp() >= HistoryConstants.MERGE_TIMESTAMP) {
       return false;
     }
     int headerIndex = (int) blockHeaderWithProof.getBlockHeader().getNumber() % EPOCH_SIZE;
