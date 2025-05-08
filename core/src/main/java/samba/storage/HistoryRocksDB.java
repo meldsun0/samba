@@ -71,7 +71,7 @@ public class HistoryRocksDB implements HistoryDB {
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
           } else {
-            LOG.debug("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
+            LOG.info("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
           }
         }
         case ContentType.BLOCK_BODY -> {
@@ -93,7 +93,7 @@ public class HistoryRocksDB implements HistoryDB {
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);
           } else {
-            LOG.debug("BlockHeader for blockNumberKey: {} is invalid", blockNumberKeySSZ);
+            LOG.info("BlockHeader for blockNumberKey: {} is invalid", blockNumberKeySSZ);
           }
         }
         default ->
