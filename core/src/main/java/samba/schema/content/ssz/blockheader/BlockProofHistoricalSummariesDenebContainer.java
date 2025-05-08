@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-import tech.pegasys.teku.infrastructure.ssz.SszList;
 import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.containers.Container4;
 import tech.pegasys.teku.infrastructure.ssz.containers.ContainerSchema4;
@@ -14,15 +13,15 @@ import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
-public class BlockProofHistoricalSummariesContainer
+public class BlockProofHistoricalSummariesDenebContainer
     extends Container4<
-        BlockProofHistoricalSummariesContainer,
+        BlockProofHistoricalSummariesDenebContainer,
         SszBytes32Vector,
         SszBytes32,
-        SszList<SszBytes32>,
+        SszBytes32Vector,
         SszUInt64> {
 
-  public BlockProofHistoricalSummariesContainer(
+  public BlockProofHistoricalSummariesDenebContainer(
       final List<Bytes32> beaconBlockProofHistoricalSummaries,
       final Bytes32 blockRoot,
       final List<Bytes32> executionBlockProof,
@@ -32,11 +31,11 @@ public class BlockProofHistoricalSummariesContainer
         SszBeaconBlockProofHistoricalSummariesVector.createVector(
             beaconBlockProofHistoricalSummaries),
         SszBytes32.of(blockRoot),
-        SszExecutionBlockProofCapellaList.createList(executionBlockProof),
+        SszExecutionBlockProofDenebVector.createVector(executionBlockProof),
         SszUInt64.of(slot));
   }
 
-  public BlockProofHistoricalSummariesContainer(TreeNode backingNode) {
+  public BlockProofHistoricalSummariesDenebContainer(TreeNode backingNode) {
     super(BlockProofHistoricalSummariesContainerSchema.INSTANCE, backingNode);
   }
 
@@ -56,19 +55,19 @@ public class BlockProofHistoricalSummariesContainer
     return getField3().get();
   }
 
-  public static BlockProofHistoricalSummariesContainer decodeBytes(Bytes bytes) {
+  public static BlockProofHistoricalSummariesDenebContainer decodeBytes(Bytes bytes) {
     BlockProofHistoricalSummariesContainerSchema schema =
         BlockProofHistoricalSummariesContainerSchema.INSTANCE;
-    BlockProofHistoricalSummariesContainer decodedBytes = schema.sszDeserialize(bytes);
+    BlockProofHistoricalSummariesDenebContainer decodedBytes = schema.sszDeserialize(bytes);
     return decodedBytes;
   }
 
   public static class BlockProofHistoricalSummariesContainerSchema
       extends ContainerSchema4<
-          BlockProofHistoricalSummariesContainer,
+          BlockProofHistoricalSummariesDenebContainer,
           SszBytes32Vector,
           SszBytes32,
-          SszList<SszBytes32>,
+          SszBytes32Vector,
           SszUInt64> {
 
     public static final BlockProofHistoricalSummariesContainerSchema INSTANCE =
@@ -78,13 +77,13 @@ public class BlockProofHistoricalSummariesContainer
       super(
           SszBeaconBlockProofHistoricalSummariesVector.getSchema(),
           SszPrimitiveSchemas.BYTES32_SCHEMA,
-          SszExecutionBlockProofCapellaList.getSchema(),
+          SszExecutionBlockProofDenebVector.getSchema(),
           SszPrimitiveSchemas.UINT64_SCHEMA);
     }
 
     @Override
-    public BlockProofHistoricalSummariesContainer createFromBackingNode(TreeNode node) {
-      return new BlockProofHistoricalSummariesContainer(node);
+    public BlockProofHistoricalSummariesDenebContainer createFromBackingNode(TreeNode node) {
+      return new BlockProofHistoricalSummariesDenebContainer(node);
     }
   }
 }

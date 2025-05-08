@@ -3,7 +3,7 @@ package samba.domain.content;
 import samba.network.history.HistoryConstants;
 import samba.schema.content.ssz.blockheader.BlockHeaderWithProofContainer;
 import samba.schema.content.ssz.blockheader.BlockProofHistoricalRootsContainer;
-import samba.schema.content.ssz.blockheader.BlockProofHistoricalSummariesContainer;
+import samba.schema.content.ssz.blockheader.BlockProofHistoricalSummariesCapellaContainer;
 import samba.schema.content.ssz.blockheader.SszBlockProofHistoricalHashesAccumulatorVector;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class ContentBlockHeader {
 
   public List<Bytes32> getBeaconBlockProofHistoricalSummaries() {
     if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBeaconBlockProofHistoricalSummaries();
     }
@@ -79,7 +79,7 @@ public class ContentBlockHeader {
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
     }
@@ -93,7 +93,7 @@ public class ContentBlockHeader {
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
     }
@@ -108,7 +108,7 @@ public class ContentBlockHeader {
           .getSlot()
           .longValue();
     } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getSlot()
           .longValue();

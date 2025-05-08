@@ -13,32 +13,33 @@ import tech.pegasys.teku.infrastructure.ssz.schema.SszPrimitiveSchemas;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
-public class BlockProofHistoricalRootsContainer
+public class BlockProofHistoricalSummariesCapellaContainer
     extends Container4<
-        BlockProofHistoricalRootsContainer,
+        BlockProofHistoricalSummariesCapellaContainer,
         SszBytes32Vector,
         SszBytes32,
         SszBytes32Vector,
         SszUInt64> {
 
-  public BlockProofHistoricalRootsContainer(
-      final List<Bytes32> beaconBlockProofHistoricalRoots,
+  public BlockProofHistoricalSummariesCapellaContainer(
+      final List<Bytes32> beaconBlockProofHistoricalSummaries,
       final Bytes32 blockRoot,
       final List<Bytes32> executionBlockProof,
       final UInt64 slot) {
     super(
-        BlockProofHistoricalRootsContainerSchema.INSTANCE,
-        SszBeaconBlockProofHistoricalRootsVector.createVector(beaconBlockProofHistoricalRoots),
+        BlockProofHistoricalSummariesContainerSchema.INSTANCE,
+        SszBeaconBlockProofHistoricalSummariesVector.createVector(
+            beaconBlockProofHistoricalSummaries),
         SszBytes32.of(blockRoot),
         SszExecutionBlockProofBellatrixVector.createVector(executionBlockProof),
         SszUInt64.of(slot));
   }
 
-  public BlockProofHistoricalRootsContainer(TreeNode backingNode) {
-    super(BlockProofHistoricalRootsContainerSchema.INSTANCE, backingNode);
+  public BlockProofHistoricalSummariesCapellaContainer(TreeNode backingNode) {
+    super(BlockProofHistoricalSummariesContainerSchema.INSTANCE, backingNode);
   }
 
-  public List<Bytes32> getBeaconBlockProofHistoricalRoots() {
+  public List<Bytes32> getBeaconBlockProofHistoricalSummaries() {
     return getField0().asListUnboxed();
   }
 
@@ -47,41 +48,42 @@ public class BlockProofHistoricalRootsContainer
   }
 
   public List<Bytes32> getExecutionBlockProof() {
-    return getField2().asListUnboxed();
+    return getField2().asList().stream().map(SszBytes32::get).toList();
   }
 
   public UInt64 getSlot() {
     return getField3().get();
   }
 
-  public static BlockProofHistoricalRootsContainer decodeBytes(Bytes bytes) {
-    BlockProofHistoricalRootsContainerSchema schema =
-        BlockProofHistoricalRootsContainerSchema.INSTANCE;
-    BlockProofHistoricalRootsContainer decodedBytes = schema.sszDeserialize(bytes);
+  public static BlockProofHistoricalSummariesCapellaContainer decodeBytes(Bytes bytes) {
+    BlockProofHistoricalSummariesContainerSchema schema =
+        BlockProofHistoricalSummariesContainerSchema.INSTANCE;
+    BlockProofHistoricalSummariesCapellaContainer decodedBytes = schema.sszDeserialize(bytes);
     return decodedBytes;
   }
 
-  public static class BlockProofHistoricalRootsContainerSchema
+  public static class BlockProofHistoricalSummariesContainerSchema
       extends ContainerSchema4<
-          BlockProofHistoricalRootsContainer,
+          BlockProofHistoricalSummariesCapellaContainer,
           SszBytes32Vector,
           SszBytes32,
           SszBytes32Vector,
           SszUInt64> {
-    public static BlockProofHistoricalRootsContainerSchema INSTANCE =
-        new BlockProofHistoricalRootsContainerSchema();
 
-    private BlockProofHistoricalRootsContainerSchema() {
+    public static final BlockProofHistoricalSummariesContainerSchema INSTANCE =
+        new BlockProofHistoricalSummariesContainerSchema();
+
+    private BlockProofHistoricalSummariesContainerSchema() {
       super(
-          SszBeaconBlockProofHistoricalRootsVector.getSchema(),
+          SszBeaconBlockProofHistoricalSummariesVector.getSchema(),
           SszPrimitiveSchemas.BYTES32_SCHEMA,
           SszExecutionBlockProofBellatrixVector.getSchema(),
           SszPrimitiveSchemas.UINT64_SCHEMA);
     }
 
     @Override
-    public BlockProofHistoricalRootsContainer createFromBackingNode(TreeNode node) {
-      return new BlockProofHistoricalRootsContainer(node);
+    public BlockProofHistoricalSummariesCapellaContainer createFromBackingNode(TreeNode node) {
+      return new BlockProofHistoricalSummariesCapellaContainer(node);
     }
   }
 }
