@@ -12,7 +12,7 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SszExecutionBlockProofVectorTest {
+public class SszExecutionBlockProofBellatrixVectorTest {
 
   List<Bytes32> executionBlockProof;
 
