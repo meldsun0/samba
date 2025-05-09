@@ -15,7 +15,7 @@ import org.apache.tuweni.bytes.Bytes;
 /**
  * CAUTION: this API is unstable and might be changed in any version in backward incompatible way
  */
-public interface HistoryAPI {
+public sealed interface HistoryAPI extends SambaAPI permits HistoryAPIClient {
 
   PutContentResult putContent(final Bytes contentKey, final Bytes contentValue);
 

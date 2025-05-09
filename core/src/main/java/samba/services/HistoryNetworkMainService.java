@@ -2,6 +2,7 @@ package samba.services;
 
 import static tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory.DEFAULT_MAX_QUEUE_SIZE;
 
+import samba.NetworkSDK;
 import samba.api.Discv5API;
 import samba.api.Discv5APIClient;
 import samba.api.HistoryAPI;
@@ -45,7 +46,7 @@ import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 import tech.pegasys.teku.service.serviceutils.Service;
 
-public class PortalNodeMainService extends Service {
+public class HistoryNetworkMainService extends Service implements NetworkSDK<HistoryAPI> {
 
   private static final Logger LOG = LogManager.getLogger();
   private static final int DEFAULT_ASYNC_P2P_MAX_THREADS = 10;
@@ -72,15 +73,15 @@ public class PortalNodeMainService extends Service {
   private final IncomingRequestTalkHandler incomingRequestTalkHandler =
       new IncomingRequestTalkHandler();
 
-  public PortalNodeMainService(
-      final MainServiceConfig mainServiceConfig,
+  public HistoryNetworkMainService(
+      final HistoryNetworkMainServiceConfig historyNetworkMainServiceConfig,
       final SambaConfiguration sambaConfiguration,
       final Vertx vertx) {
-    this.timeProvider = mainServiceConfig.getTimeProvider();
-    this.eventChannels = mainServiceConfig.getEventChannels();
-    this.metricsSystem = mainServiceConfig.getMetricsSystem();
+    this.timeProvider = historyNetworkMainServiceConfig.getTimeProvider();
+    this.eventChannels = historyNetworkMainServiceConfig.getEventChannels();
+    this.metricsSystem = historyNetworkMainServiceConfig.getMetricsSystem();
     this.asyncRunner =
-        mainServiceConfig.createAsyncRunner(
+        historyNetworkMainServiceConfig.createAsyncRunner(
             "samba_discovery_service", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
     this.sambaConfiguration = sambaConfiguration;
     this.vertx = vertx;
@@ -246,5 +247,15 @@ public class PortalNodeMainService extends Service {
                 eventChannels,
                 asyncRunner,
                 timeProvider));
+  }
+
+  @Override
+  public HistoryAPI getSDK() {
+    return new HistoryAPIClient(this.historyNetwork);
+  }
+
+  @Override
+  public Discv5API getDiscv5API() {
+    return new Discv5APIClient(this.discoveryService);
   }
 }

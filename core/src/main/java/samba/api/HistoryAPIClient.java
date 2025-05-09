@@ -25,7 +25,7 @@ import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
 
-public class HistoryAPIClient implements HistoryAPI {
+public final class HistoryAPIClient implements HistoryAPI {
 
   private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
 
