@@ -41,7 +41,7 @@ public class HistoricalHashesAccumulator {
   public static boolean validate(
       final ContentBlockHeader blockHeaderWithProof,
       final HistoricalHashesAccumulatorContainer accumulator) {
-    if (blockHeaderWithProof.getBlockHeader().getTimestamp() >= HistoryConstants.MERGE_TIMESTAMP) {
+    if (blockHeaderWithProof.getBlockHeader().getNumber() >= HistoryConstants.MERGE_BLOCK) {
       return false;
     }
     int headerIndex = (int) blockHeaderWithProof.getBlockHeader().getNumber() % EPOCH_SIZE;
