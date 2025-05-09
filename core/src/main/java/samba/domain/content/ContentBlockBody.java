@@ -15,61 +15,61 @@ public class ContentBlockBody {
 
   private final BlockBodyPreShanghaiContainer blockBodyPreShanghaiContainer;
   private final BlockBodyPostShanghaiContainer blockBodyPostShanghaiContainer;
-  private final long timestamp;
+  private final long blockNumber;
 
   public ContentBlockBody(Bytes sszBytes) {
     BlockBodyPreShanghaiContainer tempBlockBodyPreShanghaiContainer;
     BlockBodyPostShanghaiContainer tempBlockBodyPostShanghaiContainer;
-    long tempTimestamp;
+    long tempBlockNumber;
     try {
       tempBlockBodyPreShanghaiContainer = BlockBodyPreShanghaiContainer.decodeBytes(sszBytes);
       tempBlockBodyPostShanghaiContainer = null;
-      tempTimestamp =
-          HistoryConstants.SHANGHAI_TIMESTAMP - 1; // No guaranteed way to get timestamp from body
+      tempBlockNumber =
+          HistoryConstants.SHANGHAI_BLOCK - 1; // No guaranteed way to get timestamp from body
     } catch (Exception e) {
       tempBlockBodyPreShanghaiContainer = null;
       tempBlockBodyPostShanghaiContainer = BlockBodyPostShanghaiContainer.decodeBytes(sszBytes);
-      tempTimestamp = HistoryConstants.SHANGHAI_TIMESTAMP;
+      tempBlockNumber = HistoryConstants.SHANGHAI_BLOCK;
     }
     this.blockBodyPreShanghaiContainer = tempBlockBodyPreShanghaiContainer;
     this.blockBodyPostShanghaiContainer = tempBlockBodyPostShanghaiContainer;
-    this.timestamp = tempTimestamp;
+    this.blockNumber = tempBlockNumber;
   }
 
   public ContentBlockBody(
-      BlockBodyPreShanghaiContainer blockBodyPreShanghaiContainer, long timestamp) {
+      BlockBodyPreShanghaiContainer blockBodyPreShanghaiContainer, long blockNumber) {
     this.blockBodyPreShanghaiContainer = blockBodyPreShanghaiContainer;
     this.blockBodyPostShanghaiContainer = null;
-    this.timestamp = timestamp;
+    this.blockNumber = blockNumber;
   }
 
   public ContentBlockBody(
-      BlockBodyPostShanghaiContainer blockBodyPostShanghaiContainer, long timestamp) {
+      BlockBodyPostShanghaiContainer blockBodyPostShanghaiContainer, long blockNumber) {
     this.blockBodyPreShanghaiContainer = null;
     this.blockBodyPostShanghaiContainer = blockBodyPostShanghaiContainer;
-    this.timestamp = timestamp;
+    this.blockNumber = blockNumber;
   }
 
   public BlockBodyPreShanghaiContainer getBlockBodyPreShanghaiContainer() {
-    if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer;
     }
     throw new UnsupportedOperationException("Block body is post-Shanghai");
   }
 
   public BlockBodyPostShanghaiContainer getBlockBodyPostShanghaiContainer() {
-    if (timestamp >= HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPostShanghaiContainer;
     }
     throw new UnsupportedOperationException("Block body is pre-Shanghai");
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public long getNumber() {
+    return blockNumber;
   }
 
   public List<Transaction> getTransactions() {
-    if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer.getTransactions();
     } else {
       return blockBodyPostShanghaiContainer.getTransactions();
@@ -77,7 +77,7 @@ public class ContentBlockBody {
   }
 
   public List<BlockHeader> getUncles() {
-    if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer.getUncles();
     } else {
       return blockBodyPostShanghaiContainer.getUncles();
@@ -85,14 +85,14 @@ public class ContentBlockBody {
   }
 
   public List<Withdrawal> getWithdrawals() {
-    if (timestamp >= HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPostShanghaiContainer.getWithdrawals();
     }
     throw new UnsupportedOperationException("Block body is pre-Shanghai");
   }
 
   public Bytes getSszBytes() {
-    if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP) {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer.sszSerialize();
     } else {
       return blockBodyPostShanghaiContainer.sszSerialize();

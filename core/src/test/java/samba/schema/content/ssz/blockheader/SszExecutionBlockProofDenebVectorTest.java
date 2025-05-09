@@ -12,32 +12,32 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SszExecutionBlockProofCapellaListTest {
+public class SszExecutionBlockProofDenebVectorTest {
 
   List<Bytes32> executionBlockProof;
 
   @BeforeEach
   public void setup() {
     this.executionBlockProof = new ArrayList<>();
-    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_LIMIT; i++)
+    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_DENEB_SIZE; i++)
       this.executionBlockProof.add(Bytes32.repeat((byte) i));
   }
 
   @Test
   public void testSszDecode() {
-    SszExecutionBlockProofCapellaList sszExecutionBlockProofCapellaList =
-        new SszExecutionBlockProofCapellaList(
+    SszExecutionBlockProofDenebVector sszExecutionBlockProofVector =
+        new SszExecutionBlockProofDenebVector(
             Bytes.fromHexString(
                 "0x00000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101020202020202020202020202020202020202020202020202020202020202020203030303030303030303030303030303030303030303030303030303030303030404040404040404040404040404040404040404040404040404040404040404050505050505050505050505050505050505050505050505050505050505050506060606060606060606060606060606060606060606060606060606060606060707070707070707070707070707070707070707070707070707070707070707080808080808080808080808080808080808080808080808080808080808080809090909090909090909090909090909090909090909090909090909090909090a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"));
-    List<Bytes32> decodedExecutionBlockProof = sszExecutionBlockProofCapellaList.getDecodedList();
+    List<Bytes32> decodedExecutionBlockProof = sszExecutionBlockProofVector.getDecodedVector();
     assertEquals(this.executionBlockProof, decodedExecutionBlockProof);
   }
 
   @Test
   public void testSszEncode() {
-    SszExecutionBlockProofCapellaList sszExecutionBlockProofCapellaList =
-        new SszExecutionBlockProofCapellaList(this.executionBlockProof);
-    Bytes encodedExecutionBlockProof = sszExecutionBlockProofCapellaList.sszSerialize();
+    SszExecutionBlockProofDenebVector sszExecutionBlockProofVector =
+        new SszExecutionBlockProofDenebVector(this.executionBlockProof);
+    Bytes encodedExecutionBlockProof = sszExecutionBlockProofVector.sszSerialize();
     assertEquals(
         encodedExecutionBlockProof,
         Bytes.fromHexString(
