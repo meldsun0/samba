@@ -3,6 +3,7 @@ package samba.services.discovery;
 import samba.config.DiscoveryConfig;
 import samba.domain.messages.IncomingRequestTalkHandler;
 import samba.metrics.SambaMetricCategory;
+import samba.util.ProtocolVersionUtil;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;
@@ -111,6 +112,10 @@ public class Discv5Service extends Service implements Discv5Client {
                         discoveryConfig.getListenTCPPort(ip)));
       }
     }
+
+    // TODO: add protocol version support configuration
+    nodeRecordBuilder.customField(
+        "pv", ProtocolVersionUtil.supportedProtocolVersionsBytes()); // Portal protocol version
 
     this.discoverySystem =
         createDiscoverySystem(
