@@ -19,7 +19,7 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 public class PortalWireMessageDecoder {
 
   public static PortalWireMessage decode(
-      NodeRecord sourceNode, Bytes sszbytes) { // TODO change NodeRecord
+      NodeRecord sourceNode, Bytes sszbytes, int protocolVersion) { // TODO change NodeRecord
     checkNotNull(sourceNode, "SourceNode could not be null when decoding a Portal Wire Message");
     checkNotNull(sszbytes, "SSZBytes could not be null when decoding a Portal Wire Message");
     checkArgument(

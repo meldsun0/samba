@@ -4,8 +4,10 @@ import samba.domain.messages.PortalWireMessage;
 import samba.domain.messages.PortalWireMessageDecoder;
 import samba.network.exception.BadRequestException;
 import samba.network.exception.MessageToOurselfException;
+import samba.network.exception.NoSupportedProtocolVersionException;
 import samba.network.exception.StoreNotAvailableException;
 import samba.services.discovery.Discv5Client;
+import samba.util.ProtocolVersionUtil;
 
 import java.util.Optional;
 
@@ -42,6 +44,13 @@ public abstract class BaseNetwork implements Network {
     if (isOurself(destinationNode)) {
       return SafeFuture.failedFuture(new MessageToOurselfException());
     }
+    Optional<Integer> protocolVersion =
+        ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+            ProtocolVersionUtil.getSupportedProtocolVersions(destinationNode));
+    if (protocolVersion.isEmpty()) {
+      return SafeFuture.failedFuture(new NoSupportedProtocolVersionException());
+    }
+
     // TODO FIX chain order
     return SafeFuture.of(
             discv5Client
@@ -49,7 +58,11 @@ public abstract class BaseNetwork implements Network {
                     destinationNode, this.networkType.getValue(), messageRequest.getSszBytes())
                 .thenApply(
                     (sszbytes) ->
-                        parseResponse(sszbytes, destinationNode, messageRequest)) // Change
+                        parseResponse(
+                            sszbytes,
+                            destinationNode,
+                            messageRequest,
+                            protocolVersion.get())) // Change
                 .thenApply(Optional::of))
         .thenPeek(this::logResponse)
         .exceptionallyCompose(error -> handleSendMessageError(messageRequest, error));
@@ -78,8 +91,11 @@ public abstract class BaseNetwork implements Network {
   }
 
   private PortalWireMessage parseResponse(
-      Bytes sszbytes, NodeRecord destinationNode, PortalWireMessage requestMessage) {
+      Bytes sszbytes,
+      NodeRecord destinationNode,
+      PortalWireMessage requestMessage,
+      int protocolVersion) {
     // TODO validate appropriate response. If I send a Ping I must get a PONG
-    return PortalWireMessageDecoder.decode(destinationNode, sszbytes);
+    return PortalWireMessageDecoder.decode(destinationNode, sszbytes, protocolVersion);
   }
 }

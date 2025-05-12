@@ -1,6 +1,7 @@
 package samba.util;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
@@ -59,5 +60,17 @@ public class ProtocolVersionUtil {
     return protocolVersionListSchema
         .createFromElements(protocolVersions.stream().sorted().map(SszByte::of).toList())
         .sszSerialize();
+  }
+
+  public static Optional<Integer> getHighestSupportedProtocolVersion(
+      List<Integer> otherSupportedVersions) {
+    return getHighestSupportedProtocolVersion(otherSupportedVersions, SUPPORTED_PROTOCOL_VERSIONS);
+  }
+
+  public static Optional<Integer> getHighestSupportedProtocolVersion(
+      List<Integer> otherSupportedVersions, List<Integer> localSupportedVersions) {
+    return localSupportedVersions.stream()
+        .filter(otherSupportedVersions::contains)
+        .max(Integer::compareTo);
   }
 }
