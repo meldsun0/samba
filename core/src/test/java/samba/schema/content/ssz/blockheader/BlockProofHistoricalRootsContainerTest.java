@@ -27,7 +27,7 @@ public class BlockProofHistoricalRootsContainerTest {
       this.beaconBlockProofHistoricalRoots.add(Bytes32.repeat((byte) i));
     this.blockRoot = Bytes32.repeat((byte) 1);
     this.executionBlockProof = new ArrayList<>();
-    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_SIZE; i++)
+    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_BELLATRIX_SIZE; i++)
       this.executionBlockProof.add(Bytes32.repeat((byte) i));
     this.slot = UInt64.valueOf(1234);
   }

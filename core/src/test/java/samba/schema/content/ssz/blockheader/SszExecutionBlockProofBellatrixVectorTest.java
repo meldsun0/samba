@@ -12,21 +12,21 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SszExecutionBlockProofVectorTest {
+public class SszExecutionBlockProofBellatrixVectorTest {
 
   List<Bytes32> executionBlockProof;
 
   @BeforeEach
   public void setup() {
     this.executionBlockProof = new ArrayList<>();
-    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_SIZE; i++)
+    for (int i = 0; i < ContentProofConstants.EXECUTION_BLOCK_PROOF_BELLATRIX_SIZE; i++)
       this.executionBlockProof.add(Bytes32.repeat((byte) i));
   }
 
   @Test
   public void testSszDecode() {
-    SszExecutionBlockProofVector sszExecutionBlockProofVector =
-        new SszExecutionBlockProofVector(
+    SszExecutionBlockProofBellatrixVector sszExecutionBlockProofVector =
+        new SszExecutionBlockProofBellatrixVector(
             Bytes.fromHexString(
                 "0x00000000000000000000000000000000000000000000000000000000000000000101010101010101010101010101010101010101010101010101010101010101020202020202020202020202020202020202020202020202020202020202020203030303030303030303030303030303030303030303030303030303030303030404040404040404040404040404040404040404040404040404040404040404050505050505050505050505050505050505050505050505050505050505050506060606060606060606060606060606060606060606060606060606060606060707070707070707070707070707070707070707070707070707070707070707080808080808080808080808080808080808080808080808080808080808080809090909090909090909090909090909090909090909090909090909090909090a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"));
     List<Bytes32> decodedExecutionBlockProof = sszExecutionBlockProofVector.getDecodedVector();
@@ -35,8 +35,8 @@ public class SszExecutionBlockProofVectorTest {
 
   @Test
   public void testSszEncode() {
-    SszExecutionBlockProofVector sszExecutionBlockProofVector =
-        new SszExecutionBlockProofVector(this.executionBlockProof);
+    SszExecutionBlockProofBellatrixVector sszExecutionBlockProofVector =
+        new SszExecutionBlockProofBellatrixVector(this.executionBlockProof);
     Bytes encodedExecutionBlockProof = sszExecutionBlockProofVector.sszSerialize();
     assertEquals(
         encodedExecutionBlockProof,

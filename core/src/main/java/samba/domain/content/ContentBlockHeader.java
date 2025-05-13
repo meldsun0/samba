@@ -3,7 +3,7 @@ package samba.domain.content;
 import samba.network.history.HistoryConstants;
 import samba.schema.content.ssz.blockheader.BlockHeaderWithProofContainer;
 import samba.schema.content.ssz.blockheader.BlockProofHistoricalRootsContainer;
-import samba.schema.content.ssz.blockheader.BlockProofHistoricalSummariesContainer;
+import samba.schema.content.ssz.blockheader.BlockProofHistoricalSummariesCapellaContainer;
 import samba.schema.content.ssz.blockheader.SszBlockProofHistoricalHashesAccumulatorVector;
 
 import java.util.List;
@@ -64,13 +64,14 @@ public class ContentBlockHeader {
   }
 
   public List<Bytes32> getBeaconBlockProofHistoricalSummaries() {
-    if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+    if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA
+        || proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB) {
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBeaconBlockProofHistoricalSummaries();
     }
     throw new UnsupportedOperationException(
-        "Block proof type is not BLOCK_PROOF_HISTORICAL_SUMMARIES");
+        "Block proof type is not BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA or BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB");
   }
 
   public Bytes32 getBeaconBlockRoot() {
@@ -78,13 +79,14 @@ public class ContentBlockHeader {
       return BlockProofHistoricalRootsContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
-    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA
+        || proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB) {
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getBlockRoot();
     }
     throw new UnsupportedOperationException(
-        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS or BLOCK_PROOF_HISTORICAL_SUMMARIES");
+        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS, BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA or BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB");
   }
 
   public List<Bytes32> getExecutionBlockProof() {
@@ -92,13 +94,14 @@ public class ContentBlockHeader {
       return BlockProofHistoricalRootsContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
-    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA
+        || proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB) {
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getExecutionBlockProof();
     }
     throw new UnsupportedOperationException(
-        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS or BLOCK_PROOF_HISTORICAL_SUMMARIES");
+        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS, BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA or BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB");
   }
 
   public long getSlot() {
@@ -107,14 +110,15 @@ public class ContentBlockHeader {
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getSlot()
           .longValue();
-    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES) {
-      return BlockProofHistoricalSummariesContainer.decodeBytes(
+    } else if (proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA
+        || proofType == ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB) {
+      return BlockProofHistoricalSummariesCapellaContainer.decodeBytes(
               blockHeaderWithProofContainer.getEncodedBlockHeaderProof())
           .getSlot()
           .longValue();
     }
     throw new UnsupportedOperationException(
-        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS or BLOCK_PROOF_HISTORICAL_SUMMARIES");
+        "Block proof type is not BLOCK_PROOF_HISTORICAL_ROOTS, BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA or BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB");
   }
 
   public Bytes getSszBytes() {
@@ -126,11 +130,13 @@ public class ContentBlockHeader {
   }
 
   public static ContentProofType getContentProofTypeFromHeader(BlockHeader blockHeader) {
-    long timestamp = blockHeader.getTimestamp();
-    if (timestamp < HistoryConstants.MERGE_TIMESTAMP)
+    long blockNumber = blockHeader.getNumber();
+    if (blockNumber < HistoryConstants.MERGE_BLOCK)
       return ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR;
-    else if (timestamp < HistoryConstants.SHANGHAI_TIMESTAMP)
+    else if (blockNumber < HistoryConstants.SHANGHAI_BLOCK)
       return ContentProofType.BLOCK_PROOF_HISTORICAL_ROOTS;
-    else return ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES;
+    else if (blockNumber < HistoryConstants.CANCUN_BLOCK)
+      return ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_CAPELLA;
+    else return ContentProofType.BLOCK_PROOF_HISTORICAL_SUMMARIES_DENEB;
   }
 }

@@ -9,18 +9,18 @@ import tech.pegasys.teku.infrastructure.ssz.collections.SszBytes32Vector;
 import tech.pegasys.teku.infrastructure.ssz.primitive.SszBytes32;
 import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszBytes32VectorSchema;
 
-public class SszExecutionBlockProofVector {
+public class SszExecutionBlockProofBellatrixVector {
 
   private static final int EXECUTION_BLOCK_PROOF_SIZE = 11;
   private static final SszBytes32VectorSchema<SszBytes32Vector> schema =
       SszBytes32VectorSchema.create(EXECUTION_BLOCK_PROOF_SIZE);
   private final SszBytes32Vector ExecutionBlockProof;
 
-  public SszExecutionBlockProofVector(SszBytes32Vector ExecutionBlockProof) {
+  public SszExecutionBlockProofBellatrixVector(SszBytes32Vector ExecutionBlockProof) {
     this.ExecutionBlockProof = ExecutionBlockProof;
   }
 
-  public SszExecutionBlockProofVector(List<Bytes32> ExecutionBlockProof) {
+  public SszExecutionBlockProofBellatrixVector(List<Bytes32> ExecutionBlockProof) {
     if (ExecutionBlockProof.size() != EXECUTION_BLOCK_PROOF_SIZE) {
       throw new IllegalArgumentException(
           "ExecutionBlockProof size is not equal to " + EXECUTION_BLOCK_PROOF_SIZE);
@@ -28,7 +28,7 @@ public class SszExecutionBlockProofVector {
     this.ExecutionBlockProof = schema.createFromElements(createSszBytes32List(ExecutionBlockProof));
   }
 
-  public SszExecutionBlockProofVector(Bytes ExecutionBlockProof) {
+  public SszExecutionBlockProofBellatrixVector(Bytes ExecutionBlockProof) {
     this.ExecutionBlockProof = schema.sszDeserialize(ExecutionBlockProof);
   }
 
