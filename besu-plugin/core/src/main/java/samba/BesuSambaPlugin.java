@@ -16,15 +16,13 @@ import org.hyperledger.besu.plugin.services.metrics.MetricCategoryRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-import samba.Samba;
-import samba.SambaSDK;
 import samba.rpc.GetBlockBodyByBlockHash;
 
 @AutoService(BesuPlugin.class)
 public class BesuSambaPlugin implements BesuPlugin {
   private static final Logger LOG = LoggerFactory.getLogger(BesuSambaPlugin.class);
   public static final String PLUGIN_NAME = "samba";
-  private static final String CLI_OPTIONS_PREFIX = "--plugin-" + PLUGIN_NAME+"-";
+  private static final String CLI_OPTIONS_PREFIX = "--plugin-" + PLUGIN_NAME + "-";
 
   private ServiceManager serviceManager;
   private MetricCategoryRegistry metricCategoryRegistryService;
@@ -54,6 +52,8 @@ public class BesuSambaPlugin implements BesuPlugin {
       // TODO create a function
       this.picoCLIOptionsService.addPicoCLIOptions(PLUGIN_NAME, this);
       this.rpcEndpointService = this.getBesuService(this.serviceManager, RpcEndpointService.class);
+      this.sambaSDK = this.initSamba();
+      starRpcEndpoints();
     }
   }
 
@@ -67,8 +67,6 @@ public class BesuSambaPlugin implements BesuPlugin {
     LOG.info("Starting Samba plugin");
     if (startingTasksDone.compareAndSet(false, true)) {
       this.metricsSystemService = this.getBesuService(this.serviceManager, MetricsSystem.class);
-      this.sambaSDK = this.initSamba();
-      starRpcEndpoints();
     }
   }
 
