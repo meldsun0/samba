@@ -28,7 +28,7 @@ mkdir -p build/install/besu/plugins
 ```
 - Copy Samba Plugin .jar:
 ```shell script
-core/build/libs/*.jar build/install/besu/plugins/
+cp core/build/libs/*.jar build/install/besu/plugins/
 ```
 - Run Besu:
 ```shell script
