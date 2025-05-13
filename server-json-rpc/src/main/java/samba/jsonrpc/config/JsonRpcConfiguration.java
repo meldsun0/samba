@@ -1,6 +1,5 @@
 package samba.jsonrpc.config;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,7 +10,6 @@ import java.util.Objects;
 import com.google.common.base.MoreObjects;
 import lombok.Getter;
 import lombok.Setter;
-
 
 @SuppressWarnings("SameNameButDifferent")
 public class JsonRpcConfiguration {
@@ -37,7 +35,18 @@ public class JsonRpcConfiguration {
   @Getter @Setter private long maxRequestContentLength;
   @Setter @Getter private boolean prettyJsonEnabled;
 
-  private JsonRpcConfiguration(boolean enableJsonRpcServer, int port, String host, List<String> corsAllowedDomains, List<String> rpcApis, List<String> hostsAllowlist, long httpTimeoutSec, int maxActiveConnections, int maxBatchSize, long maxRequestContentLength, boolean prettyJsonEnabled) {
+  private JsonRpcConfiguration(
+      boolean enableJsonRpcServer,
+      int port,
+      String host,
+      List<String> corsAllowedDomains,
+      List<String> rpcApis,
+      List<String> hostsAllowlist,
+      long httpTimeoutSec,
+      int maxActiveConnections,
+      int maxBatchSize,
+      long maxRequestContentLength,
+      boolean prettyJsonEnabled) {
     this.enableJsonRpcServer = enableJsonRpcServer;
     this.port = port;
     this.host = host;
@@ -119,30 +128,30 @@ public class JsonRpcConfiguration {
     private int port = DEFAULT_JSON_RPC_PORT;
     private String host = DEFAULT_JSON_RPC_HOST;
     private List<String> corsAllowedDomains = Collections.emptyList();
-    private List<String> rpcApis= DEFAULT_RPC_APIS;
+    private List<String> rpcApis = DEFAULT_RPC_APIS;
     private List<String> hostsAllowlist = Arrays.asList("localhost", "127.0.0.1");
     private long httpTimeoutSec = TimeoutOptions.defaultOptions().getTimeoutSeconds();
-    private int maxActiveConnections= DEFAULT_MAX_ACTIVE_CONNECTIONS;
+    private int maxActiveConnections = DEFAULT_MAX_ACTIVE_CONNECTIONS;
     private int maxBatchSize = DEFAULT_MAX_BATCH_SIZE;
     private long maxRequestContentLength = DEFAULT_MAX_REQUEST_CONTENT_LENGTH;
     private boolean prettyJsonEnabled = DEFAULT_PRETTY_JSON_ENABLED;
 
-    private Builder(){}
+    private Builder() {}
 
     public JsonRpcConfiguration build() {
-      return new JsonRpcConfiguration(this.enableJsonRpcServer,
-      this.port,
-      this.host,
-      this.corsAllowedDomains,
-      this.rpcApis,
-      this.hostsAllowlist,
-      this.httpTimeoutSec,
-      this.maxActiveConnections,
-      this.maxBatchSize,
-      this.maxRequestContentLength,
-      this.prettyJsonEnabled);
+      return new JsonRpcConfiguration(
+          this.enableJsonRpcServer,
+          this.port,
+          this.host,
+          this.corsAllowedDomains,
+          this.rpcApis,
+          this.hostsAllowlist,
+          this.httpTimeoutSec,
+          this.maxActiveConnections,
+          this.maxBatchSize,
+          this.maxRequestContentLength,
+          this.prettyJsonEnabled);
     }
-
 
     public Builder enableJsonRpcServer(boolean enableJsonRpcServer) {
       this.enableJsonRpcServer = enableJsonRpcServer;
@@ -198,6 +207,5 @@ public class JsonRpcConfiguration {
       this.prettyJsonEnabled = prettyJsonEnabled;
       return this;
     }
-
   }
 }

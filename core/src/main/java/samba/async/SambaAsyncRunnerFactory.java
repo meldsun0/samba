@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
-import tech.pegasys.teku.infrastructure.async.OccurrenceCounter;
 
 public class SambaAsyncRunnerFactory implements AsyncRunnerFactory {
 
@@ -13,7 +12,7 @@ public class SambaAsyncRunnerFactory implements AsyncRunnerFactory {
   private final SambaTrackingExecutorFactory sambaTrackingExecutorFactory;
 
   public SambaAsyncRunnerFactory(SambaTrackingExecutorFactory sambaTrackingExecutorFactory) {
-      this.sambaTrackingExecutorFactory = sambaTrackingExecutorFactory;
+    this.sambaTrackingExecutorFactory = sambaTrackingExecutorFactory;
   }
 
   @Override

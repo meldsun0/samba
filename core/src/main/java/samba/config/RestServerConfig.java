@@ -15,8 +15,10 @@ public class RestServerConfig {
   public static final int DEFAULT_REST_API_PORT = 5051;
   public static final String DEFAULT_REST_API_INTERFACE = "0.0.0.0";
   public static final int DEFAULT_MAX_URL_LENGTH = 65535;
-  public static final List<String> DEFAULT_REST_API_CORS_ALLOWED_ORIGINS = List.of("127.0.0.1", "localhost");
-  public static final List<String> DEFAULT_REST_API_HOST_ALLOWLIST = List.of("127.0.0.1", "localhost", "0.0.0.0");
+  public static final List<String> DEFAULT_REST_API_CORS_ALLOWED_ORIGINS =
+      List.of("127.0.0.1", "localhost");
+  public static final List<String> DEFAULT_REST_API_HOST_ALLOWLIST =
+      List.of("127.0.0.1", "localhost", "0.0.0.0");
   public static final boolean DEFAULT_ENABLED_REST_SERVER = true;
 
   private final int restApiPort;
@@ -44,7 +46,7 @@ public class RestServerConfig {
     this.restApiHostAllowlist = restApiHostAllowlist;
   }
 
-  public boolean isRestServerEnabled(){
+  public boolean isRestServerEnabled() {
     return this.enableRestServer;
   }
 
@@ -93,14 +95,12 @@ public class RestServerConfig {
       return this;
     }
 
-    public Builder restApiCorsAllowedOrigins(
-        final List<String> restApiCorsAllowedOrigins) {
+    public Builder restApiCorsAllowedOrigins(final List<String> restApiCorsAllowedOrigins) {
       this.restApiCorsAllowedOrigins = restApiCorsAllowedOrigins;
       return this;
     }
 
-    public Builder restApiHostAllowlist(
-        final List<String> restApiHostAllowlist) {
+    public Builder restApiHostAllowlist(final List<String> restApiHostAllowlist) {
       this.restApiHostAllowlist = restApiHostAllowlist;
       return this;
     }

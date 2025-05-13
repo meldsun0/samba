@@ -52,8 +52,12 @@ public final class PortalNode implements AutoCloseable {
 
   public PortalNode(final SambaConfiguration sambaConfiguration) {
     this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig());
-    this.eventChannels = new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
-    this.asyncRunnerFactory = new SambaAsyncRunnerFactory(new SambaTrackingExecutorFactory(rejectedExecutionCounter, metricsEndpoint.getMetricsSystem()));
+    this.eventChannels =
+        new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
+    this.asyncRunnerFactory =
+        new SambaAsyncRunnerFactory(
+            new SambaTrackingExecutorFactory(
+                rejectedExecutionCounter, metricsEndpoint.getMetricsSystem()));
 
     final RestServerConfig restServerConfig = sambaConfiguration.getRestServerConfig();
     STATUS_LOG.onStartup(

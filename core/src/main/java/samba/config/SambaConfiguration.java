@@ -71,7 +71,8 @@ public class SambaConfiguration {
     private final RestServerConfig.Builder portalRestApiConfigBuilder = RestServerConfig.builder();
     private final DiscoveryConfig.Builder discoveryConfigBuilder = DiscoveryConfig.builder();
     private final StorageConfig.Builder storageConfigBuilder = StorageConfig.builder();
-    private final JsonRpcConfiguration.Builder jsonRpcConfiguration = JsonRpcConfiguration.builder();
+    private final JsonRpcConfiguration.Builder jsonRpcConfiguration =
+        JsonRpcConfiguration.builder();
     private Optional<SECP256K1.SecretKey> secretKey = Optional.empty();
 
     private String networkName;
@@ -113,7 +114,8 @@ public class SambaConfiguration {
       return this;
     }
 
-    public Builder jsonRpc(final Consumer<JsonRpcConfiguration.Builder> jsonRpcConfigurationConsumer) {
+    public Builder jsonRpc(
+        final Consumer<JsonRpcConfiguration.Builder> jsonRpcConfigurationConsumer) {
       jsonRpcConfigurationConsumer.accept(jsonRpcConfiguration);
       return this;
     }
@@ -127,7 +129,6 @@ public class SambaConfiguration {
       restServerConfigConsumer.accept(portalRestApiConfigBuilder);
       return this;
     }
-
 
     public Builder secretKey(final String secretKey) {
       checkNotNull(secretKey);
