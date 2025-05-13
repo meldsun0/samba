@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 @Getter
-public class PortalRestApiConfig {
+public class RestServerConfig {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -19,21 +19,25 @@ public class PortalRestApiConfig {
       List.of("127.0.0.1", "localhost");
   public static final List<String> DEFAULT_REST_API_HOST_ALLOWLIST =
       List.of("127.0.0.1", "localhost", "0.0.0.0");
+  public static final boolean DEFAULT_ENABLED_REST_SERVER = true;
 
   private final int restApiPort;
   private final boolean restApiDocsEnabled;
+  private final boolean enableRestServer;
   private final String restApiInterface;
   private final int maxUrlLength;
   private final List<String> restApiCorsAllowedOrigins;
   private final List<String> restApiHostAllowlist;
 
-  private PortalRestApiConfig(
+  private RestServerConfig(
+      final boolean enableRestServer,
       final int restApiPort,
       final boolean restApiDocsEnabled,
       final String restApiInterface,
       final int maxUrlLength,
       final List<String> restApiCorsAllowedOrigins,
       final List<String> restApiHostAllowlist) {
+    this.enableRestServer = enableRestServer;
     this.restApiPort = restApiPort;
     this.restApiDocsEnabled = restApiDocsEnabled;
     this.restApiInterface = restApiInterface;
@@ -42,22 +46,32 @@ public class PortalRestApiConfig {
     this.restApiHostAllowlist = restApiHostAllowlist;
   }
 
-  public static PortalRestApiConfigBuilder builder() {
-    return new PortalRestApiConfigBuilder();
+  public boolean isRestServerEnabled() {
+    return this.enableRestServer;
   }
 
-  public static final class PortalRestApiConfigBuilder {
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static final class Builder {
 
     private int restApiPort = DEFAULT_REST_API_PORT;
+    private boolean enableRestServer = DEFAULT_ENABLED_REST_SERVER;
     private boolean restApiDocsEnabled = true;
     private String restApiInterface = DEFAULT_REST_API_INTERFACE;
     private int maxUrlLength = DEFAULT_MAX_URL_LENGTH;
     private List<String> restApiCorsAllowedOrigins = DEFAULT_REST_API_CORS_ALLOWED_ORIGINS;
     private List<String> restApiHostAllowlist = DEFAULT_REST_API_HOST_ALLOWLIST;
 
-    private PortalRestApiConfigBuilder() {}
+    private Builder() {}
 
-    public PortalRestApiConfigBuilder restApiPort(final int restApiPort) {
+    public Builder enableRestServer(final boolean enableRestServer) {
+      this.enableRestServer = enableRestServer;
+      return this;
+    }
+
+    public Builder restApiPort(final int restApiPort) {
       if (!PortAvailability.isPortValid(restApiPort)) {
         throw new InvalidConfigurationException(
             String.format("Invalid restApiPort: %d", restApiPort));
@@ -66,35 +80,34 @@ public class PortalRestApiConfig {
       return this;
     }
 
-    public PortalRestApiConfigBuilder restApiDocsEnabled(final boolean restApiDocsEnabled) {
+    public Builder restApiDocsEnabled(final boolean restApiDocsEnabled) {
       this.restApiDocsEnabled = restApiDocsEnabled;
       return this;
     }
 
-    public PortalRestApiConfigBuilder restApiInterface(final String restApiInterface) {
+    public Builder restApiInterface(final String restApiInterface) {
       this.restApiInterface = restApiInterface;
       return this;
     }
 
-    public PortalRestApiConfigBuilder maxUrlLength(final int maxUrlLength) {
+    public Builder maxUrlLength(final int maxUrlLength) {
       this.maxUrlLength = maxUrlLength;
       return this;
     }
 
-    public PortalRestApiConfigBuilder restApiCorsAllowedOrigins(
-        final List<String> restApiCorsAllowedOrigins) {
+    public Builder restApiCorsAllowedOrigins(final List<String> restApiCorsAllowedOrigins) {
       this.restApiCorsAllowedOrigins = restApiCorsAllowedOrigins;
       return this;
     }
 
-    public PortalRestApiConfigBuilder restApiHostAllowlist(
-        final List<String> restApiHostAllowlist) {
+    public Builder restApiHostAllowlist(final List<String> restApiHostAllowlist) {
       this.restApiHostAllowlist = restApiHostAllowlist;
       return this;
     }
 
-    public PortalRestApiConfig build() {
-      return new PortalRestApiConfig(
+    public RestServerConfig build() {
+      return new RestServerConfig(
+          enableRestServer,
           restApiPort,
           restApiDocsEnabled,
           restApiInterface,

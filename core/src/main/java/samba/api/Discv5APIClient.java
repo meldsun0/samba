@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class Discv5APIClient implements Discv5API {
+public final class Discv5APIClient implements Discv5API {
 
   private final Discv5Client discv5Client;
 

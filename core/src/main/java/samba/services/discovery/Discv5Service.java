@@ -182,6 +182,7 @@ public class Discv5Service extends Service implements Discv5Client {
     return SafeFuture.of(() -> discoverySystem.streamLiveNodes().toList());
   }
 
+  // seems that is a getENR //TODO RENAME
   @Override
   public Optional<String> lookupEnr(final UInt256 nodeId) {
     final Optional<NodeRecord> maybeNodeRecord = discoverySystem.lookupNode(nodeId.toBytes());

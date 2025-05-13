@@ -17,6 +17,7 @@ tasks.register("dockerDistUntar") {
         copy {
             from tarTree(distTarFile)
             into(dockerBuildDir)
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
         project.delete(files("${dockerBuildDir}/samba"))
         file("${dockerBuildDir}/${distTarFileName}").renameTo("${dockerBuildDir}/samba")
@@ -35,11 +36,11 @@ tasks.register('distDocker') {
         }
         exec {
             def image = "${dockerImageName}:${dockerBuildVersion}"
-            def dockerPlatform = ""
-            if (project.hasProperty('docker-platform')) {
-                dockerPlatform = "--platform ${project.getProperty('docker-platform')}"
-                println "Building for platform ${project.getProperty('docker-platform')}"
-            }
+
+            def targetPlatform = project.findProperty('docker-platform') ?: "linux/amd64"
+            def dockerPlatform = "--platform=${targetPlatform}"
+            println "Building for platform: ${targetPlatform}"
+
             def gitDetails = getGitCommitDetails(7)
             // Detect the OS and set the executable
             workingDir dockerBuildDir

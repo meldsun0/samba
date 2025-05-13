@@ -5,8 +5,10 @@ import samba.schema.content.ssz.blockbody.BlockBodyPostShanghaiContainer;
 import samba.schema.content.ssz.blockbody.BlockBodyPreShanghaiContainer;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
@@ -84,11 +86,11 @@ public class ContentBlockBody {
     }
   }
 
-  public List<Withdrawal> getWithdrawals() {
+  public Optional<List<Withdrawal>> getWithdrawals() {
     if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
-      return blockBodyPostShanghaiContainer.getWithdrawals();
+      return Optional.ofNullable(blockBodyPostShanghaiContainer.getWithdrawals());
     }
-    throw new UnsupportedOperationException("Block body is pre-Shanghai");
+    return Optional.empty();
   }
 
   public Bytes getSszBytes() {
@@ -97,5 +99,13 @@ public class ContentBlockBody {
     } else {
       return blockBodyPostShanghaiContainer.sszSerialize();
     }
+  }
+
+  public static ContentBlockBody decode(Bytes sszBytes) {
+    return new ContentBlockBody(sszBytes);
+  }
+
+  public BlockBody getBlockBody() {
+    return new BlockBody(this.getTransactions(), this.getUncles(), this.getWithdrawals());
   }
 }

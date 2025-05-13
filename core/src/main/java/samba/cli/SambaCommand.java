@@ -93,6 +93,13 @@ public class SambaCommand implements Callable<Integer> {
   private boolean disableJsonRpcServer;
 
   @Option(
+      names = "--disable-rest--server",
+      description = "Disables REST Server (set to true if flag is present)",
+      defaultValue = "false",
+      fallbackValue = "true")
+  private boolean disableRestServer;
+
+  @Option(
       names = {"--p2p-advertised-ip", "--p2p-advertised-ips"},
       paramLabel = "<NETWORK>",
       description =
@@ -148,14 +155,15 @@ public class SambaCommand implements Callable<Integer> {
           });
       builder.jsonRpc(
           jsonRpc -> {
+            jsonRpc.enableJsonRpcServer(!disableJsonRpcServer);
             if (jsonRpcPort != null) {
-              jsonRpc.setPort(jsonRpcPort);
+              jsonRpc.port(jsonRpcPort);
             }
             if (jsonRpcHost != null) {
-              jsonRpc.setHost(jsonRpcHost);
+              jsonRpc.host(jsonRpcHost);
             }
-            jsonRpc.setEnabled(!disableJsonRpcServer);
           });
+      builder.restServer(restServer -> restServer.enableRestServer(!disableRestServer));
 
       if (unsafePrivateKey != null) {
         builder.secretKey(unsafePrivateKey);

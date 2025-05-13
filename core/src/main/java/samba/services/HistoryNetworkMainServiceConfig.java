@@ -9,7 +9,7 @@ import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 
-public class MainServiceConfig {
+public class HistoryNetworkMainServiceConfig {
 
   @Getter private final AsyncRunnerFactory asyncRunnerFactory;
   @Getter private final TimeProvider timeProvider;
@@ -20,7 +20,7 @@ public class MainServiceConfig {
   private final int executorThreads =
       Math.max(5, Math.min(Runtime.getRuntime().availableProcessors(), 12));
 
-  public MainServiceConfig(
+  public HistoryNetworkMainServiceConfig(
       final AsyncRunnerFactory asyncRunnerFactory,
       final TimeProvider timeProvider,
       final EventChannels eventChannels,

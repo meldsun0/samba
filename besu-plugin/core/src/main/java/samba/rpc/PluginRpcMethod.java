@@ -1,4 +1,4 @@
-package rpc;
+package samba.rpc;
 
 import org.hyperledger.besu.plugin.services.rpc.PluginRpcRequest;
 
