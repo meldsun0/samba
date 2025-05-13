@@ -113,7 +113,8 @@ public class PortalWireSerializationTests {
   @Test
   public void testAcceptV0Serialization() {
     Accept accept =
-        new Accept(Bytes.fromHexString("0x0102").toInt(), Bytes.fromHexString("0x01"), 0);
+        new Accept(
+            Bytes.fromHexString("0x0102").toInt(), Bytes.fromHexString("0x0100000000000000"), 0);
     Bytes serialized = accept.getSszBytes();
     assertEquals(Bytes.fromHexString("0x070102060000000101"), serialized);
   }

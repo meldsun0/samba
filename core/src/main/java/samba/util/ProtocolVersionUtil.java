@@ -16,7 +16,7 @@ public class ProtocolVersionUtil {
 
   public static Logger LOG = LoggerFactory.getLogger(ProtocolVersionUtil.class);
 
-  public static final List<Integer> SUPPORTED_PROTOCOL_VERSIONS = List.of(0);
+  public static final List<Integer> SUPPORTED_PROTOCOL_VERSIONS = List.of(0, 1);
   public static final int MAX_VERSION_COUNT = 8;
   private static final SszListSchema<SszByte, SszList<SszByte>> protocolVersionListSchema =
       (SszListSchema<SszByte, SszList<SszByte>>)

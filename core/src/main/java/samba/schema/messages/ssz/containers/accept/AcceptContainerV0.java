@@ -27,22 +27,25 @@ public class AcceptContainerV0 extends Container2<AcceptContainerV0, SszByteVect
     super(AcceptSchema.INSTANCE, backingNode);
   }
 
-  private static SszBitlist createSszBitlist(Bytes contentKeysBitList) {
-    BitSet bitSet = BitSet.valueOf(contentKeysBitList.toArray());
+  private static SszBitlist createSszBitlist(Bytes contentKeysByteList) {
+    int size = contentKeysByteList.size();
+    BitSet bitSet = new BitSet(size);
+    for (int i = 0; i < size; i++) {
+      byte b = contentKeysByteList.get(i);
+      if (b == 1) {
+        bitSet.set(i);
+      } else if (b != 0) {
+        throw new IllegalArgumentException("Each byte must be either 0x00 or 0x01");
+      }
+    }
     SszBitlistSchema bitListSchema = SszBitlistSchema.create(PortalWireMessage.MAX_KEYS);
-    SszBitlist bitList = bitListSchema.wrapBitSet(contentKeysBitList.size() * 8, bitSet);
-    return bitList;
+    return bitListSchema.wrapBitSet(size, bitSet);
   }
 
-  private static Bytes booleanListToBytes(List<Boolean> booleanList) {
-    int size = booleanList.size();
-    int byteArrayLength = (size + 7) / 8;
-    byte[] byteArray = new byte[byteArrayLength];
-
-    for (int i = 0; i < size; i++) {
-      if (booleanList.get(i)) {
-        byteArray[i / 8] |= (1 << (i % 8));
-      }
+  private static Bytes booleanListToByteList(List<Boolean> booleanList) {
+    byte[] byteArray = new byte[booleanList.size()];
+    for (int i = 0; i < booleanList.size(); i++) {
+      byteArray[i] = (byte) (booleanList.get(i) ? 1 : 0);
     }
     return Bytes.wrap(byteArray);
   }
@@ -52,7 +55,7 @@ public class AcceptContainerV0 extends Container2<AcceptContainerV0, SszByteVect
   }
 
   public Bytes getContentKeysBitList() {
-    return booleanListToBytes(getField1().asListUnboxed());
+    return booleanListToByteList(getField1().asListUnboxed());
   }
 
   public static AcceptContainerV0 decodePacket(Bytes packet) {
