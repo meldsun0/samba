@@ -40,7 +40,6 @@ public class HistoricalHashesAccumulatorContainerTest {
     HistoricalHashesAccumulatorContainer historicalHashesAccumulatorContainer =
         new HistoricalHashesAccumulatorContainer(historicalEpochs);
     Bytes sszBytes = historicalHashesAccumulatorContainer.sszSerialize();
-    System.out.println(sszBytes.toHexString());
     assertEquals(
         sszBytes,
         Bytes.fromHexString(

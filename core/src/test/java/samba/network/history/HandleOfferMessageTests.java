@@ -54,17 +54,28 @@ public class HandleOfferMessageTests {
     verify(utpManager, never()).acceptRead(any(NodeRecord.class), any(Consumer.class));
   }
 
+  /*
   @Test
-  public void responseAcceptMessageWithAll0BitListIfContentIsStoredLocally() {
+  public void responseAcceptMessageWithAll0BitListIfContentIsStoredLocallyProtocolV0() {
     Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.EMPTY)); // Has content
     Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
     assertEquals(accept.getContentKeys(), Bytes.of(0, 0, 0));
     verify(utpManager, never()).acceptRead(any(NodeRecord.class), any(Consumer.class));
-  }
+  }*/
 
   @Test
-  public void responseAcceptMessageWithAll1BitListIfContentIsNotStoredLocally() {
+  public void responseAcceptMessageWithAll2ByteListIfContentIsStoredLocallyProtocolV1() {
+    Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
+    when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.EMPTY)); // Has content
+    Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
+    assertEquals(accept.getContentKeys(), Bytes.of(2, 2, 2));
+    verify(utpManager, never()).acceptRead(any(NodeRecord.class), any(Consumer.class));
+  }
+
+  /*
+  @Test
+  public void responseAcceptMessageWithAll1BitListIfContentIsNotStoredLocallyProtocolV0() {
     Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.empty()); // No content on DB
     when(utpManager.acceptRead(any(NodeRecord.class), any(Consumer.class))).thenReturn(555);
@@ -73,10 +84,23 @@ public class HandleOfferMessageTests {
     assertEquals(accept.getContentKeys(), Bytes.of(1, 1, 1));
     assertEquals(accept.getConnectionId(), 555);
     verify(utpManager, times(1)).acceptRead(any(NodeRecord.class), any(Consumer.class));
-  }
+  }*/
 
   @Test
-  public void responseAcceptMessage() {
+  public void responseAcceptMessageWithAll0ByteListIfContentIsNotStoredLocallyProtocolV1() {
+    Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
+    when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.empty()); // No content on DB
+    when(utpManager.acceptRead(any(NodeRecord.class), any(Consumer.class))).thenReturn(555);
+
+    Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
+    assertEquals(accept.getContentKeys(), Bytes.of(0, 0, 0));
+    assertEquals(accept.getConnectionId(), 555);
+    verify(utpManager, times(1)).acceptRead(any(NodeRecord.class), any(Consumer.class));
+  }
+
+  /*
+  @Test
+  public void responseAcceptMessageProtocolV0() {
     Offer offer = new Offer(List.of(DefaultContent.key3));
     when(historyDB.get(ContentKey.decode(DefaultContent.key3)))
         .thenReturn(Optional.of(DefaultContent.value3));
@@ -84,6 +108,19 @@ public class HandleOfferMessageTests {
 
     Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
     assertEquals(Bytes.of(1), accept.getContentKeys());
+    assertEquals(555, accept.getConnectionId());
+    verify(utpManager, times(1)).acceptRead(any(NodeRecord.class), any(Consumer.class));
+  }*/
+
+  @Test
+  public void responseAcceptMessageProtocolV1() {
+    Offer offer = new Offer(List.of(DefaultContent.key3));
+    when(historyDB.get(ContentKey.decode(DefaultContent.key3)))
+        .thenReturn(Optional.of(DefaultContent.value3));
+    when(utpManager.acceptRead(any(NodeRecord.class), any(Consumer.class))).thenReturn(555);
+
+    Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
+    assertEquals(Bytes.of(0), accept.getContentKeys());
     assertEquals(555, accept.getConnectionId());
     verify(utpManager, times(1)).acceptRead(any(NodeRecord.class), any(Consumer.class));
   }

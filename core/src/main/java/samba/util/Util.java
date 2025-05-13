@@ -13,8 +13,9 @@ public class Util {
     checkArgument(data != null, "DATA must not be null");
     // checkArgument(!data.isEmpty(), "Data MUST NOT be empty");
     // TODO FIX
-    if (data.toHexString().equals("0x00") || data.toHexString().equals("0x") || data.isEmpty())
-      return Bytes.concatenate(Bytes.of(0));
+    if (data.equals(Bytes.of(0)) || data.equals(Bytes.EMPTY) || data.isEmpty()) {
+      return Bytes.of(0);
+    }
     return Bytes.concatenate(Util.writeUnsignedLeb128(data.size()), data);
   }
 
