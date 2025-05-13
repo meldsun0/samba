@@ -1,7 +1,7 @@
 package samba.services.rest;
 
 import samba.api.rest.GetHealth;
-import samba.config.PortalRestApiConfig;
+import samba.config.RestServerConfig;
 import samba.config.VersionProvider;
 
 import javax.naming.ServiceUnavailableException;
@@ -21,7 +21,7 @@ public class PortalAPI implements PortalRestAPI {
   private final RestApi restApi;
 
   public PortalAPI(
-      final PortalRestApiConfig config,
+      final RestServerConfig config,
       final EventChannels eventChannels,
       final AsyncRunner asyncRunner,
       final TimeProvider timeProvider) {
@@ -44,7 +44,7 @@ public class PortalAPI implements PortalRestAPI {
   }
 
   private static RestApi create(
-      final PortalRestApiConfig config,
+      final RestServerConfig config,
       final EventChannels eventChannels,
       final AsyncRunner asyncRunner,
       final TimeProvider timeProvider) {
