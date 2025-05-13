@@ -3,6 +3,9 @@ package samba;
 import static samba.logging.StatusLogger.STATUS_LOG;
 import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TIME_PROVIDER;
 
+import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
+import samba.async.SambaAsyncRunnerFactory;
+import samba.async.SambaTrackingExecutorFactory;
 import samba.config.PortalRestApiConfig;
 import samba.config.SambaConfiguration;
 import samba.config.StartupLogConfig;
@@ -51,12 +54,8 @@ public final class PortalNode implements AutoCloseable {
 
   public PortalNode(final SambaConfiguration sambaConfiguration) {
     this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig());
-    this.eventChannels =
-        new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
-    this.asyncRunnerFactory =
-        AsyncRunnerFactory.createDefault(
-            new MetricTrackingExecutorFactory(
-                metricsEndpoint.getMetricsSystem(), rejectedExecutionCounter));
+    this.eventChannels = new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
+    this.asyncRunnerFactory = new SambaAsyncRunnerFactory(new SambaTrackingExecutorFactory(rejectedExecutionCounter, metricsEndpoint.getMetricsSystem()));
 
     final PortalRestApiConfig portalRestApiConfig = sambaConfiguration.getPortalRestApiConfig();
     STATUS_LOG.onStartup(

@@ -11,6 +11,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.datatypes.Hash;
+import org.hyperledger.besu.ethereum.core.BlockBody;
+import org.hyperledger.besu.ethereum.core.BlockHeader;
+import org.hyperledger.besu.ethereum.core.TransactionReceipt;
 
 /**
  * CAUTION: this API is unstable and might be changed in any version in backward incompatible way
@@ -43,4 +47,14 @@ public sealed interface HistoryAPI extends SambaAPI permits HistoryAPIClient {
   Optional<TraceGetContentResult> traceGetContent(final Bytes contentKey, final long startTime);
 
   Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId);
+
+  // For Besu
+
+  Optional<BlockHeader> getBlockHeaderByBlockHash(Hash blockHash);
+
+  Optional<BlockBody> getBlockBodyByBlockHash(Hash blockHash);
+
+  Optional<List<TransactionReceipt>> getReceiptByBlockHash(Hash blockHash);
+
+  Optional<BlockHeader> getBlockHeaderByBlockNumber(long blockNumber);
 }

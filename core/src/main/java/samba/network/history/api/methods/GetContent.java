@@ -7,6 +7,7 @@ import samba.domain.content.ContentUtil;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.slf4j.Logger;
@@ -51,5 +52,21 @@ public class GetContent {
       final HistoryNetworkInternalAPI historyNetworkInternalAPI, final Bytes contentKey) {
     LOG.debug("Executing GetLocalContent with parameters contentKey {}", contentKey);
     return new GetContent(historyNetworkInternalAPI).execute(contentKey);
+  }
+
+  public static <R> Optional<R> execute(
+      final HistoryNetworkInternalAPI historyNetworkInternalAPI,
+      Bytes contentKey,
+      Function<Bytes, Optional<R>> decoder) {
+    LOG.debug("Executing GetLocalContent with parameters contentKey {}", contentKey);
+    Optional<GetContentResult> result =
+        new GetContent(historyNetworkInternalAPI).execute(contentKey);
+    return result.flatMap(
+        content -> {
+          if ("0x".equals(content.getContent())) {
+            return Optional.empty();
+          }
+          return decoder.apply(Bytes.fromHexString(content.getContent()));
+        });
   }
 }
