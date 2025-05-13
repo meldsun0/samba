@@ -149,7 +149,6 @@ public class OfferMessageTests {
         .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
   }
 
-  /*
   @Test
   public void getBitListOfAll0ProtocolV0() throws ExecutionException, InterruptedException {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
@@ -164,7 +163,7 @@ public class OfferMessageTests {
     verify(historyDB, never()).get(any(ContentKey.class));
     verify(utpManager, never())
         .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
-  } */
+  }
 
   @Test
   public void getByteListOfAllDeclineProtocolV1() throws ExecutionException, InterruptedException {
@@ -188,29 +187,31 @@ public class OfferMessageTests {
     }
   }
 
-  /*
   @Test
   public void getEmptyResponseIfFailsWhenContentIsBeingConcatenatedProtocolV0()
       throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1}), 0));
-    MockedStatic<Util> utilMocked = mockStatic(Util.class);
-    utilMocked
-        .when(() -> Util.addUnsignedLeb128SizeToData(any()))
-        .thenThrow(new NullPointerException());
+    try (MockedStatic<Util> utilMocked = mockStatic(Util.class)) {
+      when(discv5Client.sendDiscv5Message(
+              any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+          .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1}), 0));
+      utilMocked
+          .when(() -> Util.addUnsignedLeb128SizeToData(any()))
+          .thenThrow(new NullPointerException());
 
-    List<Bytes> contentKey = List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
-    List<Bytes> content =
-        List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
+      List<Bytes> contentKey =
+          List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
+      List<Bytes> content =
+          List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
 
-    Offer offer = new Offer(contentKey);
-    Optional<Bytes> contentKeysBitList =
-        this.historyNetwork.offer(nodeRecord, content, offer).get();
+      Offer offer = new Offer(contentKey);
+      Optional<Bytes> contentKeysBitList =
+          this.historyNetwork.offer(nodeRecord, content, offer).get();
 
-    assertTrue(contentKeysBitList.isEmpty());
-    verify(utpManager, never())
-        .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
-  } */
+      assertTrue(contentKeysBitList.isEmpty());
+      verify(utpManager, never())
+          .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
+    }
+  }
 
   @Test
   public void getEmptyResponseIfFailsWhenContentIsBeingConcatenatedProtocolV1()
@@ -242,12 +243,11 @@ public class OfferMessageTests {
     }
   }
 
-  /*
   @Test
   public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponseProtocolV0()
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createAcceptResponse(555, Bytes.of(1)));
+        .thenReturn(createAcceptResponse(555, Bytes.of(1), 0));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
 
     Offer offer = new Offer(List.of(DefaultContent.key3));
@@ -261,7 +261,7 @@ public class OfferMessageTests {
             eq(555),
             eq(Util.addUnsignedLeb128SizeToData(DefaultContent.value3)));
     assertEquals(contentKeysBitList.get().toHexString(), Bytes.of(1).toHexString());
-  }*/
+  }
 
   @Test
   public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponseProtocolV1()
