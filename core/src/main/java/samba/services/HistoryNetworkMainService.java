@@ -122,7 +122,7 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
 
   private void initJsonRPCService() {
     final JsonRpcConfiguration jsonRpcConfiguration = sambaConfiguration.getJsonRpcConfigurationn();
-    if (jsonRpcConfiguration.isEnabled()) {
+    if (jsonRpcConfiguration.isEnableJsonRpcServer()) {
       final Map<String, JsonRpcMethod> methods = new HashMap<>();
 
       methods.put(RpcMethod.CLIENT_VERSION.getMethodName(), new ClientVersion("1"));

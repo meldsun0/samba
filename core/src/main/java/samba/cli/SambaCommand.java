@@ -148,13 +148,13 @@ public class SambaCommand implements Callable<Integer> {
           });
       builder.jsonRpc(
           jsonRpc -> {
+            jsonRpc.enableJsonRpcServer(!disableJsonRpcServer);
             if (jsonRpcPort != null) {
-              jsonRpc.setPort(jsonRpcPort);
+              jsonRpc.port(jsonRpcPort);
             }
             if (jsonRpcHost != null) {
-              jsonRpc.setHost(jsonRpcHost);
+              jsonRpc.host(jsonRpcHost);
             }
-            jsonRpc.setEnabled(!disableJsonRpcServer);
           });
 
       if (unsafePrivateKey != null) {
