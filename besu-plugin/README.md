@@ -17,6 +17,10 @@ cd besu
 ```shell script
 ./gradlew build
 ```
+- Install distribution:
+```shell script
+./gradlew installDist 
+```
 - Create the Plugins Directory:
 If not already present, create the plugins directory one level below the besu executable:
 ```shell script
@@ -28,7 +32,7 @@ core/build/libs/*.jar build/install/besu/plugins/
 ```
 - Run Besu:
 ```shell script
- ./bin/besu --rpc-http-enabled --rpc-http-api=ADMIN,ETH,SAMBA --plugin-samba-host=0.0.0.0 --rpc-http-host=0.0.0.0  --plugin-samba-host=$(curl -s ifconfig.me)
+ ./build/install/besu/bin/besu --rpc-http-enabled --rpc-http-api=ADMIN,ETH,SAMBA
 ```
 ## Dev mode
 Generate org.meldsunlabs:samba:1.0-SNAPSHOT library:
