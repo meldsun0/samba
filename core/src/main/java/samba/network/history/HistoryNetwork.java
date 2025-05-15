@@ -198,6 +198,10 @@ public class HistoryNetwork extends BaseNetwork
             contentMessage -> {
               Content content = contentMessage.getMessage();
               ContentKey contentKey = ContentKey.decode(message.getContentKey());
+              int protocolVersion =
+                  ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+                          ProtocolVersionUtil.getSupportedProtocolVersions(nodeRecord))
+                      .get();
               // TODO: Validate NodeRadius
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
@@ -205,6 +209,9 @@ public class HistoryNetwork extends BaseNetwork
                         .findContentRead(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
+                              if (protocolVersion != 0) {
+                                data = Util.parseAcceptedContent(data);
+                              }
                               boolean saved = historyDB.saveContent(message.getContentKey(), data);
                               // Gossip new content to network
                               if (saved) {
@@ -521,6 +528,10 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleFindContent(NodeRecord nodeRecord, FindContent findContent) {
+    int protocolVersion =
+        ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+                ProtocolVersionUtil.getSupportedProtocolVersions(nodeRecord))
+            .get();
     ContentKey contentKey =
         ContentUtil.createContentKeyFromSszBytes(findContent.getContentKey()).get();
     Optional<Bytes> content = historyDB.get(contentKey);
@@ -528,8 +539,14 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(generateEnrs(contentKey, nodeRecord));
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-      int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
-
+      int connectionId;
+      if (protocolVersion == 0) {
+        connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
+      } else {
+        connectionId =
+            this.utpManager.foundContentWrite(
+                nodeRecord, Util.addUnsignedLeb128SizeToData(content.get()));
+      }
       return new Content(connectionId);
     }
     return new Content(content.get());
