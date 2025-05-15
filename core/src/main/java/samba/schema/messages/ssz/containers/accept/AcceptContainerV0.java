@@ -1,4 +1,4 @@
-package samba.schema.messages.ssz.containers;
+package samba.schema.messages.ssz.containers.accept;
 
 import samba.domain.messages.PortalWireMessage;
 
@@ -14,35 +14,38 @@ import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszBitlistSchema;
 import tech.pegasys.teku.infrastructure.ssz.schema.collections.SszByteVectorSchema;
 import tech.pegasys.teku.infrastructure.ssz.tree.TreeNode;
 
-public class AcceptContainer extends Container2<AcceptContainer, SszByteVector, SszBitlist> {
+public class AcceptContainerV0 extends Container2<AcceptContainerV0, SszByteVector, SszBitlist> {
 
-  public AcceptContainer(Bytes connectionId, Bytes contentKeysBitList) {
+  public AcceptContainerV0(Bytes connectionId, Bytes contentKeysBitList) {
     super(
         AcceptSchema.INSTANCE,
         SszByteVector.fromBytes(connectionId),
         createSszBitlist(contentKeysBitList));
   }
 
-  public AcceptContainer(TreeNode backingNode) {
+  public AcceptContainerV0(TreeNode backingNode) {
     super(AcceptSchema.INSTANCE, backingNode);
   }
 
-  private static SszBitlist createSszBitlist(Bytes contentKeysBitList) {
-    BitSet bitSet = BitSet.valueOf(contentKeysBitList.toArray());
+  private static SszBitlist createSszBitlist(Bytes contentKeysByteList) {
+    int size = contentKeysByteList.size();
+    BitSet bitSet = new BitSet(size);
+    for (int i = 0; i < size; i++) {
+      byte b = contentKeysByteList.get(i);
+      if (b == 1) {
+        bitSet.set(i);
+      } else if (b != 0) {
+        throw new IllegalArgumentException("Each byte must be either 0x00 or 0x01");
+      }
+    }
     SszBitlistSchema bitListSchema = SszBitlistSchema.create(PortalWireMessage.MAX_KEYS);
-    SszBitlist bitList = bitListSchema.wrapBitSet(contentKeysBitList.size() * 8, bitSet);
-    return bitList;
+    return bitListSchema.wrapBitSet(size, bitSet);
   }
 
-  private static Bytes booleanListToBytes(List<Boolean> booleanList) {
-    int size = booleanList.size();
-    int byteArrayLength = (size + 7) / 8;
-    byte[] byteArray = new byte[byteArrayLength];
-
-    for (int i = 0; i < size; i++) {
-      if (booleanList.get(i)) {
-        byteArray[i / 8] |= (1 << (i % 8));
-      }
+  private static Bytes booleanListToByteList(List<Boolean> booleanList) {
+    byte[] byteArray = new byte[booleanList.size()];
+    for (int i = 0; i < booleanList.size(); i++) {
+      byteArray[i] = (byte) (booleanList.get(i) ? 1 : 0);
     }
     return Bytes.wrap(byteArray);
   }
@@ -52,17 +55,17 @@ public class AcceptContainer extends Container2<AcceptContainer, SszByteVector, 
   }
 
   public Bytes getContentKeysBitList() {
-    return booleanListToBytes(getField1().asListUnboxed());
+    return booleanListToByteList(getField1().asListUnboxed());
   }
 
-  public static AcceptContainer decodePacket(Bytes packet) {
+  public static AcceptContainerV0 decodePacket(Bytes packet) {
     AcceptSchema schema = AcceptSchema.INSTANCE;
-    AcceptContainer decodedPacket = schema.sszDeserialize(packet);
+    AcceptContainerV0 decodedPacket = schema.sszDeserialize(packet);
     return decodedPacket;
   }
 
   public static class AcceptSchema
-      extends ContainerSchema2<AcceptContainer, SszByteVector, SszBitlist> {
+      extends ContainerSchema2<AcceptContainerV0, SszByteVector, SszBitlist> {
 
     public static final AcceptSchema INSTANCE = new AcceptSchema();
 
@@ -71,8 +74,8 @@ public class AcceptContainer extends Container2<AcceptContainer, SszByteVector, 
     }
 
     @Override
-    public AcceptContainer createFromBackingNode(TreeNode node) {
-      return new AcceptContainer(node);
+    public AcceptContainerV0 createFromBackingNode(TreeNode node) {
+      return new AcceptContainerV0(node);
     }
   }
 }

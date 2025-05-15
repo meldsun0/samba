@@ -32,7 +32,6 @@ public class HistoricalHashesAccumulator {
 
   public boolean validate(final ContentBlockHeader blockHeaderWithProof) {
     if (historicalHashesAccumulatorContainer == null) {
-      System.out.println("Historical hashes accumulator is not initialized.");
       throw new IllegalStateException("Historical hashes accumulator is not initialized.");
     }
     return validate(blockHeaderWithProof, historicalHashesAccumulatorContainer);

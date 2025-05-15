@@ -30,7 +30,6 @@ public class TraceGetContent {
     UInt256 localNodeId = this.historyNetworkInternalAPI.getLocalNodeId();
     UInt256 contentId = UInt256.fromBytes(Hash.sha256(contentKeyInBytes));
 
-    System.out.println("contentKeyInBytes: " + contentKeyInBytes.toHexString());
     ContentKey contentKey = ContentUtil.createContentKeyFromSszBytes(contentKeyInBytes).get();
     Optional<String> content = this.historyNetworkInternalAPI.getLocalContent(contentKey);
 
