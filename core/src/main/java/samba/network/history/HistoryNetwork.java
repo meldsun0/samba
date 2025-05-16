@@ -57,10 +57,14 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class HistoryNetwork extends BaseNetwork
     implements HistoryNetworkInternalAPI, HistoryNetworkProtocolMessageHandler, LivenessChecker {
+
+  private static final Logger LOG = LoggerFactory.getLogger(HistoryNetwork.class);
 
   private UInt256 nodeRadius;
   private final HistoryDB historyDB;
@@ -94,7 +98,7 @@ public class HistoryNetwork extends BaseNetwork
         .thenApply(Optional::get)
         .thenCompose(
             pongMessage -> {
-              LOG.trace(
+              LOG.debug(
                   "{} message being processed from {}",
                   message.getMessageType(),
                   nodeRecord.asEnr());
@@ -110,7 +114,7 @@ public class HistoryNetwork extends BaseNetwork
                       this.routingTable.addOrUpdateNode(nodeRecord);
                       this.routingTable.updateRadius(nodeRecord.getNodeId(), dataRadius);
                     } catch (Exception e) {
-                      LOG.trace(
+                      LOG.error(
                           "Error {} when processing ClientInfoAndCapabilities {} for {}",
                           e,
                           pong.getPayload(),
@@ -122,13 +126,13 @@ public class HistoryNetwork extends BaseNetwork
                   case ERROR -> {
                     try {
                       ErrorExtension error = ErrorExtension.fromSszBytes(pong.getPayload());
-                      LOG.trace(
+                      LOG.error(
                           "Error {} from recipient when processing Ping extension {} for {}",
                           ErrorType.fromCode(error.getErrorCode().getValue()),
                           ExtensionType.fromValue(message.getPayloadType().getValue()),
                           message.getPayload());
                     } catch (Exception e) {
-                      LOG.trace(
+                      LOG.error(
                           "Error {} when processing ErrorExtension {} for {}",
                           e,
                           pong.getPayload(),
@@ -138,13 +142,13 @@ public class HistoryNetwork extends BaseNetwork
                   default -> {}
                 }
               } else {
-                LOG.trace("{} message without payload", message.getMessageType());
+                LOG.error("{} message without payload", message.getMessageType());
               }
               return SafeFuture.completedFuture(Optional.of(pong));
             })
         .exceptionallyCompose(
             error -> {
-              LOG.trace(
+              LOG.error(
                   "Something when wrong when processing message {} to {}",
                   message.getMessageType(),
                   nodeRecord.asEnr());
@@ -351,7 +355,7 @@ public class HistoryNetwork extends BaseNetwork
       this.routingTable.updateRadius(nodeRecord.getNodeId(), nodeRadius.max());
       return true;
     } catch (Exception e) {
-      LOG.debug("Error when adding enr");
+      LOG.error("Error when adding enr");
       return false;
     }
   }
@@ -444,7 +448,7 @@ public class HistoryNetwork extends BaseNetwork
                 ExtensionType.CLIENT_INFO_AND_CAPABILITIES.getExtensionCode(),
                 new ClientInfoAndCapabilities(this.nodeRadius).getSszBytes());
           } catch (Exception e) {
-            LOG.trace(
+            LOG.error(
                 "Error {} when processing ClientInfoAndCapabilities {} for {}",
                 e,
                 ping.getPayload(),
@@ -535,8 +539,6 @@ public class HistoryNetwork extends BaseNetwork
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
     try {
-      LOG.info("Offer from {}", srcNode.asEnr());
-      LOG.info("Offer contentKeys: {}", offer.getContentKeys());
       // TODO validate contentKeys.
       if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
       byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
@@ -570,7 +572,7 @@ public class HistoryNetwork extends BaseNetwork
               });
       return new Accept(connectionId, Bytes.of(contentKeysBitArray));
     } catch (Exception e) {
-      LOG.trace("Error when handling Offer Message");
+      LOG.error("Error when handling Offer Message");
       return new Accept(0, Bytes.EMPTY);
     }
   }
@@ -586,7 +588,6 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public CompletableFuture<Void> checkLiveness(NodeRecord nodeRecord) {
-    LOG.info("checkLiveness");
     Ping pingMessage =
         new Ping(
             nodeRecord.getSeq(),
@@ -614,7 +615,7 @@ public class HistoryNetwork extends BaseNetwork
       Function<Throwable, CompletionStage<Optional<V>>> createDefaultErrorWhenSendingMessage(
           MessageType message) {
     return error -> {
-      LOG.info("Something when wrong when sending a {} with error {}", message, error);
+      LOG.error("Something when wrong when sending a {} with error {}", message, error);
       return SafeFuture.completedFuture(Optional.empty());
     };
   }

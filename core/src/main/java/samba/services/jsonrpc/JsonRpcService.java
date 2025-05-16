@@ -75,7 +75,7 @@ public class JsonRpcService extends Service {
 
   @Override
   protected SafeFuture<?> doStart() {
-    LOG.debug("max number of active connections {}", maxActiveConnections);
+    LOG.info("max number of active connections {}", maxActiveConnections);
     final CompletableFuture<Void> resultFuture = new CompletableFuture<>();
     try {
       httpServer = vertx.createHttpServer(this.getHttpServerOptions());

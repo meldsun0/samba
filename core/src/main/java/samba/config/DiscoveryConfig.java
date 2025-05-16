@@ -14,16 +14,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.utils.Strings;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 public class DiscoveryConfig {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(DiscoveryConfig.class);
 
   public static final int DEFAULT_UDP_PORT_IPV4 = 9000;
   public static final int DEFAULT_UDP_PORT_IPV6 = 9090;

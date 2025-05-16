@@ -3,14 +3,10 @@ package samba.config;
 import java.util.List;
 
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 @Getter
 public class RestServerConfig {
-
-  private static final Logger LOG = LogManager.getLogger();
 
   public static final int DEFAULT_REST_API_PORT = 5051;
   public static final String DEFAULT_REST_API_INTERFACE = "0.0.0.0";

@@ -6,8 +6,7 @@ group = 'samba.storage-rocksdb'
 version = '1.0.0'
 
 dependencies {
-  implementation libs.apache.logging.log4j.api
-  implementation libs.apache.logging.log4j.core
+  implementation libs.slf4j.api
   implementation libs.rocksdbjni
   implementation libs.prometheus.simpleclient
   implementation libs.apache.commons.lang3

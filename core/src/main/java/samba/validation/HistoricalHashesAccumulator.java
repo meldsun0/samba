@@ -9,8 +9,13 @@ import java.io.InputStream;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HistoricalHashesAccumulator {
+
+  private static final Logger LOG = LoggerFactory.getLogger(HistoricalHashesAccumulator.class);
+
   public static final int EPOCH_SIZE = 8192;
   public static final int MAX_HISTORICAL_EPOCHS = 2048;
   public static final long HISTORICAL_EPOCHS_GINDEX = 3L;
@@ -32,7 +37,7 @@ public class HistoricalHashesAccumulator {
 
   public boolean validate(final ContentBlockHeader blockHeaderWithProof) {
     if (historicalHashesAccumulatorContainer == null) {
-      System.out.println("Historical hashes accumulator is not initialized.");
+      LOG.error("Historical hashes accumulator is not initialized.");
       throw new IllegalStateException("Historical hashes accumulator is not initialized.");
     }
     return validate(blockHeaderWithProof, historicalHashesAccumulatorContainer);

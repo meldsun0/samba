@@ -19,14 +19,16 @@ import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RecursiveLookupTaskFindNodes {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(RecursiveLookupTaskFindNodes.class);
+
   private static final int MAX_CONCURRENT_QUERIES = 3;
   private static final int MAX_NODE_LIST_COUNT = 16;
   private final HistoryNetwork historyNetwork;

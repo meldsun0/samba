@@ -16,8 +16,7 @@ jar {
 }
 
 dependencies {
-  implementation libs.apache.logging.log4j.api
-  implementation libs.apache.logging.log4j.core
+  implementation libs.slf4j.api
   implementation libs.tuweni.bytes
   implementation libs.tuweni.crypto
   implementation libs.tuweni.rlp
@@ -67,5 +66,10 @@ dependencies {
   testImplementation libs.assertj.core
   testRuntimeOnly libs.junit.jupiter.engine
 
-  runtimeOnly 'org.apache.logging.log4j:log4j-jul:2.24.2'
+  runtimeOnly libs.apache.logging.log4j.api
+  runtimeOnly libs.apache.logging.log4j.core
+  runtimeOnly libs.log4j.slf4j2.impl
+
+  // Optional: JUL to Log4j2 bridge
+  //runtimeOnly libs.log4j.jul
 }

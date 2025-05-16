@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -30,7 +29,8 @@ import picocli.CommandLine.Option;
     description = "Java Portal Network Client")
 public class SambaCommand implements Callable<Integer> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SambaCommand.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SambaCommand.class);
+
   private final PrintWriter outputWriter;
   private final PrintWriter errorWriter;
   private final Map<String, String> environment;
@@ -180,10 +180,10 @@ public class SambaCommand implements Callable<Integer> {
         ExceptionUtil.<Throwable>getCause(e, InvalidConfigurationException.class)
             .or(() -> ExceptionUtil.getCause(e, DatabaseStorageException.class));
     if (maybeUserErrorException.isPresent()) {
-      LogManager.getLogger().fatal(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
       return 2;
     } else {
-      LogManager.getLogger().fatal("Samba failed to start", e);
+      LOG.error("Samba failed to start", e);
       return 1;
     }
   }

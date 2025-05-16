@@ -9,15 +9,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.ExceptionThrowingFutureSupplier;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class SambaScheduledExecutorAsyncRunner implements AsyncRunner {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG =
+      LoggerFactory.getLogger(SambaScheduledExecutorAsyncRunner.class);
   private final AtomicBoolean shutdown = new AtomicBoolean(false);
   private final ScheduledExecutorService scheduler;
   private final ExecutorService workerPool;

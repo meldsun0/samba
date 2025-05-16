@@ -1,16 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="INFO">
+<Configuration status="INFO">  <!-- Controls Log4j's internal diagnostic logging, not Samba's logs. -->
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} -SAMBA -[%t] - %highlight{%level}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue} - %logger{36} - %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} - SAMBA - [%t] %highlight{%-5level}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue} %logger{36} - %msg%n%throwable"/>
         </Console>
+        <!-- Rolling file logger: rotates daily and compresses old logs -->
+        <RollingFile name="FileLogger" fileName="logs/samba.log"
+                     filePattern="logs/samba-%d{yyyy-MM-dd}.log.gz" append="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} -SAMBA- [%t] %-5level %logger{36} - %msg%n%throwable"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>   <!--Triggers a new file every day at midnight -->
+            </Policies>
+        </RollingFile>
     </Appenders>
 
     <Loggers>
-        <Root level="info">
-            <AppenderRef ref="Console" />
+        <Logger name="samba" level="info" additivity="false"> <!-- Override for specific packages -->
+            <!-- additivity="false" so not bubble up to the Root logger -->
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileLogger"/>
+        </Logger>
+
+        <Logger name="io.netty" level="warn"/>  <!-- Override for specific packages -->
+        <Logger name="org.apache" level="warn"/> <!-- Override for specific packages -->
+
+        <Root level="info"> <!--Controls Samba's logging level -->
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FileLogger"/>
         </Root>
     </Loggers>
 </Configuration>
 
-
+<!-- TODO to enable Async Logging  -->

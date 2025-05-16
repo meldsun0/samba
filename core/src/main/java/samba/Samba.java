@@ -22,7 +22,7 @@ public final class Samba {
   }
 
   public static SambaSDK init(String[] args) {
-    System.out.println("Received arguments: " + Arrays.toString(args));
+    LOG.info("Received arguments: {}", Arrays.toString(args));
     Thread.setDefaultUncaughtExceptionHandler(new SambaDefaultExceptionHandler());
     try {
       Optional<PortalNode> maybeNode = Samba.startFromCLIArgs(args);
@@ -32,7 +32,7 @@ public final class Samba {
                   .addShutdownHook(
                       new Thread(
                           () -> {
-                            System.out.println("Samba is shutting down");
+                            LOG.info("Samba is shutting down");
                             node.stop();
                           })));
       return maybeNode

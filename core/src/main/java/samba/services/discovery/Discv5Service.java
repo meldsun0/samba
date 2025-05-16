@@ -13,8 +13,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import com.google.common.base.Preconditions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.crypto.SECP256K1;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -27,6 +25,8 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordBuilder;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -35,7 +35,8 @@ import tech.pegasys.teku.service.serviceutils.Service;
 
 public class Discv5Service extends Service implements Discv5Client {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(Discv5Service.class);
+
   private final MutableDiscoverySystem discoverySystem;
   private final AsyncRunner asyncRunner;
   private volatile Cancellable bootnodeRefreshTask;

@@ -16,15 +16,16 @@ import java.util.function.Function;
 import meldsun0.utp.UTPClient;
 import meldsun0.utp.data.UtpPacket;
 import meldsun0.utp.network.TransportLayer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 @SuppressWarnings("SameNameButDifferent")
 public class UTPManager implements TransportLayer<UTPAddress> {
-  protected static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(UTPManager.class);
 
   private final Map<String, UTPClient> connections;
   private final Discv5Client discv5Client;
@@ -119,7 +120,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     if (utpClient != null) {
       utpClient.receivePacket(utpPacket, new UTPAddress(nodeRecord));
     } else {
-      LOG.info("No UTPClient found when receiving packet: {}", utpPacket);
+      LOG.error("No UTPClient found when receiving packet: {}", utpPacket);
     }
   }
 
@@ -161,7 +162,7 @@ public class UTPManager implements TransportLayer<UTPAddress> {
 
   private static void defaultUTPErrorLog(
       String operationName, NodeRecord nodeRecord, int connectionId, Throwable error) {
-    LOG.info(
+    LOG.error(
         "Error {} when {} from {} on connectionId {}",
         error.getClass().getSimpleName(),
         operationName,

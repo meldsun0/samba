@@ -22,14 +22,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HistoryRocksDB implements HistoryDB {
 
-  protected static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(HistoryRocksDB.class);
   private final RocksDBInstance rocksDBInstance;
 
   public HistoryRocksDB(
@@ -71,7 +71,7 @@ public class HistoryRocksDB implements HistoryDB {
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
           } else {
-            LOG.info("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
+            LOG.error("BlockHeader for blockHashKey: {} is invalid", blockHashKeySSZ);
           }
         }
         case ContentType.BLOCK_BODY -> {
@@ -93,7 +93,7 @@ public class HistoryRocksDB implements HistoryDB {
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);
           } else {
-            LOG.info("BlockHeader for blockNumberKey: {} is invalid", blockNumberKeySSZ);
+            LOG.error("BlockHeader for blockNumberKey: {} is invalid", blockNumberKeySSZ);
           }
         }
         default ->
@@ -102,7 +102,7 @@ public class HistoryRocksDB implements HistoryDB {
       }
       return true;
     } catch (Exception e) {
-      LOG.debug(
+      LOG.error(
           "Content could not be saved. ContentKey: {} , ContentValue: {}. Reason:",
           sszKey,
           sszValue,
@@ -185,7 +185,7 @@ public class HistoryRocksDB implements HistoryDB {
     KeyValueStorageTransaction tx = rocksDBInstance.startTransaction();
     tx.put(segment, key.toArray(), content.toArray());
     tx.commit();
-    LOG.info(
+    LOG.debug(
         "Saving on segment {}, Key: {} and Value: {} ",
         segment.getName(),
         key.toHexString(),

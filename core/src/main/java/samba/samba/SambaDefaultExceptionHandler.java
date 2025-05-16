@@ -30,13 +30,14 @@ import java.util.concurrent.RejectedExecutionException;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.events.ChannelExceptionHandler;
 
 public final class SambaDefaultExceptionHandler
     implements ChannelExceptionHandler, UncaughtExceptionHandler {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(SambaDefaultExceptionHandler.class);
 
   private final StatusLogger statusLog;
 
@@ -77,15 +78,15 @@ public final class SambaDefaultExceptionHandler
 
     if (fatalServiceError.isPresent()) {
       final String failedService = fatalServiceError.get().getService();
-      statusLog.fatalError(failedService, exception);
+      LOG.error(failedService, exception);
       System.exit(FATAL_EXIT_CODE);
     } else if (ExceptionUtil.getCause(exception, DatabaseStorageException.class)
         .filter(DatabaseStorageException::isUnrecoverable)
         .isPresent()) {
-      statusLog.fatalError(subscriberDescription, exception);
+      LOG.error(subscriberDescription, exception);
       System.exit(FATAL_EXIT_CODE);
     } else if (exception instanceof OutOfMemoryError) {
-      statusLog.fatalError(subscriberDescription, exception);
+      LOG.error(subscriberDescription, exception);
       System.exit(ERROR_EXIT_CODE);
     } else if (exception instanceof ShuttingDownException) {
       LOG.debug("Shutting down", exception);

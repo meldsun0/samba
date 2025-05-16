@@ -8,12 +8,12 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.hyperledger.besu.plugin.services.metrics.Counter;
 import org.hyperledger.besu.plugin.services.metrics.LabelledMetric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -21,7 +21,8 @@ import tech.pegasys.teku.service.serviceutils.Service;
 
 public class ConnectionService extends Service {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(ConnectionService.class);
+
   protected static final Duration WARMUP_DISCOVERY_INTERVAL = Duration.ofSeconds(1);
   protected static final Duration DISCOVERY_INTERVAL = Duration.ofSeconds(30);
 
@@ -67,7 +68,7 @@ public class ConnectionService extends Service {
 
   private SafeFuture<Void> searchForActivePeers() {
     if (!isRunning()) {
-      LOG.trace("Not running so not searching for active peers");
+      LOG.error("Not running so not searching for active peers");
       return SafeFuture.COMPLETE;
     }
     LOG.info(
@@ -86,7 +87,7 @@ public class ConnectionService extends Service {
                     .collect(Collectors.toSet())
                     .forEach(this::connectToPeers);
               } else {
-                LOG.trace("Discovery failed", error);
+                LOG.error("Discovery failed", error);
                 // TODO  What to do ?
               }
               return null;
@@ -94,20 +95,20 @@ public class ConnectionService extends Service {
   }
 
   private void connectToPeers(final NodeRecord nodeRecord) {
-    LOG.trace("Attempting to connect to {}", nodeRecord.getNodeId());
+    LOG.debug("Attempting to connect to {}", nodeRecord.getNodeId());
 
     attemptedConnectionCounter.inc();
     network
         .ping(nodeRecord)
         .finish(
             peer -> {
-              LOG.trace("Successfully connected to node {}", nodeRecord.getNodeId());
+              LOG.debug("Successfully connected to node {}", nodeRecord.getNodeId());
               successfulConnectionCounter.inc();
               //                    peer.subscribeDisconnect((reason, locallyInitiated) ->
               // peerPools.forgetPeer(peer.getId()));
             },
             error -> {
-              LOG.trace(() -> "Failed to connect to node: " + nodeRecord.getNodeId());
+              LOG.debug("Failed to connect to node: {}", nodeRecord.getNodeId());
               failedConnectionCounter.inc();
               //                    peerPools.forgetPeer(peerAddress.getId());
             });
@@ -134,13 +135,13 @@ public class ConnectionService extends Service {
 
   private void createNextSearchPeerTask() {
     if (network.getNumberOfConnectedPeers() == 0) {
-      LOG.trace("Retrying peer search, no connected peers yet");
+      LOG.debug("Retrying peer search, no connected peers yet");
       cancelPeerSearchTask();
       this.periodicPeerSearch =
           asyncRunner.runCancellableAfterDelay(
               this::activeNodesSearchingTask, WARMUP_DISCOVERY_INTERVAL, this::logSearchError);
     } else {
-      LOG.trace("Establishing peer search task with long delay");
+      LOG.debug("Establishing peer search task with long delay");
       cancelPeerSearchTask();
       this.periodicPeerSearch =
           asyncRunner.runWithFixedDelay(

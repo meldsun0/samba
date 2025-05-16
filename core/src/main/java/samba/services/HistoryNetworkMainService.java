@@ -38,9 +38,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.AsyncRunner;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 import tech.pegasys.teku.infrastructure.events.EventChannels;
@@ -49,7 +49,7 @@ import tech.pegasys.teku.service.serviceutils.Service;
 
 public class HistoryNetworkMainService extends Service implements NetworkSDK<HistoryAPI> {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(HistoryNetworkMainService.class);
   private static final int DEFAULT_ASYNC_P2P_MAX_THREADS = 10;
   public static final int DEFAULT_ASYNC_P2P_MAX_QUEUE = DEFAULT_MAX_QUEUE_SIZE;
 

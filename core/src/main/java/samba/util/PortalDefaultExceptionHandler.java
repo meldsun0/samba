@@ -3,13 +3,13 @@ package samba.util;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.reflect.Method;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.events.ChannelExceptionHandler;
 
 public final class PortalDefaultExceptionHandler
     implements ChannelExceptionHandler, UncaughtExceptionHandler {
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(PortalDefaultExceptionHandler.class);
 
   public PortalDefaultExceptionHandler() {}
 
@@ -36,6 +36,6 @@ public final class PortalDefaultExceptionHandler
   }
 
   private void handleException(final Throwable exception, final String subscriberDescription) {
-    LOG.debug("Shutting down", exception);
+    LOG.error("Shutting down", exception);
   }
 }

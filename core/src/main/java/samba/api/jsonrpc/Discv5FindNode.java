@@ -12,12 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class Discv5FindNode implements JsonRpcMethod {
-
-  private static final Logger LOG = LoggerFactory.getLogger(Discv5FindNode.class);
 
   private final Discv5API discv5API;
 

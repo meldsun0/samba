@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import oshi.SystemInfo;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
@@ -31,7 +31,8 @@ import tech.pegasys.teku.infrastructure.events.EventChannels;
 
 public final class PortalNode implements AutoCloseable {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(PortalNode.class);
+
   // TODO one jsonrpc server for all sub-networks
   private final Vertx vertx = Vertx.vertx();
   private final ExecutorService threadPool =
@@ -90,7 +91,7 @@ public final class PortalNode implements AutoCloseable {
         .whenComplete(
             (__, error) -> {
               if (error != null) {
-                LOG.info("Error when Starting Samba", error);
+                LOG.error("Error when Starting Samba", error);
               }
               try {
                 initSambaSDK();
@@ -115,7 +116,7 @@ public final class PortalNode implements AutoCloseable {
     this.eventChannels
         .stop()
         .orTimeout(30, TimeUnit.SECONDS)
-        .handleException(error -> LOG.warn("Failed to stop event channels cleanly", error))
+        .handleException(error -> LOG.error("Failed to stop event channels cleanly", error))
         .join();
     threadPool.shutdownNow();
     counterMaintainer.ifPresent(Cancellable::cancel);
@@ -127,7 +128,7 @@ public final class PortalNode implements AutoCloseable {
         .orTimeout(30, TimeUnit.SECONDS)
         .handleException(error -> LOG.error("Failed to stop services", error))
         .orTimeout(5, TimeUnit.SECONDS)
-        .handleException(error -> LOG.debug("Failed to stop metrics", error))
+        .handleException(error -> LOG.error("Failed to stop metrics", error))
         .thenRun(vertx::close)
         .join();
   }

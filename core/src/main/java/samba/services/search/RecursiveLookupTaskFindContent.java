@@ -15,13 +15,15 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RecursiveLookupTaskFindContent {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(RecursiveLookupTaskFindContent.class);
+
   private static final int MAX_CONCURRENT_QUERIES = 3;
   private final HistoryNetwork historyNetwork;
   private final Bytes contentKey;

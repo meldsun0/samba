@@ -40,7 +40,7 @@ public class Bootnodes {
               }
             });
       } else {
-        LOG.warn("No array found for network: {}", networkType.getName());
+        LOG.error("No array found for network: {}", networkType.getName());
       }
     } catch (Exception e) {
       LOG.error("Error loading bootnodes.json", e);
