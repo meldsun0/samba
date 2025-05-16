@@ -154,13 +154,23 @@ You should be getting:
 ## Hardware Requirements
 
 Minimum:
-
-TO-DO
+- m6gd.xlarge	4	16	1 x 237 GB	NVMe SSD  with EBS gp3 of 100GB.
 
 Recommended:
 
 TO-DO
 
+## Setup
+
+- Besu  + Samba:
+  - Mount volume:
+    - sudo mkfs.xfs /dev/nvme2n1
+    - sudo mkdir -p /mnt/ebs1
+    - sudo mount /dev/nvme2n1 /mnt/ebs1
+  - Provide correct access:
+    - sudo chown -R 1000:1000 /mnt/ebs1
+  - Run Besu:
+    - docker run -e HOST_IP=$(curl -s ifconfig.me) -d --name besu --user 1000 -p 8545:8545 -p 9545:9545 -p 9000:9000/udp -v /mnt/ebs1:/data  meldsun/instances:besu-with-samba-arm64 
 
 ### Useful links
 * [Devcon SEA History Expiry and Portal Network session](https://notes.ethereum.org/_XVO7jmXTGOwZmhR5-3T9Q)
