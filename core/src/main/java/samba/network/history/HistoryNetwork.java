@@ -590,8 +590,6 @@ public class HistoryNetwork extends BaseNetwork
             contentKeyAccepted.add(contentKey);
           }
         }
-        if (contentKeyAccepted.isEmpty())
-          return new Accept(0, Bytes.of(contentKeysByteArray), protocolVersion);
       } else {
         Arrays.fill(contentKeysByteArray, AcceptCodes.GENERIC_DECLINE.getValue());
         for (int x = 0; x < offer.getContentKeys().size(); x++) {
@@ -611,9 +609,9 @@ public class HistoryNetwork extends BaseNetwork
             contentKeysByteArray[x] = AcceptCodes.CONTENT_ALREADY_STORED.getValue();
           }
         }
-        if (contentKeyAccepted.isEmpty())
-          return new Accept(0, Bytes.of(contentKeysByteArray), protocolVersion);
       }
+      if (contentKeyAccepted.isEmpty())
+        return new Accept(0, Bytes.of(contentKeysByteArray), protocolVersion);
       int connectionId =
           this.utpManager.acceptRead(
               srcNode,

@@ -68,6 +68,7 @@ public class HandleOfferMessageTests {
   public void responseAcceptMessageWithAll2ByteListIfContentIsStoredLocallyProtocolV1() {
     Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.EMPTY)); // Has content
+    when(utpManager.acceptRead(any(NodeRecord.class), any(Consumer.class))).thenReturn(555);
     ProtocolVersionUtil.setSupportedProtocolVersions(nodeRecord, List.of(1));
     Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
     assertEquals(accept.getContentKeys(), Bytes.of(2, 2, 2));
@@ -79,7 +80,6 @@ public class HandleOfferMessageTests {
     Offer offer = new Offer(List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.empty()); // No content on DB
     when(utpManager.acceptRead(any(NodeRecord.class), any(Consumer.class))).thenReturn(555);
-
     Accept accept = (Accept) historyNetwork.handleOffer(nodeRecord, offer);
     assertEquals(accept.getContentKeys(), Bytes.of(1, 1, 1));
     assertEquals(accept.getConnectionId(), 555);
