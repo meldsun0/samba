@@ -21,6 +21,7 @@ import samba.services.discovery.Discv5Client;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.DefaultContent;
+import samba.util.ProtocolVersionUtil;
 import samba.util.Util;
 
 import java.lang.reflect.Field;
@@ -117,7 +118,8 @@ public class OfferMessageTests {
   public void getAndEmptyBitListIfAcceptResponseHasAnEmptyBitlist()
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(CompletableFuture.completedFuture(new Accept(555, Bytes.of()).getSszBytes()));
+        .thenReturn(
+            CompletableFuture.completedFuture(new Accept(555, Bytes.of(), 0).getSszBytes()));
 
     List<Bytes> content = List.of(DefaultContent.value1);
     Offer offer = new Offer(List.of(DefaultContent.key1));
@@ -148,9 +150,9 @@ public class OfferMessageTests {
   }
 
   @Test
-  public void getBitListOfAll0() throws ExecutionException, InterruptedException {
+  public void getBitListOfAll0ProtocolV0() throws ExecutionException, InterruptedException {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {0, 0, 0, 0})));
+        .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {0, 0, 0, 0}), 0));
 
     List<Bytes> content = List.of(DefaultContent.value1);
     Offer offer = new Offer(List.of(DefaultContent.key1));
@@ -164,33 +166,88 @@ public class OfferMessageTests {
   }
 
   @Test
-  public void getEmptyResponseIfFailsWhenContentIsBeingConcatenated()
-      throws ExecutionException, InterruptedException {
-    when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1})));
-    MockedStatic<Util> utilMocked = mockStatic(Util.class);
-    utilMocked
-        .when(() -> Util.addUnsignedLeb128SizeToData(any()))
-        .thenThrow(new NullPointerException());
+  public void getByteListOfAllDeclineProtocolV1() throws ExecutionException, InterruptedException {
+    try (MockedStatic<ProtocolVersionUtil> protocolMocked = mockStatic(ProtocolVersionUtil.class)) {
+      protocolMocked
+          .when(() -> ProtocolVersionUtil.getHighestSupportedProtocolVersion(any()))
+          .thenReturn(Optional.of(1));
+      when(discv5Client.sendDiscv5Message(
+              any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+          .thenReturn(createAcceptResponse(555, Bytes.of(1), 1));
 
-    List<Bytes> contentKey = List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
-    List<Bytes> content =
-        List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
+      List<Bytes> content = List.of(DefaultContent.value1);
+      Offer offer = new Offer(List.of(DefaultContent.key1));
+      Optional<Bytes> contentKeysBitList =
+          this.historyNetwork.offer(nodeRecord, content, offer).get();
 
-    Offer offer = new Offer(contentKey);
-    Optional<Bytes> contentKeysBitList =
-        this.historyNetwork.offer(nodeRecord, content, offer).get();
-
-    assertTrue(contentKeysBitList.isEmpty());
-    verify(utpManager, never())
-        .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
+      assertEquals(contentKeysBitList.get(), Bytes.of(1));
+      verify(historyDB, never()).get(any(ContentKey.class));
+      verify(utpManager, never())
+          .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
+    }
   }
 
   @Test
-  public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponse()
+  public void getEmptyResponseIfFailsWhenContentIsBeingConcatenatedProtocolV0()
+      throws ExecutionException, InterruptedException {
+    try (MockedStatic<Util> utilMocked = mockStatic(Util.class)) {
+      when(discv5Client.sendDiscv5Message(
+              any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+          .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {1, 1, 1}), 0));
+      utilMocked
+          .when(() -> Util.addUnsignedLeb128SizeToData(any()))
+          .thenThrow(new NullPointerException());
+
+      List<Bytes> contentKey =
+          List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
+      List<Bytes> content =
+          List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
+
+      Offer offer = new Offer(contentKey);
+      Optional<Bytes> contentKeysBitList =
+          this.historyNetwork.offer(nodeRecord, content, offer).get();
+
+      assertTrue(contentKeysBitList.isEmpty());
+      verify(utpManager, never())
+          .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
+    }
+  }
+
+  @Test
+  public void getEmptyResponseIfFailsWhenContentIsBeingConcatenatedProtocolV1()
+      throws ExecutionException, InterruptedException {
+    try (MockedStatic<ProtocolVersionUtil> protocolMocked = mockStatic(ProtocolVersionUtil.class);
+        MockedStatic<Util> utilMocked = mockStatic(Util.class); ) {
+      protocolMocked
+          .when(() -> ProtocolVersionUtil.getHighestSupportedProtocolVersion(any()))
+          .thenReturn(Optional.of(1));
+      when(discv5Client.sendDiscv5Message(
+              any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+          .thenReturn(createAcceptResponse(555, Bytes.of(new byte[] {0, 0, 0}), 1));
+      utilMocked
+          .when(() -> Util.addUnsignedLeb128SizeToData(any()))
+          .thenThrow(new NullPointerException());
+
+      List<Bytes> contentKey =
+          List.of(DefaultContent.key1, DefaultContent.key2, DefaultContent.key3);
+      List<Bytes> content =
+          List.of(DefaultContent.value1, DefaultContent.value2, DefaultContent.value3);
+
+      Offer offer = new Offer(contentKey);
+      Optional<Bytes> contentKeysByteList =
+          this.historyNetwork.offer(nodeRecord, content, offer).get();
+
+      assertTrue(contentKeysByteList.isEmpty());
+      verify(utpManager, never())
+          .offerWrite(any(NodeRecord.class), any(Integer.class), any(Bytes.class));
+    }
+  }
+
+  @Test
+  public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponseProtocolV0()
       throws ExecutionException, InterruptedException {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
-        .thenReturn(createAcceptResponse(555, Bytes.of(1)));
+        .thenReturn(createAcceptResponse(555, Bytes.of(1), 0));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
 
     Offer offer = new Offer(List.of(DefaultContent.key3));
@@ -206,9 +263,36 @@ public class OfferMessageTests {
     assertEquals(contentKeysBitList.get().toHexString(), Bytes.of(1).toHexString());
   }
 
+  @Test
+  public void sendOkOfferMessageWithEmptyContentAndGetAcceptedMessageAndAnOkResponseProtocolV1()
+      throws ExecutionException, InterruptedException {
+    try (MockedStatic<ProtocolVersionUtil> protocolVersionUtilMocked =
+        mockStatic(ProtocolVersionUtil.class)) {
+      protocolVersionUtilMocked
+          .when(() -> ProtocolVersionUtil.getHighestSupportedProtocolVersion(any()))
+          .thenReturn(Optional.of(1));
+      when(discv5Client.sendDiscv5Message(
+              any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
+          .thenReturn(createAcceptResponse(777, Bytes.of(0), 1));
+      when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
+
+      Offer offer = new Offer(List.of(DefaultContent.key3));
+      Optional<Bytes> contentKeysByteList =
+          this.historyNetwork.offer(nodeRecord, List.of(DefaultContent.value3), offer).get();
+
+      verify(utpManager, times(1))
+          .offerWrite(
+              any(NodeRecord.class),
+              eq(777),
+              eq(Util.addUnsignedLeb128SizeToData(DefaultContent.value3)));
+      assertEquals(contentKeysByteList.get().toHexString(), Bytes.of(0).toHexString());
+    }
+  }
+
   private static CompletableFuture<Bytes> createAcceptResponse(
-      int connectionId, Bytes contentKeys) {
-    return CompletableFuture.completedFuture(new Accept(connectionId, contentKeys).getSszBytes());
+      int connectionId, Bytes contentKeys, int protocolVersion) {
+    return CompletableFuture.completedFuture(
+        new Accept(connectionId, contentKeys, protocolVersion).getSszBytes());
   }
 
   private void mockRoutingTableFindNode(HistoryNetwork historyNetwork)

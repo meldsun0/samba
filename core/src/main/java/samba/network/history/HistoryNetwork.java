@@ -19,6 +19,7 @@ import samba.domain.messages.requests.FindNodes;
 import samba.domain.messages.requests.Offer;
 import samba.domain.messages.requests.Ping;
 import samba.domain.messages.response.Accept;
+import samba.domain.messages.response.AcceptCodes;
 import samba.domain.messages.response.Content;
 import samba.domain.messages.response.Nodes;
 import samba.domain.messages.response.Pong;
@@ -34,9 +35,11 @@ import samba.services.search.RecursiveLookupTaskFindNodes;
 import samba.services.search.RecursiveLookupTaskTraceFindContent;
 import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
+import samba.util.ProtocolVersionUtil;
 import samba.util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -195,6 +198,10 @@ public class HistoryNetwork extends BaseNetwork
             contentMessage -> {
               Content content = contentMessage.getMessage();
               ContentKey contentKey = ContentKey.decode(message.getContentKey());
+              int protocolVersion =
+                  ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+                          ProtocolVersionUtil.getSupportedProtocolVersions(nodeRecord))
+                      .get();
               // TODO: Validate NodeRadius
               return switch (content.getContentType()) {
                 case Content.UTP_CONNECTION_ID ->
@@ -202,6 +209,9 @@ public class HistoryNetwork extends BaseNetwork
                         .findContentRead(nodeRecord, content.getConnectionId())
                         .thenCompose(
                             data -> {
+                              if (protocolVersion != 0) {
+                                data = Util.parseAcceptedContent(data);
+                              }
                               boolean saved = historyDB.saveContent(message.getContentKey(), data);
                               // Gossip new content to network
                               if (saved) {
@@ -277,23 +287,34 @@ public class HistoryNetwork extends BaseNetwork
         .thenCompose(
             acceptMessage -> {
               Accept accept = acceptMessage.getMessage();
+              int protocolVersion = accept.getProtocolVersion();
               byte[] acceptedContent = accept.getContentKeysByteArray();
               List<Bytes> contentToOffer =
                   IntStream.range(0, acceptedContent.length)
                       .mapToObj(
                           idx -> {
-                            if (acceptedContent[idx] == 0) return null;
-                            Bytes currentContent = content.get(idx);
-                            //                            // TODO validate if is needed to go to the
-                            // db and save the content
-                            //                            if (currentContent.isZero()) {
-                            //                              Bytes contentKey =
-                            // message.getContentKeys().get(idx);
-                            //                              return historyDB
-                            //                                  .get(ContentKey.decode(contentKey))
-                            //                                  .orElse(currentContent);
-                            //                            }
-                            return content.get(idx);
+                            if (protocolVersion == 0) {
+                              if (acceptedContent[idx] == 0) return null;
+
+                              return content.get(idx);
+
+                            } else {
+                              if (acceptedContent[idx] != AcceptCodes.ACCEPT.getValue())
+                                return null;
+                              // Bytes currentContent = content.get(idx);
+                              //                            // TODO validate if is needed to go to
+                              // the
+                              // db and save the content
+                              //                            if (currentContent.isZero()) {
+                              //                              Bytes contentKey =
+                              // message.getContentKeys().get(idx);
+                              //                              return historyDB
+                              //
+                              // .get(ContentKey.decode(contentKey))
+                              //                                  .orElse(currentContent);
+                              //                            }
+                              return content.get(idx);
+                            }
                           })
                       .filter(Objects::nonNull)
                       .map(Util::addUnsignedLeb128SizeToData)
@@ -507,6 +528,10 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleFindContent(NodeRecord nodeRecord, FindContent findContent) {
+    int protocolVersion =
+        ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+                ProtocolVersionUtil.getSupportedProtocolVersions(nodeRecord))
+            .get();
     ContentKey contentKey =
         ContentUtil.createContentKeyFromSszBytes(findContent.getContentKey()).get();
     Optional<Bytes> content = historyDB.get(contentKey);
@@ -514,8 +539,14 @@ public class HistoryNetwork extends BaseNetwork
       return new Content(generateEnrs(contentKey, nodeRecord));
     }
     if (content.get().size() > PortalWireMessage.MAX_CUSTOM_PAYLOAD_BYTES) {
-      int connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
-
+      int connectionId;
+      if (protocolVersion == 0) {
+        connectionId = this.utpManager.foundContentWrite(nodeRecord, content.get());
+      } else {
+        connectionId =
+            this.utpManager.foundContentWrite(
+                nodeRecord, Util.addUnsignedLeb128SizeToData(content.get()));
+      }
       return new Content(connectionId);
     }
     return new Content(content.get());
@@ -534,29 +565,53 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public PortalWireMessage handleOffer(NodeRecord srcNode, Offer offer) {
+    int protocolVersion =
+        ProtocolVersionUtil.getHighestSupportedProtocolVersion(
+                ProtocolVersionUtil.getSupportedProtocolVersions(srcNode))
+            .get();
     try {
-      LOG.info("Offer from {}", srcNode.asEnr());
+      LOG.info("Offer from {}, Protocol Version {}", srcNode.asEnr(), protocolVersion);
       LOG.info("Offer contentKeys: {}", offer.getContentKeys());
       // TODO validate contentKeys.
-      if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY);
-      byte[] contentKeysBitArray = new byte[offer.getContentKeys().size()];
+      if (offer.getContentKeys().isEmpty()) return new Accept(0, Bytes.EMPTY, protocolVersion);
+      byte[] contentKeysByteArray = new byte[offer.getContentKeys().size()];
       List<Bytes> contentKeyAccepted = new ArrayList<>();
-      for (int x = 0; x < offer.getContentKeys().size(); x++) {
-        Bytes contentKey = offer.getContentKeys().get(x);
+      if (protocolVersion == 0) {
+        for (int x = 0; x < offer.getContentKeys().size(); x++) {
+          Bytes contentKey = offer.getContentKeys().get(x);
 
-        final int distance = Functions.logDistance(contentKey, this.discv5Client.getNodeId().get());
-        if (UInt256.valueOf(distance).compareTo(this.nodeRadius) >= 0) {
-          LOG.info("ContentKey: {} is outside radius: {}", distance, this.nodeRadius);
-          continue;
+          final int distance =
+              Functions.logDistance(contentKey, this.discv5Client.getNodeId().get());
+          if (UInt256.valueOf(distance).compareTo(this.nodeRadius) >= 0) {
+            LOG.info("ContentKey: {} is outside radius: {}", distance, this.nodeRadius);
+          } else if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+            LOG.info("ContentKey: {} not found in local storage", contentKey.toHexString());
+            contentKeysByteArray[x] = 1;
+            contentKeyAccepted.add(contentKey);
+          }
         }
-        if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
-          LOG.info("ContentKey: {} not found in local storage", contentKey.toHexString());
-          contentKeysBitArray[x] = 1;
-          contentKeyAccepted.add(contentKey);
+      } else {
+        Arrays.fill(contentKeysByteArray, AcceptCodes.GENERIC_DECLINE.getValue());
+        for (int x = 0; x < offer.getContentKeys().size(); x++) {
+          Bytes contentKey = offer.getContentKeys().get(x);
+
+          final int distance =
+              Functions.logDistance(contentKey, this.discv5Client.getNodeId().get());
+          if (UInt256.valueOf(distance).compareTo(this.nodeRadius) >= 0) {
+            LOG.info("ContentKey: {} is outside radius: {}", distance, this.nodeRadius);
+            contentKeysByteArray[x] = AcceptCodes.CONTENT_NOT_IN_RADIUS.getValue();
+          } else if (this.historyDB.get(ContentKey.decode(contentKey)).isEmpty()) {
+            LOG.info("ContentKey: {} not found in local storage", contentKey.toHexString());
+            contentKeysByteArray[x] = AcceptCodes.ACCEPT.getValue();
+            contentKeyAccepted.add(contentKey);
+          } else {
+            LOG.info("ContentKey: {} found in local storage", contentKey.toHexString());
+            contentKeysByteArray[x] = AcceptCodes.CONTENT_ALREADY_STORED.getValue();
+          }
         }
       }
-      if (contentKeyAccepted.isEmpty()) return new Accept(0, Bytes.of(contentKeysBitArray));
-
+      if (contentKeyAccepted.isEmpty())
+        return new Accept(0, Bytes.of(contentKeysByteArray), protocolVersion);
       int connectionId =
           this.utpManager.acceptRead(
               srcNode,
@@ -568,10 +623,10 @@ public class HistoryNetwork extends BaseNetwork
                   }
                 }
               });
-      return new Accept(connectionId, Bytes.of(contentKeysBitArray));
+      return new Accept(connectionId, Bytes.of(contentKeysByteArray), protocolVersion);
     } catch (Exception e) {
       LOG.trace("Error when handling Offer Message");
-      return new Accept(0, Bytes.EMPTY);
+      return new Accept(0, Bytes.EMPTY, protocolVersion);
     }
   }
 
