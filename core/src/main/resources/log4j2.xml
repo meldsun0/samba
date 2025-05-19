@@ -23,6 +23,7 @@
 
         <Logger name="io.netty" level="warn"/>  <!-- Override for specific packages -->
         <Logger name="org.apache" level="warn"/> <!-- Override for specific packages -->
+        <Logger name="meldsun0.utp" level="info"/> <!-- Override for specific packages -->
 
         <Root level="info"> <!--Controls Samba's logging level -->
             <AppenderRef ref="Console"/>
