@@ -1,6 +1,7 @@
 package samba;
 
 import samba.cli.SambaCommand;
+import samba.cli.options.LogConfigurator;
 import samba.config.SambaConfiguration;
 import samba.samba.SambaDefaultExceptionHandler;
 
@@ -34,6 +35,7 @@ public final class Samba {
                           () -> {
                             LOG.info("Samba is shutting down");
                             node.stop();
+                            LogConfigurator.shutdown();
                           })));
       return maybeNode
           .map(PortalNode::getSambaSDK)

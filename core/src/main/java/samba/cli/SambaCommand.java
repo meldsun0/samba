@@ -1,6 +1,7 @@
 package samba.cli;
 
 import samba.Samba;
+import samba.cli.options.LogConfigurator;
 import samba.config.InvalidConfigurationException;
 import samba.config.SambaConfiguration;
 import samba.config.StorageConfig;
@@ -12,8 +13,10 @@ import samba.storage.DatabaseStorageException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -108,6 +111,13 @@ public class SambaCommand implements Callable<Integer> {
       arity = "1..2")
   private List<String> p2pAdvertisedIps;
 
+  @CommandLine.Option(
+          names = {"--logging", "-l"},
+          paramLabel = "<LOG VERBOSITY LEVEL>",
+          description = "Logging verbosity levels: OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL",
+          defaultValue = "INFO")
+  private String loggingLevel = "INFO";
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -168,7 +178,7 @@ public class SambaCommand implements Callable<Integer> {
       if (unsafePrivateKey != null) {
         builder.secretKey(unsafePrivateKey);
       }
-
+      configureLogging();
       return builder.build();
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new InvalidConfigurationException(e);
@@ -202,5 +212,12 @@ public class SambaCommand implements Callable<Integer> {
     errorWriter.println(ex.getMessage());
     CommandLine.UnmatchedArgumentException.printSuggestions(ex, errorWriter);
     return ex.getCommandLine().getCommandSpec().exitCodeOnInvalidInput();
+  }
+
+  public void configureLogging() {
+    Set<String> ACCEPTED_VALUES = Set.of("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL");
+    if (ACCEPTED_VALUES.contains(this.loggingLevel.toUpperCase(Locale.ROOT))) {
+        LogConfigurator.setLevel("", this.loggingLevel);
+    }
   }
 }
