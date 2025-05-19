@@ -149,9 +149,9 @@ public class HistoryNetwork extends BaseNetwork
         .exceptionallyCompose(
             error -> {
               LOG.error(
-                  "Something when wrong when processing message {} to {}",
+                  "Something when wrong when processing message {} to {} with error {}",
                   message.getMessageType(),
-                  nodeRecord.asEnr());
+                  nodeRecord.asEnr(), error);
               this.routingTable.removeNode(nodeRecord);
               this.routingTable.removeRadius(nodeRecord.getNodeId());
               return SafeFuture.completedFuture(Optional.empty());
