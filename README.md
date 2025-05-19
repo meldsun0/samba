@@ -151,6 +151,25 @@ You should be getting:
 
 ![Tests](https://github.com/user-attachments/assets/9c812ad3-cd17-4abc-9f29-70991a80a71a)
 
+## CLI options
+
+| Command Line Argument        | Default Value   |
+|------------------------------|-----------------|
+| `--unsafe-private-key=`      |                 |
+| `--portal-subnetworks=`      | history-network |
+| `--use-default-bootnodes=`   | true            |
+| `--p2p-ip=`                  | 0.0.0.0         |
+| `--jsonrpc-port=`            | 8545            |
+| `--jsonrpc-host=`            | 127.0.0.1       |
+| `--disable-json-rpc-server=` | false           |
+| `-disable-rest--server=`     | false           |
+| `--p2p-advertised-ip=`       | 0.0.0.0         |
+| `--logging=`                 | INFO            |
+| `--data-path=`               | INFO            |
+
+
+
+
 ## Hardware Requirements
 
 Minimum:
