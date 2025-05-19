@@ -37,6 +37,9 @@ public class BesuSambaPlugin implements BesuPlugin {
   @CommandLine.Option(names = CLI_OPTIONS_PREFIX + "host")
   public String host = "0.0.0.0";
 
+  @CommandLine.Option(names = CLI_OPTIONS_PREFIX + "logging")
+  public String loggingLevel = "INFO";
+
   private SambaSDK sambaSDK;
 
   @Override
@@ -89,7 +92,8 @@ public class BesuSambaPlugin implements BesuPlugin {
         "--portal-subnetworks=history-network",
         "--p2p-advertised-ip=" + host,
         "--disable-json-rpc-server",
-        "--disable-rest--server"
+        "--disable-rest--server",
+        "--logging=" + loggingLevel
       };
       return Samba.init(options);
 
