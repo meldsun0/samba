@@ -49,7 +49,7 @@ public class HistoryNetworkIncomingRequestHandler implements IncomingRequestHand
         ProtocolVersionUtil.getHighestSupportedProtocolVersion(
             ProtocolVersionUtil.getSupportedProtocolVersions(srcNode));
     if (protocolVersion.isEmpty()) {
-      LOG.warn("Protocol version(s) not compatible with node {}", srcNode.asEnr());
+      LOG.debug("Protocol version(s) not compatible with node {}", srcNode.asEnr());
       return CompletableFuture.completedFuture(Bytes.EMPTY);
     }
 

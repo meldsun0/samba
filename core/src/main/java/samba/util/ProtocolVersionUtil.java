@@ -44,7 +44,7 @@ public class ProtocolVersionUtil {
           protocolVersionListSchema.sszDeserialize((Bytes) nodeRecord.get("pv"));
       return protocolVersionList.stream().map(b -> Byte.toUnsignedInt(b.get())).sorted().toList();
     } catch (Exception e) {
-      LOG.error("Failed to parse protocol versions from node record", e);
+      LOG.debug("Failed to parse protocol versions from node record {}", e.getMessage());
       return List.of(0);
     }
   }
