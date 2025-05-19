@@ -50,7 +50,7 @@ Build docker image:
 ```
 Run Besu with Samba as plugin:
 ```shell script
-  docker run -e HOST_IP=$(curl -s ifconfig.me)  -d --name besu-samba -p 8545:8545  -p 9545:9545   -p 9000:9000/udp samba
+  docker run -e HOST_IP=$(curl -s ifconfig.me) -e LOG_LEVEL=INFO -d --name besu-samba -p 8545:8545  -p 9545:9545   -p 9000:9000/udp samba
 ```
 
 #### CLI options | TBD
