@@ -39,7 +39,7 @@ public class PortalWireMessageDecoder {
       case FIND_CONTENT -> FindContent.fromSSZBytes(sszbytes);
       case CONTENT -> Content.fromSSZBytes(sszbytes, sourceNode);
       case OFFER -> Offer.fromSSZBytes(sszbytes);
-      case ACCEPT -> Accept.fromSSZBytes(sszbytes);
+      case ACCEPT -> Accept.fromSSZBytes(sszbytes, protocolVersion);
       default ->
           throw new RuntimeException(
               String.format(

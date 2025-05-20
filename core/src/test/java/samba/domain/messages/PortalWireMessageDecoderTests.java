@@ -153,7 +153,7 @@ public class PortalWireMessageDecoderTests {
     Bytes acceptBytes = Bytes.fromHexString("0x070102060000000101");
     Accept accept = (Accept) PortalWireMessageDecoder.decode(srcNode, acceptBytes, 0);
     int connectionId = Bytes.fromHexString("0x0102").toInt();
-    Bytes contentKeys = Bytes.fromHexString("0x01");
+    Bytes contentKeys = Bytes.fromHexString("0x0100000000000000");
     assertEquals(MessageType.ACCEPT, accept.getMessageType());
     assertEquals(connectionId, accept.getConnectionId());
     assertEquals(contentKeys, accept.getContentKeys());

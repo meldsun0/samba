@@ -16,7 +16,7 @@ public class ProtocolVersionUtil {
 
   public static Logger LOG = LoggerFactory.getLogger(ProtocolVersionUtil.class);
 
-  public static final List<Integer> SUPPORTED_PROTOCOL_VERSIONS = List.of(0);
+  public static final List<Integer> SUPPORTED_PROTOCOL_VERSIONS = List.of(0, 1);
   public static final int MAX_VERSION_COUNT = 8;
   private static final SszListSchema<SszByte, SszList<SszByte>> protocolVersionListSchema =
       (SszListSchema<SszByte, SszList<SszByte>>)
@@ -44,7 +44,7 @@ public class ProtocolVersionUtil {
           protocolVersionListSchema.sszDeserialize((Bytes) nodeRecord.get("pv"));
       return protocolVersionList.stream().map(b -> Byte.toUnsignedInt(b.get())).sorted().toList();
     } catch (Exception e) {
-      LOG.debug("Failed to parse protocol versions from node record {}", e.getMessage());
+      LOG.debug("Failed to parse protocol versions from node record: {}", nodeRecord.asEnr());
       return List.of(0);
     }
   }

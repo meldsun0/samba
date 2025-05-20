@@ -46,6 +46,11 @@ public class UTPManager implements TransportLayer<UTPAddress> {
               .startListening(connectionId, new UTPAddress(nodeRecord))
               .thenCompose(__ -> utpClient.read(this.utpExecutor))
               .thenAccept(onContentReceived)
+              .exceptionallyCompose(
+                  error -> {
+                    defaultUTPErrorLog("acceptRead", nodeRecord, connectionId, error);
+                    return SafeFuture.completedFuture(null);
+                  })
               .get();
         },
         "acceptRead",
