@@ -76,12 +76,10 @@ public class HistoryRocksDB implements HistoryDB {
         }
         case ContentType.BLOCK_BODY -> {
           Bytes blockHashSSZ = contentKey.getBlockHashSsz();
-          // TODO validate BLOCK_BODY
           save(KeyValueSegment.BLOCK_BODY, blockHashSSZ, sszValue);
         }
         case ContentType.RECEIPT -> {
           Bytes blockHashSSZ = contentKey.getBlockHashSsz();
-          // TODO validate RECEIPT
           save(KeyValueSegment.RECEIPT, blockHashSSZ, sszValue);
         }
         case ContentType.BLOCK_HEADER_BY_NUMBER -> {

@@ -42,6 +42,11 @@ public class ContentUtil {
     return true;
   }
 
+  public static boolean isReceiptsValid(ContentBlockHeader blockHeader, Bytes receipts) {
+    // TODO given a BlockHeader we should validate that value that is a sszbytes of a receipts
+    return true;
+  }
+
   public static Bytes createBlockNumberInSSZ(final ContentBlockHeader contentBlockHeader) {
     return new ContentKey(
             ContentType.BLOCK_HEADER_BY_NUMBER,
