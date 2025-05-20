@@ -11,12 +11,9 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 
 public class PortalHistoryFindContent implements JsonRpcMethod {
-  protected static final Logger LOG = LogManager.getLogger();
   private final HistoryAPI historyAPI;
 
   public PortalHistoryFindContent(HistoryAPI historyAPI) {

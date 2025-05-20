@@ -12,16 +12,16 @@ import samba.util.ProtocolVersionUtil;
 import java.util.Optional;
 
 import com.google.common.base.Throwables;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public abstract class BaseNetwork implements Network {
 
-  protected static final Logger LOG = LogManager.getLogger();
+  protected final Logger LOG = LoggerFactory.getLogger(getClass());
   protected NetworkType networkType;
   protected Discv5Client discv5Client;
   protected UInt256 nodeRadius;
@@ -77,12 +77,12 @@ public abstract class BaseNetwork implements Network {
 
   private void logResponse(Optional<PortalWireMessage> portalWireMessage) {
     portalWireMessage.ifPresent(
-        (message) -> LOG.trace("Portal {} message received", message.getMessageType()));
+        (message) -> LOG.debug("Portal {} message received", message.getMessageType()));
   }
 
   private SafeFuture<Optional<PortalWireMessage>> handleSendMessageError(
       PortalWireMessage message, Throwable error) {
-    LOG.trace("Something when wrong when sending a Portal {} message", message.getMessageType());
+    LOG.debug("Something when wrong when sending a Portal {} message", message.getMessageType());
     final Throwable rootCause = Throwables.getRootCause(error);
     if (rootCause instanceof IllegalArgumentException) {
       return SafeFuture.failedFuture(new BadRequestException(rootCause.getMessage()));

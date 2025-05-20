@@ -24,12 +24,14 @@ public class Discv5ServiceTest {
 
   @BeforeEach
   public void setUp() {
+    SECP256K1.SecretKey randomSecretKey = createRandomSecretKey();
     discv5Service =
         new Discv5Service(
             mock(MetricsSystem.class),
             null,
             DiscoveryConfig.builder().build(),
-            createRandomSecretKey(),
+            randomSecretKey,
+            Discv5Service.createNodeRecord(DiscoveryConfig.builder().build(), randomSecretKey),
             null);
   }
 

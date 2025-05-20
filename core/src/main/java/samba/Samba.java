@@ -2,6 +2,7 @@ package samba;
 
 import samba.cli.SambaCommand;
 import samba.config.SambaConfiguration;
+import samba.logging.LogConfigurator;
 import samba.samba.SambaDefaultExceptionHandler;
 
 import java.io.PrintWriter;
@@ -22,7 +23,7 @@ public final class Samba {
   }
 
   public static SambaSDK init(String[] args) {
-    System.out.println("Received arguments: " + Arrays.toString(args));
+    LOG.info("Received arguments: {}", Arrays.toString(args));
     Thread.setDefaultUncaughtExceptionHandler(new SambaDefaultExceptionHandler());
     try {
       Optional<PortalNode> maybeNode = Samba.startFromCLIArgs(args);
@@ -32,8 +33,9 @@ public final class Samba {
                   .addShutdownHook(
                       new Thread(
                           () -> {
-                            System.out.println("Samba is shutting down");
+                            LOG.info("Samba is shutting down");
                             node.stop();
+                            LogConfigurator.shutdown();
                           })));
       return maybeNode
           .map(PortalNode::getSambaSDK)

@@ -1,16 +1,13 @@
 package samba.config;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 @Getter
 public class RestServerConfig {
-
-  private static final Logger LOG = LogManager.getLogger();
 
   public static final int DEFAULT_REST_API_PORT = 5051;
   public static final String DEFAULT_REST_API_INTERFACE = "0.0.0.0";
@@ -115,5 +112,24 @@ public class RestServerConfig {
           restApiCorsAllowedOrigins,
           restApiHostAllowlist);
     }
+  }
+
+  public List<String> getRestServerSummaryLog() {
+    List<String> summary = new ArrayList<>();
+    summary.add("REST Server Summary:");
+    if (!this.enableRestServer) {
+      summary.add("Enable: false");
+    } else {
+      summary.add(
+          String.format(
+              "Enabled: true, Listen Address: %s, Port: %s, Docs: %s",
+              restApiInterface, restApiPort, restApiDocsEnabled));
+      summary.add(
+          String.format(
+              "Allow: %s, CORS: %s",
+              String.join(",", this.restApiHostAllowlist),
+              String.join(",", this.restApiCorsAllowedOrigins)));
+    }
+    return summary;
   }
 }

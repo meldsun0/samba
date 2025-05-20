@@ -10,12 +10,9 @@ import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.JsonRpcSuccessResponse;
 
 import org.apache.tuweni.bytes.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PortalHistoryPutContent implements JsonRpcMethod {
 
-  private final Logger LOG = LoggerFactory.getLogger(PortalHistoryPutContent.class);
   private final HistoryAPI historyAPI;
 
   public PortalHistoryPutContent(final HistoryAPI historyAPI) {

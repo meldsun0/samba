@@ -208,4 +208,30 @@ public class JsonRpcConfiguration {
       return this;
     }
   }
+
+  public List<String> getJsonRpcServerSummaryLog() {
+    List<String> summary = new ArrayList<>();
+    summary.add("Json-RPC Server Summary:");
+    if (!this.enableJsonRpcServer) {
+      summary.add("Enable: false");
+    } else {
+      summary.add(
+          String.format(
+              "Enabled: true, Listen Address: %s, Port: %s, APIS: %s, Pretty: %s",
+              this.host, this.port, String.join(",", this.rpcApis), this.prettyJsonEnabled));
+      summary.add(
+          String.format(
+              "Allow: %s, CORS: %s",
+              String.join(",", this.hostsAllowlist), String.join(",", this.corsAllowedDomains)));
+      summary.add(
+          String.format(
+              "Timeout: %s, Max Active Connections: %s",
+              this.httpTimeoutSec, this.maxActiveConnections));
+      summary.add(
+          String.format(
+              "Max Batch size: %s, Max Request Content Length: %s",
+              this.maxBatchSize, this.maxRequestContentLength));
+    }
+    return summary;
+  }
 }

@@ -8,12 +8,7 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public class Discv5RoutingTableInfo implements JsonRpcMethod {
-
-  protected static final Logger LOG = LogManager.getLogger();
 
   private final Discv5API discv5API;
 

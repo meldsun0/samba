@@ -4,6 +4,7 @@ import samba.Samba;
 import samba.config.InvalidConfigurationException;
 import samba.config.SambaConfiguration;
 import samba.config.StorageConfig;
+import samba.logging.LogConfigurator;
 import samba.network.NetworkType;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.services.discovery.Bootnodes;
@@ -12,11 +13,12 @@ import samba.storage.DatabaseStorageException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
-import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -30,7 +32,8 @@ import picocli.CommandLine.Option;
     description = "Java Portal Network Client")
 public class SambaCommand implements Callable<Integer> {
 
-  private static final Logger logger = LoggerFactory.getLogger(SambaCommand.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SambaCommand.class);
+
   private final PrintWriter outputWriter;
   private final PrintWriter errorWriter;
   private final Map<String, String> environment;
@@ -108,6 +111,13 @@ public class SambaCommand implements Callable<Integer> {
       arity = "1..2")
   private List<String> p2pAdvertisedIps;
 
+  @CommandLine.Option(
+      names = {"--logging", "-l"},
+      paramLabel = "<LOG VERBOSITY LEVEL>",
+      description = "Logging verbosity levels: OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL",
+      defaultValue = "INFO")
+  private String loggingLevel = "INFO";
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -168,7 +178,10 @@ public class SambaCommand implements Callable<Integer> {
       if (unsafePrivateKey != null) {
         builder.secretKey(unsafePrivateKey);
       }
-
+      builder.useDefaultBootnodes(this.useDefaultBootnodes);
+      builder.portalSubNetwork(this.portalSubNetwork);
+      builder.loggingLevel(this.loggingLevel);
+      configureLogging();
       return builder.build();
     } catch (IllegalArgumentException | NullPointerException e) {
       throw new InvalidConfigurationException(e);
@@ -180,10 +193,10 @@ public class SambaCommand implements Callable<Integer> {
         ExceptionUtil.<Throwable>getCause(e, InvalidConfigurationException.class)
             .or(() -> ExceptionUtil.getCause(e, DatabaseStorageException.class));
     if (maybeUserErrorException.isPresent()) {
-      LogManager.getLogger().fatal(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
       return 2;
     } else {
-      LogManager.getLogger().fatal("Samba failed to start", e);
+      LOG.error("Samba failed to start", e);
       return 1;
     }
   }
@@ -202,5 +215,12 @@ public class SambaCommand implements Callable<Integer> {
     errorWriter.println(ex.getMessage());
     CommandLine.UnmatchedArgumentException.printSuggestions(ex, errorWriter);
     return ex.getCommandLine().getCommandSpec().exitCodeOnInvalidInput();
+  }
+
+  public void configureLogging() {
+    Set<String> ACCEPTED_VALUES = Set.of("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL");
+    if (ACCEPTED_VALUES.contains(this.loggingLevel.toUpperCase(Locale.ROOT))) {
+      LogConfigurator.setLevel("", this.loggingLevel);
+    }
   }
 }

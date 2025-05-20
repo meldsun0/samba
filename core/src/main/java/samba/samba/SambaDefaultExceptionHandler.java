@@ -16,7 +16,6 @@ package samba.samba;
 import static samba.samba.exceptions.ExitConstants.ERROR_EXIT_CODE;
 import static samba.samba.exceptions.ExitConstants.FATAL_EXIT_CODE;
 
-import samba.logging.StatusLogger;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.samba.exceptions.FatalServiceFailureException;
 import samba.samba.exceptions.ShuttingDownException;
@@ -28,26 +27,15 @@ import java.nio.channels.ClosedChannelException;
 import java.util.Optional;
 import java.util.concurrent.RejectedExecutionException;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.events.ChannelExceptionHandler;
 
 public final class SambaDefaultExceptionHandler
     implements ChannelExceptionHandler, UncaughtExceptionHandler {
-  private static final Logger LOG = LogManager.getLogger();
 
-  private final StatusLogger statusLog;
-
-  public SambaDefaultExceptionHandler() {
-    this(StatusLogger.STATUS_LOG);
-  }
-
-  @VisibleForTesting
-  SambaDefaultExceptionHandler(final StatusLogger statusLog) {
-    this.statusLog = statusLog;
-  }
+  private static final Logger LOG = LoggerFactory.getLogger(SambaDefaultExceptionHandler.class);
 
   @Override
   public void handleException(
@@ -77,15 +65,15 @@ public final class SambaDefaultExceptionHandler
 
     if (fatalServiceError.isPresent()) {
       final String failedService = fatalServiceError.get().getService();
-      statusLog.fatalError(failedService, exception);
+      LOG.error(failedService, exception);
       System.exit(FATAL_EXIT_CODE);
     } else if (ExceptionUtil.getCause(exception, DatabaseStorageException.class)
         .filter(DatabaseStorageException::isUnrecoverable)
         .isPresent()) {
-      statusLog.fatalError(subscriberDescription, exception);
+      LOG.error(subscriberDescription, exception);
       System.exit(FATAL_EXIT_CODE);
     } else if (exception instanceof OutOfMemoryError) {
-      statusLog.fatalError(subscriberDescription, exception);
+      LOG.error(subscriberDescription, exception);
       System.exit(ERROR_EXIT_CODE);
     } else if (exception instanceof ShuttingDownException) {
       LOG.debug("Shutting down", exception);
@@ -95,9 +83,12 @@ public final class SambaDefaultExceptionHandler
       LOG.error(
           "Unexpected rejected execution due to full task queue in {}", subscriberDescription);
     } else if (isSpecFailure(exception)) {
-      statusLog.specificationFailure(subscriberDescription, exception);
+      LOG.warn("Spec failed for {}: {}", subscriberDescription, exception, exception);
     } else {
-      statusLog.unexpectedFailure(subscriberDescription, exception);
+      LOG.error(
+          "PLEASE FIX OR REPORT | Unexpected exception thrown for {}",
+          subscriberDescription,
+          exception);
     }
   }
 

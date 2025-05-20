@@ -22,15 +22,17 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.hyperledger.besu.crypto.Hash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RecursiveLookupTaskTraceFindContent {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(RecursiveLookupTaskTraceFindContent.class);
   private static final int MAX_CONCURRENT_QUERIES = 3;
   private final HistoryNetwork historyNetwork;
   private final Bytes contentKey;

@@ -6,13 +6,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StorageFactory {
 
-  private static final Logger LOG = LogManager.getLogger();
+  private static final Logger LOG = LoggerFactory.getLogger(StorageFactory.class);
 
   static final String DB_PATH = "db";
   static final String DB_VERSION_PATH = "db.version"; // TODO have version file
@@ -29,7 +29,7 @@ public class StorageFactory {
   }
 
   public HistoryRocksDB create() throws IOException {
-    LOG.info("History data directory set to: {}", dataDirectory.getAbsolutePath());
+    LOG.debug("History data directory set to: {}", dataDirectory.getAbsolutePath());
     validateDataPaths();
     createDirectories();
     // TODO do we need versions, and a metadata file ?

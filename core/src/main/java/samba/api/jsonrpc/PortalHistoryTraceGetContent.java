@@ -8,13 +8,10 @@ import samba.jsonrpc.reponse.JsonRpcRequestContext;
 import samba.jsonrpc.reponse.JsonRpcResponse;
 import samba.jsonrpc.reponse.RpcErrorType;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.time.TimeProvider;
 
 public class PortalHistoryTraceGetContent implements JsonRpcMethod {
-  protected static final Logger LOG = LogManager.getLogger();
 
   private final HistoryAPI historyAPI;
   private final TimeProvider timeProvider;

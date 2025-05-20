@@ -45,3 +45,4 @@ out/
 core/bin/
 db/
 .DS_Store
+logs/

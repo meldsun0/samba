@@ -55,7 +55,7 @@ public class PortalAPI implements PortalRestAPI {
                 openApi ->
                     openApi
                         .title(StringUtils.capitalize(VersionProvider.CLIENT_IDENTITY))
-                        .version(VersionProvider.IMPLEMENTATION_VERSION)
+                        .version(VersionProvider.IMPLEMENTATION_VERSION.orElse(""))
                         .description("A minimal API specification for the Portal node, which ...")
                         .license("Apache 2.0", "https://www.apache.org/licenses/LICENSE-2.0.html"))
             .openApiDocsEnabled(config.isRestApiDocsEnabled())

@@ -90,6 +90,7 @@ configure(allprojects - project(':platform')) {
     resolutionStrategy.capabilitiesResolution.withCapability('org.bouncycastle:bcpkix-jdk18on') {
       selectHighestVersion()
     }
+    exclude group: 'org.slf4j', module: 'slf4j-reload4j'
   }
 
   javadoc {

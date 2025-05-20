@@ -9,21 +9,23 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.web3j.utils.Strings;
 import tech.pegasys.teku.infrastructure.io.IPVersionResolver;
 import tech.pegasys.teku.infrastructure.io.PortAvailability;
 
 public class DiscoveryConfig {
-  private static final Logger LOG = LogManager.getLogger();
+
+  private static final Logger LOG = LoggerFactory.getLogger(DiscoveryConfig.class);
 
   public static final int DEFAULT_UDP_PORT_IPV4 = 9000;
   public static final int DEFAULT_UDP_PORT_IPV6 = 9090;
@@ -338,5 +340,34 @@ public class DiscoveryConfig {
             }
           });
     }
+  }
+
+  public List<String> getDiscoveryConfigSummaryLog() {
+    List<String> summary = new ArrayList<>();
+    summary.add("Discovery Summary:");
+    summary.add(
+        String.format(
+            "Listening: %s, TCP Port IPv4/IPv6: %s/%s, UDP Port IPv4/IPv6: %s/%s",
+            String.join(",", this.networkInterfaces),
+            this.listenTCPPortIpv4,
+            this.listenTCPPortIpv6,
+            this.listenUDPPortIpv4,
+            this.listenUDPPortIpv6));
+    summary.add(
+        String.format(
+            "Advertised: %s, TCP Port IPv4/IPv6: %s/%s, UDP Port IPv4/IPv6: %s/%s",
+            String.join(",", this.advertisedIps),
+            this.advertisedTCPPortIpv4,
+            this.advertisedTCPPortIpv6,
+            this.advertisedUDPPortIpv4,
+            this.advertisedUDPPortIpv6));
+    //    summary.add(
+    //        "Bootnodes: "
+    //            + String.join(
+    //                ",",
+    //                this.bootnodes.stream()
+    //                    .map(bootnode -> bootnode.getNodeId().toHexString())
+    //                    .toList()));
+    return summary;
   }
 }

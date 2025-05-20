@@ -60,10 +60,14 @@ import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.ethereum.beacon.discovery.util.Functions;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
 public class HistoryNetwork extends BaseNetwork
     implements HistoryNetworkInternalAPI, HistoryNetworkProtocolMessageHandler, LivenessChecker {
+
+  private static final Logger LOG = LoggerFactory.getLogger(HistoryNetwork.class);
 
   private UInt256 nodeRadius;
   private final HistoryDB historyDB;
@@ -150,7 +154,8 @@ public class HistoryNetwork extends BaseNetwork
               LOG.trace(
                   "Something when wrong when processing message {} to {}",
                   message.getMessageType(),
-                  nodeRecord.asEnr());
+                  nodeRecord.asEnr(),
+                  error);
               this.routingTable.removeNode(nodeRecord);
               this.routingTable.removeRadius(nodeRecord.getNodeId());
               return SafeFuture.completedFuture(Optional.empty());
