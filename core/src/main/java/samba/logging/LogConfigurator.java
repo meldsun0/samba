@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.cli.options;
+package samba.logging;
 
 import java.util.NoSuchElementException;
 

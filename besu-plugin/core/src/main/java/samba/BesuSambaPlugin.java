@@ -37,8 +37,8 @@ public class BesuSambaPlugin implements BesuPlugin {
   @CommandLine.Option(names = CLI_OPTIONS_PREFIX + "host")
   public String host = "0.0.0.0";
 
-  @CommandLine.Option(names = CLI_OPTIONS_PREFIX + "logging")
-  public String loggingLevel = "INFO";
+  @CommandLine.Option(names = {"--plugin-samba-logging"})
+  public String loggingLevel;
 
   private SambaSDK sambaSDK;
 
@@ -55,8 +55,7 @@ public class BesuSambaPlugin implements BesuPlugin {
       // TODO create a function
       this.picoCLIOptionsService.addPicoCLIOptions(PLUGIN_NAME, this);
       this.rpcEndpointService = this.getBesuService(this.serviceManager, RpcEndpointService.class);
-      this.sambaSDK = this.initSamba();
-      starRpcEndpoints();
+      this.starRpcEndpoints(); // TODO use a completable future till samba is fully initialized.
     }
   }
 
@@ -69,6 +68,7 @@ public class BesuSambaPlugin implements BesuPlugin {
   public void start() {
     LOG.info("Starting Samba plugin");
     if (startingTasksDone.compareAndSet(false, true)) {
+      this.sambaSDK = this.initSamba();
       this.metricsSystemService = this.getBesuService(this.serviceManager, MetricsSystem.class);
     }
   }

@@ -50,6 +50,7 @@ public class Discv5Service extends Service implements Discv5Client {
       final AsyncRunner asyncRunner,
       final DiscoveryConfig discoveryConfig,
       final SECP256K1.SecretKey secretKey,
+      final NodeRecord localNodeRecord,
       final IncomingRequestTalkHandler incomingRequestTalkHandler) {
 
     this.asyncRunner = asyncRunner;
@@ -59,10 +60,6 @@ public class Discv5Service extends Service implements Discv5Client {
     Preconditions.checkState(
         networkInterfaces.size() == 1 || networkInterfaces.size() == 2,
         "The configured network interfaces must be either 1 or 2");
-
-    final UInt64 seqNo = UInt64.ZERO.add(1);
-    final NodeRecordBuilder nodeRecordBuilder =
-        this.createNodeRecordBuilder(discoveryConfig, secretKey, seqNo);
 
     if (networkInterfaces.size() == 1) {
       final String listenAddress = networkInterfaces.getFirst();
@@ -76,6 +73,47 @@ public class Discv5Service extends Service implements Discv5Client {
       this.supportsIpv6 = true;
     }
 
+    this.discoverySystem =
+        createDiscoverySystem(
+            discoveryConfig,
+            secretKey,
+            incomingRequestTalkHandler,
+            discoverySystemBuilder,
+            localNodeRecord);
+
+    metricsSystem.createIntegerGauge(
+        SambaMetricCategory.DISCOVERY,
+        "live_nodes_current",
+        "Current number of live nodes tracked by the discovery system",
+        () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
+
+    LOG.info("NodeRecord : {}", localNodeRecord);
+  }
+
+  private MutableDiscoverySystem createDiscoverySystem(
+      DiscoveryConfig discoveryConfig,
+      SECP256K1.SecretKey secretKey,
+      IncomingRequestTalkHandler incomingRequestTalkHandler,
+      DiscoverySystemBuilder discoverySystemBuilder,
+      NodeRecord localNodeRecord) {
+    return discoverySystemBuilder
+        .secretKey(secretKey)
+        .bootnodes(discoveryConfig.getBootnodes())
+        .localNodeRecord(localNodeRecord)
+        .localNodeRecordListener(this::createLocalNodeRecordListener)
+        .talkHandler(incomingRequestTalkHandler)
+        .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
+        .buildMutable();
+  }
+
+  public static NodeRecord createNodeRecord(
+      DiscoveryConfig discoveryConfig, SECP256K1.SecretKey secretKey) {
+    final List<String> networkInterfaces = discoveryConfig.getNetworkInterfaces();
+    NodeRecordBuilder nodeRecordBuilder =
+        new NodeRecordBuilder()
+            .secretKey(secretKey)
+            .seq(UInt64.ZERO.add(1))
+            .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
     if (discoveryConfig.hasUserExplicitlySetAdvertisedIps()) {
       final List<String> advertisedIps = discoveryConfig.getAdvertisedIps();
       Preconditions.checkState(
@@ -113,50 +151,10 @@ public class Discv5Service extends Service implements Discv5Client {
                         discoveryConfig.getListenTCPPort(ip)));
       }
     }
-
     // TODO: add protocol version support configuration
     nodeRecordBuilder.customField(
         "pv", ProtocolVersionUtil.supportedProtocolVersionsBytes()); // Portal protocol version
-
-    this.discoverySystem =
-        createDiscoverySystem(
-            discoveryConfig,
-            secretKey,
-            incomingRequestTalkHandler,
-            discoverySystemBuilder,
-            nodeRecordBuilder);
-
-    metricsSystem.createIntegerGauge(
-        SambaMetricCategory.DISCOVERY,
-        "live_nodes_current",
-        "Current number of live nodes tracked by the discovery system",
-        () -> discoverySystem.getBucketStats().getTotalLiveNodeCount());
-
-    LOG.info("ENR :{}", this.getHomeNodeRecord());
-  }
-
-  private MutableDiscoverySystem createDiscoverySystem(
-      DiscoveryConfig discoveryConfig,
-      SECP256K1.SecretKey secretKey,
-      IncomingRequestTalkHandler incomingRequestTalkHandler,
-      DiscoverySystemBuilder discoverySystemBuilder,
-      NodeRecordBuilder nodeRecordBuilder) {
-    return discoverySystemBuilder
-        .secretKey(secretKey)
-        .bootnodes(discoveryConfig.getBootnodes())
-        .localNodeRecord(nodeRecordBuilder.build())
-        .localNodeRecordListener(this::createLocalNodeRecordListener)
-        .talkHandler(incomingRequestTalkHandler)
-        .addressAccessPolicy(AddressAccessPolicy.ALLOW_ALL) // TODO check this.
-        .buildMutable();
-  }
-
-  private NodeRecordBuilder createNodeRecordBuilder(
-      DiscoveryConfig discoveryConfig, SECP256K1.SecretKey secretKey, UInt64 seqNo) {
-    return new NodeRecordBuilder()
-        .secretKey(secretKey)
-        .seq(seqNo)
-        .customField(discoveryConfig.getClientKey(), discoveryConfig.getClientValue());
+    return nodeRecordBuilder.build();
   }
 
   private void createLocalNodeRecordListener(NodeRecord oldRecord, NodeRecord newRecord) {

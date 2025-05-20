@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package samba.cli.options;
+package samba.logging;
 
 import static java.util.Objects.requireNonNull;
 
@@ -23,7 +23,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.util.Strings;
 
 class Log4j2ConfiguratorUtil {
 
@@ -49,8 +48,6 @@ class Log4j2ConfiguratorUtil {
       loggerContext.updateLoggers();
     }
   }
-
-
 
   private static boolean setLevel(
       final String loggerName, final Level level, final Configuration config) {

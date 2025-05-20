@@ -1,10 +1,10 @@
 package samba.cli;
 
 import samba.Samba;
-import samba.cli.options.LogConfigurator;
 import samba.config.InvalidConfigurationException;
 import samba.config.SambaConfiguration;
 import samba.config.StorageConfig;
+import samba.logging.LogConfigurator;
 import samba.network.NetworkType;
 import samba.samba.exceptions.ExceptionUtil;
 import samba.services.discovery.Bootnodes;
@@ -112,10 +112,10 @@ public class SambaCommand implements Callable<Integer> {
   private List<String> p2pAdvertisedIps;
 
   @CommandLine.Option(
-          names = {"--logging", "-l"},
-          paramLabel = "<LOG VERBOSITY LEVEL>",
-          description = "Logging verbosity levels: OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL",
-          defaultValue = "INFO")
+      names = {"--logging", "-l"},
+      paramLabel = "<LOG VERBOSITY LEVEL>",
+      description = "Logging verbosity levels: OFF, ERROR, WARN, INFO, DEBUG, TRACE, ALL",
+      defaultValue = "INFO")
   private String loggingLevel = "INFO";
 
   public SambaCommand(
@@ -178,6 +178,9 @@ public class SambaCommand implements Callable<Integer> {
       if (unsafePrivateKey != null) {
         builder.secretKey(unsafePrivateKey);
       }
+      builder.useDefaultBootnodes(this.useDefaultBootnodes);
+      builder.portalSubNetwork(this.portalSubNetwork);
+      builder.loggingLevel(this.loggingLevel);
       configureLogging();
       return builder.build();
     } catch (IllegalArgumentException | NullPointerException e) {
@@ -217,7 +220,7 @@ public class SambaCommand implements Callable<Integer> {
   public void configureLogging() {
     Set<String> ACCEPTED_VALUES = Set.of("OFF", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL");
     if (ACCEPTED_VALUES.contains(this.loggingLevel.toUpperCase(Locale.ROOT))) {
-        LogConfigurator.setLevel("", this.loggingLevel);
+      LogConfigurator.setLevel("", this.loggingLevel);
     }
   }
 }

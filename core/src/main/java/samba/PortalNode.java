@@ -1,14 +1,10 @@
 package samba;
 
-import static samba.logging.StatusLogger.STATUS_LOG;
 import static tech.pegasys.teku.infrastructure.time.SystemTimeProvider.SYSTEM_TIME_PROVIDER;
 
 import samba.async.SambaAsyncRunnerFactory;
 import samba.async.SambaTrackingExecutorFactory;
-import samba.config.RestServerConfig;
 import samba.config.SambaConfiguration;
-import samba.config.StartupLogConfig;
-import samba.config.VersionProvider;
 import samba.metrics.MetricsEndpoint;
 import samba.services.HistoryNetworkMainService;
 import samba.services.HistoryNetworkMainServiceConfig;
@@ -23,7 +19,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.vertx.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import oshi.SystemInfo;
 import tech.pegasys.teku.infrastructure.async.AsyncRunnerFactory;
 import tech.pegasys.teku.infrastructure.async.Cancellable;
 import tech.pegasys.teku.infrastructure.async.OccurrenceCounter;
@@ -59,19 +54,6 @@ public final class PortalNode implements AutoCloseable {
         new SambaAsyncRunnerFactory(
             new SambaTrackingExecutorFactory(
                 rejectedExecutionCounter, metricsEndpoint.getMetricsSystem()));
-
-    final RestServerConfig restServerConfig = sambaConfiguration.getRestServerConfig();
-    STATUS_LOG.onStartup(
-        "1.0 " + (VersionProvider.COMMIT_HASH.map(s -> "Commit: " + s).orElse("")));
-    STATUS_LOG.startupConfigurations(
-        StartupLogConfig.builder()
-            .network("")
-            .hardwareInfo(new SystemInfo().getHardware())
-            .portalNodeRestApiEnabled(restServerConfig.isRestApiDocsEnabled())
-            .portalNodeRestApiInterface(restServerConfig.getRestApiInterface())
-            .portalNodeRestApiPort(restServerConfig.getRestApiPort())
-            .portalNodeRestApiAllowList(restServerConfig.getRestApiHostAllowlist())
-            .build());
 
     final HistoryNetworkMainServiceConfig historyNetworkMainServiceConfig =
         new HistoryNetworkMainServiceConfig(

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.vertx.core.Vertx;
+import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,13 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
             "samba_discovery_service", DEFAULT_ASYNC_P2P_MAX_THREADS, DEFAULT_ASYNC_P2P_MAX_QUEUE);
     this.sambaConfiguration = sambaConfiguration;
     this.vertx = vertx;
-    initDiscoveryService();
+
+    // TODO move nodeRecord
+    final NodeRecord nodeRecord =
+        Discv5Service.createNodeRecord(
+            this.sambaConfiguration.getDiscoveryConfig(), this.sambaConfiguration.getSecreteKey());
+    LOG.info(sambaConfiguration.generateSambaConfigurationSummary(nodeRecord));
+    initDiscoveryService(nodeRecord);
     initUTPService();
     initHistoryNetwork();
     initIncomingRequestTalkHandlers();
@@ -208,13 +215,14 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
             this.metricsSystem, this.asyncRunner, this.discoveryService, this.historyNetwork);
   }
 
-  protected void initDiscoveryService() {
+  protected void initDiscoveryService(NodeRecord nodeRecord) {
     this.discoveryService =
         new Discv5Service(
             this.metricsSystem,
             this.asyncRunner,
             this.sambaConfiguration.getDiscoveryConfig(),
             this.sambaConfiguration.getSecreteKey(),
+            nodeRecord,
             this.incomingRequestTalkHandler);
   }
 

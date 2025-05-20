@@ -1,8 +1,8 @@
 package samba;
 
 import samba.cli.SambaCommand;
-import samba.cli.options.LogConfigurator;
 import samba.config.SambaConfiguration;
+import samba.logging.LogConfigurator;
 import samba.samba.SambaDefaultExceptionHandler;
 
 import java.io.PrintWriter;

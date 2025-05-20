@@ -28,7 +28,7 @@ public class VersionProvider {
   public static final String ENV_LOCALAPPDATA = "LOCALAPPDATA";
   public static final String ENV_HOME = "HOME";
   public static final String CLIENT_IDENTITY = "samba";
-  public static final String IMPLEMENTATION_VERSION = "v" + getImplementationVersion();
+  public static final Optional<String> IMPLEMENTATION_VERSION = getImplementationVersion();
   public static final String VERSION =
       CLIENT_IDENTITY + "/" + IMPLEMENTATION_VERSION + "/" + detectOS() + "/" + detectJvm();
   public static final Optional<String> COMMIT_HASH = getCommitHash();
@@ -38,9 +38,9 @@ public class VersionProvider {
     return defaultStoragePathForNormalizedOS(detectedOS, System.getenv());
   }
 
-  private static String getImplementationVersion() {
+  private static Optional<String> getImplementationVersion() {
     final String version = VersionProvider.class.getPackage().getImplementationVersion();
-    return version != null ? version : "<Unknown>";
+    return version != null ? Optional.of("v" + version) : Optional.empty();
   }
 
   private static String detectOS() {
@@ -77,15 +77,15 @@ public class VersionProvider {
   static String defaultStoragePathForNormalizedOS(
       final String detectedOS, final Map<String, String> env) {
     if (detectedOS.equals("windows")) {
-      return env.get(ENV_LOCALAPPDATA) + "\\teku";
+      return env.get(ENV_LOCALAPPDATA) + "\\samba";
     } else if (detectedOS.equals("osx")) {
-      return env.get(ENV_HOME) + "/Library/teku";
+      return env.get(ENV_HOME) + "/Library/samba";
     }
     String dataHome = env.get(ENV_XDG_DATA_HOME);
     if (StringUtils.isEmpty(dataHome)) {
       dataHome = env.get(ENV_HOME) + "/.local/share";
     }
-    return dataHome + "/teku";
+    return dataHome + "/samba";
   }
 
   private static String normalizeOS(final String osName) {

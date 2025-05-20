@@ -9,18 +9,19 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 public class StorageConfig {
-
+  private static final Logger LOG = LoggerFactory.getLogger(StorageConfig.class);
   public static final String DEFAULT_DATA_DIR_PATH = "./build/data";
   private static String SAMBA_HOME_PROPERTY_NAME = "samba.home";
 
   private final Path dataPath;
-  private static final Logger LOG = LoggerFactory.getLogger(StorageConfig.class);
 
   public StorageConfig(final Path dataPath) {
     this.dataPath = dataPath;
@@ -88,5 +89,12 @@ public class StorageConfig {
       this.dataPath = dataPath;
       return this;
     }
+  }
+
+  public List<String> getStorageConfigSummaryLog() {
+    List<String> summary = new ArrayList<>();
+    summary.add("Storage Summary:");
+    summary.add("DATA PATH: " + this.dataPath);
+    return summary;
   }
 }

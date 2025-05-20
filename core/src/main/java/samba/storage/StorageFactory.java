@@ -29,7 +29,7 @@ public class StorageFactory {
   }
 
   public HistoryRocksDB create() throws IOException {
-    LOG.info("History data directory set to: {}", dataDirectory.getAbsolutePath());
+    LOG.debug("History data directory set to: {}", dataDirectory.getAbsolutePath());
     validateDataPaths();
     createDirectories();
     // TODO do we need versions, and a metadata file ?

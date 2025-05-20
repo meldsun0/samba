@@ -151,7 +151,8 @@ public class HistoryNetwork extends BaseNetwork
               LOG.error(
                   "Something when wrong when processing message {} to {} with error {}",
                   message.getMessageType(),
-                  nodeRecord.asEnr(), error);
+                  nodeRecord.asEnr(),
+                  error);
               this.routingTable.removeNode(nodeRecord);
               this.routingTable.removeRadius(nodeRecord.getNodeId());
               return SafeFuture.completedFuture(Optional.empty());
