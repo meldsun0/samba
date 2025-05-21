@@ -66,7 +66,7 @@ public class ValidationUtil {
         return true;
       }
     } catch (Exception e) {
-      LOG.error("Error validating block header: {}", e.getMessage());
+      LOG.debug("Error validating block header: {}", e.getMessage());
       return false;
     }
   }
@@ -89,13 +89,13 @@ public class ValidationUtil {
         Optional<org.hyperledger.besu.datatypes.Hash> headerWithdrawalsRoot =
             blockHeaderForBody.getWithdrawalsRoot();
         if (!headerWithdrawalsRoot.get().equals(computeRoot(body.getWithdrawalsRLP().get()))) {
-          LOG.info("Invalid withdrawals root for block {}", blockHeaderForBody.getHash());
+          LOG.debug("Invalid withdrawals root for block {}", blockHeaderForBody.getHash());
           return false;
         }
       }
       return true;
     } catch (Exception e) {
-      LOG.error("Error validating block body: {}", e.getMessage());
+      LOG.debug("Error validating block body: {}", e.getMessage());
       return false;
     }
   }
@@ -104,21 +104,20 @@ public class ValidationUtil {
     try {
       BlockHeader blockHeaderFromBody = blockHeader.getBlockHeader();
       ContentReceipts contentReceipts = ContentReceipts.decode(receipts);
-
       if (!blockHeaderFromBody
           .getReceiptsRoot()
           .equals(computeRoot(contentReceipts.getReceiptsRLP()))) {
-        LOG.info("Invalid receipts root for block {}", blockHeaderFromBody.getHash());
+        LOG.debug("Invalid receipts root for block {}", blockHeaderFromBody.getHash());
         return false;
       }
       return true;
     } catch (Exception e) {
-      LOG.error("Error validating receipts: {}", e.getMessage());
+      LOG.debug("Error validating receipts: {}", e.getMessage());
       return false;
     }
   }
 
-  private static Bytes32 computeRoot(final List<Bytes> nodes) {
+  public static Bytes32 computeRoot(final List<Bytes> nodes) {
     Function<Bytes, Bytes> identity = Function.identity();
 
     SimpleMerklePatriciaTrie<Bytes, Bytes> trie = new SimpleMerklePatriciaTrie<>(identity);

@@ -73,7 +73,7 @@ public class Util {
       int sizeOfContent = Util.readUnsignedLeb128(byteData.slice(index));
       if (sizeOfContent == 0) {
         index = index + 6;
-        contents.add(Bytes.fromHexString("0x00"));
+        contents.add(Bytes.EMPTY);
         continue;
       }
       index += Util.getLeb128Length(sizeOfContent);
@@ -87,7 +87,7 @@ public class Util {
   public static Bytes parseAcceptedContent(Bytes byteData) {
     int sizeOfContent = Util.readUnsignedLeb128(byteData);
     if (sizeOfContent == 0) {
-      return Bytes.fromHexString("0x00");
+      return Bytes.EMPTY;
     }
     return byteData.slice(Util.getLeb128Length(sizeOfContent), sizeOfContent);
   }
