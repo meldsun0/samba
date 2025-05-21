@@ -38,6 +38,7 @@ vertx-web= { module = "io.vertx:vertx-web", version.ref = "vertex"}
 
 besu-internal-metrics-core= { module = "org.hyperledger.besu.internal:metrics-core", version.ref = "besuInternal"}
 besu-internal-core = { module = "org.hyperledger.besu.internal:core", version.ref = "besuInternal"}
+besu-internal-trie = { module = "org.hyperledger.besu.internal:trie", version.ref = "besuInternal"}
 besu-internal-config = { module = "org.hyperledger.besu.internal:config", version.ref = "besuInternal"}
 besu-internal-rlp = { module = "org.hyperledger.besu.internal:rlp", version.ref = "besuInternal"}
 besu-internal-plugin-api = { module = "org.hyperledger.besu:plugin-api", version.ref = "besuInternal"}

@@ -1,6 +1,7 @@
 package samba.schema.content.ssz.blockbody;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
@@ -29,8 +30,16 @@ public class BlockBodyPreShanghaiContainer
     return SszTransactionList.decodeSszList(getField0());
   }
 
+  public List<Bytes> getTransactionsRLP() {
+    return getField0().stream().map(SszByteList::getBytes).collect(Collectors.toList());
+  }
+
   public List<BlockHeader> getUncles() {
     return SszUnclesByteList.decodeSszUncles(getField1());
+  }
+
+  public Bytes getUnclesRLP() {
+    return getField1().getBytes();
   }
 
   public static BlockBodyPreShanghaiContainer decodeBytes(Bytes bytes) {

@@ -14,6 +14,7 @@ import samba.domain.content.ContentUtil;
 import samba.rocksdb.KeyValueSegment;
 import samba.rocksdb.KeyValueStorageTransaction;
 import samba.rocksdb.RocksDBInstance;
+import samba.validation.util.ValidationUtil;
 
 import java.util.Optional;
 
@@ -38,8 +39,9 @@ public class HistoryRocksDBTest {
 
   @Test
   public void testSaveContentBlockHeaderByHash() {
-    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class)) {
-      mockedContentUtil.when(() -> ContentUtil.isBlockHeaderValid(any())).thenReturn(true);
+    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class);
+        MockedStatic<ValidationUtil> mockedValidationUtil = mockStatic(ValidationUtil.class)) {
+      mockedContentUtil.when(() -> ValidationUtil.isBlockHeaderValid(any())).thenReturn(true);
       mockedContentUtil
           .when(() -> ContentUtil.createContentKeyFromSszBytes(any(Bytes.class)))
           .thenCallRealMethod();
@@ -72,8 +74,9 @@ public class HistoryRocksDBTest {
 
   @Test
   public void testSaveContentBlockBody() {
-    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class)) {
-      mockedContentUtil.when(() -> ContentUtil.isBlockBodyValid(any(), any())).thenReturn(true);
+    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class);
+        MockedStatic<ValidationUtil> mockedValidationUtil = mockStatic(ValidationUtil.class)) {
+      mockedContentUtil.when(() -> ValidationUtil.isBlockBodyValid(any(), any())).thenReturn(true);
       mockedContentUtil
           .when(() -> ContentUtil.createContentKeyFromSszBytes(any(Bytes.class)))
           .thenCallRealMethod();
@@ -99,8 +102,9 @@ public class HistoryRocksDBTest {
 
   @Test
   public void testSaveContentReceipt() {
-    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class)) {
-      mockedContentUtil.when(() -> ContentUtil.isBlockBodyValid(any(), any())).thenReturn(true);
+    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class);
+        MockedStatic<ValidationUtil> mockedValidationUtil = mockStatic(ValidationUtil.class)) {
+      mockedContentUtil.when(() -> ValidationUtil.isBlockBodyValid(any(), any())).thenReturn(true);
       mockedContentUtil
           .when(() -> ContentUtil.createContentKeyFromSszBytes(any(Bytes.class)))
           .thenCallRealMethod();
@@ -124,8 +128,9 @@ public class HistoryRocksDBTest {
 
   @Test
   public void testSaveContentBlockHeaderByNumberNoHashKey() {
-    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class)) {
-      mockedContentUtil.when(() -> ContentUtil.isBlockHeaderValid(any())).thenReturn(true);
+    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class);
+        MockedStatic<ValidationUtil> mockedValidationUtil = mockStatic(ValidationUtil.class)) {
+      mockedContentUtil.when(() -> ValidationUtil.isBlockHeaderValid(any())).thenReturn(true);
       mockedContentUtil
           .when(() -> ContentUtil.createContentKeyFromSszBytes(any(Bytes.class)))
           .thenCallRealMethod();
@@ -158,8 +163,9 @@ public class HistoryRocksDBTest {
 
   @Test
   public void testSaveContentBlockHeaderByNumberHashKey() {
-    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class)) {
-      mockedContentUtil.when(() -> ContentUtil.isBlockHeaderValid(any())).thenReturn(true);
+    try (MockedStatic<ContentUtil> mockedContentUtil = mockStatic(ContentUtil.class);
+        MockedStatic<ValidationUtil> mockedValidationUtil = mockStatic(ValidationUtil.class)) {
+      mockedContentUtil.when(() -> ValidationUtil.isBlockHeaderValid(any())).thenReturn(true);
       mockedContentUtil
           .when(() -> ContentUtil.createContentKeyFromSszBytes(any(Bytes.class)))
           .thenCallRealMethod();

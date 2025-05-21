@@ -12,6 +12,8 @@ import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
+import tech.pegasys.teku.infrastructure.ssz.SszList;
+import tech.pegasys.teku.infrastructure.ssz.collections.SszByteList;
 
 public class ContentBlockBody {
 
@@ -66,7 +68,7 @@ public class ContentBlockBody {
     throw new UnsupportedOperationException("Block body is pre-Shanghai");
   }
 
-  public long getNumber() {
+  public long getBlockNumber() {
     return blockNumber;
   }
 
@@ -78,6 +80,14 @@ public class ContentBlockBody {
     }
   }
 
+  public List<Bytes> getTransactionsRLP() {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
+      return blockBodyPreShanghaiContainer.getTransactionsRLP();
+    } else {
+      return blockBodyPostShanghaiContainer.getTransactionsRLP();
+    }
+  }
+
   public List<BlockHeader> getUncles() {
     if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer.getUncles();
@@ -86,11 +96,26 @@ public class ContentBlockBody {
     }
   }
 
+  public Bytes getUnclesRLP() {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
+      return blockBodyPreShanghaiContainer.getUnclesRLP();
+    } else {
+      return blockBodyPostShanghaiContainer.getUnclesRLP();
+    }
+  }
+
   public Optional<List<Withdrawal>> getWithdrawals() {
     if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
       return Optional.ofNullable(blockBodyPostShanghaiContainer.getWithdrawals());
     }
     return Optional.empty();
+  }
+
+  public SszList<SszByteList> getWithdrawalsSsz() {
+    if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
+      return blockBodyPostShanghaiContainer.getWithdrawalsSsz();
+    }
+    throw new UnsupportedOperationException("Block body is pre-Shanghai");
   }
 
   public Bytes getSszBytes() {

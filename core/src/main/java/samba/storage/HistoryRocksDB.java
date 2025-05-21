@@ -15,6 +15,7 @@ import samba.rocksdb.RocksDBInstance;
 import samba.rocksdb.RocksDBMetricsFactory;
 import samba.rocksdb.Segment;
 import samba.rocksdb.exceptions.StorageException;
+import samba.validation.util.ValidationUtil;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,7 +67,7 @@ public class HistoryRocksDB implements HistoryDB {
           Bytes blockHashKeySSZ = contentKey.getBlockHashSsz();
           Optional<ContentBlockHeader> blockHeader =
               ContentUtil.createBlockHeaderfromSszBytes(sszValue);
-          if (blockHeader.isPresent() && ContentUtil.isBlockHeaderValid(blockHeader.get())) {
+          if (blockHeader.isPresent() && ValidationUtil.isBlockHeaderValid(blockHeader.get())) {
             Bytes blockNumberKeySSZ = ContentUtil.createBlockNumberInSSZ(blockHeader.get());
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue); // TODO async
@@ -86,7 +87,7 @@ public class HistoryRocksDB implements HistoryDB {
           Bytes blockNumberKeySSZ = contentKey.getBlockNumberSsz();
           Optional<ContentBlockHeader> blockHeader =
               ContentUtil.createBlockHeaderfromSszBytes(sszValue);
-          if (blockHeader.isPresent() && ContentUtil.isBlockHeaderValid(blockHeader.get())) {
+          if (blockHeader.isPresent() && ValidationUtil.isBlockHeaderValid(blockHeader.get())) {
             Bytes blockHashKeySSZ = ContentUtil.createBlockHashKey(blockHeader.get());
             save(KeyValueSegment.BLOCK_HASH_BY_BLOCK_NUMBER, blockNumberKeySSZ, blockHashKeySSZ);
             save(KeyValueSegment.BLOCK_HEADER, blockHashKeySSZ, sszValue);

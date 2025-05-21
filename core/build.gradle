@@ -27,6 +27,7 @@ dependencies {
 
   implementation libs.besu.internal.metrics.core
   implementation libs.besu.internal.core
+  implementation libs.besu.internal.trie
   implementation libs.besu.internal.config
   implementation libs.besu.internal.plugin.api //TODO need to be removed
   implementation libs.besu.internal.rlp

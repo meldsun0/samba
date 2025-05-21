@@ -39,6 +39,7 @@ import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.ProtocolVersionUtil;
 import samba.util.Util;
+import samba.validation.util.ValidationUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -417,9 +418,9 @@ public class HistoryNetwork extends BaseNetwork
       boolean isValid =
           switch (contentType) {
             case ContentType.BLOCK_BODY ->
-                ContentUtil.isBlockBodyValid(associatedHeader.get(), contentValue);
+                ValidationUtil.isBlockBodyValid(associatedHeader.get(), contentValue);
             case ContentType.RECEIPT ->
-                ContentUtil.isReceiptsValid(associatedHeader.get(), contentValue);
+                ValidationUtil.isReceiptsValid(associatedHeader.get(), contentValue);
             default -> true;
           };
 
