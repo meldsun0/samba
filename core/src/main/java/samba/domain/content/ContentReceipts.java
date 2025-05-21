@@ -35,6 +35,10 @@ public class ContentReceipts {
     return sszReceiptList.getDecodedList();
   }
 
+  public List<Bytes> getReceiptsRLP() {
+    return sszReceiptList.getReceiptsRLP();
+  }
+
   public Bytes getSszBytes() {
     return sszReceiptList.sszSerialize();
   }

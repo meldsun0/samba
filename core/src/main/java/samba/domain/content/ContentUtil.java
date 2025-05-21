@@ -1,16 +1,11 @@
 package samba.domain.content;
 
-import samba.validation.HistoricalHashesAccumulator;
-
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import tech.pegasys.teku.infrastructure.unsigned.UInt64;
 
 public class ContentUtil {
-
-  private static final HistoricalHashesAccumulator historicalHashesAccumulator =
-      new HistoricalHashesAccumulator();
 
   public static Optional<ContentKey> createContentKeyFromSszBytes(Bytes contentkeyBytes) {
     Optional<ContentKey> contentKey = Optional.of(new ContentKey(contentkeyBytes));
@@ -33,15 +28,6 @@ public class ContentUtil {
     return receipts;
   }
 
-  public static boolean isBlockBodyValid(ContentBlockHeader blockHeader, Bytes blockBody) {
-    // TODO given a BlockHeader we should validate that value that is a sszbytes of a blockBody
-    /*
-    Compare header timestamp against SHANGHAI_TIMESTAMP to determine what encoding scheme the block body uses.
-    Decode the block body using either pre-shanghai or post-shanghai encoding.
-    Validate the decoded block body against the roots in the header.*/
-    return true;
-  }
-
   public static Bytes createBlockNumberInSSZ(final ContentBlockHeader contentBlockHeader) {
     return new ContentKey(
             ContentType.BLOCK_HEADER_BY_NUMBER,
@@ -52,14 +38,5 @@ public class ContentUtil {
   public static Bytes createBlockHashKey(final ContentBlockHeader blockHeader) {
     return new ContentKey(ContentType.BLOCK_HEADER, blockHeader.getBlockHeader().getHash().copy())
         .getBlockHashSsz();
-  }
-
-  public static boolean isBlockHeaderValid(ContentBlockHeader blockHeaderWithProof) {
-    if (blockHeaderWithProof.getBlockHeaderProofType()
-        == ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR) {
-      return historicalHashesAccumulator.validate(blockHeaderWithProof);
-    } else { // TODO: add other proof type validation
-      return true;
-    }
   }
 }

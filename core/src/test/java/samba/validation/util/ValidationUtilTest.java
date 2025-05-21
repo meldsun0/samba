@@ -2,6 +2,8 @@ package samba.validation.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import samba.util.DefaultContent;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class ValidationUtilTest {
 
   @Test
-  void verifySmallExample() {
+  void testIsValidMerkleBranch() {
     Bytes32 leafB00 = Bytes32.fromHexString("0x" + "aa".repeat(32));
     Bytes32 leafB01 = Bytes32.fromHexString("0x" + "bb".repeat(32));
     Bytes32 leafB10 = Bytes32.fromHexString("0x" + "cc".repeat(32));
@@ -62,6 +64,41 @@ class ValidationUtilTest {
     assertFalse(
         ValidationUtil.isValidMerkleBranch(
             leafB01, Arrays.asList(leafB00, nodeB1x), 2, 0b01, nodeB1x));
+  }
+
+  @Test
+  public void testIsBlockHeaderValid() {
+    boolean resultPreMerge = ValidationUtil.isBlockHeaderValid(DefaultContent.preMergeBlockHeader);
+    boolean resultPostCapella =
+        ValidationUtil.isBlockHeaderValid(DefaultContent.postCapellaBlockHeader);
+    assertTrue(resultPreMerge);
+    assertTrue(resultPostCapella);
+  }
+
+  @Test
+  public void testIsBlockBodyValid() {
+    boolean resultPreMerge =
+        ValidationUtil.isBlockBodyValid(
+            DefaultContent.preMergeBlockHeader, DefaultContent.preMergeBlockBody.getSszBytes());
+    boolean resultPostCapella =
+        ValidationUtil.isBlockBodyValid(
+            DefaultContent.postCapellaBlockHeader,
+            DefaultContent.postCapellaBlockBody.getSszBytes());
+    assertTrue(resultPreMerge);
+    assertTrue(resultPostCapella);
+  }
+
+  @Test
+  public void testIsReceiptsValid() {
+    boolean resultPreMerge =
+        ValidationUtil.isReceiptsValid(
+            DefaultContent.preMergeBlockHeader, DefaultContent.preMergeReceipts.getSszBytes());
+    boolean resultPostCapella =
+        ValidationUtil.isReceiptsValid(
+            DefaultContent.postCapellaBlockHeader,
+            DefaultContent.postCapellaReceipts.getSszBytes());
+    assertTrue(resultPreMerge);
+    assertTrue(resultPostCapella);
   }
 
   private static Bytes32 hashConcat(Bytes32 left, Bytes32 right) {

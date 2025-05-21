@@ -5,7 +5,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import samba.api.jsonrpc.results.FindContentResult;
 import samba.api.jsonrpc.results.RecursiveFindNodesResult;
 import samba.api.jsonrpc.results.TraceGetContentResult;
+import samba.domain.content.ContentBlockHeader;
 import samba.domain.content.ContentKey;
+import samba.domain.content.ContentType;
 import samba.domain.content.ContentUtil;
 import samba.domain.dht.LivenessChecker;
 import samba.domain.messages.MessageType;
@@ -37,6 +39,7 @@ import samba.services.utp.UTPManager;
 import samba.storage.HistoryDB;
 import samba.util.ProtocolVersionUtil;
 import samba.util.Util;
+import samba.validation.util.ValidationUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,6 +81,7 @@ public class HistoryNetwork extends BaseNetwork
   public static final int MAX_GOSSIP_COUNT = 4;
   private static final ExecutorService EXECUTOR_GOSSIP =
       Executors.newVirtualThreadPerTaskExecutor();
+  private static final int DEFAULT_TIMEOUT = 60;
 
   // TODO standard client version text, standard capabilities list, standard client info extension,
   // default ping with standard arguments
@@ -217,7 +221,7 @@ public class HistoryNetwork extends BaseNetwork
                               if (protocolVersion != 0) {
                                 data = Util.parseAcceptedContent(data);
                               }
-                              boolean saved = historyDB.saveContent(message.getContentKey(), data);
+                              boolean saved = this.store(message.getContentKey(), data);
                               // Gossip new content to network
                               if (saved) {
                                 Set<NodeRecord> foundNodes =
@@ -233,8 +237,7 @@ public class HistoryNetwork extends BaseNetwork
                 case Content.CONTENT_TYPE -> {
                   // TODO validate content and key before persisting it or responding
 
-                  boolean saved =
-                      historyDB.saveContent(message.getContentKey(), content.getContent());
+                  boolean saved = this.store(message.getContentKey(), content.getContent());
                   // Gossip new content to network
                   if (saved) {
                     Set<NodeRecord> foundNodes =
@@ -409,7 +412,58 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public boolean store(Bytes contentKey, Bytes contentValue) {
+    ContentType contentType = ContentType.fromContentKey(contentKey);
+
+    if (contentType == ContentType.BLOCK_BODY || contentType == ContentType.RECEIPT) {
+      Optional<ContentBlockHeader> associatedHeader = getAssociatedBlockHeader(contentKey);
+      if (associatedHeader.isEmpty()) {
+        return false;
+      }
+
+      boolean isValid =
+          switch (contentType) {
+            case ContentType.BLOCK_BODY ->
+                ValidationUtil.isBlockBodyValid(associatedHeader.get(), contentValue);
+            case ContentType.RECEIPT ->
+                ValidationUtil.isReceiptsValid(associatedHeader.get(), contentValue);
+            default -> true;
+          };
+
+      if (!isValid) {
+        LOG.debug("{} is not valid for block header {}", contentType, contentKey);
+        return false;
+      }
+    }
+
     return this.historyDB.saveContent(contentKey, contentValue);
+  }
+
+  private Optional<ContentBlockHeader> getAssociatedBlockHeader(Bytes contentKey) {
+    try {
+      Bytes blockHeaderKeySsz =
+          Bytes.concatenate(Bytes.of(ContentType.BLOCK_HEADER.getByteValue()), contentKey.slice(1));
+      ContentKey blockHeaderKey = ContentKey.decode(blockHeaderKeySsz);
+
+      Optional<Bytes> blockHeaderBytes = historyDB.get(blockHeaderKey);
+      if (blockHeaderBytes.isPresent()) {
+        return ContentUtil.createBlockHeaderfromSszBytes(blockHeaderBytes.get());
+      }
+
+      Optional<FindContentResult> searchResult = getContent(blockHeaderKey, DEFAULT_TIMEOUT);
+      if (searchResult.isPresent()) {
+        Optional<ContentBlockHeader> blockHeader =
+            ContentUtil.createBlockHeaderfromSszBytes(
+                Bytes.fromHexString(searchResult.get().getContent()));
+        this.store(
+            blockHeaderKeySsz, blockHeader.get().getSszBytes()); // Store newly located block header
+        return blockHeader;
+      }
+
+      return Optional.empty();
+    } catch (Exception e) {
+      LOG.debug("Error when retrieving associated block header for {}", contentKey, e);
+      return Optional.empty();
+    }
   }
 
   @Override
@@ -624,7 +678,7 @@ public class HistoryNetwork extends BaseNetwork
                 List<Bytes> parsedContent = Util.parseAcceptedContents(newContent);
                 if (parsedContent.size() == contentKeyAccepted.size()) {
                   for (int i = 0; i < parsedContent.size(); i++) {
-                    this.historyDB.saveContent(contentKeyAccepted.get(i), parsedContent.get(i));
+                    this.store(contentKeyAccepted.get(i), parsedContent.get(i));
                   }
                 }
               });

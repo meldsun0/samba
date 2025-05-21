@@ -66,7 +66,7 @@ public class ContentBlockBody {
     throw new UnsupportedOperationException("Block body is pre-Shanghai");
   }
 
-  public long getNumber() {
+  public long getBlockNumber() {
     return blockNumber;
   }
 
@@ -78,6 +78,14 @@ public class ContentBlockBody {
     }
   }
 
+  public List<Bytes> getTransactionsRLP() {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
+      return blockBodyPreShanghaiContainer.getTransactionsRLP();
+    } else {
+      return blockBodyPostShanghaiContainer.getTransactionsRLP();
+    }
+  }
+
   public List<BlockHeader> getUncles() {
     if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
       return blockBodyPreShanghaiContainer.getUncles();
@@ -86,9 +94,24 @@ public class ContentBlockBody {
     }
   }
 
+  public Bytes getUnclesRLP() {
+    if (blockNumber < HistoryConstants.SHANGHAI_BLOCK) {
+      return blockBodyPreShanghaiContainer.getUnclesRLP();
+    } else {
+      return blockBodyPostShanghaiContainer.getUnclesRLP();
+    }
+  }
+
   public Optional<List<Withdrawal>> getWithdrawals() {
     if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
       return Optional.ofNullable(blockBodyPostShanghaiContainer.getWithdrawals());
+    }
+    return Optional.empty();
+  }
+
+  public Optional<List<Bytes>> getWithdrawalsRLP() {
+    if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
+      return Optional.ofNullable(blockBodyPostShanghaiContainer.getWithdrawalsRLP());
     }
     return Optional.empty();
   }
