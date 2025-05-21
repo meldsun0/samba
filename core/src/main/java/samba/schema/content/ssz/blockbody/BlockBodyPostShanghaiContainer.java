@@ -49,6 +49,10 @@ public class BlockBodyPostShanghaiContainer
     return SszWithdrawalList.decodeSszList(getField2());
   }
 
+  public List<Bytes> getWithdrawalsRLP() {
+    return getField2().stream().map(SszByteList::getBytes).collect(Collectors.toList());
+  }
+
   public SszList<SszByteList> getWithdrawalsSsz() {
     return getField0();
   }

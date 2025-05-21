@@ -12,8 +12,6 @@ import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.core.Transaction;
 import org.hyperledger.besu.ethereum.core.Withdrawal;
-import tech.pegasys.teku.infrastructure.ssz.SszList;
-import tech.pegasys.teku.infrastructure.ssz.collections.SszByteList;
 
 public class ContentBlockBody {
 
@@ -111,11 +109,11 @@ public class ContentBlockBody {
     return Optional.empty();
   }
 
-  public SszList<SszByteList> getWithdrawalsSsz() {
+  public Optional<List<Bytes>> getWithdrawalsRLP() {
     if (blockNumber >= HistoryConstants.SHANGHAI_BLOCK) {
-      return blockBodyPostShanghaiContainer.getWithdrawalsSsz();
+      return Optional.ofNullable(blockBodyPostShanghaiContainer.getWithdrawalsRLP());
     }
-    throw new UnsupportedOperationException("Block body is pre-Shanghai");
+    return Optional.empty();
   }
 
   public Bytes getSszBytes() {

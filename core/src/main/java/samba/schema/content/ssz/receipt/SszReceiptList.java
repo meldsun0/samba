@@ -77,6 +77,10 @@ public class SszReceiptList {
         .collect(Collectors.toList());
   }
 
+  public List<Bytes> getReceiptsRLP() {
+    return receiptList.stream().map(SszByteList::getBytes).collect(Collectors.toList());
+  }
+
   public static SszReceiptList decodeBytes(Bytes bytes) {
     return new SszReceiptList(receiptListSchema.sszDeserialize(bytes));
   }

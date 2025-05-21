@@ -7,9 +7,7 @@ import samba.domain.content.ContentReceipts;
 import samba.network.history.HistoryConstants;
 import samba.validation.HistoricalHashesAccumulator;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -18,9 +16,7 @@ import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.crypto.Hash;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-import org.hyperledger.besu.ethereum.trie.NodeLoader;
-import org.hyperledger.besu.ethereum.trie.patricia.StoredMerklePatriciaTrie;
-import org.hyperledger.besu.ethereum.trie.patricia.StoredNodeFactory;
+import org.hyperledger.besu.ethereum.trie.patricia.SimpleMerklePatriciaTrie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,63 +58,78 @@ public class ValidationUtil {
   }
 
   public static boolean isBlockHeaderValid(ContentBlockHeader blockHeaderWithProof) {
-    if (blockHeaderWithProof.getBlockHeaderProofType()
-        == ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR) {
-      return historicalHashesAccumulator.validate(blockHeaderWithProof);
-    } else { // TODO: add other proof type validation
-      return true;
+    try {
+      if (blockHeaderWithProof.getBlockHeaderProofType()
+          == ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR) {
+        return historicalHashesAccumulator.validate(blockHeaderWithProof);
+      } else { // TODO: add other proof type validation
+        return true;
+      }
+    } catch (Exception e) {
+      LOG.error("Error validating block header: {}", e.getMessage());
+      return false;
     }
   }
 
   public static boolean isBlockBodyValid(ContentBlockHeader blockHeader, Bytes blockBodyBytes) {
-    BlockHeader blockHeaderForBody = blockHeader.getBlockHeader();
-    ContentBlockBody body = ContentBlockBody.decode(blockBodyBytes);
-    if (!blockHeaderForBody
-        .getTransactionsRoot()
-        .equals(computeTransactionsRoot(body.getTransactionsRLP()))) {
-      LOG.error("Invalid transactions root for block {}", blockHeaderForBody.getHash());
-      return false;
-    }
-    if (!blockHeaderForBody.getOmmersHash().equals(Hash.keccak256(body.getUnclesRLP()))) {
-      LOG.error("Invalid uncles root for block {}", blockHeaderForBody.getHash());
-      return false;
-    }
-    if (body.getBlockNumber() >= HistoryConstants.SHANGHAI_BLOCK) {
-      Optional<org.hyperledger.besu.datatypes.Hash> headerWithdrawalsRoot =
-          blockHeaderForBody.getWithdrawalsRoot();
-      if (!headerWithdrawalsRoot.get().equals(body.getWithdrawalsSsz().hashTreeRoot())) {
-        LOG.error("Invalid withdrawals root for block {}", blockHeaderForBody.getHash());
+    try {
+      BlockHeader blockHeaderForBody = blockHeader.getBlockHeader();
+      ContentBlockBody body = ContentBlockBody.decode(blockBodyBytes);
+      if (!blockHeaderForBody
+          .getTransactionsRoot()
+          .equals(computeRoot(body.getTransactionsRLP()))) {
+        LOG.debug("Invalid transactions root for block {}", blockHeaderForBody.getHash());
         return false;
       }
+      if (!blockHeaderForBody.getOmmersHash().equals(Hash.keccak256(body.getUnclesRLP()))) {
+        LOG.debug("Invalid uncles root for block {}", blockHeaderForBody.getHash());
+        return false;
+      }
+      if (body.getBlockNumber() >= HistoryConstants.SHANGHAI_BLOCK) {
+        Optional<org.hyperledger.besu.datatypes.Hash> headerWithdrawalsRoot =
+            blockHeaderForBody.getWithdrawalsRoot();
+        if (!headerWithdrawalsRoot.get().equals(computeRoot(body.getWithdrawalsRLP().get()))) {
+          LOG.info("Invalid withdrawals root for block {}", blockHeaderForBody.getHash());
+          return false;
+        }
+      }
+      return true;
+    } catch (Exception e) {
+      LOG.error("Error validating block body: {}", e.getMessage());
+      return false;
     }
-    return true;
   }
 
   public static boolean isReceiptsValid(ContentBlockHeader blockHeader, Bytes receipts) {
-    BlockHeader blockHeaderFromBody = blockHeader.getBlockHeader();
-    ContentReceipts contentReceipts = ContentReceipts.decode(receipts);
-    if (!blockHeaderFromBody
-        .getReceiptsRoot()
-        .equals(contentReceipts.getSszReceiptList().getEncodedList().hashTreeRoot())) {
+    try {
+      BlockHeader blockHeaderFromBody = blockHeader.getBlockHeader();
+      ContentReceipts contentReceipts = ContentReceipts.decode(receipts);
+
+      if (!blockHeaderFromBody
+          .getReceiptsRoot()
+          .equals(computeRoot(contentReceipts.getReceiptsRLP()))) {
+        LOG.info("Invalid receipts root for block {}", blockHeaderFromBody.getHash());
+        return false;
+      }
+      return true;
+    } catch (Exception e) {
+      LOG.error("Error validating receipts: {}", e.getMessage());
       return false;
     }
-    return true;
   }
 
-  private static Bytes32 computeTransactionsRoot(final List<Bytes> transactions) {
-    Map<Bytes32, Bytes> storage = new HashMap<>();
-    NodeLoader nodeLoader = (location, hash) -> Optional.ofNullable(storage.get(hash));
+  private static Bytes32 computeRoot(final List<Bytes> nodes) {
     Function<Bytes, Bytes> identity = Function.identity();
-    StoredNodeFactory<Bytes> nodeFactory = new StoredNodeFactory<>(nodeLoader, identity, identity);
-    StoredMerklePatriciaTrie<Bytes, Bytes> trie =
-        new StoredMerklePatriciaTrie<>(nodeFactory, Bytes32.ZERO);
 
-    for (int i = 0; i < transactions.size(); i++) {
+    SimpleMerklePatriciaTrie<Bytes, Bytes> trie = new SimpleMerklePatriciaTrie<>(identity);
+
+    for (int i = 0; i < nodes.size(); i++) {
       final int index = i;
-      Bytes transactionIndex = RLP.encode(out -> out.writeIntScalar(index));
-      Bytes encodedTransaction = transactions.get(index);
+      Bytes transactionIndex = RLP.encode(out -> out.writeIntScalar(index)); // RLP index
+      Bytes encodedTransaction = nodes.get(index); // Already RLP encoded
       trie.put(transactionIndex, encodedTransaction);
     }
+
     return trie.getRootHash();
   }
 }
