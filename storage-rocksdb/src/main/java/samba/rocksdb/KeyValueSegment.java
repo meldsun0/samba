@@ -2,6 +2,7 @@ package samba.rocksdb;
 
 import java.nio.charset.StandardCharsets;
 
+// TODO these must be on each sub-network module but validated on this module.
 public enum KeyValueSegment implements Segment {
   DEFAULT("default".getBytes(StandardCharsets.UTF_8)),
   BLOCK_HEADER(new byte[] {14}),

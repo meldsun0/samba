@@ -2,6 +2,7 @@ package samba.storage;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import samba.config.StorageConfig;
 import samba.domain.content.ContentBlockBody;
 import samba.domain.content.ContentBlockHeader;
 import samba.domain.content.ContentKey;
@@ -10,17 +11,12 @@ import samba.domain.content.ContentType;
 import samba.domain.content.ContentUtil;
 import samba.rocksdb.KeyValueSegment;
 import samba.rocksdb.KeyValueStorageTransaction;
-import samba.rocksdb.RocksDBConfiguration;
 import samba.rocksdb.RocksDBInstance;
-import samba.rocksdb.RocksDBMetricsFactory;
+import samba.rocksdb.RocksDBKeyValueStorageFactory;
 import samba.rocksdb.Segment;
-import samba.rocksdb.exceptions.StorageException;
 import samba.validation.util.ValidationUtil;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
@@ -33,29 +29,18 @@ public class HistoryRocksDB implements HistoryDB {
   private static final Logger LOG = LoggerFactory.getLogger(HistoryRocksDB.class);
   private final RocksDBInstance rocksDBInstance;
 
-  public HistoryRocksDB(
-      Path path, MetricsSystem metricsSystem, RocksDBMetricsFactory rocksDBMetricsFactory)
-      throws StorageException {
-    this.rocksDBInstance =
-        new RocksDBInstance(
-            RocksDBConfiguration.createDefault(path),
-            Arrays.asList(KeyValueSegment.values()),
-            List.of(),
-            metricsSystem,
-            rocksDBMetricsFactory);
-  }
-
   public HistoryRocksDB(RocksDBInstance rocksDBInstance) {
     this.rocksDBInstance = rocksDBInstance;
   }
 
-  public static HistoryRocksDB create(MetricsSystem metricsSystem, final Path dataDirectory) {
-    try {
-      StorageFactory storageFactory = new StorageFactory(metricsSystem, dataDirectory);
-      return storageFactory.create();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public HistoryRocksDB(
+      final Path dataPath, final StorageConfig storageConfig, MetricsSystem metricsSystem) {
+    this.rocksDBInstance =
+        RocksDBKeyValueStorageFactory.create(
+            dataPath,
+            storageConfig.getDatabasePath(),
+            storageConfig.getDatabaseFormat(),
+            metricsSystem);
   }
 
   @Override

@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import samba.jsonrpc.config.JsonRpcConfiguration;
 import samba.logging.FramedLogMessage;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class SambaConfiguration {
   private boolean useDefaultBootnodes;
   private String loggingLevel;
   private String portalSubNetwork;
+  private Path dataPath;
 
   private SambaConfiguration(
       final MetricsConfig metricsConfig,
@@ -38,6 +40,7 @@ public class SambaConfiguration {
       final StartupHardwareConfig startupHardwareConfig,
       final SECP256K1.SecretKey secretKey,
       boolean useDefaultBootnodes,
+      final Path dataPath,
       String loggingLevel,
       String portalSubNetwork) {
     this.metricsConfig = metricsConfig;
@@ -48,6 +51,7 @@ public class SambaConfiguration {
     this.startupHardwareConfig = startupHardwareConfig;
     this.secretKey = secretKey;
     this.useDefaultBootnodes = useDefaultBootnodes;
+    this.dataPath = dataPath;
     this.loggingLevel = loggingLevel;
     this.portalSubNetwork = portalSubNetwork;
   }
@@ -80,8 +84,8 @@ public class SambaConfiguration {
     return jsonRpcConfiguration;
   }
 
-  private StartupHardwareConfig getStartupHardwareConfig() {
-    return this.startupHardwareConfig;
+  public Path getDataPath() {
+    return this.dataPath;
   }
 
   public String generateSambaConfigurationSummary(NodeRecord nodeRecord) {
@@ -94,8 +98,9 @@ public class SambaConfiguration {
     lines.add("Node Summary: ");
     lines.add("NodeId: " + nodeRecord.getNodeId());
     lines.add("PublicKey: " + nodeRecord.get("secp256k1"));
+    lines.add("DataPath: " + this.dataPath);
 
-    lines.addAll(this.getStartupHardwareConfig().getStartupSummeryLog());
+    lines.addAll(this.startupHardwareConfig.getStartupSummeryLog());
     lines.addAll(this.getDiscoveryConfig().getDiscoveryConfigSummaryLog());
     lines.addAll(this.getRestServerConfig().getRestServerSummaryLog());
     lines.addAll(this.getJsonRpcConfigurationn().getJsonRpcServerSummaryLog());
@@ -113,6 +118,7 @@ public class SambaConfiguration {
     private Optional<SECP256K1.SecretKey> secretKey = Optional.empty();
 
     private boolean useDefaultBootnodes;
+    private Path dataPath;
     private String loggingLevel;
     private String portalSubNetwork;
 
@@ -130,6 +136,7 @@ public class SambaConfiguration {
           new StartupHardwareConfig(),
           secretKey.get(),
           this.useDefaultBootnodes,
+          this.dataPath,
           this.loggingLevel,
           this.portalSubNetwork);
     }
@@ -174,6 +181,11 @@ public class SambaConfiguration {
 
     public Builder useDefaultBootnodes(boolean useDefaultBootnodes) {
       this.useDefaultBootnodes = useDefaultBootnodes;
+      return this;
+    }
+
+    public Builder dataPath(Path dataPath) {
+      this.dataPath = dataPath;
       return this;
     }
 
