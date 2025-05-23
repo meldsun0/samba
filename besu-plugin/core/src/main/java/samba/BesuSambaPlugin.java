@@ -40,6 +40,9 @@ public class BesuSambaPlugin implements BesuPlugin {
   @CommandLine.Option(names = {"--plugin-samba-logging"})
   public String loggingLevel;
 
+  @CommandLine.Option(names = {"--plugin-samba-data-path"})
+  public String dataPath;
+
   private SambaSDK sambaSDK;
 
   @Override
@@ -93,7 +96,8 @@ public class BesuSambaPlugin implements BesuPlugin {
         "--p2p-advertised-ip=" + host,
         "--disable-json-rpc-server",
         "--disable-rest--server",
-        "--logging=" + loggingLevel
+        "--logging=" + loggingLevel,
+        "--data-path=" + dataPath
       };
       return Samba.init(options);
 

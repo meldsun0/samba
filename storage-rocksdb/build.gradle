@@ -10,6 +10,7 @@ dependencies {
   implementation libs.rocksdbjni
   implementation libs.prometheus.simpleclient
   implementation libs.apache.commons.lang3
+  implementation libs.jackson.datatype.jdk8
   implementation libs.besu.internal.plugin.api //TODO need to be removed
   implementation libs.besu.internal.metrics.core
   implementation libs.google.guava

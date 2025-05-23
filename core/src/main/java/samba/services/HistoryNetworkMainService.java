@@ -204,8 +204,10 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
     this.historyNetwork =
         new HistoryNetwork(
             this.discoveryService,
-            HistoryRocksDB.create(
-                metricsSystem, sambaConfiguration.getStorageConfig().getDataPath()),
+            new HistoryRocksDB(
+                sambaConfiguration.getDataPath(),
+                sambaConfiguration.getStorageConfig(),
+                metricsSystem),
             this.utpManager);
   }
 
