@@ -2,10 +2,10 @@ package samba.validation.util;
 
 import samba.domain.content.ContentBlockBody;
 import samba.domain.content.ContentBlockHeader;
-import samba.domain.content.ContentProofType;
 import samba.domain.content.ContentReceipts;
 import samba.network.history.HistoryConstants;
 import samba.validation.HistoricalHashesAccumulator;
+import samba.validation.HistoricalRootsAccumulator;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,8 @@ public class ValidationUtil {
 
   private static final HistoricalHashesAccumulator historicalHashesAccumulator =
       new HistoricalHashesAccumulator();
+  private static final HistoricalRootsAccumulator historicalRootsAccumulator =
+      new HistoricalRootsAccumulator();
 
   public static boolean isValidMerkleBranch(
       final Bytes32 leaf,
@@ -59,11 +61,14 @@ public class ValidationUtil {
 
   public static boolean isBlockHeaderValid(ContentBlockHeader blockHeaderWithProof) {
     try {
-      if (blockHeaderWithProof.getBlockHeaderProofType()
-          == ContentProofType.BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR) {
-        return historicalHashesAccumulator.validate(blockHeaderWithProof);
-      } else { // TODO: add other proof type validation
-        return true;
+      switch (blockHeaderWithProof.getBlockHeaderProofType()) {
+        case BLOCK_PROOF_HISTORICAL_HASHES_ACCUMULATOR:
+          return historicalHashesAccumulator.validate(blockHeaderWithProof);
+        case BLOCK_PROOF_HISTORICAL_ROOTS:
+          return historicalRootsAccumulator.validate(blockHeaderWithProof);
+        default:
+          // TODO: add other proof type validation
+          return true;
       }
     } catch (Exception e) {
       LOG.debug("Error validating block header: {}", e.getMessage());

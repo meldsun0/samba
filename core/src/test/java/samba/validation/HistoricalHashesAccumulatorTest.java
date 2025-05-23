@@ -73,7 +73,7 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateValidBlock() {
+  public void testValidateValidBlockHeader() {
     try {
       InputStream file = getClass().getClassLoader().getResourceAsStream("premergeacc.bin");
 
@@ -88,7 +88,7 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateValidBlockWithPartialEpoch() {
+  public void testValidateValidBlockHeaderWithPartialEpoch() {
     try {
       InputStream file = getClass().getClassLoader().getResourceAsStream("premergeacc.bin");
       Bytes accumulatorBytes = Bytes.wrap(file.readAllBytes());
@@ -103,7 +103,7 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateInvalidBlock() {
+  public void testValidateInvalidBlockHeader() {
     ContentBlockHeader blockHeader =
         new ContentBlockHeader(
             new BlockHeaderWithProofContainer(

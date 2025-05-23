@@ -14,6 +14,7 @@ public class HistoryConstants {
   public static final long MAX_EPHEMERAL_HEADER_PAYLOAD = 256;
   public static final long MAX_HEADER_PROOF_LENGTH = 1024;
 
+  public static final int EPOCH_SIZE = 8192;
   public static final long MERGE_BLOCK = 15537394;
   public static final long SHANGHAI_BLOCK = 17034870;
   public static final long CANCUN_BLOCK = 19426587;

@@ -16,7 +16,6 @@ public class HistoricalHashesAccumulator {
 
   private static final Logger LOG = LoggerFactory.getLogger(HistoricalHashesAccumulator.class);
 
-  public static final int EPOCH_SIZE = 8192;
   public static final int MAX_HISTORICAL_EPOCHS = 2048;
   public static final long HISTORICAL_EPOCHS_GINDEX = 3L;
   public static final int TREE_DEPTH = 15;
@@ -49,9 +48,11 @@ public class HistoricalHashesAccumulator {
     if (blockHeaderWithProof.getBlockHeader().getNumber() >= HistoryConstants.MERGE_BLOCK) {
       return false;
     }
-    int headerIndex = (int) blockHeaderWithProof.getBlockHeader().getNumber() % EPOCH_SIZE;
-    long generalIndex = (EPOCH_SIZE * 2 * 2) + (headerIndex * 2);
-    int epochIndex = (int) blockHeaderWithProof.getBlockHeader().getNumber() / EPOCH_SIZE;
+    int headerIndex =
+        (int) blockHeaderWithProof.getBlockHeader().getNumber() % HistoryConstants.EPOCH_SIZE;
+    long generalIndex = (HistoryConstants.EPOCH_SIZE * 2 * 2) + (headerIndex * 2);
+    int epochIndex =
+        (int) blockHeaderWithProof.getBlockHeader().getNumber() / HistoryConstants.EPOCH_SIZE;
     Bytes32 epochHash = accumulator.getHistoricalEpochs().get(epochIndex);
 
     return ValidationUtil.isValidMerkleBranch(
