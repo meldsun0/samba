@@ -73,7 +73,7 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateValidBlock() {
+  public void testValidateValidBlockHeader() {
     try {
       InputStream file = getClass().getClassLoader().getResourceAsStream("premergeacc.bin");
 
@@ -88,7 +88,7 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateValidBlockWithPartialEpoch() {
+  public void testValidateValidBlockHeaderWithPartialEpoch() {
     try {
       InputStream file = getClass().getClassLoader().getResourceAsStream("premergeacc.bin");
       Bytes accumulatorBytes = Bytes.wrap(file.readAllBytes());
@@ -103,8 +103,8 @@ public class HistoricalHashesAccumulatorTest {
   }
 
   @Test
-  public void testValidateInvalidBlock() {
-    ContentBlockHeader blockHeader =
+  public void testValidateInvalidBlockHeader() {
+    ContentBlockHeader invalidBlockHeader =
         new ContentBlockHeader(
             new BlockHeaderWithProofContainer(
                 genesisBlockHeader,
@@ -116,7 +116,7 @@ public class HistoricalHashesAccumulatorTest {
       Bytes accumulatorBytes = Bytes.wrap(file.readAllBytes());
       HistoricalHashesAccumulatorContainer accumulator =
           HistoricalHashesAccumulatorContainer.decodeBytes(accumulatorBytes);
-      boolean validated = HistoricalHashesAccumulator.validate(blockHeader, accumulator);
+      boolean validated = HistoricalHashesAccumulator.validate(invalidBlockHeader, accumulator);
       assertTrue(!validated);
     } catch (Exception e) {
       fail("Failed to read the premergeacc.bin file", e);

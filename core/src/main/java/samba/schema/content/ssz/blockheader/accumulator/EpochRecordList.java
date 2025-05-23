@@ -1,6 +1,6 @@
 package samba.schema.content.ssz.blockheader.accumulator;
 
-import samba.validation.HistoricalHashesAccumulator;
+import samba.network.history.HistoryConstants;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,24 +15,22 @@ public class EpochRecordList {
       (SszListSchema<HeaderRecordContainer, SszList<HeaderRecordContainer>>)
           SszListSchema.create(
               HeaderRecordContainer.HeaderRecordContainerSchema.INSTANCE,
-              HistoricalHashesAccumulator.EPOCH_SIZE);
+              HistoryConstants.EPOCH_SIZE);
 
   private final SszList<HeaderRecordContainer> headerRecordList;
 
   public EpochRecordList(SszList<HeaderRecordContainer> headerRecordList) {
-    if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
+    if (headerRecordList.size() >= HistoryConstants.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is greater than or equal to "
-              + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to " + HistoryConstants.EPOCH_SIZE);
     }
     this.headerRecordList = headerRecordList;
   }
 
   public EpochRecordList(List<HeaderRecordContainer> headerRecordList) {
-    if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
+    if (headerRecordList.size() >= HistoryConstants.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is greater than or equal to "
-              + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to " + HistoryConstants.EPOCH_SIZE);
     }
     this.headerRecordList = schema.createFromElements(headerRecordList);
   }
@@ -47,20 +45,18 @@ public class EpochRecordList {
 
   public static SszList<HeaderRecordContainer> createList(
       List<HeaderRecordContainer> headerRecordList) {
-    if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
+    if (headerRecordList.size() >= HistoryConstants.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is greater than or equal to "
-              + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to " + HistoryConstants.EPOCH_SIZE);
     }
     return schema.createFromElements(headerRecordList);
   }
 
   public static List<HeaderRecordContainer> decodeList(
       SszList<HeaderRecordContainer> headerRecordList) {
-    if (headerRecordList.size() >= HistoricalHashesAccumulator.EPOCH_SIZE) {
+    if (headerRecordList.size() >= HistoryConstants.EPOCH_SIZE) {
       throw new IllegalArgumentException(
-          "HeaderRecordList size is greater than or equal to "
-              + HistoricalHashesAccumulator.EPOCH_SIZE);
+          "HeaderRecordList size is greater than or equal to " + HistoryConstants.EPOCH_SIZE);
     }
     return headerRecordList.stream().collect(Collectors.toList());
   }
