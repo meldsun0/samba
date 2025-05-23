@@ -165,7 +165,7 @@ You should be getting:
 | `-disable-rest--server=`     | false           |
 | `--p2p-advertised-ip=`       | 0.0.0.0         |
 | `--logging=`                 | INFO            |
-| `--data-path=`               | INFO            |
+| `--data-path=`               | ./build/samba            |
 
 
 
