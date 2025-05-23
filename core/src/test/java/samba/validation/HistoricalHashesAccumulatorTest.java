@@ -104,7 +104,7 @@ public class HistoricalHashesAccumulatorTest {
 
   @Test
   public void testValidateInvalidBlockHeader() {
-    ContentBlockHeader blockHeader =
+    ContentBlockHeader invalidBlockHeader =
         new ContentBlockHeader(
             new BlockHeaderWithProofContainer(
                 genesisBlockHeader,
@@ -116,7 +116,7 @@ public class HistoricalHashesAccumulatorTest {
       Bytes accumulatorBytes = Bytes.wrap(file.readAllBytes());
       HistoricalHashesAccumulatorContainer accumulator =
           HistoricalHashesAccumulatorContainer.decodeBytes(accumulatorBytes);
-      boolean validated = HistoricalHashesAccumulator.validate(blockHeader, accumulator);
+      boolean validated = HistoricalHashesAccumulator.validate(invalidBlockHeader, accumulator);
       assertTrue(!validated);
     } catch (Exception e) {
       fail("Failed to read the premergeacc.bin file", e);

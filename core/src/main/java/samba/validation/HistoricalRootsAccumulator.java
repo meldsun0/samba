@@ -17,7 +17,7 @@ public class HistoricalRootsAccumulator {
   private static final Logger LOG = LoggerFactory.getLogger(HistoricalRootsAccumulator.class);
 
   public static final long HISTORICAL_ROOTS_LIMIT = 1L << 24;
-  public static final int TREE_DEPTH = 15;
+  public static final int TREE_DEPTH = 14;
 
   private HistoricalRootsAccumulatorList historicalRootsList;
 
