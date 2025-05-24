@@ -39,7 +39,10 @@ public enum RpcMethod {
 
   PORTAL_HISTORY_STORE("portal_historyStore"),
   PORTAL_HISTORY_LOCAL_CONTENT("portal_historyLocalContent"),
-  PORTAL_HISTORY_PUT_CONTENT("portal_historyPutContent");
+  PORTAL_HISTORY_PUT_CONTENT("portal_historyPutContent"),
+
+  // TODO: migrate to beacon network
+  PORTAL_BEACON_STORE("portal_beaconStore");
 
   private final String methodName;
 
