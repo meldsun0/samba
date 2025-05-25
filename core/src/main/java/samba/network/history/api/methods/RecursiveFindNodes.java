@@ -4,6 +4,7 @@ import samba.api.jsonrpc.results.RecursiveFindNodesResult;
 import samba.network.history.api.HistoryNetworkInternalAPI;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class RecursiveFindNodes {
 
   private Optional<RecursiveFindNodesResult> execute(final String nodeId) {
     Optional<RecursiveFindNodesResult> result =
-        this.historyNetworkInternalAPI.recursiveFindNodes(nodeId, SEARCH_TIMEOUT);
+        this.historyNetworkInternalAPI.recursiveFindNodes(nodeId, Set.of(), SEARCH_TIMEOUT);
     return result;
   }
 
