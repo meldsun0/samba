@@ -173,7 +173,6 @@ You should be getting:
 ## Hardware Requirements
 
 Minimum:
-- m6gd.xlarge	4	16	1 x 237 GB	NVMe SSD  with EBS gp3 of 100GB.
 
 Recommended:
 
