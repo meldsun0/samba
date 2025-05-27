@@ -88,8 +88,8 @@ public class RecursiveLookupTaskFindNodes {
 
     final boolean closestCondition =
         foundNodes.stream()
-                .limit(MAX_NODE_LIST_COUNT)
                 .filter(record -> !excludedNodes.contains(record))
+                .limit(MAX_NODE_LIST_COUNT)
                 .filter(
                     record ->
                         UInt256.fromBytes(record.getNodeId().xor(targetNodeId))

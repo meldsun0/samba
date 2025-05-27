@@ -745,6 +745,11 @@ public class HistoryNetwork extends BaseNetwork
     CompletableFuture<Optional<FindContentResult>> future = task.execute();
     try {
       Optional<FindContentResult> result = future.join();
+      if (result.isPresent() && result.get().getContent() != null)
+        this.gossip(
+            task.getInterestedNodes(),
+            contentKey.getSszBytes(),
+            Bytes.fromHexString(result.get().getContent())); // POKE Mechanism
       return result;
     } catch (Exception e) {
       LOG.error("Error when executing getContent", e);
@@ -766,6 +771,11 @@ public class HistoryNetwork extends BaseNetwork
     CompletableFuture<Optional<TraceGetContentResult>> future = task.execute();
     try {
       Optional<TraceGetContentResult> result = future.join();
+      if (result.isPresent() && result.get().getContent() != null)
+        this.gossip(
+            task.getInterestedNodes(),
+            contentKey.getSszBytes(),
+            Bytes.fromHexString(result.get().getContent())); // POKE Mechanism
       return result;
     } catch (Exception e) {
       LOG.error("Error when executing traceGetContent", e);

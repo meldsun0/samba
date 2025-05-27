@@ -44,13 +44,14 @@ public class RecursiveLookupTaskTraceFindContent {
   private Optional<TraceGetContentResult> content = Optional.empty();
   private final int timeout;
 
-  private final UInt256 origin; // Done
-  private final UInt256 targetId; // Done
-  private UInt256 receivedFrom; // Done
-  private final long startedAtMs; // Done
-  private final Map<UInt256, TraceResultResponseItemJson> responses = new HashMap<>(); // Done
+  private final UInt256 origin;
+  private final UInt256 targetId;
+  private UInt256 receivedFrom;
+  private final long startedAtMs;
+  private final Map<UInt256, TraceResultResponseItemJson> responses = new HashMap<>();
   private final Map<UInt256, TraceResultMetadataObjectJson> metadata = new HashMap<>();
-  private final List<UInt256> cancelled = new ArrayList<>(); // Done
+  private final List<UInt256> cancelled = new ArrayList<>();
+  private final Set<NodeRecord> interestedNodes = new HashSet<>();
 
   public RecursiveLookupTaskTraceFindContent(
       final HistoryNetwork historyNetwork,
@@ -161,6 +162,10 @@ public class RecursiveLookupTaskTraceFindContent {
                           .flatMap(Optional::stream)
                           .filter(node -> !queriedNodeIds.contains(node.getNodeId()))
                           .collect(Collectors.toSet()));
+                  UInt256 peerDistance =
+                      UInt256.fromBytes(peer.getNodeId().xor(Hash.sha256(contentKey)));
+                  if (peerDistance.lessOrEqualThan(historyNetwork.getRadiusFromNode(peer)))
+                    interestedNodes.add(peer);
                 }
                 responses.put(
                     peerNodeId, new TraceResultResponseItemJson(durationMs, respondedWith));
@@ -176,5 +181,9 @@ public class RecursiveLookupTaskTraceFindContent {
               }
               return null;
             });
+  }
+
+  public Set<NodeRecord> getInterestedNodes() {
+    return interestedNodes;
   }
 }
