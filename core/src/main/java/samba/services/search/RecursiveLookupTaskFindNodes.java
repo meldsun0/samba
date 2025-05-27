@@ -126,7 +126,8 @@ public class RecursiveLookupTaskFindNodes {
   private void queryPeer(final NodeRecord peer) {
     Integer logDistance =
         UInt256.fromBytes(peer.getNodeId().xor(targetNodeId)).toBigInteger().bitLength() - 1;
-    Set<Integer> logDistances = Set.of(logDistance);
+    Set<Integer> logDistances = new HashSet<>();
+    logDistances.add(logDistance);
     if (!peer.getNodeId().equals(targetNodeId)) {
       logDistances.add(logDistance + 1);
       logDistances.add(logDistance - 1);

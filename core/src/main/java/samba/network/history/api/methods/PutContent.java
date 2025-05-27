@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.crypto.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,7 @@ public class PutContent {
 
   private static final Logger LOG = LoggerFactory.getLogger(PutContent.class);
   private final HistoryNetworkInternalAPI historyNetworkInternalAPI;
+  private static final int SEARCH_TIMEOUT = 15;
 
   public PutContent(HistoryNetworkInternalAPI historyNetworkInternalAPI) {
     this.historyNetworkInternalAPI = historyNetworkInternalAPI;
@@ -34,7 +36,8 @@ public class PutContent {
             contentKey, this.historyNetworkInternalAPI.getMaxGossipCount(), true);
     if (nodes.size() < this.historyNetworkInternalAPI.getMaxGossipCount()) {
       Optional<RecursiveFindNodesResult> newNodes =
-          this.historyNetworkInternalAPI.recursiveFindNodes(null, nodes, 0);
+          this.historyNetworkInternalAPI.recursiveFindNodes(
+              Hash.sha256(contentKeyInBytes).toHexString(), nodes, SEARCH_TIMEOUT);
       if (newNodes.isPresent()) {
         nodes.addAll(
             Stream.of(newNodes.get())
