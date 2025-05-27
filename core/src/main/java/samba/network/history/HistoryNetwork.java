@@ -775,7 +775,7 @@ public class HistoryNetwork extends BaseNetwork
 
   @Override
   public Optional<RecursiveFindNodesResult> recursiveFindNodes(
-      final String nodeId, final int timeout) {
+      final String nodeId, Set<NodeRecord> excludedNodes, final int timeout) {
     Bytes nodeIdBytes = Bytes.fromHexString(nodeId);
     RecursiveLookupTaskFindNodes task =
         new RecursiveLookupTaskFindNodes(
@@ -783,6 +783,7 @@ public class HistoryNetwork extends BaseNetwork
             nodeIdBytes,
             this.discv5Client.getHomeNodeRecord().getNodeId(),
             this.routingTable.findClosestNodesToKey(nodeIdBytes, 10, false),
+            excludedNodes,
             timeout);
     CompletableFuture<Optional<RecursiveFindNodesResult>> future = task.execute();
     try {

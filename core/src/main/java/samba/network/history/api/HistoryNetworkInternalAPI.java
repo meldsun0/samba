@@ -37,6 +37,8 @@ public interface HistoryNetworkInternalAPI {
 
   Set<NodeRecord> getFoundNodes(ContentKey contentKey, int count, boolean inRadius);
 
+  Optional<NodeRecord> nodeRecordFromEnr(String enr);
+
   void gossip(final Set<NodeRecord> nodes, final Bytes key, final Bytes content);
 
   int getMaxGossipCount();
@@ -52,7 +54,8 @@ public interface HistoryNetworkInternalAPI {
   // TODO RENAME
   Optional<FindContentResult> getContent(ContentKey contentKey, int timeout);
 
-  Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId, final int timeout);
+  Optional<RecursiveFindNodesResult> recursiveFindNodes(
+      final String nodeId, Set<NodeRecord> excludedNodes, final int timeout);
 
   UInt256 getLocalNodeId();
 

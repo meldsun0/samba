@@ -39,12 +39,14 @@ public class RecursiveLookupTaskFindNodes {
   private final Bytes targetNodeId;
   private final Set<Bytes> queriedNodeIds = new HashSet<>();
   private final SortedSet<NodeRecord> foundNodes;
+  private final Set<NodeRecord> excludedNodes = new HashSet<>();
 
   public RecursiveLookupTaskFindNodes(
       final HistoryNetwork historyNetwork,
       final Bytes targetNodeId,
       final Bytes homeNodeId,
       final Set<NodeRecord> foundNodes,
+      final Set<NodeRecord> excludedNodes,
       final int timeout) {
     this.historyNetwork = historyNetwork;
     this.targetNodeId = targetNodeId;
@@ -54,6 +56,7 @@ public class RecursiveLookupTaskFindNodes {
             Comparator.comparing(
                 foundNode -> UInt256.fromBytes(foundNode.getNodeId().xor(targetNodeId))));
     this.foundNodes.addAll(foundNodes);
+    this.excludedNodes.addAll(excludedNodes);
     this.timeout = timeout;
   }
 
@@ -86,6 +89,7 @@ public class RecursiveLookupTaskFindNodes {
     final boolean closestCondition =
         foundNodes.stream()
                 .limit(MAX_NODE_LIST_COUNT)
+                .filter(record -> !excludedNodes.contains(record))
                 .filter(
                     record ->
                         UInt256.fromBytes(record.getNodeId().xor(targetNodeId))
@@ -103,8 +107,9 @@ public class RecursiveLookupTaskFindNodes {
               : Optional.of(
                   new RecursiveFindNodesResult(
                       foundNodes.stream()
+                          .filter(record -> !excludedNodes.contains(record))
                           .limit(MAX_NODE_LIST_COUNT)
-                          .map(nodeRecord -> nodeRecord.getNodeId().toHexString())
+                          .map(nodeRecord -> nodeRecord.asEnr())
                           .toList())));
       return;
     }
@@ -121,7 +126,8 @@ public class RecursiveLookupTaskFindNodes {
   private void queryPeer(final NodeRecord peer) {
     Integer logDistance =
         UInt256.fromBytes(peer.getNodeId().xor(targetNodeId)).toBigInteger().bitLength() - 1;
-    Set<Integer> logDistances = Set.of(logDistance);
+    Set<Integer> logDistances = new HashSet<>();
+    logDistances.add(logDistance);
     if (!peer.getNodeId().equals(targetNodeId)) {
       logDistances.add(logDistance + 1);
       logDistances.add(logDistance - 1);

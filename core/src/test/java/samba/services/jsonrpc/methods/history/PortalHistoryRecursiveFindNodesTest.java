@@ -53,7 +53,7 @@ public class PortalHistoryRecursiveFindNodesTest {
                 }));
     RecursiveFindNodesResult foundData =
         new RecursiveFindNodesResult(List.of("0x0001", "0x0002", "0x0003", "0x0004", "0x0005"));
-    when(historyJsonRpc.recursiveFindNodes(any(String.class), anyInt()))
+    when(historyJsonRpc.recursiveFindNodes(any(String.class), any(), anyInt()))
         .thenReturn(Optional.of(foundData));
     final JsonRpcResponse expected =
         new JsonRpcSuccessResponse(request.getRequest().getId(), foundData);
