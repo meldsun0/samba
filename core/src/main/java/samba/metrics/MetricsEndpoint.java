@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.hyperledger.besu.metrics.MetricsService;
+import org.hyperledger.besu.metrics.ObservableMetricsSystem;
+import org.hyperledger.besu.metrics.noop.NoOpMetricsSystem;
 import org.hyperledger.besu.metrics.prometheus.MetricsConfiguration;
 import org.hyperledger.besu.metrics.prometheus.PrometheusMetricsSystem;
 import org.hyperledger.besu.plugin.services.MetricsSystem;
@@ -26,13 +28,18 @@ import org.hyperledger.besu.plugin.services.MetricsSystem;
 public class MetricsEndpoint {
 
   private final Optional<MetricsService> metricsService;
-  private final PrometheusMetricsSystem metricsSystem;
+  private final ObservableMetricsSystem metricsSystem;
 
   public MetricsEndpoint(final MetricsConfig config) {
     final MetricsConfiguration metricsConfig = createMetricsConfiguration(config);
-    metricsSystem = new PrometheusMetricsSystem(config.getMetricsCategories(), true);
-    metricsSystem.init();
-    metricsService = MetricsService.create(metricsConfig, metricsSystem);
+    if (metricsConfig.isEnabled()) {
+      metricsSystem = new PrometheusMetricsSystem(config.getMetricsCategories(), true);
+      // TODO check if we need the metricSystem.init()
+      metricsService = MetricsService.create(metricsConfig, metricsSystem);
+    } else {
+      metricsSystem = new NoOpMetricsSystem();
+      metricsService = MetricsService.create(metricsConfig, metricsSystem);
+    }
   }
 
   public CompletableFuture<?> start() {
