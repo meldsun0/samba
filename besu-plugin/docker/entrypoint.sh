@@ -6,4 +6,5 @@ exec besu \
   --plugin-samba-host="$HOST_IP" \
   --rpc-http-host=0.0.0.0 \
   --plugin-samba-data-path="$BESU_DATA_PATH/samba" \
+  --metrics-enabled  \
   --plugin-samba-logging="$LOG_LEVEL"

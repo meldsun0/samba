@@ -1,0 +1,83 @@
+services:
+  samba:
+    image: meldsun/samba:25.5-develop-31d6ec9-2
+    container_name: samba
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      args:
+#        VERSION: "v1.0.0"
+#        BUILD_DATE: "${BUILD_DATE:-2025-05-26}"
+#        VCS_REF: "${VCS_REF:-dev}"
+#    container_name: samba
+    user: "1000"
+    ports:
+      - "8545:8545"       # JSON-RPC server
+      - "8008:8008"       # Prometheus will scrape here
+      - "5051:5051"       # REST server
+      - "9090:9090"       # Discv5
+      - "9000:9000/udp"   # Discv5
+      - "9000:9000"       # Discv5
+    volumes:
+      - ${SAMBA_DATA_PATH}:/opt/samba/data
+      - ${SAMBA_LOG_PATH}:/opt/samba/logs
+    environment:
+      - SAMBA_USER_NAME=samba
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=samba,service.version=v1.0.0
+      - HOST_IP=${HOST_IP}
+    command: >
+      --p2p-advertised-ip=${HOST_IP}
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - samba
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - ${SAMBA_LOG_PATH}:/opt/samba/logs:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/datasources/prometheus.yml:/etc/grafana/provisioning/datasources/prometheus.yml
+      - ./grafana/datasources/loki.yml:/etc/grafana/provisioning/datasources/loki.yml
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+volumes:
+  grafana-data:

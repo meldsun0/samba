@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -52,7 +53,8 @@ public class OfferMessageTests {
     this.discv5Client = mock(Discv5Client.class);
     this.utpManager = mock(UTPManager.class);
     this.nodeRecord = createNodeRecord();
-    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
+    this.historyNetwork =
+        new HistoryNetwork(discv5Client, historyDB, utpManager, mock(MetricsSystem.class));
     when(this.discv5Client.getNodeId()).thenReturn(Optional.of(createNodeRecord().getNodeId()));
     mockRoutingTableFindNode(this.historyNetwork);
     when(historyDB.isAvailable()).thenReturn(true);

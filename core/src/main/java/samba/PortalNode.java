@@ -50,6 +50,7 @@ public final class PortalNode implements AutoCloseable {
     this.metricsEndpoint = new MetricsEndpoint(sambaConfiguration.getMetricsConfig());
     this.eventChannels =
         new EventChannels(new PortalDefaultExceptionHandler(), metricsEndpoint.getMetricsSystem());
+
     this.asyncRunnerFactory =
         new SambaAsyncRunnerFactory(
             new SambaTrackingExecutorFactory(
@@ -100,9 +101,10 @@ public final class PortalNode implements AutoCloseable {
         .orTimeout(30, TimeUnit.SECONDS)
         .handleException(error -> LOG.error("Failed to stop event channels cleanly", error))
         .join();
-    threadPool.shutdownNow();
-    counterMaintainer.ifPresent(Cancellable::cancel);
-    asyncRunnerFactory.shutdown();
+    this.threadPool.shutdownNow();
+    this.metricsEndpoint.stop();
+    this.counterMaintainer.ifPresent(Cancellable::cancel);
+    this.asyncRunnerFactory.shutdown();
 
     // Stop services.
     this.historyNetworkMainService

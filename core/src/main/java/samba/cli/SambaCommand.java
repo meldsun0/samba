@@ -131,6 +131,13 @@ public class SambaCommand implements Callable<Integer> {
 
   private String sambaUserName = "samba";
 
+  @Option(
+      names = "--disable-metric--server",
+      description = "Disables Metric Server (set to true if flag is present)",
+      defaultValue = "false",
+      fallbackValue = "true")
+  private boolean disableMetricServer;
+
   public SambaCommand(
       final PrintWriter outputWriter,
       final PrintWriter errorWriter,
@@ -190,6 +197,11 @@ public class SambaCommand implements Callable<Integer> {
               jsonRpc.host(jsonRpcHost);
             }
           });
+      builder.metrics(
+          metricsConfigBuilder -> {
+            metricsConfigBuilder.metricsEnabled(!disableMetricServer);
+          });
+
       builder.restServer(restServer -> restServer.enableRestServer(!disableRestServer));
 
       if (unsafePrivateKey != null) {

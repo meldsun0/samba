@@ -62,6 +62,7 @@ import org.ethereum.beacon.discovery.schema.IdentitySchemaV4Interpreter;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.ethereum.beacon.discovery.util.Functions;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,10 +88,13 @@ public class HistoryNetwork extends BaseNetwork
   // default ping with standard arguments
 
   public HistoryNetwork(
-      final Discv5Client client, final HistoryDB historyDB, final UTPManager utpManager) {
+      final Discv5Client client,
+      final HistoryDB historyDB,
+      final UTPManager utpManager,
+      final MetricsSystem metricsSystem) {
     super(NetworkType.EXECUTION_HISTORY_NETWORK, client, UInt256.ONE);
     this.nodeRadius = UInt256.MAX_VALUE.subtract(1L); // TODO must come from argument
-    this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this);
+    this.routingTable = new HistoryRoutingTable(client.getHomeNodeRecord(), this, metricsSystem);
     this.historyDB = historyDB;
     this.utpManager = utpManager;
     this.nodeRecordFactory = new NodeRecordFactory(new IdentitySchemaV4Interpreter());

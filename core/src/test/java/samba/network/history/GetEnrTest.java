@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -35,7 +36,9 @@ public class GetEnrTest {
   public void setUp() {
     this.discv5Client = mock(Discv5Client.class);
     this.historyDB = mock(HistoryDB.class);
-    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, mock(UTPManager.class));
+    this.historyNetwork =
+        new HistoryNetwork(
+            discv5Client, historyDB, mock(UTPManager.class), mock(MetricsSystem.class));
     when(discv5Client.getHomeNodeRecord()).thenReturn(createNodeRecord());
   }
 

@@ -105,6 +105,7 @@ public class SambaConfiguration {
     lines.addAll(this.getRestServerConfig().getRestServerSummaryLog());
     lines.addAll(this.getJsonRpcConfigurationn().getJsonRpcServerSummaryLog());
     lines.addAll(this.getStorageConfig().getStorageConfigSummaryLog());
+    lines.addAll(this.getMetricsConfig().getMetricsConfigSummaryLog());
     return FramedLogMessage.generate(lines);
   }
 
@@ -164,6 +165,12 @@ public class SambaConfiguration {
 
     public Builder storage(final Consumer<StorageConfig.Builder> storageConfigConsumer) {
       storageConfigConsumer.accept(storageConfigBuilder);
+      return this;
+    }
+
+    public Builder metrics(
+        final Consumer<MetricsConfig.MetricsConfigBuilder> metricsConfigConsumer) {
+      metricsConfigConsumer.accept(metricsConfigBuilder);
       return this;
     }
 

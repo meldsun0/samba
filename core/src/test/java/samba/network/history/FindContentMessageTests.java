@@ -22,10 +22,12 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
 
+@SuppressWarnings("unchecked")
 public class FindContentMessageTests {
 
   private static final Bytes contentKey =
@@ -44,7 +46,8 @@ public class FindContentMessageTests {
     this.discv5Client = mock(Discv5Client.class);
     this.utpManager = mock(UTPManager.class);
     this.nodeRecord = createNodeRecord();
-    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, utpManager);
+    this.historyNetwork =
+        new HistoryNetwork(discv5Client, historyDB, utpManager, mock(MetricsSystem.class));
     when(historyDB.isAvailable()).thenReturn(true);
   }
 

@@ -15,10 +15,12 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
 
+@SuppressWarnings("unchecked")
 public class DeleteEnrTest {
 
   private HistoryNetworkInternalAPI historyNetwork;
@@ -28,7 +30,11 @@ public class DeleteEnrTest {
   @BeforeEach
   public void setUp() {
     this.historyNetwork =
-        new HistoryNetwork(mock(Discv5Client.class), mock(HistoryDB.class), mock(UTPManager.class));
+        new HistoryNetwork(
+            mock(Discv5Client.class),
+            mock(HistoryDB.class),
+            mock(UTPManager.class),
+            mock(MetricsSystem.class));
   }
 
   @Test
