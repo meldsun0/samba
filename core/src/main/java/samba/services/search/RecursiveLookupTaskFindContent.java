@@ -16,7 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.crypto.Hash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,7 @@ public class RecursiveLookupTaskFindContent {
   private final Set<NodeRecord> foundNodes = new HashSet<>();
   private Optional<FindContentResult> content = Optional.empty();
   private final int timeout;
+  private final Set<NodeRecord> interestedNodes = new HashSet<>();
 
   public RecursiveLookupTaskFindContent(
       final HistoryNetwork historyNetwork,
@@ -108,6 +111,10 @@ public class RecursiveLookupTaskFindContent {
                           .flatMap(Optional::stream)
                           .filter(node -> !queriedNodeIds.contains(node.getNodeId()))
                           .collect(Collectors.toSet()));
+                  UInt256 peerDistance =
+                      UInt256.fromBytes(peer.getNodeId().xor(Hash.sha256(contentKey)));
+                  if (peerDistance.lessOrEqualThan(historyNetwork.getRadiusFromNode(peer)))
+                    interestedNodes.add(peer);
                 }
                 sendRequests();
               }
@@ -121,5 +128,9 @@ public class RecursiveLookupTaskFindContent {
               }
               return null;
             });
+  }
+
+  public Set<NodeRecord> getInterestedNodes() {
+    return interestedNodes;
   }
 }

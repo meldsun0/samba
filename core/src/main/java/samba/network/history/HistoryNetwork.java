@@ -438,7 +438,8 @@ public class HistoryNetwork extends BaseNetwork
     return this.historyDB.saveContent(contentKey, contentValue);
   }
 
-  private Optional<ContentBlockHeader> getAssociatedBlockHeader(Bytes contentKey) {
+  private Optional<ContentBlockHeader> getAssociatedBlockHeader(
+      Bytes contentKey) { // TODO: fallback mechanism in case found block header is not valid
     try {
       Bytes blockHeaderKeySsz =
           Bytes.concatenate(Bytes.of(ContentType.BLOCK_HEADER.getByteValue()), contentKey.slice(1));
@@ -745,6 +746,11 @@ public class HistoryNetwork extends BaseNetwork
     CompletableFuture<Optional<FindContentResult>> future = task.execute();
     try {
       Optional<FindContentResult> result = future.join();
+      if (result.isPresent() && result.get().getContent() != null)
+        this.gossip(
+            task.getInterestedNodes(),
+            contentKey.getSszBytes(),
+            Bytes.fromHexString(result.get().getContent())); // POKE Mechanism
       return result;
     } catch (Exception e) {
       LOG.error("Error when executing getContent", e);
@@ -766,6 +772,11 @@ public class HistoryNetwork extends BaseNetwork
     CompletableFuture<Optional<TraceGetContentResult>> future = task.execute();
     try {
       Optional<TraceGetContentResult> result = future.join();
+      if (result.isPresent() && result.get().getContent() != null)
+        this.gossip(
+            task.getInterestedNodes(),
+            contentKey.getSszBytes(),
+            Bytes.fromHexString(result.get().getContent())); // POKE Mechanism
       return result;
     } catch (Exception e) {
       LOG.error("Error when executing traceGetContent", e);
