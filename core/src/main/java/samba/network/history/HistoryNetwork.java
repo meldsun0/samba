@@ -438,7 +438,8 @@ public class HistoryNetwork extends BaseNetwork
     return this.historyDB.saveContent(contentKey, contentValue);
   }
 
-  private Optional<ContentBlockHeader> getAssociatedBlockHeader(Bytes contentKey) {
+  private Optional<ContentBlockHeader> getAssociatedBlockHeader(
+      Bytes contentKey) { // TODO: fallback mechanism in case found block header is not valid
     try {
       Bytes blockHeaderKeySsz =
           Bytes.concatenate(Bytes.of(ContentType.BLOCK_HEADER.getByteValue()), contentKey.slice(1));
