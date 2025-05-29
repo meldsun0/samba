@@ -43,6 +43,7 @@ import samba.validation.util.ValidationUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -449,17 +450,44 @@ public class HistoryNetwork extends BaseNetwork
       if (blockHeaderBytes.isPresent()) {
         return ContentUtil.createBlockHeaderfromSszBytes(blockHeaderBytes.get());
       }
+      int SEARCH_ATTEMPTS = 3;
+      Set<NodeRecord> excludedNodes = new HashSet<>();
+      for (int i = 0; i < SEARCH_ATTEMPTS; i++) {
+        RecursiveLookupTaskFindContent task =
+            new RecursiveLookupTaskFindContent(
+                this,
+                blockHeaderKey.getSszBytes(),
+                this.discv5Client.getHomeNodeRecord().getNodeId(),
+                getFoundNodes(blockHeaderKey),
+                DEFAULT_TIMEOUT);
+        Optional<FindContentResult> searchResult = task.execute().join();
 
-      Optional<FindContentResult> searchResult = getContent(blockHeaderKey, DEFAULT_TIMEOUT);
-      if (searchResult.isPresent()) {
-        Optional<ContentBlockHeader> blockHeader =
-            ContentUtil.createBlockHeaderfromSszBytes(
-                Bytes.fromHexString(searchResult.get().getContent()));
-        this.store(
-            blockHeaderKeySsz, blockHeader.get().getSszBytes()); // Store newly located block header
-        return blockHeader;
+        if (searchResult.isPresent()) {
+          Optional<ContentBlockHeader> blockHeader =
+              ContentUtil.createBlockHeaderfromSszBytes(
+                  Bytes.fromHexString(searchResult.get().getContent()));
+          if (this.store(blockHeaderKeySsz, blockHeader.get().getSszBytes())) {
+            LOG.debug(
+                "Found and stored block header for content key {}: {}",
+                contentKey,
+                blockHeaderKey.getSszBytes().toHexString());
+            this.gossip(
+                task.getInterestedNodes(),
+                blockHeaderKey.getSszBytes(),
+                Bytes.fromHexString(searchResult.get().getContent())); // POKE Mechanism
+            return blockHeader; // Store newly located block header
+          }
+          LOG.debug(
+              "Found Header for content key {} invalid, trying other peers",
+              contentKey,
+              blockHeaderKey);
+        }
+        if (task.getRespondingNode().isPresent()) excludedNodes.add(task.getRespondingNode().get());
       }
-
+      LOG.debug(
+          "Could not find associated block header for content key {} after {} attempts",
+          contentKey,
+          SEARCH_ATTEMPTS);
       return Optional.empty();
     } catch (Exception e) {
       LOG.debug("Error when retrieving associated block header for {}", contentKey, e);
