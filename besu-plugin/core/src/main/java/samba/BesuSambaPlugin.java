@@ -2,6 +2,7 @@ package samba;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.auto.service.AutoService;
@@ -43,7 +44,7 @@ public class BesuSambaPlugin implements BesuPlugin {
   @CommandLine.Option(names = {"--plugin-samba-data-path"})
   public String dataPath;
 
-  private SambaSDK sambaSDK;
+  private final CompletableFuture<SambaSDK> sambaSDKFuture = new CompletableFuture<>();
 
   @Override
   public void register(ServiceManager serviceManager) {
@@ -71,7 +72,8 @@ public class BesuSambaPlugin implements BesuPlugin {
   public void start() {
     LOG.info("Starting Samba plugin");
     if (startingTasksDone.compareAndSet(false, true)) {
-      this.sambaSDK = this.initSamba();
+      SambaSDK sdk = this.initSamba();
+      sambaSDKFuture.complete(sdk);
       this.metricsSystemService = this.getBesuService(this.serviceManager, MetricsSystem.class);
     }
   }
@@ -110,7 +112,7 @@ public class BesuSambaPlugin implements BesuPlugin {
   }
 
   private void starRpcEndpoints() {
-    var methods = List.of(new GetBlockBodyByBlockHash(this.sambaSDK));
+    var methods = List.of(new GetBlockBodyByBlockHash(this.sambaSDKFuture));
     methods.forEach(
         method -> {
           LOG.info(
