@@ -1,5 +1,8 @@
 package samba.rpc;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
@@ -9,10 +12,10 @@ import samba.SambaSDK;
 
 public class GetBlockBodyByBlockHash implements PluginRpcMethod {
 
-  private final SambaSDK sambaSDK;
+  private final CompletableFuture<SambaSDK> sambaSDKFuture;
 
-  public GetBlockBodyByBlockHash(SambaSDK sambaSDK) {
-    this.sambaSDK = sambaSDK;
+  public GetBlockBodyByBlockHash(CompletableFuture<SambaSDK> sambaSDKFuture) {
+    this.sambaSDKFuture = sambaSDKFuture;
   }
 
   @Override
@@ -30,12 +33,15 @@ public class GetBlockBodyByBlockHash implements PluginRpcMethod {
     try {
       String rawParam = new JsonRpcParameter().required(rpcRequest.getParams(), 0, String.class);
       Hash blockHash = Hash.fromHexString(rawParam);
-      return this.sambaSDK
+      return this.sambaSDKFuture
+          .get()
           .historyAPI()
           .flatMap(history -> history.getBlockHeaderByBlockHash(blockHash))
           .map(BlockHeader::toString)
           .orElse("");
-    } catch (JsonRpcParameter.JsonRpcParameterException e) {
+    } catch (JsonRpcParameter.JsonRpcParameterException
+        | ExecutionException
+        | InterruptedException e) {
       throw new RuntimeException(e);
     }
   }

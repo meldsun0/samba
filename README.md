@@ -80,6 +80,14 @@ All the unit tests are run as part of the build, but can be explicitly triggered
 
 ## Docker
 
+To run Samba inside docker you should:
+
+```shell script
+./gradlew distDocker 
+```
+```shell script
+docker -p 8545:8545 -p 5051:5051 -p 8008:8008 -p 9000:9000/udp {imageName} --p2p-advertised-ip==$(curl -s ifconfig.me)
+```
 ## Running Hive locally
 
 To run Hive locally against Samba you should follow these instructions: 
@@ -165,7 +173,7 @@ You should be getting:
 | `-disable-rest--server=`     | false           |
 | `--p2p-advertised-ip=`       | 0.0.0.0         |
 | `--logging=`                 | INFO            |
-| `--data-path=`               | ./build/samba            |
+| `--data-path=`               | ./build/samba   |
 
 
 
@@ -180,15 +188,48 @@ TO-DO
 
 ## Setup
 
-- Besu  + Samba:
+- Besu or Samba:
   - Mount volume:
     - sudo mkfs.xfs /dev/nvme2n1
     - sudo mkdir -p /mnt/ebs1
     - sudo mount /dev/nvme2n1 /mnt/ebs1
   - Provide correct access:
     - sudo chown -R 1000:1000 /mnt/ebs1
+  - Relocating Docker's Data Directory to a Custom Path (e.g., EBS Volume):
+    - sudo mkdir -p /etc/docker 
+    - sudo nano /etc/docker/daemon.json 
+    {
+      "data-root": "/mnt/ebs1/docker"
+      } 
+    - sudo mv /var/lib/docker /mnt/ebs1/docker 
+    - sudo systemctl daemon-reexec 
+    - sudo systemctl restart docker 
+    - docker info | grep "Docker Root Dir"
+  - If you are running samba standalone:
+    - mkdir /mnt/ebs1/samba
+    -  docker run -p 8545:8545 -p 5051:5051 -p 8008:8008 -p 9000:9000/udp  -v /mnt/ebs1/samba:/opt/samba meldsun/instances:samba-standalone-arm64 --p2p-advertised-ip=$(curl -s ifconfig.me)
   - Run Besu:
     - docker run -e HOST_IP=$(curl -s ifconfig.me) -d --name besu --user 1000 -p 8545:8545 -p 9545:9545 -p 9000:9000/udp -v /mnt/ebs1:/data  meldsun/instances:besu-with-samba-arm64 
+### Running instances
+
+If you want to run Samba using docker compose with Prometheus and Grafana:
+
+```shell script
+HOST_IP=$(curl -s ifconfig.me) SAMBA_DATA_PATH={dataPath}  SAMBA_LOG_PATH={logPath} docker compose up -d
+```
+
+| Service        | URL                                            | Notes                              |
+| -------------- | ---------------------------------------------- | ---------------------------------- |
+| **Prometheus** | [http://localhost:9091](http://localhost:9091) | Confirm `samba:8008/metrcis` is UP |
+| **Grafana**    | [http://localhost:3000](http://localhost:3000) | Login: `admin` / `admin`           |
+
+If you want to run it using just the docker image:
+
+```shell script
+docker run -p 8545:8545 -p 5051:5051 -p 8008:8008 -p 9000:9000/udp  -v /mnt/ebs1/samba:/data -d  meldsun/instances:samba-standalone-arm64 --p2p-advertised-ip=$(curl -s ifconfig.me)
+```
+
+
 
 ### Useful links
 * [Devcon SEA History Expiry and Portal Network session](https://notes.ethereum.org/_XVO7jmXTGOwZmhR5-3T9Q)

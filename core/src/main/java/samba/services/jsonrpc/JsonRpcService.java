@@ -12,6 +12,7 @@ import samba.jsonrpc.handler.TimeoutHandler;
 import samba.jsonrpc.handler.processor.BaseJsonRpcProcessor;
 import samba.jsonrpc.health.HealthService;
 import samba.jsonrpc.reponse.JsonRpcMethod;
+import samba.metrics.SambaMetricCategory;
 
 import java.util.Map;
 import java.util.Optional;
@@ -52,6 +53,7 @@ public class JsonRpcService extends Service {
 
   private final int maxActiveConnections;
   private final AtomicInteger activeConnectionsCount = new AtomicInteger();
+  // private final LabelledMetric<OperationTimer> requestTimer;
 
   private HttpServer httpServer;
   private final HealthService livenessService;
@@ -65,6 +67,19 @@ public class JsonRpcService extends Service {
       final Map<String, JsonRpcMethod> methods,
       final HealthService livenessService) {
     validateConfig(config);
+    //    requestTimer =
+    //            metricsSystem.createLabelledTimer(
+    //                    BesuMetricCategory.RPC,
+    //                    "request_time",
+    //                    "Time taken to process a JSON-RPC request",
+    //                    "methodName");
+
+    metricsSystem.createIntegerGauge(
+        SambaMetricCategory.HISTORY,
+        "rpc_active_connection_count",
+        "Total no of active rpc http connections",
+        activeConnectionsCount::intValue);
+
     this.config = config;
     this.vertx = vertx;
     this.rpcMethods = methods;
@@ -190,7 +205,7 @@ public class JsonRpcService extends Service {
             activeConnectionsCount.getAndIncrement());
         connection.close();
       } else {
-        LOG.info(
+        LOG.debug(
             "Opened connection from {}. Total of active connections: {}/{}",
             connection.remoteAddress(),
             activeConnectionsCount.incrementAndGet(),

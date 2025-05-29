@@ -7,11 +7,9 @@ import org.hyperledger.besu.plugin.services.metrics.MetricCategory;
 
 public enum SambaMetricCategory implements MetricCategory {
   DISCOVERY("samba_discovery"),
-  EVENTBUS("samba_eventbus"),
-  EXECUTOR("samba_executor"),
-  LIBP2P("samba_libp2p"),
   NETWORK("samba_network"),
-  STORAGE("samba_storage");
+  STORAGE("samba_storage"),
+  HISTORY("samba_history");
 
   private final String name;
 
@@ -30,6 +28,6 @@ public enum SambaMetricCategory implements MetricCategory {
   }
 
   public static Set<SambaMetricCategory> defaultCategories() {
-    return Set.of(DISCOVERY, EVENTBUS, EXECUTOR, LIBP2P, NETWORK);
+    return Set.of(DISCOVERY, NETWORK, STORAGE, HISTORY);
   }
 }

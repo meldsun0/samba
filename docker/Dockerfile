@@ -18,16 +18,20 @@ RUN apt-get update $NO_PROXY_CACHE  && \
   chown samba:samba /opt/samba  && \
   chmod 0755 /opt/samba
 
+RUN apt-get update && apt-get install -y gosu && rm -rf /var/lib/apt/lists/*
+
 ARG SAMBA_USER=samba
 USER ${SAMBA_USER}
 WORKDIR /opt/samba
 
 COPY --chown=samba:samba samba /opt/samba/
-#RUN mkdir -p  /opt/samba/build/data
-#JSON-RPC Metrics, Rest API,Discv5
-EXPOSE 8545 8008 5051 9000/udp
+# Make sure logs/ exists and is writable by the samba user
+RUN mkdir -p /opt/samba/logs && \
+    chown samba:samba /opt/samba/logs && \
+    chmod 755 /opt/samba/logs
 
-ENV SAMBA_RPC_HTTP_HOST 0.0.0.0
+#     JSON-RPC Metrics, Rest API,Discv5
+EXPOSE 8545 8008 5051 9090 9000/udp 9000
 
 ENV SAMBA_PID_PATH "/tmp/pid"
 
@@ -45,10 +49,9 @@ ENV PATH="/opt/samba/bin:${OLDPATH}"
 USER root
 RUN chmod +x /opt/samba/bin/samba-entry.sh
 
+USER samba
 ENV SAMBA_USER_NAME=${SAMBA_USER}
-
 ENTRYPOINT ["samba-entry.sh"]
-#HEALTHCHECK --start-period=5s --interval=5s --timeout=1s --retries=10 CMD bash -c "[ -f /tmp/pid ]"
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE

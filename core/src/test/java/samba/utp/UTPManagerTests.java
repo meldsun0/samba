@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import meldsun0.utp.UTPClient;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +38,7 @@ public class UTPManagerTests {
   @BeforeEach
   public void before() {
     this.discv5Client = mock(Discv5Client.class);
-    this.utpManager = spy(new UTPManager(discv5Client));
+    this.utpManager = spy(new UTPManager(discv5Client, mock(MetricsSystem.class)));
     this.utpClient = mock(UTPClient.class);
     this.nodeRecord = mock(NodeRecord.class);
   }

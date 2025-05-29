@@ -13,7 +13,7 @@ import picocli.CommandLine;
 public interface DefaultCommandValues {
 
   String SAMBA_HOME_PROPERTY_NAME = "samba.home";
-  String DEFAULT_DATA_DIR_PATH = "./build/samba";
+  String DEFAULT_DATA_DIR_PATH = "./data";
 
   static Path getDefaultSambaDataPath(final Object command) {
     final String sambaHomeProperty = System.getProperty(SAMBA_HOME_PROPERTY_NAME);

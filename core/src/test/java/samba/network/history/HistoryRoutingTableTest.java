@@ -1,6 +1,7 @@
 package samba.network.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import samba.TestHelper;
 import samba.domain.dht.LivenessChecker;
@@ -14,6 +15,7 @@ import java.util.Set;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,7 +31,8 @@ public class HistoryRoutingTableTest {
   public void setUp() {
     this.livenessChecker = Mockito.mock(LivenessChecker.class);
     this.homeNode = TestHelper.createNodeRecord();
-    this.routingTable = new HistoryRoutingTable(this.homeNode, this.livenessChecker);
+    this.routingTable =
+        new HistoryRoutingTable(this.homeNode, this.livenessChecker, mock(MetricsSystem.class));
     this.nodes = new ArrayList<>();
     for (int i = 1; i < 15; i++) {
       NodeRecord node = TestHelper.createNodeRecord();
@@ -55,7 +58,8 @@ public class HistoryRoutingTableTest {
 
   @Test
   public void testFindClosestNodesToContentKeyInRadius() {
-    RoutingTable exaggeratedTable = new HistoryRoutingTable(this.homeNode, this.livenessChecker);
+    RoutingTable exaggeratedTable =
+        new HistoryRoutingTable(this.homeNode, this.livenessChecker, mock(MetricsSystem.class));
     exaggeratedTable.addOrUpdateNode(this.nodes.get(0));
     exaggeratedTable.updateRadius(this.nodes.get(0).getNodeId(), UInt256.MAX_VALUE);
     exaggeratedTable.addOrUpdateNode(this.nodes.get(2));

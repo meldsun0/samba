@@ -2,6 +2,7 @@ package samba.network.history.routingtable;
 
 import samba.domain.dht.LivenessChecker;
 import samba.domain.dht.NodeTable;
+import samba.metrics.SambaMetricCategory;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -17,6 +18,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.hyperledger.besu.crypto.Hash;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 
 /**
  * KBuckets: Represent distances from the local node perspective. It's a "binary tree whose leaves
@@ -32,11 +34,24 @@ public class HistoryRoutingTable implements RoutingTable {
   private final Map<Bytes, UInt256> radiusMap;
   private final NodeTable nodeTable;
 
-  // gossip ?
-
-  public HistoryRoutingTable(final NodeRecord homeNode, final LivenessChecker livenessChecker) {
-    this.radiusMap = new ConcurrentHashMap<Bytes, UInt256>();
+  public HistoryRoutingTable(
+      final NodeRecord homeNode,
+      final LivenessChecker livenessChecker,
+      final MetricsSystem metricsSystem) {
+    this.radiusMap = new ConcurrentHashMap<>();
     this.nodeTable = new NodeTable(homeNode, livenessChecker);
+
+    metricsSystem.createIntegerGauge(
+        SambaMetricCategory.HISTORY,
+        "routing_table_radius_nodes_count",
+        "Number of nodes in the radiusMap",
+        this.radiusMap::size);
+
+    metricsSystem.createIntegerGauge(
+        SambaMetricCategory.HISTORY,
+        "live_nodes_current",
+        "Current number of live nodes tracked by the discovery system",
+        this::getActiveNodes);
   }
 
   @Override

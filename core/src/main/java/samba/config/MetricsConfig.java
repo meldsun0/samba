@@ -16,7 +16,9 @@ package samba.config;
 import samba.metrics.SambaMetricCategory;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,13 +30,12 @@ public class MetricsConfig {
 
   public static final ImmutableSet<MetricCategory> DEFAULT_METRICS_CATEGORIES =
       ImmutableSet.<MetricCategory>builder()
-          // .addAll(EnumSet.allOf(StandardMetricCategory.class))
           .addAll(SambaMetricCategory.defaultCategories())
           .build();
   public static final int DEFAULT_METRICS_PORT = 8008;
-  public static final String DEFAULT_METRICS_INTERFACE = "127.0.0.1";
+  public static final String DEFAULT_METRICS_INTERFACE = "0.0.0.0";
   public static final List<String> DEFAULT_METRICS_HOST_ALLOWLIST =
-      Arrays.asList("127.0.0.1", "127.0 0.1:8008");
+      Arrays.asList("127.0.0.1", "localhost", "samba", "prometheus");
   public static final int DEFAULT_IDLE_TIMEOUT_SECONDS = 60;
   public static final int DEFAULT_METRICS_PUBLICATION_INTERVAL = 60;
 
@@ -102,6 +103,25 @@ public class MetricsConfig {
     return idleTimeoutSeconds;
   }
 
+  public Collection<String> getMetricsConfigSummaryLog() {
+    List<String> summary = new ArrayList<>();
+    summary.add("Metrics Server Summary:");
+    if (!this.metricsEnabled) {
+      summary.add("Enable: false");
+    } else {
+      summary.add(
+          String.format(
+              "Enabled: true, Listen Address: %s, Port: %s", metricsInterface, metricsPort));
+      summary.add(
+          String.format(
+              "Allow: %s, Categories: %s",
+              String.join(",", this.metricsHostAllowlist),
+              String.join(
+                  ",", this.metricsCategories.stream().map(MetricCategory::getName).toList())));
+    }
+    return summary;
+  }
+
   public static final class MetricsConfigBuilder {
 
     private boolean metricsEnabled = true;
@@ -119,15 +139,6 @@ public class MetricsConfig {
       this.metricsEnabled = metricsEnabled;
       return this;
     }
-
-    //        public MetricsConfigBuilder metricsPort(final int metricsPort) {
-    //            if (!PortAvailability.isPortValid(metricsPort)) {
-    //                throw new InvalidConfigurationException(
-    //                        String.format("Invalid metricsPort: %d", metricsPort));
-    //            }
-    //            this.metricsPort = metricsPort;
-    //            return this;
-    //        }
 
     public MetricsConfigBuilder metricsInterface(final String metricsInterface) {
       this.metricsInterface = metricsInterface;
@@ -148,16 +159,6 @@ public class MetricsConfig {
       this.metricsPublishEndpoint = metricsPublishEndpoint;
       return this;
     }
-
-    //        public MetricsConfigBuilder metricsPublishInterval(final int metricsPublishInterval) {
-    //            if (metricsPublishInterval < 0) {
-    //                throw new InvalidConfigurationException(
-    //                        String.format("Invalid metricsPublishInterval: %d",
-    // metricsPublishInterval));
-    //            }
-    //            this.metricsPublishInterval = metricsPublishInterval;
-    //            return this;
-    //        }
 
     public MetricsConfig build() {
       return new MetricsConfig(

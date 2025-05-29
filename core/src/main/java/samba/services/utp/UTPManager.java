@@ -1,5 +1,6 @@
 package samba.services.utp;
 
+import samba.metrics.SambaMetricCategory;
 import samba.network.NetworkType;
 import samba.services.discovery.Discv5Client;
 
@@ -18,6 +19,7 @@ import meldsun0.utp.data.UtpPacket;
 import meldsun0.utp.network.TransportLayer;
 import org.apache.tuweni.bytes.Bytes;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tech.pegasys.teku.infrastructure.async.SafeFuture;
@@ -32,9 +34,15 @@ public class UTPManager implements TransportLayer<UTPAddress> {
 
   private final ExecutorService utpExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-  public UTPManager(final Discv5Client discv5Client) {
+  public UTPManager(final Discv5Client discv5Client, final MetricsSystem metricsSystem) {
     this.discv5Client = discv5Client;
     this.connections = new ConcurrentHashMap<>();
+
+    metricsSystem.createIntegerGauge(
+        SambaMetricCategory.HISTORY,
+        "utp_active_connection_count",
+        "Current UTP connections",
+        this.connections::size);
   }
 
   public int acceptRead(NodeRecord nodeRecord, Consumer<Bytes> onContentReceived) {

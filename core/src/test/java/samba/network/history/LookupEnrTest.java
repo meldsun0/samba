@@ -27,6 +27,7 @@ import org.apache.tuweni.units.bigints.UInt64;
 import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
+import org.hyperledger.besu.plugin.services.MetricsSystem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.ReflectionUtils;
@@ -43,7 +44,9 @@ public class LookupEnrTest {
     this.discv5Client = mock(Discv5Client.class);
     HistoryDB historyDB = mock(HistoryDB.class);
     when(historyDB.isAvailable()).thenReturn(true);
-    this.historyNetwork = new HistoryNetwork(discv5Client, historyDB, mock(UTPManager.class));
+    this.historyNetwork =
+        new HistoryNetwork(
+            discv5Client, historyDB, mock(UTPManager.class), mock(MetricsSystem.class));
     this.nodeRecord = TestHelper.createNodeRecord();
     this.routingTable = this.mockRoutingTable();
   }

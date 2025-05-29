@@ -34,6 +34,7 @@ public class ConnectionService extends Service {
   private final Counter failedConnectionCounter;
   private final AsyncRunner asyncRunner;
   private volatile Cancellable periodicPeerSearch;
+  private final MetricsSystem metricsSystem;
 
   public ConnectionService(
       final MetricsSystem metricsSystem,
@@ -44,11 +45,11 @@ public class ConnectionService extends Service {
     this.asyncRunner = asyncRunner;
     this.network = network;
     this.discv5Client = discv5Client;
-
+    this.metricsSystem = metricsSystem;
     final LabelledMetric<Counter> connectionAttemptCounter =
         metricsSystem.createLabelledCounter(
             SambaMetricCategory.NETWORK,
-            "peer_connection_attempt_count_total",
+            "connection_attempt_count_total",
             "Total number of outbound connection attempts made",
             "status");
     attemptedConnectionCounter = connectionAttemptCounter.labels("attempted");
@@ -104,13 +105,10 @@ public class ConnectionService extends Service {
             peer -> {
               LOG.debug("Successfully connected to node {}", nodeRecord.getNodeId());
               successfulConnectionCounter.inc();
-              //                    peer.subscribeDisconnect((reason, locallyInitiated) ->
-              // peerPools.forgetPeer(peer.getId()));
             },
             error -> {
               LOG.debug("Failed to connect to node: {}", nodeRecord.getNodeId());
               failedConnectionCounter.inc();
-              //                    peerPools.forgetPeer(peerAddress.getId());
             });
   }
 

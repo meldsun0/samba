@@ -120,7 +120,7 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
   }
 
   private void initUTPService() {
-    this.utpManager = new UTPManager(this.discoveryService);
+    this.utpManager = new UTPManager(this.discoveryService, this.metricsSystem);
   }
 
   private void initAPIs() {
@@ -209,7 +209,8 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
                 sambaConfiguration.getDataPath(),
                 sambaConfiguration.getStorageConfig(),
                 metricsSystem),
-            this.utpManager);
+            this.utpManager,
+            metricsSystem);
   }
 
   private void initConnectionService() {
