@@ -6,6 +6,7 @@ import samba.services.discovery.Discv5Client;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -68,19 +69,19 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     return connectionId;
   }
 
-  public void offerWrite(final NodeRecord nodeRecord, final int connectionId, Bytes content) {
-    this.runAsyncUTP(
+  public SafeFuture<Void> offerWrite(NodeRecord nodeRecord, int connectionId, Bytes content) {
+    return runAsyncUTPWithFuture(
         () -> {
-          UTPClient utpClient = this.registerClient(nodeRecord, connectionId);
+          UTPClient utpClient = registerClient(nodeRecord, connectionId);
           utpClient
               .connect(connectionId, new UTPAddress(nodeRecord))
-              .thenCompose(__ -> utpClient.write(content, this.utpExecutor))
-              .get();
+              .thenCompose(__ -> utpClient.write(content, utpExecutor))
+              .join();
         },
         "offerWrite",
         nodeRecord,
         connectionId,
-        this.utpExecutor);
+        utpExecutor);
   }
 
   public int foundContentWrite(NodeRecord nodeRecord, Bytes content) {
@@ -193,6 +194,21 @@ public class UTPManager implements TransportLayer<UTPAddress> {
     SafeFuture.runAsync(
             () -> executeWithHandling(task, operationName, nodeRecord, connectionId), executor)
         .exceptionally(defaultUTPErrorLog(operationName, nodeRecord, connectionId));
+  }
+
+  private SafeFuture<Void> runAsyncUTPWithFuture(
+      RunnableUTP task,
+      String operationName,
+      NodeRecord nodeRecord,
+      int connectionId,
+      Executor executor) {
+
+    CompletableFuture<Void> future =
+        SafeFuture.runAsync(
+                () -> executeWithHandling(task, operationName, nodeRecord, connectionId), executor)
+            .exceptionally(defaultUTPErrorLog(operationName, nodeRecord, connectionId));
+
+    return SafeFuture.of(future);
   }
 
   private void executeWithHandling(
