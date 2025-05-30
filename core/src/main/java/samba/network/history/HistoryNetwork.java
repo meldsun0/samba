@@ -333,12 +333,12 @@ public class HistoryNetwork extends BaseNetwork
                       .map(Util::addUnsignedLeb128SizeToData)
                       .toList();
 
-              Optional.ofNullable(contentToOffer)
-                  .filter(list -> !list.isEmpty())
-                  .ifPresent(
-                      list ->
-                          utpManager.offerWrite(
-                              nodeRecord, accept.getConnectionId(), Bytes.concatenate(list)));
+              if (contentToOffer != null && !contentToOffer.isEmpty()) {
+                return utpManager
+                    .offerWrite(
+                        nodeRecord, accept.getConnectionId(), Bytes.concatenate(contentToOffer))
+                    .thenApply(__ -> Optional.of(accept.getContentKeys()));
+              }
 
               return SafeFuture.completedFuture(Optional.of(accept.getContentKeys()));
             })

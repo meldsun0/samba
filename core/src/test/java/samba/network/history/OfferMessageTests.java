@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -251,7 +252,8 @@ public class OfferMessageTests {
     when(discv5Client.sendDiscv5Message(any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
         .thenReturn(createAcceptResponse(555, Bytes.of(1), 0));
     when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
-
+    when(utpManager.offerWrite(any(NodeRecord.class), anyInt(), any(Bytes.class)))
+        .thenReturn(SafeFuture.completedFuture(null));
     Offer offer = new Offer(List.of(DefaultContent.key3));
 
     Optional<Bytes> contentKeysBitList =
@@ -277,7 +279,8 @@ public class OfferMessageTests {
               any(NodeRecord.class), any(Bytes.class), any(Bytes.class)))
           .thenReturn(createAcceptResponse(777, Bytes.of(0), 1));
       when(historyDB.get(any(ContentKey.class))).thenReturn(Optional.of(Bytes.of(0)));
-
+      when(utpManager.offerWrite(any(NodeRecord.class), anyInt(), any(Bytes.class)))
+          .thenReturn(SafeFuture.completedFuture(null));
       Offer offer = new Offer(List.of(DefaultContent.key3));
       Optional<Bytes> contentKeysByteList =
           this.historyNetwork.offer(nodeRecord, List.of(DefaultContent.value3), offer).get();
