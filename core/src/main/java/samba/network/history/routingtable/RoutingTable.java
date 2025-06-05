@@ -1,5 +1,6 @@
 package samba.network.history.routingtable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -33,4 +34,7 @@ public interface RoutingTable {
   boolean isNodeConnected(Bytes nodeId);
 
   boolean isNodeIgnored(NodeRecord nodeRecord);
+
+  /** Recently nodes are at the start of the list with older at the end. */
+  List<List<NodeRecord>> getNodeRecordBuckets();
 }

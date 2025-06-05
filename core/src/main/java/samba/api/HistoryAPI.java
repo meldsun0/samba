@@ -48,6 +48,8 @@ public sealed interface HistoryAPI extends SambaAPI permits HistoryAPIClient {
 
   Optional<RecursiveFindNodesResult> recursiveFindNodes(final String nodeId);
 
+  Optional<List<List<String>>> getRoutingTable();
+
   // For Besu
 
   Optional<BlockHeader> getBlockHeaderByBlockHash(Hash blockHash);

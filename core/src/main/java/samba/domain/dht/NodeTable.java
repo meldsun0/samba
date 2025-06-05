@@ -3,6 +3,7 @@ package samba.domain.dht;
 import java.time.Clock;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -94,5 +95,9 @@ public class NodeTable {
 
   public boolean isNodeIgnored(NodeRecord nodeRecord) {
     return this.livenessManager.isABadPeer(nodeRecord);
+  }
+
+  public List<List<NodeRecord>> getNodeRecordBuckets() {
+    return this.buckets.values().stream().map(KBucket::getAllNodes).toList();
   }
 }

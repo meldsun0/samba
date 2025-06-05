@@ -61,4 +61,6 @@ public interface HistoryNetworkInternalAPI {
 
   Optional<TraceGetContentResult> traceGetContent(
       ContentKey contentKey, int timeout, long startTime);
+
+  List<List<NodeRecord>> getRoutingTable();
 }
