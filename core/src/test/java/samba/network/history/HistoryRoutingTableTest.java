@@ -1,5 +1,6 @@
 package samba.network.history;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -70,5 +71,19 @@ public class HistoryRoutingTableTest {
         exaggeratedTable.findClosestNodesToKey(Bytes.fromHexString("0x1234"), 10, true);
     assertEquals(2, foundNodes.size());
     assertEquals(Set.of(this.nodes.get(0), this.nodes.get(2)), foundNodes);
+  }
+
+  @Test
+  void testGetNodeRecordBuckets() {
+
+    var mostRecently = TestHelper.createNodeAtDistance(homeNode.getNodeId(), 1);
+    var internalBuckets = this.routingTable.getNodeRecordBuckets();
+    assertThat(internalBuckets.stream().mapToInt(List::size).sum()).isEqualTo(14);
+
+    this.routingTable.addOrUpdateNode(mostRecently);
+    internalBuckets = this.routingTable.getNodeRecordBuckets();
+
+    assertThat(internalBuckets.stream().mapToInt(List::size).sum()).isEqualTo(15);
+    assertThat(internalBuckets.get(1).getFirst()).isEqualTo(mostRecently);
   }
 }

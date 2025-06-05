@@ -189,6 +189,9 @@ public class HistoryNetworkMainService extends Service implements NetworkSDK<His
           RpcMethod.PORTAL_HISTORY_RECURSIVE_FIND_NODES.getMethodName(),
           new PortalHistoryRecursiveFindNodes(this.historyAPI));
       methods.put(RpcMethod.PORTAL_BEACON_STORE.getMethodName(), new PortalBeaconStore());
+      methods.put(
+          RpcMethod.PORTAL_HISTORY_ROUTING_TABLE_INFO.getMethodName(),
+          new PortalHistoryRoutingTableInfo(this.historyAPI, this.discv5API));
 
       jsonRpcService =
           Optional.of(

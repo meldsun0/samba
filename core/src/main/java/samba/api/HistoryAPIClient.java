@@ -94,6 +94,11 @@ public final class HistoryAPIClient implements HistoryAPI {
   }
 
   @Override
+  public Optional<List<List<String>>> getRoutingTable() {
+    return GetRoutingTable.execute(this.historyNetworkInternalAPI);
+  }
+
+  @Override
   public Optional<BlockHeader> getBlockHeaderByBlockHash(Hash blockHash) {
     return GetBlockHeaderByBlockHash.execute(this.historyNetworkInternalAPI, blockHash);
   }

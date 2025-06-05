@@ -6,6 +6,7 @@ import samba.metrics.SambaMetricCategory;
 
 import java.util.Comparator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -101,6 +102,11 @@ public class HistoryRoutingTable implements RoutingTable {
   @Override
   public boolean isNodeIgnored(NodeRecord nodeRecord) {
     return this.nodeTable.isNodeIgnored(nodeRecord);
+  }
+
+  @Override
+  public List<List<NodeRecord>> getNodeRecordBuckets() {
+    return this.nodeTable.getNodeRecordBuckets();
   }
 
   @Override
