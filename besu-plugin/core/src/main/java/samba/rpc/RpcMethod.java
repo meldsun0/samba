@@ -5,7 +5,10 @@ import java.util.HashSet;
 
 public enum RpcMethod {
   GET_VERSION("getVersion"),
-  GET_BLOCK_BODY_BY_HASH("getBlockBodyByBlockHash");
+  GET_BLOCK_BODY_BY_BLOCK_HASH("getBlockBodyByBlockHash"),
+  GET_BLOCK_HEADER_BY_BLOCK_HASH("getBlockHeaderByBlockHash"),
+  GET_TRANSACTION_RECEIPT_BY_BLOCK_HASH("getBlockHeaderByBlockHash"),
+  GET_BLOCK_HEADER_BY_BLOCK_NUMBER("getBlockHeaderByBlockNumber");
 
   private final String methodName;
 

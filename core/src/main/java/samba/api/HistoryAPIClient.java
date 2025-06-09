@@ -109,13 +109,13 @@ public final class HistoryAPIClient implements HistoryAPI {
   }
 
   @Override
-  public Optional<List<TransactionReceipt>> getReceiptByBlockHash(Hash blockHash) {
+  public Optional<List<TransactionReceipt>> getTransactionReceiptByBlockHash(Hash blockHash) {
     return GetTransactionReceiptByBlockHash.execute(this.historyNetworkInternalAPI, blockHash);
   }
 
   @Override
-  public Optional<BlockHeader> getBlockHeaderByBlockNumber(long blockNumber) {
+  public Optional<BlockHeader> getBlockHeaderByBlockNumber(String blockNumber) {
     return GetBlockHeaderByBlockNumber.execute(
-        this.historyNetworkInternalAPI, UInt64.fromLongBits(blockNumber));
+        this.historyNetworkInternalAPI, UInt64.valueOf(blockNumber));
   }
 }

@@ -1,20 +1,20 @@
 package samba.rpc;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import org.hyperledger.besu.datatypes.Hash;
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
-import org.hyperledger.besu.ethereum.core.BlockBody;
+import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.plugin.services.rpc.PluginRpcRequest;
 import samba.BesuSambaPlugin;
 import samba.SambaSDK;
 
-public class GetBlockBodyByBlockHash implements PluginRpcMethod {
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
+public class GetBlockHeaderByBlockHash implements PluginRpcMethod {
 
   private final CompletableFuture<SambaSDK> sambaSDKFuture;
 
-  public GetBlockBodyByBlockHash(CompletableFuture<SambaSDK> sambaSDKFuture) {
+  public GetBlockHeaderByBlockHash(CompletableFuture<SambaSDK> sambaSDKFuture) {
     this.sambaSDKFuture = sambaSDKFuture;
   }
 
@@ -25,7 +25,7 @@ public class GetBlockBodyByBlockHash implements PluginRpcMethod {
 
   @Override
   public String getName() {
-    return RpcMethod.GET_BLOCK_BODY_BY_BLOCK_HASH.getMethodName();
+    return RpcMethod.GET_BLOCK_HEADER_BY_BLOCK_HASH.getMethodName();
   }
 
   @Override
@@ -36,8 +36,8 @@ public class GetBlockBodyByBlockHash implements PluginRpcMethod {
       return this.sambaSDKFuture
           .get()
           .historyAPI()
-          .flatMap(history -> history.getBlockBodyByBlockHash(blockHash))
-          .map(BlockBody::toString)
+          .flatMap(history -> history.getBlockHeaderByBlockHash(blockHash))
+          .map(BlockHeader::toString)
           .orElse("");
     } catch (JsonRpcParameter.JsonRpcParameterException
         | ExecutionException
