@@ -1,5 +1,6 @@
 #FROM meldsun/besu:discovery
-FROM meldsun/besu:discovery-arm64
+#FROM meldsun/besu:discovery-arm64
+FROM hyperledger/besu:25.6.0
 COPY --chown=besu:besu core/build/libs/*.jar  /opt/besu/plugins/
 
 EXPOSE 30303 8545 8551 8546 8547 8888 9545 8008 5051 9090 9000/udp 9000

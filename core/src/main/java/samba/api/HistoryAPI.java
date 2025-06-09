@@ -50,13 +50,11 @@ public sealed interface HistoryAPI extends SambaAPI permits HistoryAPIClient {
 
   Optional<List<List<String>>> getRoutingTable();
 
-  // For Besu
-
   Optional<BlockHeader> getBlockHeaderByBlockHash(Hash blockHash);
 
   Optional<BlockBody> getBlockBodyByBlockHash(Hash blockHash);
 
-  Optional<List<TransactionReceipt>> getReceiptByBlockHash(Hash blockHash);
+  Optional<List<TransactionReceipt>> getTransactionReceiptByBlockHash(Hash blockHash);
 
-  Optional<BlockHeader> getBlockHeaderByBlockNumber(long blockNumber);
+  Optional<BlockHeader> getBlockHeaderByBlockNumber(String blockNumber);
 }
