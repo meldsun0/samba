@@ -6,22 +6,11 @@ group = 'samba.storage-rocksdb'
 version = '1.0.0'
 
 dependencies {
-  implementation libs.slf4j.api
+
   implementation libs.rocksdbjni
   implementation libs.prometheus.simpleclient
   implementation libs.apache.commons.lang3
   implementation libs.jackson.datatype.jdk8
   implementation libs.besu.internal.plugin.api //TODO need to be removed
   implementation libs.besu.internal.metrics.core
-  implementation libs.google.guava
-  implementation libs.assertj.core
-  implementation libs.mockito.core
-
-  compileOnly libs.projectlombok
-  annotationProcessor libs.projectlombok
-  testCompileOnly libs.projectlombok
-  testAnnotationProcessor libs.projectlombok
-  testImplementation libs.junit.jupiter.api
-  testImplementation libs.assertj.core
-  testRuntimeOnly libs.junit.jupiter.engine
 }

@@ -23,13 +23,15 @@ dependencies {
   api platform('io.netty:netty-bom:4.1.115.Final')
   api platform('io.opentelemetry:opentelemetry-bom:1.43.0')
   api platform('io.prometheus:simpleclient_bom:0.16.0')
-  api platform('io.vertx:vertx-stack-depchain:4.5.10')
   api platform('org.apache.logging.log4j:log4j-bom:2.24.1')
   api platform('org.assertj:assertj-bom:3.26.3')
   api platform('org.immutables:bom:2.10.1')
   api platform('org.junit:junit-bom:5.11.2')
   api platform('org.mockito:mockito-bom:5.14.2')
   api platform('org.slf4j:slf4j-bom:2.0.16')
+
+  api platform('org.projectlombok:lombok:1.18.34')
+
 
   constraints {
     api project(':core')
