@@ -11,8 +11,6 @@ apply from: rootProject.file("gradle/lint.gradle")
 apply from: rootProject.file("gradle/tests.gradle")
 
 dependencies {
-  implementation 'io.tmio:tuweni-bytes'
-  implementation 'net.java.dev.jna:jna'
 }
 
 
