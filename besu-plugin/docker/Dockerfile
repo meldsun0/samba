@@ -1,4 +1,4 @@
-#FROM meldsun/besu:discovery
+
 #FROM meldsun/besu:discovery-arm64
 FROM hyperledger/besu:25.6.0
 COPY --chown=besu:besu core/build/libs/*.jar  /opt/besu/plugins/
