@@ -1,36 +1,92 @@
-task fatJar(type: Jar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from sourceSets.main.output
-    dependsOn configurations.runtimeClasspath
-    zip64 = true
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+def platformTargets = ['macos', 'linux-aarch64', 'linux-x86_64', 'all']
+platformTargets.each { target ->
+    tasks.register("fatJar_${target}", Jar) {
+        group = "build"
+        description = "Builds a fat jar for target: ${target}"
+        archiveFileName.set("${sambaArtifactId}-${releaseVersion}-${target}.jar")
+
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        from sourceSets.main.output
+        dependsOn configurations.runtimeClasspath
+        zip64 = true
+
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+
+        doFirst {
+            logger.lifecycle("▶ Building fatJar for platformTarget = ${target}")
+            if (target == "macos") {
+                include '**/*.class'
+                include '**/*.dylib', '**/*.jnilib'
+                exclude '**/*.so', '**/*.dll', '**/windows*/**', '**/linux*/**'
+            } else if (target == "linux-aarch64") {
+                include '**/*.class'
+                include '**/*.so', '**/linux-aarch64/**'
+                exclude '**/*.dylib', '**/*.jnilib', '**/*.dll', '**/windows*/**', '**/darwin*/**'
+            } else if (target == "linux-x86_64") {
+                include '**/*.class'
+                include '**/*.so'
+                exclude '**/*.dylib', '**/*.jnilib', '**/*.dll', '**/windows*/**', '**/darwin*/**', '**/linux-aarch64/**'
+            } else if (target == "all") {
+                logger.lifecycle("No filtering applied for platformTarget=all")
+            } else {
+                throw new GradleException("Unsupported platformTarget '${target}'. Use 'mac', 'linux-aarch64', 'linux-x86_64' or 'all'.")
+            }
+        }
+
+        exclude "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA"
+
+        doLast {
+            logger.lifecycle("Fat JAR generated: ${archiveFile.get().asFile}")
+        }
     }
-    exclude "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA"
+}
+
+tasks.register("fatJarAllPlatforms") {
+    group = "build"
+    description = "Build fat JARs for all supported platforms (mac, linux-aarch64, linux-x86_64, all)"
+
+    dependsOn platformTargets.collect { target ->
+        tasks.named("fatJar_${target}")
+    }
+
+    doLast {
+        logger.lifecycle("All platform fat JARs built:")
+        platformTargets.each { target ->
+            def jarPath = "${buildDir}/libs/${sambaArtifactId}-${releaseVersion}-${target}.jar"
+            logger.lifecycle(" - ${jarPath}")
+        }
+    }
 }
 
 afterEvaluate {
     publishing {
         publications {
-            mavenJava(MavenPublication) {
-                artifact(fatJar) {
-                    classifier = null
-                }
+            platformTargets.each { target ->
+                def taskName = "fatJar_${target}"
+                def pubName = "mavenJava_${target}"
 
-                groupId = "${sambaGroupId}"
-                artifactId = "${sambaArtifactId}"
-                version = "${releaseVersion}"
+                create(pubName, MavenPublication) {
+                    artifact(tasks.named(taskName)) {
+                        classifier = null
+                    }
 
-                pom {
-                    name.set("Samba")
-                    description.set("Samba is an Ethereum Portal client")
-                    url.set("https://github.com/meldsun0/samba")
+                    def artifactIdWithPlatform = "${sambaArtifactId}-${target}"
+                    groupId = "${sambaGroupId}"
+                    artifactId = artifactIdWithPlatform
+                    version = "${releaseVersion}" // no platform in version
 
-                    licenses {
-                        license {
-                            name.set("Apache License 2.0")
-                            url.set("https://www.apache.org/licenses/LICENSE-2.0")
-                            distribution.set("repo")
+                    pom {
+                        name.set("Samba")
+                        description.set("Samba is an Ethereum Portal client")
+                        url.set("https://github.com/meldsun0/samba")
+                        licenses {
+                            license {
+                                name.set("Apache License 2.0")
+                                url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                                distribution.set("repo")
+                            }
                         }
                     }
                 }
@@ -45,3 +101,4 @@ afterEvaluate {
         }
     }
 }
+
