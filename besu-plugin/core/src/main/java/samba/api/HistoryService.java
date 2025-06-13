@@ -18,6 +18,6 @@ public interface HistoryService {
 
   Optional<List<TransactionReceipt>> getTransactionReceiptByBlockHash(Hash blockHash);
 
-  //The characters in the string must all be decimal digits
+  // The characters in the string must all be decimal digits
   Optional<BlockHeader> getBlockHeaderByBlockNumber(String blockNumber);
 }

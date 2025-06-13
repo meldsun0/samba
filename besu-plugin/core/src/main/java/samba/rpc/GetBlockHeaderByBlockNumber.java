@@ -1,15 +1,13 @@
 package samba.rpc;
 
-import org.hyperledger.besu.datatypes.Hash;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.hyperledger.besu.ethereum.api.jsonrpc.internal.parameters.JsonRpcParameter;
-import org.hyperledger.besu.ethereum.core.BlockBody;
 import org.hyperledger.besu.ethereum.core.BlockHeader;
 import org.hyperledger.besu.plugin.services.rpc.PluginRpcRequest;
 import samba.BesuSambaPlugin;
 import samba.SambaSDK;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class GetBlockHeaderByBlockNumber implements PluginRpcMethod {
 

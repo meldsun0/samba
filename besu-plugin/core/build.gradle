@@ -27,16 +27,13 @@ dependencies {
   implementation "${besuArtifactGroup}.internal:api"
   implementation "${besuArtifactGroup}.internal:core"
   implementation "${besuArtifactGroup}.internal:metrics-core"
-  //  implementation "org.hyperledger.besu.internal:core:besuInternal"
 
   implementation 'com.google.code.gson:gson'
 
-  implementation 'io.tmio:tuweni-bytes'
-  implementation 'io.tmio:tuweni-units'
-  implementation 'io.tmio:tuweni-toml'
-
   implementation 'info.picocli:picocli'
-  implementation 'org.meldsunlabs:samba:1.0-SNAPSHOT'
+  implementation 'org.meldsunlabs:samba-linux-x86_64:1.0-SNAPSHOT'
+
+
 
 }
 

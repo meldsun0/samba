@@ -16,7 +16,7 @@ jar {
 }
 
 dependencies {
-  implementation libs.slf4j.api
+
   implementation libs.apache.logging.log4j.api
   implementation libs.apache.logging.log4j.core
 
@@ -47,12 +47,12 @@ dependencies {
   implementation libs.teku.internal.json
 
   implementation libs.picocli
-  implementation libs.netty.all
+
   implementation libs.discovery
   implementation libs.oshi.core
-  implementation libs.assertj.core
-  implementation libs.mockito.core
-  implementation libs.rocksdbjni
+
+
+
   implementation libs.prometheus.simpleclient
   implementation libs.jackson.dataformat.yaml
   implementation libs.jackson.datatype.jdk8
@@ -62,13 +62,6 @@ dependencies {
   implementation project(':server-json-rpc')
   implementation 'org.meldsun.utp:utp-core:2.0-SNAPSHOT'
 
-  compileOnly libs.projectlombok
-  annotationProcessor libs.projectlombok
-  testCompileOnly libs.projectlombok
-  testAnnotationProcessor libs.projectlombok
-  testImplementation libs.junit.jupiter.api
-  testImplementation libs.assertj.core
-  testRuntimeOnly libs.junit.jupiter.engine
 
   runtimeOnly libs.apache.logging.log4j.api
   runtimeOnly libs.apache.logging.log4j.core

@@ -71,3 +71,24 @@ tasks.register('runContainer') {
         }
     }
 }
+
+distTar {
+    dependsOn  untunedStartScripts
+    println "Executing task: ${name}"
+    doFirst {
+        delete fileTree(dir: 'build/distributions', include: '*.tar.gz')
+    }
+    compression = Compression.GZIP
+    setVersion(archiveBuildVersion)
+    archiveExtension = 'tar.gz'
+}
+
+distZip {
+    dependsOn untunedStartScripts
+    println "Executing task: ${name}"
+    doFirst {
+        delete fileTree(dir: 'build/distributions', include: '*.zip')
+    }
+    setVersion(archiveBuildVersion)
+    setVersion(archiveBuildVersion)
+}

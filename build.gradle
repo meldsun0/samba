@@ -221,10 +221,6 @@ installDist { dependsOn untunedStartScripts }
 
 ext.archiveBuildVersion = archiveBuildVersion
 
-apply from: 'buildscripts/buildTar.gradle'
-
-apply from: 'buildscripts/buildZip.gradle'
-
 apply from: 'buildscripts/buildFatJar.gradle'
 
 jacocoTestReport {

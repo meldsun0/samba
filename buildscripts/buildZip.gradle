@@ -1,9 +1,0 @@
-distZip {
-    dependsOn untunedStartScripts
-    println "Executing task: ${name}"
-    doFirst {
-        delete fileTree(dir: 'build/distributions', include: '*.zip')
-    }
-    setVersion(archiveBuildVersion)
-    setVersion(archiveBuildVersion)
-}
