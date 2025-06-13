@@ -52,13 +52,14 @@ After a successful build, distribution packages are available in `build/distribu
 
 ### Other Useful Gradle Targets
 
-| Target       | Builds                                                  |
-|--------------|---------------------------------------------------------|
-| distTar      | Full distribution in build/distributions (as `.tar.gz`) |
-| distZip      | Full distribution in build/distributions (as `.zip`)    |
-| distDocker   | The `meldsun/samba` docker image                        |
-| dockerUpload | Push imges to Docker Hub                                |
-| runContainer | A docker container running                              |
+| Target             | Builds                                                  |
+|--------------------|---------------------------------------------------------|
+| distTar            | Full distribution in build/distributions (as `.tar.gz`) |
+| distZip            | Full distribution in build/distributions (as `.zip`)    |
+| distDocker         | The `meldsun/samba` docker image                        |
+| fatJarAllPlatforms | It creates fatJars for multiple platforms               |
+| dockerUpload       | Push imges to Docker Hub                                |
+| runContainer       | A docker container running                              |
 
 ## Code Style
 
