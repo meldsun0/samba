@@ -61,26 +61,37 @@ Run Besu with Samba as plugin:
 
 
 ## RPC methods
+- samba_getBlockBodyByBlockHash
+- samba_getBlocHeaderByBlockHash
+- samba_transactionReceiptByBlockHash
+- samba_getBlockHeaderByBlockNumber
 
-### Get Version
-#### `samba_getVersion`
-
-This endpoint is hardcoded value used for testing the plugin. 
+### Get BlockBody by Blockhash:
+#### `samba_getBlockBodyByBlockHash`
 
 ```shell
-  curl --location --request POST 'http://localhost:8545' --data-raw '{
-    "jsonrpc": "2.0",
-    "method": "samba_getVersion",
-    "params": [],
-    "id": 1
-  }'
+curl --location 'xyz:8545' \
+--header 'Content-Type: application/json' \
+--data '{
+"jsonrpc": "2.0",
+"method": "samba_getBlockBodyByBlockHash",
+"params": ["0xcb278a973370d2b1ba0cd9e0f25d1329ccb11d7ddca21c9df5ba2362d59ff2d3"],
+"id": 1
+}'
 ```
 
-#### Result
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": "1.0"
+## Interface available:
+```
+@Unstable
+public interface HistoryService {
+
+  Optional<BlockHeader> getBlockHeaderByBlockHash(Hash blockHash);
+
+  Optional<BlockBody> getBlockBodyByBlockHash(Hash blockHash);
+
+  Optional<List<TransactionReceipt>> getTransactionReceiptByBlockHash(Hash blockHash);
+
+  //The characters in the string must all be decimal digits
+  Optional<BlockHeader> getBlockHeaderByBlockNumber(String blockNumber);
 }
 ```
