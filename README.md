@@ -128,7 +128,7 @@ View logs output and results:
 ```
 ## [JSON-RPC API (23)](https://samba-portal-node.postman.co/workspace/Samba-Portal-Node-Workspace~8bf54719-5e6d-4476-8b33-6434dc57d833/request/33150235-eb63c4bf-82ff-477e-a17d-616657e9cdbc?action=share&creator=33150235&ctx=documentation&active-environment=33150235-5c222146-bd60-431b-bb15-f3f9dc8fc9cc)
 
-#### History
+#### History (14)
 - portal_historyAddEnr
 - portal_historyDeleteEnr
 - portal_historyFindContent
@@ -142,8 +142,9 @@ View logs output and results:
 - portal_historyStore
 - portal_historyPutContent
 - portal_historyRoutingTableInfo
+- portal_historyRecursiveFindNodes
 
-#### Discv5
+#### Discv5 (8)
 - discv5_getEnr,
 - discv5_nodeInfo, 
 - discv5_updateNodeInfo
@@ -152,6 +153,16 @@ View logs output and results:
 - discv5_routingTableInfo
 - discv5_addEnr
 - discv5_deleteEnr
+
+#### Beacon
+  - portal_beaconStore
+
+##### Pending
+- discv5_ping: In order to implement it there is a refactor to be made on the library we are using:
+    - [Discord conversation](https://discord.com/channels/697535391594446898/1050616638497640548/1381765398889758931)
+    - [Issue](https://github.com/Consensys/discovery/issues/195)
+- discv5_lookupEnr: Soon
+- discv5_recursiveFindNodes: Soon
 
 When running against Hive:
 ```shell script
